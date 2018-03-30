@@ -8,7 +8,6 @@ dependencies:
   - field
   - inline_entity_form
   - intercept_core
-  - intercept_location
   - media
   - menu_ui
   - node

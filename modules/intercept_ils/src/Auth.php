@@ -33,36 +33,34 @@ class Auth extends UserAuth {
    * {@inheritdoc}
    */
   public function authenticate($username, $password) {
-    // Let Drupal authenticate first to speed up authentication.
-    $auth = parent::authenticate($username, $password);
-    if ($auth) {
-      return $auth;
-    }
-    if ($this->client->patron->authenticate($username, $password)) {
-      $patron = $this->client->patron->validate($username);
-      // First get user if stored in authmap.
-      if ($user = $this->externalAuth->load($patron->barcode(), 'polaris')) {
-        $this->externalAuthmap->save($user, 'polaris', $patron->barcode(), $patron->basicData());
-      }
-      else {
-        $data = $patron->basicData();
-        $account_data = [
-          'name' => $patron->barcode(),
-          'mail' => $data->EmailAddress,
-          'init' => $data->EmailAddress,
-          'pass' => $password,
-        ];
-        // Create a Drupal user automatically and return the new user_id.
-        $user = $this->externalAuth->register($patron->barcode(), 'polaris', $account_data, $data);
-      }
+    /**
+     * First just do a call to externalauth load, if that's true, pass to parent and validate password.
+     *
+     * If that fails, check if the current $username and $password are valid in external system - call to polaris.
+     * - If TRUE - Automatically generate user with user register.
+     * - If FALSE - Pass back to parent to deny authentication.
+     */
+    if ($user = $this->externalAuth->load($username, 'polaris')) {
+      $user->set('ils_authentication', TRUE);
+      // TODO: This should be moved to the Polaris event subscriber for login.
+      $patron = $this->client->patron->get($username);
+      $this->externalAuthmap->save($user, 'polaris', $username, $patron->basicData());
       return $user->id();
     }
-    return $auth;
+    if (($patron = $this->client->patron->get($username)) && $patron->authenticate($password)) {
+      // This should go in the event subscriber.
+      $data = $patron->basicData();
+      $account_data = [
+        'name' => $username,
+        'mail' => $data->EmailAddress,
+        'init' => $data->EmailAddress,
+      ];
+      $user = $this->externalAuth->register($username, 'polaris', $account_data, $data);
+      return $user->id();
+    }
+    return parent::authenticate($username, $password);
   }
 
-  private function isValidUsername($username) {
-    return \Drupal::entityTypeManager()->getStorage('user')->loadByProperties(['name' => $username]);
-  }
   /**
    * Automatically inherit methods if they are public.
    */

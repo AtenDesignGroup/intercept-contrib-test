@@ -4,8 +4,6 @@ dependencies:
   config:
     - field.storage.node.field_staff_use_only
     - node.type.room
-_core:
-  default_config_hash: yfizFRUWjGmO8ML_i8I6HwpKgjyT7BifU5rLpilwgL0
 id: node.room.field_staff_use_only
 field_name: field_staff_use_only
 entity_type: node

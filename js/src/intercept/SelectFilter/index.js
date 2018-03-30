@@ -1,12 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { withStyles } from '@material-ui/core/styles';
-import Input, { InputLabel } from '@material-ui/core/Input';
-import { MenuItem } from '@material-ui/core/Menu';
-import { FormControl } from '@material-ui/core/Form';
-import { ListItemText } from '@material-ui/core/List';
-import Select from '@material-ui/core/Select';
-import Checkbox from '@material-ui/core/Checkbox';
+import { withStyles } from 'material-ui/styles';
+import Input, { InputLabel } from 'material-ui/Input';
+import { MenuItem } from 'material-ui/Menu';
+import { FormControl } from 'material-ui/Form';
+import { ListItemText } from 'material-ui/List';
+import Select from 'material-ui/Select';
+import Checkbox from 'material-ui/Checkbox';
+import Chip from 'material-ui/Chip';
+import findIndex from 'lodash/findIndex';
 
 const styles = theme => ({
   root: {
@@ -19,78 +21,79 @@ const styles = theme => ({
     maxWidth: 300,
     width: '100%',
   },
+  chips: {
+    display: 'flex',
+    flexWrap: 'wrap',
+  },
+  chip: {
+    margin: theme.spacing.unit / 4,
+  },
   inputLabel: {
     margin: 0,
   },
 });
 
-const ITEM_HEIGHT = 24;
-const ITEM_PADDING_TOP = 4;
-const MenuListProps = {
-  className: 'select-filter__menu-list',
-};
-
+const ITEM_HEIGHT = 48;
+const ITEM_PADDING_TOP = 8;
 const MenuProps = {
-  MenuListProps,
   PaperProps: {
     style: {
-      // maxHeight: (ITEM_HEIGHT * 8.5) + ITEM_PADDING_TOP,
-      maxHeight: 200,
+      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
       width: 250,
     },
   },
-  getContentAnchorEl: null,
-  anchorOrigin: {
-    vertical: 'bottom',
-    horizontal: 'left',
-  },
-  className: 'select-filter__menu',
 };
 
+function getLabel(options, key) {
+  const index = findIndex(options, item => item.key === key);
+  return index > -1 ? options[index].value : null;
+}
+
 class SelectFilter extends React.Component {
+  state = {
+    value: [],
+  };
+
   handleChange = (event) => {
+    this.setState({ value: event.target.value });
     this.props.handleChange(event);
   };
 
   render() {
-    const { options, label, value, multiple } = this.props;
-    const checkboxId = id => `select-filter--${id}`;
-    const checkboxLabel = (text, id) => (
-      <label className="select-filter__checkbox-label" htmlFor={id}>
-        {text}
-      </label>
-    );
+    const { classes, theme, options, label } = this.props;
 
     return (
-      <div className="select-filter">
-        <FormControl className="select-filter__control">
-          <InputLabel
-            className="select-filter__label"
-            htmlFor="select-multiple-chip"
-            shrink={false}
-          >
+      <div className={classes.root}>
+        <FormControl className={classes.formControl}>
+          <InputLabel className={classes.inputLabel} htmlFor="select-multiple-chip">
             {label}
           </InputLabel>
-
           <Select
-            multiple={multiple}
-            value={value === null ? '' : value}
+            multiple
+            value={this.state.value}
             onChange={this.handleChange}
             input={<Input id="select-multiple-chip" />}
-            renderValue={() => null}
+            renderValue={selected => (
+              <div className={classes.chips}>
+                {selected.map(value => (
+                  <Chip key={value} label={getLabel(options, value)} className={classes.chip} />
+                ))}
+              </div>
+            )}
             MenuProps={MenuProps}
           >
             {options.map(option => (
-              <MenuItem key={option.key} value={option.key} className="select-filter__menu-item">
-                {multiple && <Checkbox
-                  checked={multiple ? value.indexOf(option.key) > -1 : value === option.key}
-                  id={checkboxId(option.key)}
-                  className="select-filter__checkbox"
-                />}
-                <ListItemText
-                  disableTypography
-                  primary={checkboxLabel(option.value, checkboxId(option.key))}
-                />
+              <MenuItem
+                key={option.key}
+                value={option.key}
+                style={{
+                  fontWeight:
+                    this.state.value.indexOf(option.key) === -1
+                      ? theme.typography.fontWeightRegular
+                      : theme.typography.fontWeightMedium,
+                }}
+              >
+                {option.value}
               </MenuItem>
             ))}
           </Select>
@@ -101,21 +104,12 @@ class SelectFilter extends React.Component {
 }
 
 SelectFilter.propTypes = {
+  classes: PropTypes.object.isRequired,
+  theme: PropTypes.object.isRequired,
   label: PropTypes.string.isRequired,
-  value: PropTypes.oneOfType([PropTypes.arrayOf(String), PropTypes.string]),
+  // value: PropTypes.string,
   options: PropTypes.arrayOf(Object).isRequired,
   handleChange: PropTypes.func.isRequired,
-  multiple: PropTypes.bool,
-};
-
-SelectFilter.defaultProps = {
-  value: null,
-  multiple: false,
-};
-
-SelectFilter.defaultProps = {
-  value: null,
-  multiple: false,
 };
 
 export default withStyles(styles, { withTheme: true })(SelectFilter);

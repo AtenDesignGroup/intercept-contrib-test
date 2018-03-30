@@ -5,15 +5,13 @@ dependencies:
     - field.storage.node.field_room_type
     - node.type.room
     - taxonomy.vocabulary.room_type
-_core:
-  default_config_hash: MaAMKqo3HHEYHFFfGj_WOjnLpC21JFXYQGL9DKeqBbA
 id: node.room.field_room_type
 field_name: field_room_type
 entity_type: node
 bundle: room
 label: 'Room Type'
 description: ''
-required: false
+required: true
 translatable: false
 default_value: {  }
 default_value_callback: ''

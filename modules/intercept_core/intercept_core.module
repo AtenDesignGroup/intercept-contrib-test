@@ -1,97 +1,12 @@
 <?php
 
-use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\StringTranslation\TranslatableMarkup;
-
 /**
  * Implements hook_preprocess_page.
  */
 function intercept_core_preprocess_page(array &$variables) {
-  // Add the intercept_client consumer id.
-  $consumer_id = Drupal::state()->get('intercept_client.id');
-  $consumer = Drupal::service('entity_type.manager')->getStorage('consumer')->load($consumer_id);
+  $consumer = Drupal::service('entity_type.manager')->getStorage('consumer')->load(2);
   if ($consumer) {
     $consumer_token = $consumer ? $consumer->uuid() : NULL;
     $variables['#attached']['drupalSettings']['intercept']['consumer'] = $consumer_token;
   }
-
-  // Add user info to drupalSettings.
-  $current_user = \Drupal::currentUser();
-  $user = \Drupal\user\Entity\User::load($current_user->id());
-  $user_timezone = new \DateTimeZone(drupal_get_user_timezone());
-  $utc = new \DateTime('UTC');
-  $user_utc_offset = $user_timezone->getOffset($utc) / 3600;
-  $variables['#attached']['drupalSettings']['intercept']['user'] = [
-    'id' => $current_user->id(),
-    'uuid' => $user->uuid(),
-    'roles' => $current_user->getRoles(),
-    'timezone' => drupal_get_user_timezone(),
-    'utc_offset' => $user_utc_offset,
-  ];
-}
-
-/**
- * Implements hook_entity_type_build().
- */
-function intercept_core_entity_type_build(array &$entity_types) {
-  /** @var $entity_types \Drupal\Core\Entity\EntityTypeInterface[] */
-  $entity_types['profile']->setFormClass('customer', '\Drupal\intercept_core\Form\ProfileForm');
-}
-
-/**
- * Implements hook_menu_links_discovered_alter().
- */
-function intercept_core_menu_links_discovered_alter(&$links) {
-  // Change the title of the default user view menu link.
-  if (isset($links['user.page'])) {
-    $links['user.page']['title'] = t('Dashboard');
-  }
-}
-
-/**
- * Implements hook_local_tasks_alter().
- */
-function intercept_core_local_tasks_alter(&$local_tasks) {
-  // Change the title of the profile customer user tab.
-  if (isset($local_tasks['entity.profile.user_profile_form:profile.type.customer'])) {
-    $local_tasks['entity.profile.user_profile_form:profile.type.customer']['title'] = t('Settings');
-  }
-}
-
-/**
- * Perform alterations before an entity form is included in the IEF widget.
- *
- * @param $entity_form
- *   Nested array of form elements that comprise the entity form.
- * @param $form_state
- *   The form state of the parent form.
- */
-function intercept_core_inline_entity_form_entity_form_alter(&$entity_form, &$form_state) {
-  if ($entity_form['#entity_type'] == 'media') {
-    // Hide the revision log message field on all media forms.
-    $entity_form['revision_log_message']['#access'] = FALSE;
-  }
-}
-
-/**
- * Implements hook_entity_extra_field_info().
- */
-function intercept_core_entity_extra_field_info() {
-  $extra = [];
-
-  $extra['profile']['customer']['form']['card_number'] = [
-    'label' => t('Card number'),
-    'description' => t('ILS card number'),
-    'weight' => 10,
-    'visible' => FALSE,
-  ];
-
-  $extra['profile']['customer']['form']['pin'] = [
-    'label' => t('Pin'),
-    'description' => t('ILS pin'),
-    'weight' => 15,
-    'visible' => FALSE,
-  ];
-
-  return $extra;
 }

@@ -1,95 +1,73 @@
-import React, { PureComponent } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import moment from 'moment-timezone';
-// import momentTimezone from 'moment-timezone';
-import get from 'lodash/get';
-
-/* eslint-disable */
-import drupalSettings from 'drupalSettings';
+import moment from 'moment';
 import interceptClient from 'interceptClient';
-/* eslint-enable */
-
-import FieldInline from './../FieldInline';
+import MetaField from './../MetaField';
 import Teaser from './../Teaser';
-import ButtonRegister from './../ButtonRegister';
-import EventRegistrationStatus from '../../../../modules/intercept_event/js/src/components/EventRegisterApp/EventRegistrationStatus';
-import RegistrationStatus from './../RegistrationStatus';
 
-const { select, constants, utils } = interceptClient;
-const c = constants;
-const userId = get(drupalSettings, 'intercept.user.uuid');
+const { select } = interceptClient;
 
-class EventTeaser extends PureComponent {
-  render() {
-    const { id, event, image, registrations } = this.props;
+const EventTeaser = (props) => {
+  const { id, event, image } = props;
 
-    const termMap = item => ({
-      id: item.id,
-      name: get(item, 'attributes.name'),
-    });
+  const termMap = item => ({
+    id: item.attributes.uuid,
+    name: item.attributes.name,
+  });
 
-    const date = moment(utils.dateFromDrupal(event.attributes['field_date_time'].value));
+  const date = moment(`${event.attributes['field_date_time'].value}Z`, moment.ISO_8601);
 
-    const audienceValues = event.relationships['field_event_audience']
-      .map(termMap)
-      .filter(i => i.id);
-
-    const audiences =
-      audienceValues.length > 0 ? (
-        <FieldInline label="Audience" key="audience" values={audienceValues} />
-      ) : null;
-
-    return (
-      <Teaser
-        key={id}
-        modifiers={[image ? 'with-image' : 'without-image']}
-        image={image}
-        supertitle={get(event, 'relationships.field_location.attributes.title')}
-        title={event.attributes.title}
-        titleUrl={
-          event.attributes.path ? event.attributes.path.alias : `/node/${event.attributes.nid}`
-        }
-        date={{
-          month: date.utcOffset(utils.getUserUtcOffset()).format('MMM'),
-          date: date.utcOffset(utils.getUserUtcOffset()).format('D'),
-          time: utils.getTimeDisplay(date),
-        }}
-        description={event.attributes['field_text_teaser'].value}
-        tags={[audiences]}
-        registrations={registrations}
-        footer={props => (
-          <React.Fragment>
-            <ButtonRegister eventId={props.event.id} />
-            <RegistrationStatus eventId={props.event.id} />
-          </React.Fragment>
-        )}
-        event={event}
-      />
+  const eventTypeValues = event.relationships['field_event_type'].map(termMap);
+  const eventTypes =
+    eventTypeValues.length > 0 ? (
+      <MetaField label="Event type" key="eventType" values={eventTypeValues} />
+    ) : (
+      <div />
     );
-  }
-}
+
+  const audienceValues = event.relationships['field_event_audience'].map(termMap);
+  const audiences =
+    audienceValues.length > 0 ? (
+      <MetaField label="Audience" key="audience" values={audienceValues} />
+    ) : (
+      <div />
+    );
+
+  return (
+    <Teaser
+      key={id}
+      modifiers={['has-image']}
+      image={image}
+      supertitle={event.relationships['field_location'].attributes.title}
+      title={event.attributes.title}
+      titleUrl={event.attributes.path.alias}
+      date={{
+        month: date.format('MMM'),
+        date: date.format('D'),
+        time: date.format('h:mm a').replace('m', '.m.'),
+      }}
+      description={event.attributes['field_text_teaser']}
+      tags={[eventTypes, audiences]}
+    />
+  );
+};
 
 EventTeaser.propTypes = {
   id: PropTypes.string.isRequired,
   event: PropTypes.object.isRequired,
   image: PropTypes.string,
-  registrations: PropTypes.array,
 };
 
 EventTeaser.defaultProps = {
   image: null,
-  registrations: [],
 };
 
-const mapStateToProps = (state, ownProps) => {
-  const identifier = select.getIdentifier(c.TYPE_EVENT, ownProps.id);
-  const registrations = select.eventRegistrationsByEventByUser(ownProps.id, userId)(state);
-  return {
-    event: select.bundle(identifier)(state),
-    image: select.resourceImageStyle(identifier, '4to3_740x556')(state),
-    registrations,
-  };
-};
+const mapStateToProps = (state, ownProps) => ({
+  event: select.bundle(select.getIdentifier('node--event', ownProps.id))(state),
+  image: select.eventImageStyle(ownProps.id, '4to3_740x556')(state),
+});
 
-export default connect(mapStateToProps)(EventTeaser);
+const mapDispatchToProps = dispatch => ({});
+
+export default connect(mapStateToProps, mapDispatchToProps)(EventTeaser);

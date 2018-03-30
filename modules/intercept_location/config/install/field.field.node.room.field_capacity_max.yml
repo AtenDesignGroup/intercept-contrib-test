@@ -4,8 +4,6 @@ dependencies:
   config:
     - field.storage.node.field_capacity_max
     - node.type.room
-_core:
-  default_config_hash: qgsqqgIsXk7IUE3PNMYdXHxYkAV9maleBcS24h8X6lk
 id: node.room.field_capacity_max
 field_name: field_capacity_max
 entity_type: node

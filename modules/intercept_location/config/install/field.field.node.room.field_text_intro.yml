@@ -6,8 +6,6 @@ dependencies:
     - node.type.room
   module:
     - text
-_core:
-  default_config_hash: YOByajuzwuKGUch9O7OktkVty0yZAkAkXPmx9NMGz9g
 id: node.room.field_text_intro
 field_name: field_text_intro
 entity_type: node

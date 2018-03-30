@@ -11,6 +11,8 @@ dependencies:
   - field_group
   - inline_entity_form
   - intercept_core
+  - intercept_equipment
+  - intercept_event
   - link
   - media
   - menu_ui

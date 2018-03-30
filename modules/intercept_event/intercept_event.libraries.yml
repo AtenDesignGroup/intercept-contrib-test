@@ -1,69 +1,14 @@
-eventCheckin:
-  version: VERSION
-  js:
-    js/event_checkin.js: {}
-  dependencies:
-    - core/jquery
-    - core/drupal
-    - core/drupalSettings
-
-eventAttendanceList:
-  js:
-    js/dist/eventAttendanceList.js:
-      preprocess: false
-  dependencies:
-    - core/drupal
-    - core/drupalSettings
-    - intercept_core/babelHelpers
-    - intercept_core/react
-    - intercept_core/moment
-    - intercept_core/interceptClient
-    - intercept_core/interceptCommon
-    - intercept_core/interceptTheme
-    - intercept_core/materialIcons
 
 eventList:
   js:
     js/dist/eventList.js:
       preprocess: false
+
   dependencies:
-    - core/drupal
     - core/drupalSettings
     - intercept_core/babelHelpers
     - intercept_core/react
     - intercept_core/moment
     - intercept_core/interceptClient
     - intercept_core/interceptCommon
-    - intercept_core/interceptTheme
     - intercept_core/bigCalendar
-    - intercept_core/materialIcons
-
-eventRegister:
-  js:
-    js/dist/eventRegister.js:
-      preprocess: false
-  dependencies:
-    - core/drupal
-    - core/drupalSettings
-    - intercept_core/babelHelpers
-    - intercept_core/react
-    - intercept_core/moment
-    - intercept_core/interceptClient
-    - intercept_core/interceptCommon
-    - intercept_core/interceptTheme
-    - intercept_core/materialIcons
-
-manageEventRegistrations:
-  js:
-    js/dist/eventRegistrationList.js:
-      preprocess: false
-
-  dependencies:
-    - core/drupal
-    - core/drupalSettings
-    - intercept_core/babelHelpers
-    - intercept_core/react
-    - intercept_core/moment
-    - intercept_core/interceptClient
-    - intercept_core/interceptCommon
-    - intercept_core/interceptTheme

@@ -4,28 +4,3 @@ rema_api.system_time:
     _controller: '\Drupal\intercept_core\Controller\SystemTime::response'
   requirements:
     _access: 'TRUE'
-
-intercept_core.settings:
-  path: '/admin/config/intercept'
-  defaults:
-    _controller: '\Drupal\system\Controller\SystemController::systemAdminMenuBlockPage'
-    _title: 'InterCEPT Settings'
-  requirements:
-    _permission: 'access administration pages'
-
-intercept_core.general:
-  path: '/admin/config/intercept/general'
-  defaults:
-    _form: '\Drupal\intercept_core\Form\SettingsForm'
-    _title: 'InterCEPT General'
-  requirements:
-    _permission: 'administer intercept_core'
-
-intercept_core.account.settings:
-  path: '/account/settings'
-  defaults:
-    _controller: '\Drupal\intercept_core\Controller\UserAccount::userRedirect'
-    _title: 'Settings'
-    route_name: 'entity.profile.type.user_profile_form'
-  requirements:
-    _user_is_logged_in: 'TRUE'

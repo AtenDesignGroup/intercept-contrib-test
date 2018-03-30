@@ -8,9 +8,10 @@ dependencies:
   - entity_browser_entity_form
   - field
   - field_group
-  - flag
   - inline_entity_form
   - intercept_core
+  - intercept_equipment
+  - intercept_event
   - intercept_location
   - media
   - menu_ui

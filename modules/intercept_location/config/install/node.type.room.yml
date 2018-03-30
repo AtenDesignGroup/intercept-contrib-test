@@ -8,8 +8,6 @@ third_party_settings:
     available_menus:
       - main
     parent: 'main:'
-_core:
-  default_config_hash: isxkLxgFv3FTtSiufzZDBEfoyeWf1QUKYigXCZr1_H4
 name: Room
 type: room
 description: 'Rooms, spaces or desks within a location.'

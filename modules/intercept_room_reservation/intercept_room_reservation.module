@@ -5,12 +5,7 @@
  * Contains intercept_room_reservation.module.
  */
 
-use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Routing\RouteMatchInterface;
-use Drupal\Core\Render\Element;
-use Drupal\intercept_room_reservation\Entity\RoomReservationInterface;
-use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
-use Drupal\Core\Url;
 
 /**
  * Implements hook_help().
@@ -29,135 +24,12 @@ function intercept_room_reservation_help($route_name, RouteMatchInterface $route
 }
 
 /**
- * Implements hook_node_access().
- */
-function intercept_room_reservation_node_access(\Drupal\node\NodeInterface $node, $op, \Drupal\Core\Session\AccountInterface $account) {
-  if ($node->bundle() == 'room' && $op == 'view') {
-    if ($node->field_staff_use_only->getString() === "1" && !$account->hasPermission('view staff use room reservation')) {
-      return AccessResult::forbidden()->cachePerPermissions()->cachePerUser()->addCacheableDependency($node);
-    }
-  }
-   // No opinion.
-  return AccessResult::neutral();
-}
-
-/**
- * Implements hook_preprocess_page.
- */
-function intercept_room_reservation_preprocess_page(array &$variables) {
-  $limit = \Drupal::config('intercept_core.room_reservations')->get('reservation_limit', 0);
-  $variables['#attached']['drupalSettings']['intercept']['room_reservations']['customer_limit'] = $limit;
-}
-
-/**
- * Implements hook_entity_operation().
- */
-function intercept_room_reservation_entity_operation(\Drupal\Core\Entity\EntityInterface $entity) {
-  if ($entity->getEntityTypeId() == 'room_reservation' ) {
-    $operation = function($op) use ($entity) {
-      return [
-        'title' => t(ucwords($op)),
-        'url' => Url::fromRoute("entity.room_reservation.{$op}_form", [
-          'room_reservation' => $entity->id(),
-          'destination' => Url::fromRoute('<current>')->toString(),
-        ]),
-      ];
-    };
-    return [
-      'cancel' => $operation('cancel'), 'approve' => $operation('approve'), 'decline' => $operation('decline'),
-    ];
-  }
-  return [];
-}
-
-/**
  * Implements hook_theme().
  */
 function intercept_room_reservation_theme() {
   return [
-    'room_reservation' => [
-      'render element' => 'elements',
+    'intercept_room_reservation' => [
+      'render element' => 'children',
     ],
   ];
-}
-
-/**
- * Prepares variables for Room reservation templates.
- *
- * Default template: room_reservation.html.twig.
- *
- * @param array $variables
- *   An associative array containing:
- *   - elements: An associative array containing the user information and any
- *   - attributes: HTML attributes for the containing element.
- */
-function template_preprocess_room_reservation(array &$variables) {
-  // Fetch RoomReservation Entity Object.
-  $room_reservation = $variables['room_reservation'] = $variables['elements']['#room_reservation'];
-  $variables['view_mode'] = $variables['elements']['#view_mode'];
-  // Helpful $content variable for templates.
-  foreach (Element::children($variables['elements']) as $key) {
-    $variables['content'][$key] = $variables['elements'][$key];
-  }
-  $variables['label'] = $room_reservation->label();
-}
-
-/**
- * Implements hook_theme_suggestions_HOOK().
- */
-function intercept_room_reservation_theme_suggestions_room_reservation(array $variables) {
-  $suggestions = [];
-  $room_reservation = $variables['elements']['#room_reservation'];
-  $sanitized_view_mode = strtr($variables['elements']['#view_mode'], '.', '_');
-
-  $suggestions[] = 'room_reservation__' . $sanitized_view_mode;
-  $suggestions[] = 'room_reservation__' . $room_reservation->bundle();
-  $suggestions[] = 'room_reservation__' . $room_reservation->bundle() . '__' . $sanitized_view_mode;
-
-  return $suggestions;
-}
-
-/**
- * Implements hook_entity_extra_field_info().
- */
-function intercept_room_reservation_entity_extra_field_info() {
-  $extra = [];
-
-  $extra['room_reservation']['room_reservation']['display']['location_full'] = [
-    'label' => t('Full location'),
-    'description' => t('Location title and room name'),
-    'weight' => 10,
-    'visible' => FALSE,
-  ];
-
-  $extra['room_reservation']['room_reservation']['display']['attendees_full'] = [
-    'label' => t('Attendee count'),
-    'description' => t('Atendee count and label'),
-    'weight' => 15,
-    'visible' => FALSE,
-  ];
-  return $extra;
-}
-
-/**
- * Implements hook_ENTITY_TYPE_view()().
- */
-function intercept_room_reservation_room_reservation_view(array &$build, RoomReservationInterface $room_reservation, EntityViewDisplayInterface $display, $view_mode) {
-  $build['location_full'] = [
-    '#type' => 'html_tag',
-    '#tag' => 'div',
-    '#attributes' => ['class' => 'field-location-full'],
-    '#value' => $room_reservation->location(),
-   ];
-
-  $count = $room_reservation->field_attendee_count->getString();
-  $build['attendees_full'] = [
-    '#type' => 'html_tag',
-    '#tag' => 'div',
-    '#attributes' => ['class' => 'field-attendees-full'],
-    '#value' => !empty($count) ? t('@count Attendees', [
-      '@count' => $count,
-    ]) : '',
-   ];
-
 }

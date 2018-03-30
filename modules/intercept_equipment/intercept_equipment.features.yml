@@ -1,2 +1,4 @@
 bundle: intercept
+excluded:
+  - jsonapi_extras.jsonapi_resource_config.node--equipment
 required: true

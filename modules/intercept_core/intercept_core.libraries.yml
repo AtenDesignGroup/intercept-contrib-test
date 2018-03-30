@@ -1,8 +1,8 @@
 react:
   js:
-    https://unpkg.com/react@16.3.2/umd/react.production.min.js:
+    https://unpkg.com/react@16/umd/react.production.min.js:
       external: true
-    https://unpkg.com/react-dom@16.3.2/umd/react-dom.production.min.js:
+    https://unpkg.com/react-dom@16/umd/react-dom.production.min.js:
       external: true
 
 bigCalendar:
@@ -13,21 +13,8 @@ bigCalendar:
 
 moment:
   js:
-    https://unpkg.com/moment@2.20.1/min/moment.min.js:
+    https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/moment.min.js:
       external: true
-    https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.17/moment-timezone-with-data-2012-2022.min.js:
-      external: true
-
-materialIcons:
-  remote: https://fonts.googleapis.com
-  version: 3.0.1
-  license:
-    name: Apache 2.0
-    url: https://raw.githubusercontent.com/google/material-design-icons/master/LICENSE
-    gpl-compatible: true
-  css:
-    theme:
-      https://fonts.googleapis.com/icon?family=Material+Icons: { type: external, minified: true }
 
 babelHelpers:
   js:
@@ -42,14 +29,6 @@ interceptCommon:
 interceptClient:
   js:
     js/dist/interceptClient.js:
-      preprocess: false
-  dependencies:
-    - core/drupalSettings
-    - intercept_core/materialIcons
-
-interceptTheme:
-  js:
-    js/dist/interceptTheme.js:
       preprocess: false
   dependencies:
     - core/drupalSettings

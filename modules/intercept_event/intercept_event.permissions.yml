@@ -1,14 +1,27 @@
-edit event field field_event_is_template:
-  title: 'Mark an event node as template'
+add event recurrence entities:
+  title: 'Create new Event Recurrence entities'
 
-edit event field field_featured:
-  title: 'Mark an event node as featured'
+administer event recurrence entities:
+  title: 'Administer Event Recurrence entities'
+  description: 'Allow to access the administration form to configure Event Recurrence entities.'
+  restrict access: true
 
-scan event_attendance:
-  title: 'Scan in event attendance'
+delete event recurrence entities:
+  title: 'Delete Event Recurrence entities'
 
-analyze events:
-  title: 'Analyze events'
+edit event recurrence entities:
+  title: 'Edit Event Recurrence entities'
 
-create event content from template:
-  title: 'Event: Create new content from template'
+view event recurrence entities:
+  title: 'View Event Recurrence entities'
+
+view all event recurrence revisions:
+  title: 'View all Event Recurrence revisions'
+
+revert all event recurrence revisions:
+  title: 'Revert all Event Recurrence revisions'
+  description: 'Role requires permission <em>view Event Recurrence revisions</em> and <em>edit rights</em> for event recurrence entities in question or <em>administer event recurrence entities</em>.'
+
+delete all event recurrence revisions:
+  title: 'Delete all revisions'
+  description: 'Role requires permission to <em>view Event Recurrence revisions</em> and <em>delete rights</em> for event recurrence entities in question or <em>administer event recurrence entities</em>.'

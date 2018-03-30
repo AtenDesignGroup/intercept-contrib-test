@@ -11,26 +11,24 @@ dependencies:
   - duration_field
   - editor
   - entity_browser
-    #  - evaluate
+  - evaluate
   - features
   - field
   - file
   - filter
-  - focal_point
+  - intercept_equipment
   - media
   - menu_link_content
   - node
   - options
   - paragraphs
   - path
-  - profile
   - rdf
   - search
   - shortcut
   - simple_oauth
   - system
   - taxonomy
-  - telephone
   - text
   - user
   - views

@@ -1,15 +1,25 @@
+add room reservation entities:
+  title: 'Create new Room reservation entities'
+
 administer room reservation entities:
   title: 'Administer Room reservation entities'
   description: 'Allow to access the administration form to configure Room reservation entities.'
   restrict access: true
 
-view staff use room reservation:
-  title: "View a 'staff use only' room"
-  description: "Grants permission to reserve rooms with field_staff_use_only set to TRUE"
+delete room reservation entities:
+  title: 'Delete Room reservation entities'
 
-create room reservation for user:
-  title: "Create room reservations for another user"
-  description: "Allow access to be able to create Room Reservations and select the user in the form."
+edit room reservation entities:
+  title: 'Edit Room reservation entities'
+
+view published room reservation entities:
+  title: 'View published Room reservation entities'
+
+view unpublished room reservation entities:
+  title: 'View unpublished Room reservation entities'
+
+view all room reservation revisions:
+  title: 'View all Room reservation revisions'
 
 revert all room reservation revisions:
   title: 'Revert all Room reservation revisions'

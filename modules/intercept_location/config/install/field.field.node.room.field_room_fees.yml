@@ -6,8 +6,6 @@ dependencies:
     - node.type.room
   module:
     - text
-_core:
-  default_config_hash: Uk6QBWRH7eixZARxaub8lGMJrfuVS9AVavZTa23GcFE
 id: node.room.field_room_fees
 field_name: field_room_fees
 entity_type: node

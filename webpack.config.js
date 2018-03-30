@@ -4,15 +4,14 @@ const webpack = require('webpack');
 
 // Create an object map of entry file arrays keyed by submodule.
 const entries = {
-  intercept_event: ['eventList', 'eventRegister', 'eventRegistrationList'],
+  intercept_event: ['eventList'],
   intercept_location: ['locationsList'],
-  intercept_room_reservation: ['reserveRoom', 'roomReservationList'],
 };
 
 const babelLoader = {
   test: /\.js$/,
   loader: 'babel-loader',
-  exclude: /node_modules/,
+  exclude: ['/node_modules/'],
   query: {
     plugins: [
       'external-helpers',
@@ -106,19 +105,12 @@ module.exports = function config(env) {
           react: 'React',
           'react-dom': 'ReactDOM',
           interceptClient: 'interceptClient',
-          interceptTheme: 'interceptTheme',
-          Drupal: 'Drupal',
-          drupalSettings: 'drupalSettings',
           moment: 'moment',
           redis: 'redis',
         };
         const dev = {
           interceptClient: 'interceptClient',
-          interceptTheme: 'interceptTheme',
-          Drupal: 'Drupal',
-          drupalSettings: 'drupalSettings',
           redis: 'redis',
-          moment: 'moment',
         };
 
         return isProduction ? prod : dev;
@@ -141,7 +133,6 @@ module.exports = function config(env) {
         filename: '[name].js',
         path: path.resolve(__dirname),
         libraryTarget: 'umd',
-        library: 'interceptClient',
       },
       resolve: {
         // Allow common modules in the root module to be referenced.
@@ -161,62 +152,11 @@ module.exports = function config(env) {
       })(),
       externals: (() => {
         const prod = {
-          Drupal: 'Drupal',
-          drupalSettings: 'drupalSettings',
-          moment: 'moment',
           redis: 'redis',
-        };
-        const dev = {
-          Drupal: 'Drupal',
-          drupalSettings: 'drupalSettings',
-          moment: 'moment',
-          redis: 'redis',
-        };
-
-        return isProduction ? prod : dev;
-      })(),
-      module: {
-        loaders: [babelLoader],
-      },
-    },
-
-    //
-    // interceptTheme.js
-    //   This should function as a standalone library so it needs its own config.
-    //
-    {
-      entry: {
-        'modules/intercept_core/js/dist/interceptTheme':
-          './modules/intercept_core/js/src/interceptTheme.js',
-      },
-      output: {
-        filename: '[name].js',
-        path: path.resolve(__dirname),
-        libraryTarget: 'umd',
-      },
-      resolve: {
-        // Allow common modules in the root module to be referenced.
-        modules: [path.resolve(__dirname, 'js/src'), 'node_modules'],
-      },
-      plugins: (() => {
-        const nodeEnv = isProduction ? 'production' : 'development';
-        const plugins = [
-          new webpack.DefinePlugin({ 'process.env': { NODE_ENV: JSON.stringify(nodeEnv) } }),
-        ];
-
-        if (isProduction) {
-          plugins.push(new Minify());
-        }
-
-        return plugins;
-      })(),
-      externals: (() => {
-        const prod = {
-          Drupal: 'Drupal',
           drupalSettings: 'drupalSettings',
         };
         const dev = {
-          Drupal: 'Drupal',
+          redis: 'redis',
           drupalSettings: 'drupalSettings',
         };
 

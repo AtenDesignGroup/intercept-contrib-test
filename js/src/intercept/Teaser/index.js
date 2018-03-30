@@ -1,39 +1,20 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import MetaField from './../MetaField';
 
 const Teaser = (props) => {
-  const {
-    date,
-    description,
-    footer,
-    image,
-    modifiers,
-    supertitle,
-    subtitle,
-    tags,
-    title,
-    titleUrl,
-    type,
-    uuid,
-  } = props;
+  const { date, modifiers, image, type, supertitle, subtitle, title, titleUrl, description, tags } = props;
   const classes = `clearfix teaser ${modifiers.map(mod => `teaser--${mod}`).join(' ')}`;
 
-  const img = image && <img src={image} alt={title} />;
-
-  function createMarkup(value) {
-    return { __html: value };
-  }
+  const img = image && (<img src={image} alt={title}/>);
 
   return (
-    <article uuid={uuid} className={classes}>
+    <article className={classes}>
       <div className="teaser__image">
-        {titleUrl && img ? (
-          <a href={titleUrl} className="teaser__image-link" aria-hidden="true">
-            {img}
-          </a>
-        ) : (
-          img
-        )}
+        { titleUrl
+          ? (<a href="{{title_url}}" className="teaser__image-link" aria-hidden="true">{img}</a>)
+          : (img)
+        }
         {date && (
           <div className="teaser__date-wrapper">
             <p className="teaser__date">
@@ -44,59 +25,49 @@ const Teaser = (props) => {
           </div>
         )}
       </div>
-      <div className="teaser__main clearfix">
-        <div className="teaser__content">
-          {type && <span className="teaser__type">{type}</span>}
-          {supertitle && <span className="teaser__supertitle">{supertitle}</span>}
-          <h3 className="teaser__title">
-            {titleUrl ? (
-              <a href={titleUrl} className="teaser__title-link">
-                {title}
-              </a>
-            ) : (
-              title
-            )}
-          </h3>
-          {subtitle && <span className="teaser__subtitle">{subtitle}</span>}
-          {description && (
-            <div className="teaser__description" dangerouslySetInnerHTML={createMarkup(description)} />
+      <div className="teaser__content clearfix">
+        {type && <span className="teaser__type">{type}</span>}
+        {supertitle && <span className="teaser__supertitle">{supertitle}</span>}
+        <h3 className="teaser__title">
+          {titleUrl ? (
+            <a href={titleUrl} className="teaser__title-link">
+              {title}
+            </a>
+          ) : (
+            title
           )}
-          {tags && <div className="teaser__tags">{tags}</div>}
-
-        </div>
-        {footer && <div className="teaser__footer">{footer(props)}</div>}
+        </h3>
+        {subtitle && <span className="teaser__subtitle">{subtitle}</span>}
+        {description && <div className="teaser__description">{description}</div>}
+        {tags && <div className="teaser__tags">{tags}</div>}
       </div>
     </article>
   );
 };
 
 Teaser.propTypes = {
-  uuid: PropTypes.string,
-  date: PropTypes.object,
-  description: PropTypes.string,
-  footer: PropTypes.func,
-  image: PropTypes.string,
   modifiers: PropTypes.arrayOf(PropTypes.string),
+  type: PropTypes.string,
+  image: PropTypes.string,
   supertitle: PropTypes.string,
   subtitle: PropTypes.string,
-  tags: PropTypes.arrayOf(PropTypes.element),
+  description: PropTypes.string,
   title: PropTypes.string.isRequired,
   titleUrl: PropTypes.string,
-  type: PropTypes.string,
+  date: PropTypes.object,
+  tags: PropTypes.arrayOf(PropTypes.element),
 };
 
 Teaser.defaultProps = {
-  date: null,
-  description: null,
   modifiers: [],
-  footer: null,
+  type: null,
   image: null,
   subtitle: null,
   supertitle: null,
   titleUrl: null,
+  date: null,
+  description: null,
   tags: null,
-  type: null,
-  uuid: null,
 };
 
 export default Teaser;

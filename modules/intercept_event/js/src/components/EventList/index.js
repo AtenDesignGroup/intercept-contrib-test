@@ -1,50 +1,30 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { withStyles } from 'material-ui/styles';
 import map from 'lodash/map';
-
-// Intercept
-/* eslint-disable */
-import interceptClient from 'interceptClient';
 import EventTeaser from 'intercept/EventTeaser';
-import ContentList from 'intercept/ContentList';
-/* eslint-enable */
+
+const styles = theme => ({});
 
 class EventList extends Component {
   state = {};
 
   render() {
-    const { events, loading } = this.props;
-
-    const teasers = items =>
-      items.map(id => ({
-        key: id,
-        node: <EventTeaser id={id} className="event-teaser" />,
-      }));
+    const { events } = this.props;
 
     const list =
-      events.length > 0 ? (
-        map(events, group => (
-          <ContentList
-            heading={interceptClient.utils.getDayDisplay(group.date)}
-            items={teasers(group.items)}
-            key={group.key}
-          />
-        ))
+      Object.keys(events).length > 0 ? (
+        map(events, id => <EventTeaser key={id} id={id} className="event-teaser" />)
       ) : (
-        !loading && <p key={0}>No events have been loaded.</p>
+        <p>No events have been loaded.</p>
       );
 
-    return <div className="events-list">{list}</div>;
+    return <div className="eventsList">{list}</div>;
   }
 }
 
 EventList.propTypes = {
-  events: PropTypes.arrayOf(Object).isRequired,
-  loading: PropTypes.bool,
+  events: PropTypes.arrayOf(PropTypes.string).isRequired,
 };
 
-EventList.defaultProps = {
-  loading: false,
-};
-
-export default EventList;
+export default withStyles(styles, { withTheme: true })(EventList);

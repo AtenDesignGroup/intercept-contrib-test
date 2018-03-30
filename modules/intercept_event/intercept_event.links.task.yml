@@ -1,0 +1,27 @@
+# Event Recurrence routing definition
+event_recurrence.settings_tab:
+  route_name: event_recurrence.settings
+  title: 'Settings'
+  base_route: event_recurrence.settings
+
+entity.event_recurrence.canonical:
+  route_name: entity.event_recurrence.canonical
+  base_route: entity.event_recurrence.canonical
+  title: 'View'
+
+entity.event_recurrence.edit_form:
+  route_name: entity.event_recurrence.edit_form
+  base_route: entity.event_recurrence.canonical
+  title: 'Edit'
+
+entity.event_recurrence.version_history:
+  route_name: entity.event_recurrence.version_history
+  base_route: entity.event_recurrence.canonical
+  title: 'Revisions'
+
+entity.event_recurrence.delete_form:
+  route_name:  entity.event_recurrence.delete_form
+  base_route:  entity.event_recurrence.canonical
+  title: Delete
+  weight: 10
+

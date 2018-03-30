@@ -1,0 +1,7 @@
+langcode: en
+status: true
+dependencies: {  }
+id: intercept_registered_customer
+label: 'InterCEPT Registered Customer'
+weight: 7
+is_admin: null

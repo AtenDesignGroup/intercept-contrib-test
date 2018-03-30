@@ -1,0 +1,17 @@
+uuid: 00e2f34b-2504-4632-a590-4b9d5d3069ee
+langcode: en
+status: true
+dependencies:
+  module:
+    - focal_point
+name: 4to3_400x300
+label: '4:3 400x300'
+effects:
+  9e6e2bf1-97b5-412d-90cf-0d58ea7585bb:
+    uuid: 9e6e2bf1-97b5-412d-90cf-0d58ea7585bb
+    id: focal_point_scale_and_crop
+    weight: 1
+    data:
+      width: 400
+      height: 300
+      crop_type: focal_point

@@ -1,0 +1,17 @@
+uuid: 24ba63c0-fac8-4a3c-950d-d7f857c1a913
+langcode: en
+status: true
+dependencies:
+  module:
+    - focal_point
+name: 4to3_1480x1112
+label: '4:3 1480x1112'
+effects:
+  55449d4e-bc0f-4dbe-81f0-15bf9b6c8e26:
+    uuid: 55449d4e-bc0f-4dbe-81f0-15bf9b6c8e26
+    id: focal_point_scale_and_crop
+    weight: 1
+    data:
+      width: 1480
+      height: 1112
+      crop_type: focal_point

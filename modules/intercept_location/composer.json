@@ -1,0 +1,18 @@
+{
+  "name": "drupal/intercept_location",
+  "type": "drupal-module",
+  "description": "Feature: Provides content types and functionality for Intercept locations.",
+  "keywords": [
+    "Drupal"
+  ],
+  "license": "MIT",
+  "homepage": "https://www.drupal.org/project/intercept",
+  "minimum-stability": "dev",
+  "support": {
+    "issues": "https://www.drupal.org/project/issues/intercept",
+    "source": "http://cgit.drupalcode.org/intercept"
+  },
+  "require": {
+    "drupal/office_hours": "^1.0"
+  }
+}

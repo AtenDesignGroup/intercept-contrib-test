@@ -1,0 +1,17 @@
+uuid: 7bda01a5-6c31-4ae4-be5e-7668ba1d1da0
+langcode: en
+status: true
+dependencies:
+  module:
+    - focal_point
+name: 3to2_870x580
+label: '3:2 870x580'
+effects:
+  89f2e0f8-bc2b-433f-b4d9-2fce322b519e:
+    uuid: 89f2e0f8-bc2b-433f-b4d9-2fce322b519e
+    id: focal_point_scale_and_crop
+    weight: 1
+    data:
+      width: 870
+      height: 580
+      crop_type: focal_point

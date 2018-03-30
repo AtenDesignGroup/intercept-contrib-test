@@ -1,0 +1,35 @@
+<?php
+
+/**
+ * @file
+ * Contains intercept_room_reservation.module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function intercept_room_reservation_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the intercept_room_reservation module.
+    case 'help.page.intercept_room_reservation':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Room reservation functionality for the InterCEPT library') . '</p>';
+      return $output;
+
+    default:
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function intercept_room_reservation_theme() {
+  return [
+    'intercept_room_reservation' => [
+      'render element' => 'children',
+    ],
+  ];
+}

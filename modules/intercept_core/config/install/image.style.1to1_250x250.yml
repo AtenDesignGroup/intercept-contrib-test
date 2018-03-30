@@ -1,0 +1,17 @@
+uuid: 860afb16-81e0-4e6b-b68c-527bcd90c031
+langcode: en
+status: true
+dependencies:
+  module:
+    - focal_point
+name: 1to1_250x250
+label: '1:1_250x250'
+effects:
+  bde845c9-7a5d-4f2b-8841-8476a69459ed:
+    uuid: bde845c9-7a5d-4f2b-8841-8476a69459ed
+    id: focal_point_scale_and_crop
+    weight: 1
+    data:
+      width: 250
+      height: 250
+      crop_type: focal_point

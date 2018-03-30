@@ -1,0 +1,7 @@
+langcode: en
+status: true
+dependencies: {  }
+id: intercept_event_manager
+label: 'InterCEPT Event Manager'
+weight: 5
+is_admin: null

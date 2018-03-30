@@ -1,0 +1,7 @@
+services:
+  intercept_ils.auth:
+    class: Drupal\intercept_ils\Auth
+    public: false
+    decorates: user.auth
+    decoration_inner_name: intercept_ils.auth.user_auth
+    arguments: ['@entity.manager', '@password', '@intercept_ils.auth.user_auth', '@polaris.client', '@externalauth.externalauth', '@externalauth.authmap']

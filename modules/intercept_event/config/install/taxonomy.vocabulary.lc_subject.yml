@@ -1,0 +1,8 @@
+langcode: en
+status: true
+dependencies: {  }
+name: 'Subject Heading'
+vid: lc_subject
+description: 'Provides keywords for events based on subject headings associated with library materials'
+hierarchy: 0
+weight: 0

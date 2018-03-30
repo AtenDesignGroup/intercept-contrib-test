@@ -1,0 +1,17 @@
+uuid: bf51e9f6-1d76-47e1-91f9-c58b0b1f2464
+langcode: en
+status: true
+dependencies:
+  module:
+    - focal_point
+name: 1to1_290x290
+label: '1:1_290x290'
+effects:
+  7e97534c-af80-4de2-a054-0697d7a0508b:
+    uuid: 7e97534c-af80-4de2-a054-0697d7a0508b
+    id: focal_point_scale_and_crop
+    weight: 1
+    data:
+      width: 290
+      height: 290
+      crop_type: focal_point

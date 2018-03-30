@@ -1,0 +1,8 @@
+langcode: en
+status: true
+dependencies: {  }
+id: intercept_kiosk
+label: 'InterCEPT Kiosk'
+weight: 9
+is_admin: null
+permissions: {  }

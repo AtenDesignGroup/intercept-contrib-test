@@ -1,0 +1,34 @@
+react:
+  js:
+    https://unpkg.com/react@16/umd/react.production.min.js:
+      external: true
+    https://unpkg.com/react-dom@16/umd/react-dom.production.min.js:
+      external: true
+
+bigCalendar:
+  version: 0.18.0
+  css:
+    base:
+      css/vendor/react-big-calendar.css: {}
+
+moment:
+  js:
+    https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/moment.min.js:
+      external: true
+
+babelHelpers:
+  js:
+    js/dist/babelHelpers.js:
+      preprocess: false
+
+interceptCommon:
+  js:
+    js/dist/interceptCommon.js:
+      preprocess: false
+
+interceptClient:
+  js:
+    js/dist/interceptClient.js:
+      preprocess: false
+  dependencies:
+    - core/drupalSettings

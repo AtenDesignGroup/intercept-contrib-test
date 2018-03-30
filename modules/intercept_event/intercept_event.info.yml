@@ -1,0 +1,25 @@
+name: Event
+description: 'Provides Event content type and related configuration. '
+type: module
+core: 8.x
+dependencies:
+  - date_recur
+  - datetime_range
+  - entity_browser_entity_form
+  - field
+  - field_group
+  - inline_entity_form
+  - intercept_core
+  - intercept_equipment
+  - intercept_event
+  - intercept_location
+  - media
+  - menu_ui
+  - node
+  - path
+  - pathauto
+  - stories_media
+  - taxonomy
+  - text
+  - user
+package: Intercept

@@ -1,0 +1,14 @@
+
+# Event Recurrence menu items definition
+entity.event_recurrence.collection:
+  title: 'Event Recurrence list'
+  route_name: entity.event_recurrence.collection
+  description: 'List Event Recurrence entities'
+  parent: system.admin_structure
+  weight: 100
+
+event_recurrence.admin.structure.settings:
+  title: Event Recurrence settings
+  description: 'Configure Event Recurrence entities'
+  route_name: event_recurrence.settings
+  parent: system.admin_structure

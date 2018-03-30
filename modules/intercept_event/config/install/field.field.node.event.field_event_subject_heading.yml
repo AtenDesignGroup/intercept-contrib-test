@@ -1,0 +1,28 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_event_subject_heading
+    - node.type.event
+    - taxonomy.vocabulary.lc_subject
+id: node.event.field_event_subject_heading
+field_name: field_event_subject_heading
+entity_type: node
+bundle: event
+label: 'Subject Headings'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:taxonomy_term'
+  handler_settings:
+    target_bundles:
+      lc_subject: lc_subject
+    sort:
+      field: name
+      direction: asc
+    auto_create: false
+    auto_create_bundle: ''
+field_type: entity_reference

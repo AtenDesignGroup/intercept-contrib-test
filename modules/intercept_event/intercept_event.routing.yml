@@ -1,0 +1,8 @@
+
+intercept_event.events_controller_list:
+  path: '/events'
+  defaults:
+    _controller: '\Drupal\intercept_event\Controller\EventsController::list'
+    _title: 'Events'
+  requirements:
+    _permission: 'access content'

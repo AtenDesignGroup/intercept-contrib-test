@@ -1,0 +1,17 @@
+uuid: 10a0551a-9e9b-446c-b3db-476ecebbed57
+langcode: en
+status: true
+dependencies:
+  module:
+    - focal_point
+name: 3to2_1080x720
+label: '3:2 1080x720'
+effects:
+  8b17b82f-3481-481b-a2bb-c20883dce940:
+    uuid: 8b17b82f-3481-481b-a2bb-c20883dce940
+    id: focal_point_scale_and_crop
+    weight: 1
+    data:
+      width: 1080
+      height: 720
+      crop_type: focal_point

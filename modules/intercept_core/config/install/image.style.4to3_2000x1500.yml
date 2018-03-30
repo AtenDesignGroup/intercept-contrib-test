@@ -1,0 +1,17 @@
+uuid: 34aeccef-872c-464f-a929-1088f0dcaf51
+langcode: en
+status: true
+dependencies:
+  module:
+    - focal_point
+name: 4to3_2000x1500
+label: '4:3 2000x1500'
+effects:
+  b68aa1b3-cd21-4fe2-be57-4bc135d13c15:
+    uuid: b68aa1b3-cd21-4fe2-be57-4bc135d13c15
+    id: focal_point_scale_and_crop
+    weight: 1
+    data:
+      width: 2000
+      height: 1500
+      crop_type: focal_point

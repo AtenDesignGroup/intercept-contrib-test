@@ -1,0 +1,25 @@
+<?php
+
+/**
+ * Implements hook_user_login().
+ */
+function intercept_ils_user_login($account) {
+}
+
+/**
+ *  * Implements hook_entity_base_field_info().
+ *   */
+function intercept_ils_entity_base_field_info(\Drupal\Core\Entity\EntityTypeInterface $entity_type) {
+  if ($entity_type->id() === 'user') {
+    $fields = [];
+
+    $fields['ils_authentication'] = \Drupal\Core\Field\BaseFieldDefinition::create('boolean')
+      ->setLabel(t('ILS Authentication'))
+      ->setDescription(t('Whether or not the user has been authenticated by the ILS.'))
+      ->setComputed(TRUE)
+      ->setCardinality(1)
+      ->setDefaultValue(FALSE);
+
+    return $fields;
+  }
+}

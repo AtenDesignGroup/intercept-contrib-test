@@ -1,0 +1,7 @@
+langcode: en
+status: true
+dependencies: {  }
+id: intercept_event_organizer
+label: 'InterCEPT Event Organizer'
+weight: 6
+is_admin: null

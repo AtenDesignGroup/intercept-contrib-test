@@ -1,0 +1,30 @@
+add room reservation entities:
+  title: 'Create new Room reservation entities'
+
+administer room reservation entities:
+  title: 'Administer Room reservation entities'
+  description: 'Allow to access the administration form to configure Room reservation entities.'
+  restrict access: true
+
+delete room reservation entities:
+  title: 'Delete Room reservation entities'
+
+edit room reservation entities:
+  title: 'Edit Room reservation entities'
+
+view published room reservation entities:
+  title: 'View published Room reservation entities'
+
+view unpublished room reservation entities:
+  title: 'View unpublished Room reservation entities'
+
+view all room reservation revisions:
+  title: 'View all Room reservation revisions'
+
+revert all room reservation revisions:
+  title: 'Revert all Room reservation revisions'
+  description: 'Role requires permission <em>view Room reservation revisions</em> and <em>edit rights</em> for room reservation entities in question or <em>administer room reservation entities</em>.'
+
+delete all room reservation revisions:
+  title: 'Delete all revisions'
+  description: 'Role requires permission to <em>view Room reservation revisions</em> and <em>delete rights</em> for room reservation entities in question or <em>administer room reservation entities</em>.'

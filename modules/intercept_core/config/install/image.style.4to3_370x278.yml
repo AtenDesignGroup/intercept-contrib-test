@@ -1,0 +1,17 @@
+uuid: fccefcad-b3dc-415a-9d8b-e5ce98815fed
+langcode: en
+status: true
+dependencies:
+  module:
+    - focal_point
+name: 4to3_370x278
+label: '4:3 370x278'
+effects:
+  b6a17f30-051c-4e33-bee7-a0dbfd11ad0f:
+    uuid: b6a17f30-051c-4e33-bee7-a0dbfd11ad0f
+    id: focal_point_scale_and_crop
+    weight: 1
+    data:
+      width: 370
+      height: 278
+      crop_type: focal_point

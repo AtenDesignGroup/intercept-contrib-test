@@ -1,0 +1,12 @@
+<?php
+
+/**
+ * Implements hook_preprocess_page.
+ */
+function intercept_core_preprocess_page(array &$variables) {
+  $consumer = Drupal::service('entity_type.manager')->getStorage('consumer')->load(2);
+  if ($consumer) {
+    $consumer_token = $consumer ? $consumer->uuid() : NULL;
+    $variables['#attached']['drupalSettings']['intercept']['consumer'] = $consumer_token;
+  }
+}

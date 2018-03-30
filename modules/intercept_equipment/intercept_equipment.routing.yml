@@ -1,0 +1,8 @@
+
+intercept_equipment.manage_equipment:
+  path: '/intercept/equipment'
+  defaults:
+    _controller: '\Drupal\intercept_equipment\Controller\InterceptEquipmentController::manage'
+    _title: 'Equipment'
+  requirements:
+    _permission: 'access content'

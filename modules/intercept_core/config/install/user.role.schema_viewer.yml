@@ -1,0 +1,7 @@
+langcode: en
+status: true
+dependencies: {  }
+id: schema_viewer
+label: 'Schema Viewer'
+weight: 3
+is_admin: null

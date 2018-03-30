@@ -1,0 +1,17 @@
+uuid: 6a1ac077-ca62-4bbb-80da-d4d9a577cb5d
+langcode: en
+status: true
+dependencies:
+  module:
+    - focal_point
+name: 1to1_612x612
+label: '1:1_612x612'
+effects:
+  fe310cf7-058b-4163-bd47-ad978823c432:
+    uuid: fe310cf7-058b-4163-bd47-ad978823c432
+    id: focal_point_scale_and_crop
+    weight: 1
+    data:
+      width: 612
+      height: 612
+      crop_type: focal_point

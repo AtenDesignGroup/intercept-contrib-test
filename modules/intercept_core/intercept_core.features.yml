@@ -1,0 +1,24 @@
+bundle: intercept
+excluded:
+  - core.entity_form_display.node.equipment.default
+  - core.entity_form_display.block_content.basic.default
+  - core.entity_view_display.node.equipment.default
+  - core.entity_view_display.block_content.basic.default
+  - field.field.node.equipment.field_duration_min
+  - field.field.block_content.basic.body
+  - contact.form.feedback
+  - block_content.type.basic
+  - core.entity_view_mode.block.token
+  - core.entity_view_mode.block_content.token
+  - core.entity_view_mode.consumer.token
+  - core.entity_view_mode.contact_message.token
+  - core.entity_view_mode.evaluation_criteria.token
+  - core.entity_view_mode.file.token
+  - core.entity_view_mode.media.token
+  - core.entity_view_mode.menu_link_content.token
+  - core.entity_view_mode.node.token
+  - core.entity_view_mode.oauth2_token.token
+  - core.entity_view_mode.paragraph.token
+  - core.entity_view_mode.shortcut.token
+  - core.entity_view_mode.taxonomy_term.token
+required: true

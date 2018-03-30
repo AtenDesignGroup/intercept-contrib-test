@@ -1,0 +1,6 @@
+rema_api.system_time:
+  path: '/intercept/time'
+  defaults:
+    _controller: '\Drupal\intercept_core\Controller\SystemTime::response'
+  requirements:
+    _access: 'TRUE'

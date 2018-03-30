@@ -1,0 +1,35 @@
+name: InterCEPT Core
+description: 'Provides core components required by other features.'
+type: module
+core: 8.x
+dependencies:
+  - block
+  - block_content
+  - consumers
+  - consumer_image_styles
+  - contact
+  - duration_field
+  - editor
+  - entity_browser
+  - evaluate
+  - features
+  - field
+  - file
+  - filter
+  - intercept_equipment
+  - media
+  - menu_link_content
+  - node
+  - options
+  - paragraphs
+  - path
+  - rdf
+  - search
+  - shortcut
+  - simple_oauth
+  - system
+  - taxonomy
+  - text
+  - user
+  - views
+package: Intercept

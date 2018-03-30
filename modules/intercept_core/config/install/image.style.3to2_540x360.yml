@@ -1,0 +1,17 @@
+uuid: e9df3a74-5280-4f87-89f3-e2b5bb316c03
+langcode: en
+status: true
+dependencies:
+  module:
+    - focal_point
+name: 3to2_540x360
+label: '3:2 540x360'
+effects:
+  cdba9d92-73a4-4423-bb2d-0a439a54ece1:
+    uuid: cdba9d92-73a4-4423-bb2d-0a439a54ece1
+    id: focal_point_scale_and_crop
+    weight: 1
+    data:
+      width: 540
+      height: 360
+      crop_type: focal_point

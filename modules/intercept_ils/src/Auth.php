@@ -33,13 +33,16 @@ class Auth extends UserAuth {
    * {@inheritdoc}
    */
   public function authenticate($username, $password) {
-    /**
-     * First just do a call to externalauth load, if that's true, pass to parent and validate password.
-     *
-     * If that fails, check if the current $username and $password are valid in external system - call to polaris.
-     * - If TRUE - Automatically generate user with user register.
-     * - If FALSE - Pass back to parent to deny authentication.
-     */
+    // Let Drupal authenticate first to speed up authentication.
+    $auth = parent::authenticate($username, $password);
+    if ($auth) {
+      return $auth;
+    }
+    // Do not check Polaris if a user just supplies the wrong password.
+    if ($this->isValidUsername($username)) {
+      return $auth;
+    }
+    // First get user if stored in authmap and let Drupal authenticate.
     if ($user = $this->externalAuth->load($username, 'polaris')) {
       $user->set('ils_authentication', TRUE);
       // TODO: This should be moved to the Polaris event subscriber for login.
@@ -47,6 +50,7 @@ class Auth extends UserAuth {
       $this->externalAuthmap->save($user, 'polaris', $username, $patron->basicData());
       return $user->id();
     }
+    // If there's no authmap stored, check if this is a valid patron and PIN.
     if (($patron = $this->client->patron->get($username)) && $patron->authenticate($password)) {
       // This should go in the event subscriber.
       $data = $patron->basicData();
@@ -55,12 +59,16 @@ class Auth extends UserAuth {
         'mail' => $data->EmailAddress,
         'init' => $data->EmailAddress,
       ];
+      // Create a Drupal user automatically and return the new user_id.
       $user = $this->externalAuth->register($username, 'polaris', $account_data, $data);
       return $user->id();
     }
-    return parent::authenticate($username, $password);
+    return $auth;
   }
 
+  private function isValidUsername($username) {
+    return \Drupal::entityTypeManager()->getStorage('user')->loadByProperties(['name' => $username]);
+  }
   /**
    * Automatically inherit methods if they are public.
    */

@@ -1,0 +1,23 @@
+uuid: 43e9dcf2-eb38-4b40-9314-a859dbba79c5
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_text_content
+    - node.type.room
+  module:
+    - text
+_core:
+  default_config_hash: oxJWrWZJikrd6vOTFAAkEQjIC7CpUm7mhFhEr0-crg4
+id: node.room.field_text_content
+field_name: field_text_content
+entity_type: node
+bundle: room
+label: 'Primary Content'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: text_long

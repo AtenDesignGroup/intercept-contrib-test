@@ -1,8 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import SelectMultiple from './../Select/SelectMultiple';
-import SelectSingle from './../Select/SelectSingle';
+import SelectFilter from './../SelectFilter';
 import interceptClient from 'interceptClient';
 
 const { select, api } = interceptClient;
@@ -13,11 +12,9 @@ class SelectResource extends React.Component {
   }
 
   render() {
-    const { value, multiple } = this.props;
-    return multiple ? (
-      <SelectMultiple {...this.props} value={value === null ? [] : value} />
-    ) : (
-      <SelectSingle {...this.props} options={[{ key: '', value: 'None' }, ...this.props.options] } value={value} />
+    const { options, handleChange, value, type, label } = this.props;
+    return (
+      <SelectFilter options={options} handleChange={handleChange} label={label} value={value} />
     );
   }
 }
@@ -33,18 +30,16 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
 });
 
 SelectResource.defaultProps = {
-  multiple: false,
-  value: null,
+  value: [],
 };
 
 SelectResource.propTypes = {
   options: PropTypes.arrayOf(Object).isRequired,
-  value: PropTypes.oneOfType([PropTypes.arrayOf(String), PropTypes.string]),
+  value: PropTypes.arrayOf(String),
   handleChange: PropTypes.func.isRequired,
   fetchAll: PropTypes.func.isRequired,
   type: PropTypes.string.isRequired,
   label: PropTypes.string.isRequired,
-  multiple: PropTypes.bool,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(SelectResource);

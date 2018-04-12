@@ -13,13 +13,15 @@ use Drupal\Core\Link;
  */
 class RoomReservationListBuilder extends EntityListBuilder {
 
-
   /**
    * {@inheritdoc}
    */
   public function buildHeader() {
-    $header['id'] = $this->t('Room reservation ID');
     $header['name'] = $this->t('Name');
+    $header['room'] = $this->t('Room');
+    $header['location'] = $this->t('Location');
+    $header['user'] = $this->t('User');
+    $header['status'] = $this->t('Status');
     return $header + parent::buildHeader();
   }
 
@@ -28,13 +30,16 @@ class RoomReservationListBuilder extends EntityListBuilder {
    */
   public function buildRow(EntityInterface $entity) {
     /* @var $entity \Drupal\intercept_room_reservation\Entity\RoomReservation */
-    $row['id'] = $entity->id();
-    $row['name'] = Link::createFromRoute(
-      $entity->label(),
-      'entity.room_reservation.edit_form',
-      ['room_reservation' => $entity->id()]
-    );
+    $row['name'] = $entity->link();
+    $row['room'] = $this->getEntityLabel($entity->field_room->entity, $this->t('No room'));
+    $row['location'] = $entity->get('location')->entity ? $entity->get('location')->entity->label() : '';
+    $row['user'] = $this->getEntityLabel($entity->field_user->entity, $this->t('No user'));
+    $row['status'] = $entity->field_status->getString();
     return $row + parent::buildRow($entity);
+  }
+
+  private function getEntityLabel(EntityInterface $entity = NULL, $default = '') {
+    return $entity ? $entity->link() : $default;
   }
 
 }

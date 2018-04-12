@@ -1,0 +1,143 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.node.room.field_capacity_max
+    - field.field.node.room.field_capacity_min
+    - field.field.node.room.field_image_primary
+    - field.field.node.room.field_location
+    - field.field.node.room.field_online_registration
+    - field.field.node.room.field_reservation_phone_number
+    - field.field.node.room.field_room_fees
+    - field.field.node.room.field_room_standard_equipment
+    - field.field.node.room.field_room_type
+    - field.field.node.room.field_staff_use_only
+    - field.field.node.room.field_text_content
+    - field.field.node.room.field_text_intro
+    - field.field.node.room.field_text_teaser
+    - image.style.4to3_400x300
+    - node.type.room
+  module:
+    - media
+    - telephone
+    - text
+    - user
+_core:
+  default_config_hash: nFY7_Y9wBIl39Vw6sKfBMQcXnQTdZuh6-L3oSBtSyRQ
+id: node.room.default
+targetEntityType: node
+bundle: room
+mode: default
+content:
+  field_capacity_max:
+    weight: 8
+    label: above
+    settings:
+      thousand_separator: ''
+      prefix_suffix: true
+    third_party_settings: {  }
+    type: number_integer
+    region: content
+  field_capacity_min:
+    weight: 7
+    label: above
+    settings:
+      thousand_separator: ''
+      prefix_suffix: true
+    third_party_settings: {  }
+    type: number_integer
+    region: content
+  field_image_primary:
+    weight: 1
+    label: hidden
+    settings:
+      image_style: medium
+      image_link: ''
+    third_party_settings: {  }
+    type: media_thumbnail
+    region: content
+  field_location:
+    weight: 0
+    label: hidden
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
+    region: content
+  field_online_registration:
+    weight: 12
+    label: above
+    settings:
+      format: default
+      format_custom_false: ''
+      format_custom_true: ''
+    third_party_settings: {  }
+    type: boolean
+    region: content
+  field_reservation_phone_number:
+    weight: 13
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: basic_string
+    region: content
+  field_room_fees:
+    weight: 9
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: text_default
+    region: content
+  field_room_standard_equipment:
+    weight: 10
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+  field_room_type:
+    weight: 5
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
+    region: content
+  field_staff_use_only:
+    weight: 6
+    label: above
+    settings:
+      format: default
+      format_custom_false: ''
+      format_custom_true: ''
+    third_party_settings: {  }
+    type: boolean
+    region: content
+  field_text_content:
+    weight: 4
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: text_default
+    region: content
+  field_text_intro:
+    weight: 3
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: text_default
+    region: content
+  field_text_teaser:
+    weight: 2
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: basic_string
+    region: content
+  links:
+    weight: 11
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+hidden: {  }

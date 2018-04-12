@@ -2,8 +2,6 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 
-import Formsy from 'formsy-react';
-
 // Lodash
 import map from 'lodash/map';
 
@@ -15,7 +13,6 @@ import CurrentFilters from 'intercept/CurrentFilters';
 import DateFilter from 'intercept/DateFilter';
 import KeywordFilter from 'intercept/KeywordFilter';
 import SelectResource from 'intercept/SelectResource';
-import SelectSingle from 'intercept/Select/SelectSingle';
 
 const { constants } = interceptClient;
 const c = constants;
@@ -23,17 +20,9 @@ const c = constants;
 const labels = {
   [c.TYPE_LOCATION]: 'Location',
   [c.TYPE_ROOM_TYPE]: 'Room Type',
-  capacity: 'Room Capacity',
+  [c.DATE]: 'Date',
+  [c.KEYWORD]: 'Keyword',
 };
-
-const capacityOptions = [
-  { key: '0', value: 'none' },
-  { key: '5', value: '5+' },
-  { key: '10', value: '10+' },
-  { key: '20', value: '20+' },
-  { key: '50', value: '50+' },
-  { key: '100', value: '100+' },
-];
 
 const currentFiltersConfig = filters =>
   map(filters, (value, key) => ({
@@ -76,32 +65,24 @@ class EventFilters extends PureComponent {
 
     return (
       <div className="filters">
-        <h3 className="filters__heading">Filter</h3>
-        <Formsy className="filters__inputs">
+        <h3 className="visually-hidden filters__heading">Filters</h3>
+        <div className="filters__inputs">
           <SelectResource
-            multiple
             type={c.TYPE_LOCATION}
-            name={c.TYPE_LOCATION}
             handleChange={this.onInputChange(c.TYPE_LOCATION)}
             value={filters[c.TYPE_LOCATION]}
             label={labels[c.TYPE_LOCATION]}
           />
           <SelectResource
-            multiple
             type={c.TYPE_ROOM_TYPE}
-            name={c.TYPE_ROOM_TYPE}
             handleChange={this.onInputChange(c.TYPE_ROOM_TYPE)}
             value={filters[c.TYPE_ROOM_TYPE]}
             label={labels[c.TYPE_ROOM_TYPE]}
           />
-          <SelectSingle
-            options={capacityOptions}
-            handleChange={this.onInputChange('capacity')}
-            value={filters.capacity}
-            label={labels.capacity}
-            name={'capacity'}
-          />
-        </Formsy>
+          {showDate && (
+            <DateFilter handleChange={this.onDateChange} defaultValue={null} value={filters.date} />
+          )}
+        </div>
         <div className="filters__current">
           <CurrentFilters filters={currentFilters} onChange={this.onFilterChange} />
         </div>

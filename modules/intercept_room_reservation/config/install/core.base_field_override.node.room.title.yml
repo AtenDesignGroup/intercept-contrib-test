@@ -1,0 +1,19 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.room
+_core:
+  default_config_hash: 238Lr62A3I-AHGF7d_qO3509zoWe9y_cLEy6wQlgZZ4
+id: node.room.title
+field_name: title
+entity_type: node
+bundle: room
+label: 'Room Name and Number'
+description: ''
+required: true
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

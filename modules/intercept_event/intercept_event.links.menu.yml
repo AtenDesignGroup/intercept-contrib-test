@@ -12,3 +12,15 @@ event_recurrence.admin.structure.settings:
   description: 'Configure Event Recurrence entities'
   route_name: event_recurrence.settings
   parent: system.admin_structure
+
+events.browse:
+  title: Events
+  description: 'Browse upcoming events'
+  route_name: intercept_event.events_controller_list
+  menu_name: main
+
+intercept_event.account.events:
+  title: 'Events'
+  weight: 5
+  route_name: intercept_core.account.events
+  menu_name: account

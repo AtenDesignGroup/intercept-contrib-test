@@ -1,10 +1,9 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { withStyles } from 'material-ui/styles';
 import map from 'lodash/map';
+import interceptClient from 'interceptClient';
 import EventTeaser from 'intercept/EventTeaser';
-
-const styles = theme => ({});
+import ContentList from 'intercept/ContentList';
 
 class EventList extends Component {
   state = {};
@@ -12,19 +11,31 @@ class EventList extends Component {
   render() {
     const { events } = this.props;
 
+    const teasers = items =>
+      items.map(id => ({
+        key: id,
+        node: <EventTeaser id={id} className="event-teaser" />,
+      }));
+
     const list =
-      Object.keys(events).length > 0 ? (
-        map(events, id => <EventTeaser key={id} id={id} className="event-teaser" />)
+      events.length > 0 ? (
+        map(events, group => (
+          <ContentList
+            heading={interceptClient.select.getDayDisplay(group.date)}
+            items={teasers(group.items)}
+            key={group.key}
+          />
+        ))
       ) : (
-        <p>No events have been loaded.</p>
+        <p key={0}>No events have been loaded.</p>
       );
 
-    return <div className="eventsList">{list}</div>;
+    return <div className="events-list">{list}</div>;
   }
 }
 
 EventList.propTypes = {
-  events: PropTypes.arrayOf(PropTypes.string).isRequired,
+  events: PropTypes.arrayOf(Object).isRequired,
 };
 
-export default withStyles(styles, { withTheme: true })(EventList);
+export default EventList;

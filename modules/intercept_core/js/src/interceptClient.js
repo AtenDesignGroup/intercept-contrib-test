@@ -5,7 +5,8 @@ import { createStore, applyMiddleware, combineReducers, compose } from 'redux';
 import intercept from 'intercept-client';
 import drupalSettings from 'drupalSettings';
 import thunk from 'redux-thunk';
-import * as select from './select';
+import * as select from './lib/select';
+import history from './lib/history';
 
 const reducers = combineReducers({
   ...intercept.reducer,
@@ -17,6 +18,6 @@ const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 /* eslint-enable */
 
 const store = createStore(reducers, composeEnhancers(applyMiddleware(thunk)));
-const interceptClient = Object.assign({}, intercept, { store, select, consumer });
+const interceptClient = Object.assign({}, intercept, { store, select, consumer, history });
 window.interceptClient = interceptClient;
 export default interceptClient;

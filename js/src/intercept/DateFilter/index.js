@@ -1,7 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from 'material-ui/styles';
-import TextField from 'material-ui/TextField';
+import moment from 'moment';
+import MomentUtils from 'material-ui-pickers/utils/moment-utils';
+import DatePicker from 'material-ui-pickers/DatePicker';
+import MuiPickersUtilsProvider from 'material-ui-pickers/utils/MuiPickersUtilsProvider';
 
 const styles = theme => ({
   container: {
@@ -15,38 +18,40 @@ const styles = theme => ({
   },
 });
 
+const InputLabelProps = value => ({
+  shrink: value !== null,
+  className: 'date-filter__label',
+});
+
 function DateFilter(props) {
-  const { classes, label, defaultValue, handleChange } = props;
+  const { value, handleChange } = props;
+  const onChange = date => handleChange(date.toDate());
+  const onClear = () => handleChange(null);
+  const inputValue = value === '' ? null : value;
 
   return (
-    <form className={classes.container} noValidate>
-      <TextField
-        id="date"
-        label={label}
-        type="date"
-        defaultValue={defaultValue}
-        className={classes.textField}
-        onChange={handleChange}
-        InputLabelProps={{
-          shrink: true,
-        }}
+    <MuiPickersUtilsProvider utils={MomentUtils} moment={moment}>
+      <DatePicker
+        onChange={onChange}
+        onClear={onClear}
+        clearable
+        label={'Date'}
+        InputLabelProps={InputLabelProps(inputValue)}
+        value={inputValue}
+        className="date-filter"
       />
-    </form>
+    </MuiPickersUtilsProvider>
   );
 }
 
-const now = new Date();
-
 // Specifies the default values for props:
 DateFilter.defaultProps = {
-  defaultValue: `${now.getFullYear}-${now.getMonth}-${now.getDate}`,
+  value: null,
   label: 'Date',
 };
 
 DateFilter.propTypes = {
-  classes: PropTypes.object.isRequired,
-  defaultValue: PropTypes.string,
-  label: PropTypes.string,
+  value: PropTypes.instanceOf(Date),
   handleChange: PropTypes.func.isRequired,
 };
 

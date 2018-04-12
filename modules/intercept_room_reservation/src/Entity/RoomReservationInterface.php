@@ -14,27 +14,6 @@ use Drupal\user\EntityOwnerInterface;
  */
 interface RoomReservationInterface extends ContentEntityInterface, RevisionLogInterface, EntityChangedInterface, EntityOwnerInterface {
 
-  // Add get/set methods for your configuration properties here.
-
-  /**
-   * Gets the Room reservation name.
-   *
-   * @return string
-   *   Name of the Room reservation.
-   */
-  public function getName();
-
-  /**
-   * Sets the Room reservation name.
-   *
-   * @param string $name
-   *   The Room reservation name.
-   *
-   * @return \Drupal\intercept_room_reservation\Entity\RoomReservationInterface
-   *   The called Room reservation entity.
-   */
-  public function setName($name);
-
   /**
    * Gets the Room reservation creation timestamp.
    *

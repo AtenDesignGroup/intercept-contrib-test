@@ -8,6 +8,9 @@ use Drupal\Core\Entity\RevisionableContentEntityBase;
 use Drupal\Core\Entity\RevisionableInterface;
 use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\intercept_room_reservation\Field\ComputedEntityReferenceFieldItemList;
+use Drupal\intercept_room_reservation\Field\ComputedFileFieldItemList;
 use Drupal\user\UserInterface;
 
 /**
@@ -46,23 +49,22 @@ use Drupal\user\UserInterface;
  *   entity_keys = {
  *     "id" = "id",
  *     "revision" = "vid",
- *     "label" = "name",
  *     "uuid" = "uuid",
  *     "uid" = "user_id",
  *     "langcode" = "langcode",
  *     "status" = "status",
  *   },
  *   links = {
- *     "canonical" = "/admin/structure/room_reservation/{room_reservation}",
- *     "add-form" = "/admin/structure/room_reservation/add",
- *     "edit-form" = "/admin/structure/room_reservation/{room_reservation}/edit",
- *     "delete-form" = "/admin/structure/room_reservation/{room_reservation}/delete",
+ *     "canonical" = "/room-reservation/{room_reservation}",
+ *     "add-form" = "/room-reservation/add",
+ *     "edit-form" = "/room-reservation/{room_reservation}/edit",
+ *     "delete-form" = "/room-reservation/{room_reservation}/delete",
  *     "version-history" = "/admin/structure/room_reservation/{room_reservation}/revisions",
  *     "revision" = "/admin/structure/room_reservation/{room_reservation}/revisions/{room_reservation_revision}/view",
  *     "revision_revert" = "/admin/structure/room_reservation/{room_reservation}/revisions/{room_reservation_revision}/revert",
  *     "revision_delete" = "/admin/structure/room_reservation/{room_reservation}/revisions/{room_reservation_revision}/delete",
  *     "translation_revert" = "/admin/structure/room_reservation/{room_reservation}/revisions/{room_reservation_revision}/revert/{langcode}",
- *     "collection" = "/admin/structure/room_reservation",
+ *     "collection" = "/admin/content/room_reservations",
  *   },
  *   field_ui_base_route = "room_reservation.settings"
  * )
@@ -70,6 +72,24 @@ use Drupal\user\UserInterface;
 class RoomReservation extends RevisionableContentEntityBase implements RoomReservationInterface {
 
   use EntityChangedTrait;
+
+  use StringTranslationTrait;
+
+  public function label() {
+    $dates = $this->get('field_dates')->first();
+    if (!$dates || !$dates->get('value') || !$dates->get('end_value')) {
+      return '';
+    }
+    $values = [];
+    if ($from_date = $dates->get('value')->getDateTime()) {
+      $values['@date'] = $from_date->format('F n, Y');
+      $values['@time_start'] = $from_date->format('H:i A');
+    }
+    if ($to_date = $dates->get('end_value')->getDateTime()) {
+      $values['@time_end'] = $to_date->format('H:i A');
+    }
+    return !empty($values) ? $this->t('@date from @time_start to @time_end', $values) : '';
+  }
 
   /**
    * {@inheritdoc}
@@ -117,21 +137,6 @@ class RoomReservation extends RevisionableContentEntityBase implements RoomReser
     if (!$this->getRevisionUser()) {
       $this->setRevisionUserId($this->getOwnerId());
     }
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getName() {
-    return $this->get('name')->value;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function setName($name) {
-    $this->set('name', $name);
-    return $this;
   }
 
   /**
@@ -225,26 +230,26 @@ class RoomReservation extends RevisionableContentEntityBase implements RoomReser
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
 
-    $fields['name'] = BaseFieldDefinition::create('string')
-      ->setLabel(t('Name'))
-      ->setDescription(t('The name of the Room reservation entity.'))
-      ->setRevisionable(TRUE)
-      ->setSettings([
-        'max_length' => 50,
-        'text_processing' => 0,
-      ])
-      ->setDefaultValue('')
-      ->setDisplayOptions('view', [
-        'label' => 'above',
-        'type' => 'string',
-        'weight' => -4,
-      ])
-      ->setDisplayOptions('form', [
-        'type' => 'string_textfield',
-        'weight' => -4,
-      ])
+    $fields['image'] = BaseFieldDefinition::create('image')
+      ->setLabel(t('Image'))
+      ->setDescription(t('The related room entity\'s image.'))
+      ->setComputed(TRUE)
+      ->setClass(ComputedFileFieldItemList::class)
       ->setDisplayConfigurable('form', TRUE)
-      ->setDisplayConfigurable('view', TRUE);
+      ->setDisplayConfigurable('view', TRUE)
+      ->setSetting('target_fields', ['field_room', 'field_image_primary', 'field_media_image'])
+      ->setReadOnly(TRUE);
+
+    $fields['location'] = BaseFieldDefinition::create('entity_reference')
+      ->setLabel(t('Location'))
+      ->setDescription(t('The related room\'s location entity.'))
+      ->setComputed(TRUE)
+      ->setClass(ComputedEntityReferenceFieldItemList::class)
+      ->setDisplayConfigurable('form', TRUE)
+      ->setDisplayConfigurable('view', TRUE)
+      ->setTargetEntityTypeId('node')->setTargetBundle('location')
+      ->setSetting('target_fields', ['field_room', 'field_location'])
+      ->setReadOnly(TRUE);
 
     $fields['status'] = BaseFieldDefinition::create('boolean')
       ->setLabel(t('Publishing status'))

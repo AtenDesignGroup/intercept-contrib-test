@@ -1,8 +1,17 @@
 import React from 'react';
+import { configureUrlQuery } from 'react-url-query';
 import { render } from 'react-dom';
-import withIntercept from 'intercept/withIntercept';
+import { Provider } from 'react-redux';
+import interceptClient from 'interceptClient';
 import ReserveRoomApp from './components/ReserveRoomApp';
 
-const App = withIntercept(ReserveRoomApp);
+// link the history used in our app to url-query so it can update the URL with it.
+configureUrlQuery({ history: interceptClient.history });
 
-render(<App />, document.getElementById('reserveRoomRoot'));
+const store = interceptClient.store;
+render(
+  <Provider store={store}>
+    <ReserveRoomApp />
+  </Provider>,
+  document.getElementById('reserveRoomRoot'),
+);

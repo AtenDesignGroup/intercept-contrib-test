@@ -11,12 +11,11 @@ dependencies:
   - duration_field
   - editor
   - entity_browser
-  - evaluate
+    #  - evaluate
   - features
   - field
   - file
   - filter
-  - intercept_equipment
   - media
   - menu_link_content
   - node

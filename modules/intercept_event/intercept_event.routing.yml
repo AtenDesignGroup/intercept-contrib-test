@@ -6,3 +6,20 @@ intercept_event.events_controller_list:
     _title: 'Events'
   requirements:
     _permission: 'access content'
+
+intercept_event.account.events:
+  path: '/account/events'
+  defaults:
+    _controller: '\Drupal\intercept_core\Controller\UserAccount::userRedirect'
+    _title: 'Events'
+    route_name: 'entity.user.events'
+  requirements:
+    _user_is_logged_in: 'TRUE'
+
+entity.user.events:
+  path: '/user/{user}/events'
+  defaults:
+    _controller: '\Drupal\intercept_core\Controller\UserAccount::eventsPage'
+  requirements:
+    _entity_access: 'user.update'
+    user: \d+

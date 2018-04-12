@@ -1,0 +1,22 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_text_intro
+    - node.type.room
+  module:
+    - text
+_core:
+  default_config_hash: YOByajuzwuKGUch9O7OktkVty0yZAkAkXPmx9NMGz9g
+id: node.room.field_text_intro
+field_name: field_text_intro
+entity_type: node
+bundle: room
+label: 'Intro Text'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: text_long

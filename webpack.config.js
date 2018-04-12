@@ -6,6 +6,7 @@ const webpack = require('webpack');
 const entries = {
   intercept_event: ['eventList'],
   intercept_location: ['locationsList'],
+  intercept_room_reservation: ['reserveRoom'],
 };
 
 const babelLoader = {
@@ -111,6 +112,7 @@ module.exports = function config(env) {
         const dev = {
           interceptClient: 'interceptClient',
           redis: 'redis',
+          moment: 'moment',
         };
 
         return isProduction ? prod : dev;
@@ -152,12 +154,14 @@ module.exports = function config(env) {
       })(),
       externals: (() => {
         const prod = {
-          redis: 'redis',
           drupalSettings: 'drupalSettings',
+          moment: 'moment',
+          redis: 'redis',
         };
         const dev = {
-          redis: 'redis',
           drupalSettings: 'drupalSettings',
+          moment: 'moment',
+          redis: 'redis',
         };
 
         return isProduction ? prod : dev;

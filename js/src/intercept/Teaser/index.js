@@ -1,20 +1,38 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import MetaField from './../MetaField';
 
 const Teaser = (props) => {
-  const { date, modifiers, image, type, supertitle, subtitle, title, titleUrl, description, tags } = props;
+  const {
+    date,
+    description,
+    footer,
+    image,
+    modifiers,
+    supertitle,
+    subtitle,
+    tags,
+    title,
+    titleUrl,
+    type,
+  } = props;
   const classes = `clearfix teaser ${modifiers.map(mod => `teaser--${mod}`).join(' ')}`;
 
-  const img = image && (<img src={image} alt={title}/>);
+  const img = image && <img src={image} alt={title} />;
+
+  function createMarkup(value) {
+    return { __html: value };
+  }
 
   return (
     <article className={classes}>
       <div className="teaser__image">
-        { titleUrl
-          ? (<a href="{{title_url}}" className="teaser__image-link" aria-hidden="true">{img}</a>)
-          : (img)
-        }
+        {titleUrl && img ? (
+          <a href={titleUrl} className="teaser__image-link" aria-hidden="true">
+            {img}
+          </a>
+        ) : (
+          img
+        )}
         {date && (
           <div className="teaser__date-wrapper">
             <p className="teaser__date">
@@ -38,36 +56,42 @@ const Teaser = (props) => {
           )}
         </h3>
         {subtitle && <span className="teaser__subtitle">{subtitle}</span>}
-        {description && <div className="teaser__description">{description}</div>}
+        {description && (
+          <div className="teaser__description" dangerouslySetInnerHTML={createMarkup(description)} />
+        )}
         {tags && <div className="teaser__tags">{tags}</div>}
+
+        {footer && <div className="teaser__footer">{footer}</div>}
       </div>
     </article>
   );
 };
 
 Teaser.propTypes = {
-  modifiers: PropTypes.arrayOf(PropTypes.string),
-  type: PropTypes.string,
+  date: PropTypes.object,
+  description: PropTypes.string,
+  footer: PropTypes.arrayOf(PropTypes.node),
   image: PropTypes.string,
+  modifiers: PropTypes.arrayOf(PropTypes.string),
   supertitle: PropTypes.string,
   subtitle: PropTypes.string,
-  description: PropTypes.string,
+  tags: PropTypes.arrayOf(PropTypes.element),
   title: PropTypes.string.isRequired,
   titleUrl: PropTypes.string,
-  date: PropTypes.object,
-  tags: PropTypes.arrayOf(PropTypes.element),
+  type: PropTypes.string,
 };
 
 Teaser.defaultProps = {
+  date: null,
+  description: null,
   modifiers: [],
-  type: null,
+  footer: null,
   image: null,
   subtitle: null,
   supertitle: null,
   titleUrl: null,
-  date: null,
-  description: null,
   tags: null,
+  type: null,
 };
 
 export default Teaser;

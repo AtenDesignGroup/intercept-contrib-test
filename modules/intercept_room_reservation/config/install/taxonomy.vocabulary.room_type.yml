@@ -1,0 +1,11 @@
+uuid: 59f231eb-3fc6-4e61-a419-f48239c04bd6
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: _tOYBZmCaS5OdYVj0fGOwDQPqTYdsYONANNSwDQ7TsM
+name: 'Room Type'
+vid: room_type
+description: 'Room categorization'
+hierarchy: 0
+weight: 0

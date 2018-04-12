@@ -1,0 +1,70 @@
+langcode: en
+status: false
+dependencies:
+  config:
+    - core.entity_view_mode.room_reservation.full
+    - field.field.room_reservation.room_reservation.field_attendee_count
+    - field.field.room_reservation.room_reservation.field_dates
+    - field.field.room_reservation.room_reservation.field_event
+    - field.field.room_reservation.room_reservation.field_group_name
+    - field.field.room_reservation.room_reservation.field_meeting_dates
+    - field.field.room_reservation.room_reservation.field_refreshments
+    - field.field.room_reservation.room_reservation.field_room
+    - field.field.room_reservation.room_reservation.field_status
+    - field.field.room_reservation.room_reservation.field_user
+    - image.style.3to2_270x180
+  module:
+    - image
+    - intercept_room_reservation
+id: room_reservation.room_reservation.full
+targetEntityType: room_reservation
+bundle: room_reservation
+mode: full
+content:
+  field_attendee_count:
+    weight: 2
+    label: hidden
+    settings:
+      thousand_separator: ''
+      prefix_suffix: true
+    third_party_settings: {  }
+    type: number_integer
+    region: content
+  field_event:
+    weight: 1
+    label: hidden
+    settings:
+      link: false
+    third_party_settings: {  }
+    type: entity_reference_label
+    region: content
+  image:
+    type: image
+    weight: 0
+    region: content
+    label: hidden
+    settings:
+      image_style: 3to2_270x180
+      image_link: ''
+    third_party_settings: {  }
+  name:
+    label: hidden
+    type: string
+    weight: 0
+    region: content
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+hidden:
+  attendees_full: true
+  field_dates: true
+  field_group_name: true
+  field_meeting_dates: true
+  field_refreshments: true
+  field_refreshments_description: true
+  field_room: true
+  field_status: true
+  field_user: true
+  location: true
+  location_full: true
+  user_id: true

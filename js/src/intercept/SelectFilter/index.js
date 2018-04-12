@@ -7,8 +7,6 @@ import { FormControl } from 'material-ui/Form';
 import { ListItemText } from 'material-ui/List';
 import Select from 'material-ui/Select';
 import Checkbox from 'material-ui/Checkbox';
-import Chip from 'material-ui/Chip';
-import findIndex from 'lodash/findIndex';
 
 const styles = theme => ({
   root: {
@@ -21,79 +19,78 @@ const styles = theme => ({
     maxWidth: 300,
     width: '100%',
   },
-  chips: {
-    display: 'flex',
-    flexWrap: 'wrap',
-  },
-  chip: {
-    margin: theme.spacing.unit / 4,
-  },
   inputLabel: {
     margin: 0,
   },
 });
 
-const ITEM_HEIGHT = 48;
-const ITEM_PADDING_TOP = 8;
+const ITEM_HEIGHT = 24;
+const ITEM_PADDING_TOP = 4;
+const MenuListProps = {
+  className: 'select-filter__menu-list',
+};
+
 const MenuProps = {
+  MenuListProps,
   PaperProps: {
     style: {
-      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+      // maxHeight: (ITEM_HEIGHT * 8.5) + ITEM_PADDING_TOP,
+      maxHeight: 200,
       width: 250,
     },
   },
+  getContentAnchorEl: null,
+  anchorOrigin: {
+    vertical: 'bottom',
+    horizontal: 'left',
+  },
+  className: 'select-filter__menu',
 };
 
-function getLabel(options, key) {
-  const index = findIndex(options, item => item.key === key);
-  return index > -1 ? options[index].value : null;
-}
-
 class SelectFilter extends React.Component {
-  state = {
-    value: [],
-  };
-
   handleChange = (event) => {
-    this.setState({ value: event.target.value });
     this.props.handleChange(event);
   };
 
   render() {
-    const { classes, theme, options, label } = this.props;
+    const { options, label, value } = this.props;
+    const checkboxId = id => `select-filter--${id}`;
+    const checkboxLabel = (text, id) => (
+      <label className="select-filter__checkbox-label" htmlFor={id}>
+        {text}
+      </label>
+    );
 
     return (
-      <div className={classes.root}>
-        <FormControl className={classes.formControl}>
-          <InputLabel className={classes.inputLabel} htmlFor="select-multiple-chip">
+      <div className="select-filter">
+        <FormControl className="select-filter__control">
+          <InputLabel
+            className="select-filter__label"
+            htmlFor="select-multiple-chip"
+            shrink={false}
+          >
             {label}
           </InputLabel>
+
           <Select
             multiple
-            value={this.state.value}
+            value={value}
             onChange={this.handleChange}
             input={<Input id="select-multiple-chip" />}
-            renderValue={selected => (
-              <div className={classes.chips}>
-                {selected.map(value => (
-                  <Chip key={value} label={getLabel(options, value)} className={classes.chip} />
-                ))}
-              </div>
-            )}
+            renderValue={() => null}
             MenuProps={MenuProps}
           >
             {options.map(option => (
-              <MenuItem
-                key={option.key}
-                value={option.key}
-                style={{
-                  fontWeight:
-                    this.state.value.indexOf(option.key) === -1
-                      ? theme.typography.fontWeightRegular
-                      : theme.typography.fontWeightMedium,
-                }}
-              >
-                {option.value}
+              <MenuItem key={option.key} value={option.key} className="select-filter__menu-item">
+                <Checkbox
+                  checked={value.indexOf(option.key) > -1}
+                  id={checkboxId(option.key)}
+                  className="select-filter__checkbox"
+                />
+                <ListItemText
+                  disableTypography
+                  primary={checkboxLabel(option.value, checkboxId(option.key))}
+                />
               </MenuItem>
             ))}
           </Select>
@@ -104,12 +101,14 @@ class SelectFilter extends React.Component {
 }
 
 SelectFilter.propTypes = {
-  classes: PropTypes.object.isRequired,
-  theme: PropTypes.object.isRequired,
   label: PropTypes.string.isRequired,
-  // value: PropTypes.string,
+  value: PropTypes.arrayOf(String),
   options: PropTypes.arrayOf(Object).isRequired,
   handleChange: PropTypes.func.isRequired,
+};
+
+SelectFilter.defaultProps = {
+  value: PropTypes.arrayOf(String),
 };
 
 export default withStyles(styles, { withTheme: true })(SelectFilter);

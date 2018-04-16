@@ -13,7 +13,6 @@ dependencies:
     - field.field.node.event.field_event_tags
     - field.field.node.event.field_event_type
     - field.field.node.event.field_has_waitlist
-    - field.field.node.event.field_image_primary
     - field.field.node.event.field_location
     - field.field.node.event.field_must_register
     - field.field.node.event.field_room
@@ -160,7 +159,7 @@ content:
     third_party_settings: {  }
     type: boolean_checkbox
     region: content
-  field_image_primary:
+  image_primary:
     weight: 7
     settings:
       form_mode: default

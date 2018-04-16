@@ -5,7 +5,6 @@ dependencies:
     - core.entity_view_mode.node.teaser
     - field.field.node.room.field_capacity_max
     - field.field.node.room.field_capacity_min
-    - field.field.node.room.field_image_primary
     - field.field.node.room.field_location
     - field.field.node.room.field_room_fees
     - field.field.node.room.field_room_type
@@ -16,6 +15,8 @@ dependencies:
     - node.type.room
   module:
     - user
+_core:
+  default_config_hash: 7l7_lSLSePrVuobTOBupjTAQok625LYXGxsyDlhzl54
 id: node.room.teaser
 targetEntityType: node
 bundle: room
@@ -27,7 +28,7 @@ content:
 hidden:
   field_capacity_max: true
   field_capacity_min: true
-  field_image_primary: true
+  image_primary: true
   field_location: true
   field_room_fees: true
   field_room_type: true

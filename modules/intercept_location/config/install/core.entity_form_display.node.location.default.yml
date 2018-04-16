@@ -5,7 +5,6 @@ dependencies:
     - field.field.node.location.field_address
     - field.field.node.location.field_affiliated
     - field.field.node.location.field_contact_number
-    - field.field.node.location.field_image_primary
     - field.field.node.location.field_location_hours
     - field.field.node.location.field_map_link
     - field.field.node.location.field_text_content
@@ -70,7 +69,7 @@ content:
     third_party_settings: {  }
     type: telephone_default
     region: content
-  field_image_primary:
+  image_primary:
     weight: 1
     settings:
       form_mode: default

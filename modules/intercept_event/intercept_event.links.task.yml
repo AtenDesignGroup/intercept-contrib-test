@@ -25,3 +25,8 @@ entity.event_recurrence.delete_form:
   title: Delete
   weight: 10
 
+entity.event_recurrence.collection:
+  title: 'Event Recurrence'
+  route_name: entity.event_recurrence.collection
+  base_route: system.admin_content
+  weight: 15

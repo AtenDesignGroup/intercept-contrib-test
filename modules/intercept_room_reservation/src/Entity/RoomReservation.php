@@ -237,7 +237,7 @@ class RoomReservation extends RevisionableContentEntityBase implements RoomReser
       ->setClass(ComputedFileFieldItemList::class)
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE)
-      ->setSetting('target_fields', ['field_room', 'field_image_primary', 'field_media_image'])
+      ->setSetting('target_fields', ['field_room', 'image_primary', 'field_media_image'])
       ->setReadOnly(TRUE);
 
     $fields['location'] = BaseFieldDefinition::create('entity_reference')

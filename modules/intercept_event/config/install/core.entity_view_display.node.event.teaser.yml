@@ -14,7 +14,6 @@ dependencies:
     - field.field.node.event.field_event_tags
     - field.field.node.event.field_event_type
     - field.field.node.event.field_has_waitlist
-    - field.field.node.event.field_image_primary
     - field.field.node.event.field_location
     - field.field.node.event.field_must_register
     - field.field.node.event.field_room
@@ -58,7 +57,7 @@ content:
     settings:
       link: true
     third_party_settings: {  }
-  field_image_primary:
+  image_primary:
     type: media_thumbnail
     weight: 2
     region: content

@@ -48,15 +48,15 @@ use Drupal\user\UserInterface;
  *     "langcode" = "langcode",
  *   },
  *   links = {
- *     "canonical" = "/admin/structure/intercept/event_recurrence/{event_recurrence}",
- *     "add-form" = "/admin/structure/intercept/event_recurrence/add",
- *     "edit-form" = "/admin/structure/intercept/event_recurrence/{event_recurrence}/edit",
- *     "delete-form" = "/admin/structure/intercept/event_recurrence/{event_recurrence}/delete",
+ *     "canonical" = "/event-recurrence/{event_recurrence}",
+ *     "add-form" = "/event-recurrence/add",
+ *     "edit-form" = "/event-recurrence/{event_recurrence}/edit",
+ *     "delete-form" = "/event-recurrence/{event_recurrence}/delete",
  *     "version-history" = "/admin/structure/intercept/event_recurrence/{event_recurrence}/revisions",
  *     "revision" = "/admin/structure/intercept/event_recurrence/{event_recurrence}/revisions/{event_recurrence_revision}/view",
  *     "revision_revert" = "/admin/structure/intercept/event_recurrence/{event_recurrence}/revisions/{event_recurrence_revision}/revert",
  *     "revision_delete" = "/admin/structure/intercept/event_recurrence/{event_recurrence}/revisions/{event_recurrence_revision}/delete",
- *     "collection" = "/admin/structure/intercept/event_recurrence",
+ *     "collection" = "/admin/content/event_recurrence",
  *   },
  *   field_ui_base_route = "event_recurrence.settings"
  * )

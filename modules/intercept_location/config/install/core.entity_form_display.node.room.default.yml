@@ -4,7 +4,6 @@ dependencies:
   config:
     - field.field.node.room.field_capacity_max
     - field.field.node.room.field_capacity_min
-    - field.field.node.room.field_image_primary
     - field.field.node.room.field_location
     - field.field.node.room.field_room_fees
     - field.field.node.room.field_room_standard_equipment
@@ -44,7 +43,7 @@ content:
     third_party_settings: {  }
     type: number
     region: content
-  field_image_primary:
+  image_primary:
     weight: 3
     settings:
       form_mode: default

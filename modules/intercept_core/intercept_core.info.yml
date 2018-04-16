@@ -16,6 +16,7 @@ dependencies:
   - field
   - file
   - filter
+  - focal_point
   - media
   - menu_link_content
   - node

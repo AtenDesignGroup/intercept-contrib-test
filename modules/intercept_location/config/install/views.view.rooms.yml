@@ -1,10 +1,8 @@
-uuid: fd759b71-bbdc-4a23-b798-acd87198fc02
 langcode: en
 status: true
 dependencies:
   config:
     - field.storage.node.field_capacity_max
-    - field.storage.node.field_image_primary
     - field.storage.node.field_text_teaser
     - node.type.room
   module:
@@ -79,10 +77,10 @@ display:
           separator: ''
           hide_empty: false
       fields:
-        field_image_primary:
-          id: field_image_primary
-          table: node__field_image_primary
-          field: field_image_primary
+        image_primary:
+          id: image_primary
+          table: node__image_primary
+          field: image_primary
           relationship: none
           group_type: group
           admin_label: ''
@@ -519,7 +517,7 @@ display:
         - user.permissions
       tags:
         - 'config:field.storage.node.field_capacity_max'
-        - 'config:field.storage.node.field_image_primary'
+        - 'config:field.storage.node.image_primary'
         - 'config:field.storage.node.field_text_teaser'
         - extensions
   page_1:
@@ -540,6 +538,6 @@ display:
         - user.permissions
       tags:
         - 'config:field.storage.node.field_capacity_max'
-        - 'config:field.storage.node.field_image_primary'
+        - 'config:field.storage.node.image_primary'
         - 'config:field.storage.node.field_text_teaser'
         - extensions

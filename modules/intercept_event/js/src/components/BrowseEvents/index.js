@@ -13,8 +13,8 @@ import EventCalendar from './../EventCalendar';
 const { constants, api, select } = interceptClient;
 const c = constants;
 const eventIncludes = [
-  'field_image_primary',
-  'field_image_primary.field_media_image',
+  'image_primary',
+  'image_primary.field_media_image',
   'field_room',
 ];
 

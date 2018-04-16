@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "babel-polyfill": "^6.26.0",
-    "intercept-client": "^1.1.21",
+    "intercept-client": "^1.1.26",
     "lodash": "^4.17.5",
     "redux": "^3.7.2",
     "redux-thunk": "^2.2.0",

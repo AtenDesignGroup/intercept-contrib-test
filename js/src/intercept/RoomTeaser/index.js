@@ -41,7 +41,7 @@ class RoomTeaser extends PureComponent {
         image={image}
         supertitle={get(room, 'relationships.field_location.attributes.title')}
         title={room.attributes.title}
-        description={room.attributes['field_text_teaser']}
+        description={get(room, 'attributes.field_text_teaser.value')}
         tags={[roomTypes, capicity]}
       />
     );

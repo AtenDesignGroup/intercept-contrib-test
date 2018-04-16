@@ -4,8 +4,9 @@ dependencies:
   config:
     - field.field.node.room.field_capacity_max
     - field.field.node.room.field_capacity_min
-    - field.field.node.room.field_image_primary
     - field.field.node.room.field_location
+    - field.field.node.room.field_online_registration
+    - field.field.node.room.field_reservation_phone_number
     - field.field.node.room.field_room_fees
     - field.field.node.room.field_room_standard_equipment
     - field.field.node.room.field_room_type
@@ -13,12 +14,15 @@ dependencies:
     - field.field.node.room.field_text_content
     - field.field.node.room.field_text_intro
     - field.field.node.room.field_text_teaser
-    - image.style.medium
+    - image.style.4to3_400x300
     - node.type.room
   module:
     - media
+    - telephone
     - text
     - user
+_core:
+  default_config_hash: nFY7_Y9wBIl39Vw6sKfBMQcXnQTdZuh6-L3oSBtSyRQ
 id: node.room.default
 targetEntityType: node
 bundle: room
@@ -42,7 +46,7 @@ content:
     third_party_settings: {  }
     type: number_integer
     region: content
-  field_image_primary:
+  image_primary:
     weight: 1
     label: hidden
     settings:
@@ -58,6 +62,23 @@ content:
       link: true
     third_party_settings: {  }
     type: entity_reference_label
+    region: content
+  field_online_registration:
+    weight: 12
+    label: above
+    settings:
+      format: default
+      format_custom_false: ''
+      format_custom_true: ''
+    third_party_settings: {  }
+    type: boolean
+    region: content
+  field_reservation_phone_number:
+    weight: 13
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: basic_string
     region: content
   field_room_fees:
     weight: 9

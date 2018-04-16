@@ -4,7 +4,6 @@ dependencies:
   config:
     - field.field.room_reservation.room_reservation.field_attendee_count
     - field.field.room_reservation.room_reservation.field_dates
-    - field.field.room_reservation.room_reservation.field_event
     - field.field.room_reservation.room_reservation.field_group_name
     - field.field.room_reservation.room_reservation.field_meeting_dates
     - field.field.room_reservation.room_reservation.field_refreshments
@@ -33,15 +32,6 @@ content:
     settings: {  }
     third_party_settings: {  }
     type: daterange_default
-    region: content
-  field_event:
-    weight: 32
-    settings:
-      match_operator: CONTAINS
-      size: 60
-      placeholder: ''
-    third_party_settings: {  }
-    type: entity_reference_autocomplete
     region: content
   field_group_name:
     weight: 29

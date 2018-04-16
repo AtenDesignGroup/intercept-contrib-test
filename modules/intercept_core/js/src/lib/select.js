@@ -144,7 +144,7 @@ export const bundles = type => state =>
 //
 export const resourceImage = identifier =>
   createSelector(bundle(identifier), resourceBundle =>
-    get(resourceBundle, 'relationships.field_image_primary.relationships.field_media_image'),
+    get(resourceBundle, 'relationships.image_primary.relationships.field_media_image'),
   );
 
 export const resourceImageStyle = (identifier, style) =>

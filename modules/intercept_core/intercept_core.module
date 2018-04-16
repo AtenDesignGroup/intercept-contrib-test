@@ -33,19 +33,16 @@ function intercept_core_entity_base_field_info(\Drupal\Core\Entity\EntityTypeInt
     $fields['image_primary'] = \Drupal\Core\Field\BaseFieldDefinition::create('entity_reference')
       ->setLabel(new TranslatableMarkup('Image Primary'))
       ->setDescription(new TranslatableMarkup('Primary image for nodes required by InterCEPT.'))
-      ->setSetting('handler', 'default:media')
-      ->setTargetBundle('image')
-      ->setTargetEntityTypeId('media')
-      ->setCardinality(1)
-      ->setDisplayOptions('view', [
-        'label' => 'inline',
-        'type' => 'entity_reference_label',
-        'weight' => 5,
+      ->setSettings([
+        'handler' => 'default:media',
+        'target_type' => 'media',
+        'handler_settings' => [
+          'target_bundles' => ['image' => 'image'],
+        ],
       ])
-      ->setDisplayOptions('form', [
-        'type' => 'options_buttons',
-        'weight' => 5,
-      ]);
+      ->setCardinality(1)
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
   }
   return $fields;
 }

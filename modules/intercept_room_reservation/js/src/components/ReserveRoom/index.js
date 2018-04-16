@@ -13,8 +13,8 @@ import RoomCalendar from './../RoomCalendar';
 const { constants, api, select } = interceptClient;
 const c = constants;
 const roomIncludes = [
-  'field_image_primary',
-  'field_image_primary.field_media_image',
+  'image_primary',
+  'image_primary.field_media_image',
 ];
 
 function getDateSpan(value, view = 'day') {

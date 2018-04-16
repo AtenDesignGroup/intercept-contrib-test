@@ -14,7 +14,6 @@ dependencies:
     - field.field.node.event.field_event_tags
     - field.field.node.event.field_event_type
     - field.field.node.event.field_has_waitlist
-    - field.field.node.event.field_image_primary
     - field.field.node.event.field_location
     - field.field.node.event.field_must_register
     - field.field.node.event.field_room
@@ -94,7 +93,7 @@ content:
     third_party_settings: {  }
     type: entity_reference_label
     region: content
-  field_image_primary:
+  image_primary:
     weight: 0
     label: hidden
     settings:

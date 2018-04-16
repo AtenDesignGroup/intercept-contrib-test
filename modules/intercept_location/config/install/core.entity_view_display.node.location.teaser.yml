@@ -5,7 +5,6 @@ dependencies:
     - core.entity_view_mode.node.teaser
     - field.field.node.location.field_address
     - field.field.node.location.field_contact_number
-    - field.field.node.location.field_image_primary
     - field.field.node.location.field_map_link
     - field.field.node.location.field_text_content
     - field.field.node.location.field_text_intro
@@ -24,7 +23,7 @@ hidden:
   field_address: true
   field_affiliated: true
   field_contact_number: true
-  field_image_primary: true
+  image_primary: true
   field_location_hours: true
   field_map_link: true
   field_text_content: true

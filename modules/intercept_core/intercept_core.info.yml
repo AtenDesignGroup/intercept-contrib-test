@@ -23,12 +23,14 @@ dependencies:
   - options
   - paragraphs
   - path
+  - profile
   - rdf
   - search
   - shortcut
   - simple_oauth
   - system
   - taxonomy
+  - telephone
   - text
   - user
   - views

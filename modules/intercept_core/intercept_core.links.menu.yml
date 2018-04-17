@@ -1,33 +1,5 @@
-intercept_core.settings:
-  title: 'InterCEPT Settings'
-  description: 'Administer InterCEPT specific settings.'
-  route_name: intercept_core.settings
-  parent: system.admin_config
-
-intercept_core.general:
-  title: 'InterCEPT Settings'
-  description: 'InterCEPT general settings.'
-  route_name: intercept_core.general
-  parent: intercept_core.settings
-
 intercept_core.account.settings:
   title: 'Settings'
-  weight: 15
+  weight: 10
   route_name: intercept_core.account.settings
   menu_name: account
-
-intercept_core.account.staff:
-  title: 'Staff'
-  weight: 20
-  route_name: intercept_core.management.staff_default.redirect
-  menu_name: account
-
-intercept_core.account.admin:
-  title: 'Admin'
-  weight: 25
-  route_name: intercept_core.management.admin_default.redirect
-  menu_name: account
-
-# Staff menu
-intercept_core.manage:
-  deriver: \Drupal\intercept_core\Plugin\Derivative\InterceptMenuLinks

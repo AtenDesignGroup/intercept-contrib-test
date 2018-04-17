@@ -1,5 +1,7 @@
-name: 'intercept_ils'
+name: 'InterCEPT ILS'
 type: module
 description: 'Intercept ILS integration'
 core: 8.x
 package: 'InterCEPT'
+dependencies:
+  profile

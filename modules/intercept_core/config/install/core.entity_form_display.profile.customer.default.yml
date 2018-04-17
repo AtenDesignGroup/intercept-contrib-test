@@ -1,0 +1,69 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.profile.customer.field_audiences
+    - field.field.profile.customer.field_event_types
+    - field.field.profile.customer.field_first_name
+    - field.field.profile.customer.field_last_name
+    - field.field.profile.customer.field_phone
+    - field.field.profile.customer.field_preferred_location
+    - profile.type.customer
+  module:
+    - telephone
+id: profile.customer.default
+targetEntityType: profile
+bundle: customer
+mode: default
+content:
+  field_audiences:
+    weight: 5
+    settings:
+      match_operator: CONTAINS
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: entity_reference_autocomplete
+    region: content
+  field_event_types:
+    weight: 4
+    settings:
+      match_operator: CONTAINS
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: entity_reference_autocomplete
+    region: content
+  field_first_name:
+    weight: 0
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+  field_last_name:
+    weight: 1
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+  field_phone:
+    weight: 2
+    settings:
+      placeholder: ''
+    third_party_settings: {  }
+    type: telephone_default
+    region: content
+  field_preferred_location:
+    weight: 3
+    settings:
+      match_operator: CONTAINS
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: entity_reference_autocomplete
+    region: content
+hidden: {  }

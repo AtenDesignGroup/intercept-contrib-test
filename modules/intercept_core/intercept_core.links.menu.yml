@@ -1,0 +1,5 @@
+intercept_core.account.settings:
+  title: 'Settings'
+  weight: 10
+  route_name: intercept_core.account.settings
+  menu_name: account

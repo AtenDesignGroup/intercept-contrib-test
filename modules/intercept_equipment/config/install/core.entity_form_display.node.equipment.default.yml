@@ -2,10 +2,11 @@ langcode: en
 status: true
 dependencies:
   config:
+    - core.entity_form_mode.media.simple
     - field.field.node.equipment.field_duration_min
     - field.field.node.equipment.field_equipment_type
-    - field.field.node.equipment.field_image_primary
     - field.field.node.equipment.field_text_content
+    - field.field.node.equipment.image_primary
     - node.type.equipment
   module:
     - duration_field
@@ -32,15 +33,23 @@ content:
     type: duration_widget
     region: content
   field_equipment_type:
-    weight: 1
+    weight: 2
     settings: {  }
     third_party_settings: {  }
     type: options_select
     region: content
-  field_image_primary:
+  field_text_content:
     weight: 3
     settings:
-      form_mode: default
+      rows: 5
+      placeholder: ''
+    third_party_settings: {  }
+    type: text_textarea
+    region: content
+  image_primary:
+    weight: 1
+    settings:
+      form_mode: simple
       label_singular: ''
       label_plural: ''
       allow_new: true
@@ -49,16 +58,8 @@ content:
       override_labels: false
     third_party_settings:
       entity_browser_entity_form:
-        entity_browser_id: stories_image_uploader
+        entity_browser_id: stories_image
     type: inline_entity_form_complex
-    region: content
-  field_text_content:
-    weight: 2
-    settings:
-      rows: 5
-      placeholder: ''
-    third_party_settings: {  }
-    type: text_textarea
     region: content
   path:
     type: path

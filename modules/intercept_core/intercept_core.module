@@ -23,26 +23,3 @@ function intercept_core_menu_links_discovered_alter(&$links) {
     $links['user.page']['title'] = t('Dashboard');
   }
 }
-
-/**
- * Implements hook_entity_base_field_info().
- */
-function intercept_core_entity_base_field_info(\Drupal\Core\Entity\EntityTypeInterface $entity_type) {
-  $fields = [];
-  if ($entity_type->id() == 'node') {
-    $fields['image_primary'] = \Drupal\Core\Field\BaseFieldDefinition::create('entity_reference')
-      ->setLabel(new TranslatableMarkup('Image Primary'))
-      ->setDescription(new TranslatableMarkup('Primary image for nodes required by InterCEPT.'))
-      ->setSettings([
-        'handler' => 'default:media',
-        'target_type' => 'media',
-        'handler_settings' => [
-          'target_bundles' => ['image' => 'image'],
-        ],
-      ])
-      ->setCardinality(1)
-      ->setDisplayConfigurable('view', TRUE)
-      ->setDisplayConfigurable('form', TRUE);
-  }
-  return $fields;
-}

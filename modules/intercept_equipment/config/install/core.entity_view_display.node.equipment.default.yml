@@ -4,13 +4,11 @@ dependencies:
   config:
     - field.field.node.equipment.field_duration_min
     - field.field.node.equipment.field_equipment_type
-    - field.field.node.equipment.field_image_primary
     - field.field.node.equipment.field_text_content
-    - image.style.medium
+    - field.field.node.equipment.image_primary
     - node.type.equipment
   module:
     - duration_field
-    - media
     - text
     - user
 id: node.equipment.default
@@ -35,21 +33,20 @@ content:
     third_party_settings: {  }
     type: entity_reference_label
     region: content
-  field_image_primary:
-    weight: 0
-    label: hidden
-    settings:
-      image_style: medium
-      image_link: ''
-    third_party_settings: {  }
-    type: media_thumbnail
-    region: content
   field_text_content:
     weight: 1
     label: above
     settings: {  }
     third_party_settings: {  }
     type: text_default
+    region: content
+  image_primary:
+    weight: 5
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
     region: content
   links:
     weight: 4

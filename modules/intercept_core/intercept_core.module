@@ -1,5 +1,6 @@
 <?php
 
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
@@ -21,5 +22,20 @@ function intercept_core_menu_links_discovered_alter(&$links) {
   // Add a warning to the end of route links to the admin section.
   if (isset($links['user.page'])) {
     $links['user.page']['title'] = t('Dashboard');
+  }
+}
+
+/**
+ * Perform alterations before an entity form is included in the IEF widget.
+ *
+ * @param $entity_form
+ *   Nested array of form elements that comprise the entity form.
+ * @param $form_state
+ *   The form state of the parent form.
+ */
+function intercept_core_inline_entity_form_entity_form_alter(&$entity_form, &$form_state) {
+  if ($entity_form['#entity_type'] == 'media') {
+    // Hide the revision log message field on all media forms.
+    $entity_form['revision_log_message']['#access'] = FALSE;
   }
 }

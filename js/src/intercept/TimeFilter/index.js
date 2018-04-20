@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { withStyles } from '@material-ui/core/styles';
+import { withStyles } from 'material-ui/styles';
 import moment from 'moment';
 import MomentUtils from 'material-ui-pickers/utils/moment-utils';
 import TimePicker from 'material-ui-pickers/TimePicker';
@@ -24,7 +24,7 @@ const InputLabelProps = value => ({
 });
 
 function TimeFilter(props) {
-  const { value, label, handleChange } = props;
+  const { value, label } = props;
   const inputValue = value === '' ? null : value;
   const onChange = date => handleChange(date.toDate());
   const onClear = () => handleChange(null);
@@ -45,7 +45,7 @@ function TimeFilter(props) {
 }
 
 TimeFilter.propTypes = {
-  value: PropTypes.instanceOf(Date),
+  value: PropTypes.string,
   label: PropTypes.string,
   handleChange: PropTypes.func.isRequired,
 };

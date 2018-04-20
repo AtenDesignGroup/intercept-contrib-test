@@ -65,7 +65,7 @@ class EventFilters extends PureComponent {
 
     return (
       <div className="filters">
-        <h3 className="visually-hidden filters__heading">Filters</h3>
+        <h3 className="filters__heading">Filter</h3>
         <div className="filters__inputs">
           <SelectResource
             type={c.TYPE_LOCATION}

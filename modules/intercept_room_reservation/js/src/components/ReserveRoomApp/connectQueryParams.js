@@ -2,10 +2,9 @@ import { addUrlProps, UrlQueryParamTypes, encode, decode, Serialize } from 'reac
 
 import pickBy from 'lodash/pickBy';
 
-/* eslint-disable */
 import interceptClient from 'interceptClient';
 import updateWithHistory from 'intercept/updateWithHistory';
-/* eslint-enable */
+
 
 const { decodeArray, encodeArray, decodeObject, encodeObject } = Serialize;
 
@@ -14,7 +13,7 @@ const c = constants;
 
 const removeFalseyProps = obj => pickBy(obj, prop => prop);
 
-const encodeFilters = value => {
+const encodeFilters = (value) => {
   const filters = removeFalseyProps({
     location: encodeArray(value[c.TYPE_LOCATION], ','),
     type: encodeArray(value[c.TYPE_ROOM_TYPE], ','),
@@ -23,7 +22,7 @@ const encodeFilters = value => {
   return encodeObject(filters, ':', '_');
 };
 
-const decodeFilters = values => {
+const decodeFilters = (values) => {
   if (!values) {
     return {};
   }
@@ -48,6 +47,7 @@ const urlPropsQueryConfig = {
   // },
 };
 
-const connectQueryParams = component =>
-  updateWithHistory(addUrlProps({ urlPropsQueryConfig })(component));
+const connectQueryParams = component => updateWithHistory(
+  addUrlProps({ urlPropsQueryConfig })(component)
+);
 export default connectQueryParams;

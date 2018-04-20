@@ -12,9 +12,9 @@ class SelectResource extends React.Component {
   }
 
   render() {
-    const { options, handleChange, value, type, label } = this.props;
+    const { value, multiple } = this.props;
     return (
-      <SelectFilter options={options} handleChange={handleChange} label={label} value={value} />
+      <SelectFilter {...this.props} value={value === null && multiple ? [] : value} />
     );
   }
 }
@@ -30,16 +30,21 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
 });
 
 SelectResource.defaultProps = {
-  value: [],
+  multiple: false,
+  value: null,
 };
 
 SelectResource.propTypes = {
   options: PropTypes.arrayOf(Object).isRequired,
-  value: PropTypes.arrayOf(String),
+  value: PropTypes.oneOfType([
+    PropTypes.arrayOf(String),
+    PropTypes.string,
+  ]),
   handleChange: PropTypes.func.isRequired,
   fetchAll: PropTypes.func.isRequired,
   type: PropTypes.string.isRequired,
   label: PropTypes.string.isRequired,
+  multiple: PropTypes.bool,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(SelectResource);

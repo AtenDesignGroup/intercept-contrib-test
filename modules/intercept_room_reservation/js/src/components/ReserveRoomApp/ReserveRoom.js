@@ -7,15 +7,14 @@ import interceptClient from 'interceptClient';
 import ViewSwitcher from 'intercept/ViewSwitcher';
 import PageSpinner from 'intercept/PageSpinner';
 import RoomFilters from './../RoomFilters';
+import ReserveRoomForm from './../ReserveRoomForm';
 import RoomList from './../RoomList';
 import RoomCalendar from './../RoomCalendar';
+import SelectResource from 'intercept/SelectResource';
 
 const { constants, api, select } = interceptClient;
 const c = constants;
-const roomIncludes = [
-  'image_primary',
-  'image_primary.field_media_image',
-];
+const roomIncludes = ['image_primary', 'image_primary.field_media_image'];
 
 function getDateSpan(value, view = 'day') {
   const start = moment(value).startOf(view);
@@ -121,12 +120,19 @@ class ReserveRoom extends Component {
       calView: props.calView,
       date: props.date,
       filters: props.filters,
+      formValues: {
+        date: null,
+        start: null,
+        end: null,
+        room: null,
+      },
       view: props.view,
     };
     this.handleCalendarNavigate = this.handleCalendarNavigate.bind(this);
     this.handleCalendarView = this.handleCalendarView.bind(this);
     this.handleFilterChange = this.handleFilterChange.bind(this);
     this.handleViewChange = this.handleViewChange.bind(this);
+    this.handleFormChange = this.handleViewChange.bind(this);
     this.doFetchRooms = debounce(this.doFetchRooms, 500).bind(this);
   }
 
@@ -154,6 +160,12 @@ class ReserveRoom extends Component {
     this.doFetchRooms(values);
   }
 
+  handleFormChange(formValues) {
+    this.setState = {
+      formValues,
+    };
+  }
+
   doFetchRooms(
     values = this.props.filters,
     view = this.props.view,
@@ -179,36 +191,42 @@ class ReserveRoom extends Component {
       handleViewChange,
       handleCalendarView,
       handleFilterChange,
+      handleFormChange,
     } = this;
     const { calendarRooms, rooms, roomsLoading, filters, view, date, calView } = props;
 
-    const eventComponent =
-      view === 'list' ? (
-        <RoomList rooms={rooms} />
-      ) : (
-        <RoomCalendar
-          rooms={calendarRooms}
-          onNavigate={handleCalendarNavigate}
-          onView={handleCalendarView}
-          defaultView={calView}
-          defaultDate={date}
-        />
-      );
+    const selectionComponent = null;
+      // view === 'list' ? (
+      //   <RoomList rooms={rooms} />
+      // ) : (
+      //   <RoomCalendar
+      //     rooms={calendarRooms}
+      //     onNavigate={handleCalendarNavigate}
+      //     onView={handleCalendarView}
+      //     defaultView={calView}
+      //     defaultDate={date}
+      //   />
+      // );
 
     return (
-      <div className="l--offset">
-        <div className="clearfix">
-          <div className="l__main">
-            <div className="l--subsection">
-              <ViewSwitcher value={view} handleChange={handleViewChange} />
-              <PageSpinner loading={roomsLoading} />
-              <RoomFilters
-                onChange={handleFilterChange}
-                showDate={view === 'list'}
-                filters={filters}
-              />
-            </div>
-            <div className="l__primary">{eventComponent}</div>
+      <div className="l--offset l--sidebar-before">
+        <header className="l__header">
+          <h1 className="page-title">Reserve a Room</h1>
+        </header>
+        <div className="l__main">
+          <div className="l__secondary">
+            <h4 className="page-title">Reservation Details</h4>
+            <ReserveRoomForm onChange={handleFormChange} />
+          </div>
+          <div className="l__primary">
+            <ViewSwitcher value={view} handleChange={handleViewChange} />
+            <RoomFilters
+              onChange={handleFilterChange}
+              showDate={view === 'list'}
+              filters={filters}
+            />
+            <PageSpinner loading={roomsLoading} />
+            {selectionComponent}
           </div>
         </div>
       </div>

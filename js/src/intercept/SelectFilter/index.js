@@ -53,7 +53,7 @@ class SelectFilter extends React.Component {
   };
 
   render() {
-    const { options, label, value } = this.props;
+    const { options, label, value, multiple } = this.props;
     const checkboxId = id => `select-filter--${id}`;
     const checkboxLabel = (text, id) => (
       <label className="select-filter__checkbox-label" htmlFor={id}>
@@ -73,8 +73,8 @@ class SelectFilter extends React.Component {
           </InputLabel>
 
           <Select
-            multiple
-            value={value}
+            multiple={multiple}
+            value={value === null ? '' : value}
             onChange={this.handleChange}
             input={<Input id="select-multiple-chip" />}
             renderValue={() => null}
@@ -83,7 +83,7 @@ class SelectFilter extends React.Component {
             {options.map(option => (
               <MenuItem key={option.key} value={option.key} className="select-filter__menu-item">
                 <Checkbox
-                  checked={value.indexOf(option.key) > -1}
+                  checked={multiple ? value.indexOf(option.key) > -1 : value === option.key}
                   id={checkboxId(option.key)}
                   className="select-filter__checkbox"
                 />
@@ -102,13 +102,15 @@ class SelectFilter extends React.Component {
 
 SelectFilter.propTypes = {
   label: PropTypes.string.isRequired,
-  value: PropTypes.arrayOf(String),
+  value: PropTypes.oneOfType([PropTypes.arrayOf(String), PropTypes.string]),
   options: PropTypes.arrayOf(Object).isRequired,
   handleChange: PropTypes.func.isRequired,
+  multiple: PropTypes.bool,
 };
 
 SelectFilter.defaultProps = {
-  value: PropTypes.arrayOf(String),
+  value: null,
+  multiple: false,
 };
 
 export default withStyles(styles, { withTheme: true })(SelectFilter);

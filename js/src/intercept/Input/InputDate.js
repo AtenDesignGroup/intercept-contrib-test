@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { withStyles } from 'material-ui/styles';
 import moment from 'moment';
 import MomentUtils from 'material-ui-pickers/utils/moment-utils';
-import TimePicker from 'material-ui-pickers/TimePicker';
+import DatePicker from 'material-ui-pickers/DatePicker';
 import MuiPickersUtilsProvider from 'material-ui-pickers/utils/MuiPickersUtilsProvider';
 
 const styles = theme => ({
@@ -20,39 +20,39 @@ const styles = theme => ({
 
 const InputLabelProps = value => ({
   shrink: value !== null,
-  className: 'time-filter__label',
+  className: 'date-filter__label',
 });
 
-function TimeFilter(props) {
-  const { value, label, handleChange } = props;
-  const inputValue = value === '' ? null : value;
+function InputDate(props) {
+  const { value, handleChange } = props;
   const onChange = date => handleChange(date.toDate());
   const onClear = () => handleChange(null);
+  const inputValue = value === '' ? null : value;
 
   return (
     <MuiPickersUtilsProvider utils={MomentUtils} moment={moment}>
-      <TimePicker
+      <DatePicker
         onChange={onChange}
         onClear={onClear}
-        clearable={props.clearable}
-        label={label}
+        clearable
+        label={'Date'}
         InputLabelProps={InputLabelProps(inputValue)}
         value={inputValue}
-        className="time-filter"
+        className="date-filter input input--date"
       />
     </MuiPickersUtilsProvider>
   );
 }
 
-TimeFilter.propTypes = {
+// Specifies the default values for props:
+InputDate.defaultProps = {
+  value: null,
+  label: 'Date',
+};
+
+InputDate.propTypes = {
   value: PropTypes.instanceOf(Date),
-  label: PropTypes.string,
   handleChange: PropTypes.func.isRequired,
 };
 
-TimeFilter.defaultProps = {
-  value: null,
-  label: 'Time',
-};
-
-export default withStyles(styles)(TimeFilter);
+export default withStyles(styles)(InputDate);

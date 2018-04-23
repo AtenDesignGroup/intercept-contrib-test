@@ -53,7 +53,7 @@ class SelectFilter extends React.Component {
   };
 
   render() {
-    const { options, label, value, multiple } = this.props;
+    const { options, label, value} = this.props;
     const checkboxId = id => `select-filter--${id}`;
     const checkboxLabel = (text, id) => (
       <label className="select-filter__checkbox-label" htmlFor={id}>
@@ -67,26 +67,20 @@ class SelectFilter extends React.Component {
           <InputLabel
             className="select-filter__label"
             htmlFor="select-multiple-chip"
-            shrink={false}
+            // shrink={false}
           >
             {label}
           </InputLabel>
 
           <Select
-            multiple={multiple}
             value={value === null ? '' : value}
             onChange={this.handleChange}
             input={<Input id="select-multiple-chip" />}
-            renderValue={() => null}
+            // renderValue={(value) => value}
             MenuProps={MenuProps}
           >
             {options.map(option => (
               <MenuItem key={option.key} value={option.key} className="select-filter__menu-item">
-                {multiple && <Checkbox
-                  checked={multiple ? value.indexOf(option.key) > -1 : value === option.key}
-                  id={checkboxId(option.key)}
-                  className="select-filter__checkbox"
-                />}
                 <ListItemText
                   disableTypography
                   primary={checkboxLabel(option.value, checkboxId(option.key))}

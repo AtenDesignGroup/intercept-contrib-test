@@ -121,10 +121,20 @@ class ReserveRoom extends Component {
       date: props.date,
       filters: props.filters,
       formValues: {
-        date: null,
-        start: null,
-        end: null,
-        room: null,
+        [c.TYPE_ROOM]: null,
+        date: new Date(),
+        start: moment()
+          .startOf('hour')
+          .add(1, 'h')
+          .toDate(),
+        end: moment()
+          .startOf('hour')
+          .add(2, 'h')
+          .toDate(),
+        attendees: 1,
+        groupName: '',
+        refreshments: false,
+        refreshmentsDesc: '',
       },
       view: props.view,
     };
@@ -132,7 +142,7 @@ class ReserveRoom extends Component {
     this.handleCalendarView = this.handleCalendarView.bind(this);
     this.handleFilterChange = this.handleFilterChange.bind(this);
     this.handleViewChange = this.handleViewChange.bind(this);
-    this.handleFormChange = this.handleViewChange.bind(this);
+    this.handleFormChange = this.handleFormChange.bind(this);
     this.doFetchRooms = debounce(this.doFetchRooms, 500).bind(this);
   }
 
@@ -141,8 +151,8 @@ class ReserveRoom extends Component {
   }
 
   handleViewChange = (value) => {
-    this.props.onChangeView(value);
-    this.doFetchRooms(this.props.filters, value, this.props.calView, this.props.date);
+    // this.props.onChangeView(value);
+    // this.doFetchRooms(this.props.filters, value, this.props.calView, this.props.date);
   };
 
   handleCalendarNavigate = (date, calView) => {
@@ -161,9 +171,9 @@ class ReserveRoom extends Component {
   }
 
   handleFormChange(formValues) {
-    this.setState = {
+    this.setState({
       formValues,
-    };
+    });
   }
 
   doFetchRooms(
@@ -196,17 +206,17 @@ class ReserveRoom extends Component {
     const { calendarRooms, rooms, roomsLoading, filters, view, date, calView } = props;
 
     const selectionComponent = null;
-      // view === 'list' ? (
-      //   <RoomList rooms={rooms} />
-      // ) : (
-      //   <RoomCalendar
-      //     rooms={calendarRooms}
-      //     onNavigate={handleCalendarNavigate}
-      //     onView={handleCalendarView}
-      //     defaultView={calView}
-      //     defaultDate={date}
-      //   />
-      // );
+    // view === 'list' ? (
+    //   <RoomList rooms={rooms} />
+    // ) : (
+    //   <RoomCalendar
+    //     rooms={calendarRooms}
+    //     onNavigate={handleCalendarNavigate}
+    //     onView={handleCalendarView}
+    //     defaultView={calView}
+    //     defaultDate={date}
+    //   />
+    // );
 
     return (
       <div className="l--offset l--sidebar-before">
@@ -215,10 +225,10 @@ class ReserveRoom extends Component {
         </header>
         <div className="l__main">
           <div className="l__secondary">
-            <h4 className="page-title">Reservation Details</h4>
-            <ReserveRoomForm onChange={handleFormChange} />
+            <h4 className="">Reservation Details</h4>
+            <ReserveRoomForm values={this.state.formValues} onChange={handleFormChange} />
           </div>
-          <div className="l__primary">
+          {/* <div className="l__primary">
             <ViewSwitcher value={view} handleChange={handleViewChange} />
             <RoomFilters
               onChange={handleFilterChange}
@@ -227,7 +237,7 @@ class ReserveRoom extends Component {
             />
             <PageSpinner loading={roomsLoading} />
             {selectionComponent}
-          </div>
+          </div> */}
         </div>
       </div>
     );
@@ -247,18 +257,18 @@ const mapDispatchToProps = dispatch => ({
 });
 
 ReserveRoom.propTypes = {
-  calendarRooms: PropTypes.arrayOf(Object).isRequired,
+  // calendarRooms: PropTypes.arrayOf(Object).isRequired,
   rooms: PropTypes.arrayOf(Object).isRequired,
   roomsLoading: PropTypes.bool.isRequired,
   fetchRooms: PropTypes.func.isRequired,
-  calView: PropTypes.string,
-  date: PropTypes.instanceOf(Date),
-  view: PropTypes.string,
-  filters: PropTypes.object,
-  onChangeCalView: PropTypes.func.isRequired,
-  onChangeView: PropTypes.func.isRequired,
-  onChangeFilters: PropTypes.func.isRequired,
-  onChangeDate: PropTypes.func.isRequired,
+  // calView: PropTypes.string,
+  // date: PropTypes.instanceOf(Date),
+  // view: PropTypes.string,
+  // filters: PropTypes.object,
+  // onChangeCalView: PropTypes.func.isRequired,
+  // onChangeView: PropTypes.func.isRequired,
+  // onChangeFilters: PropTypes.func.isRequired,
+  // onChangeDate: PropTypes.func.isRequired,
 };
 
 ReserveRoom.defaultProps = {

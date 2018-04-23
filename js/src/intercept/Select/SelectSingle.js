@@ -6,7 +6,6 @@ import { MenuItem } from 'material-ui/Menu';
 import { FormControl } from 'material-ui/Form';
 import { ListItemText } from 'material-ui/List';
 import Select from 'material-ui/Select';
-import Checkbox from 'material-ui/Checkbox';
 
 const styles = theme => ({
   root: {
@@ -47,13 +46,13 @@ const MenuProps = {
   className: 'select-filter__menu',
 };
 
-class SelectFilter extends React.Component {
+class SelectSingle extends React.Component {
   handleChange = (event) => {
     this.props.handleChange(event);
   };
 
   render() {
-    const { options, label, value, multiple } = this.props;
+    const { options, label, value} = this.props;
     const checkboxId = id => `select-filter--${id}`;
     const checkboxLabel = (text, id) => (
       <label className="select-filter__checkbox-label" htmlFor={id}>
@@ -62,31 +61,25 @@ class SelectFilter extends React.Component {
     );
 
     return (
-      <div className="select-filter">
+      <div className="select-filter input input--select">
         <FormControl className="select-filter__control">
           <InputLabel
             className="select-filter__label"
             htmlFor="select-multiple-chip"
-            shrink={false}
+            // shrink={false}
           >
             {label}
           </InputLabel>
 
           <Select
-            multiple={multiple}
             value={value === null ? '' : value}
             onChange={this.handleChange}
             input={<Input id="select-multiple-chip" />}
-            renderValue={() => null}
+            // renderValue={(value) => value}
             MenuProps={MenuProps}
           >
             {options.map(option => (
               <MenuItem key={option.key} value={option.key} className="select-filter__menu-item">
-                {multiple && <Checkbox
-                  checked={multiple ? value.indexOf(option.key) > -1 : value === option.key}
-                  id={checkboxId(option.key)}
-                  className="select-filter__checkbox"
-                />}
                 <ListItemText
                   disableTypography
                   primary={checkboxLabel(option.value, checkboxId(option.key))}
@@ -100,7 +93,7 @@ class SelectFilter extends React.Component {
   }
 }
 
-SelectFilter.propTypes = {
+SelectSingle.propTypes = {
   label: PropTypes.string.isRequired,
   value: PropTypes.oneOfType([PropTypes.arrayOf(String), PropTypes.string]),
   options: PropTypes.arrayOf(Object).isRequired,
@@ -108,9 +101,9 @@ SelectFilter.propTypes = {
   multiple: PropTypes.bool,
 };
 
-SelectFilter.defaultProps = {
+SelectSingle.defaultProps = {
   value: null,
   multiple: false,
 };
 
-export default withStyles(styles, { withTheme: true })(SelectFilter);
+export default withStyles(styles, { withTheme: true })(SelectSingle);

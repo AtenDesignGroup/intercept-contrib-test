@@ -11,6 +11,7 @@
     "build:js-helpers": "./node_modules/.bin/babel-external-helpers | ./node_modules/.bin/minify --mangle false > modules/intercept_core/js/dist/babelHelpers.js"
   },
   "dependencies": {
+    "@material-ui/icons": "^1.0.0-beta.42",
     "babel-polyfill": "^6.26.0",
     "history": "^4.7.2",
     "intercept-client": "^1.1.28",

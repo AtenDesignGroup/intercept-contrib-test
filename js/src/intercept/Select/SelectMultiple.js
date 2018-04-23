@@ -47,7 +47,7 @@ const MenuProps = {
   className: 'select-filter__menu',
 };
 
-class SelectFilter extends React.Component {
+class SelectMultiple extends React.Component {
   handleChange = (event) => {
     this.props.handleChange(event);
   };
@@ -100,7 +100,7 @@ class SelectFilter extends React.Component {
   }
 }
 
-SelectFilter.propTypes = {
+SelectMultiple.propTypes = {
   label: PropTypes.string.isRequired,
   value: PropTypes.oneOfType([PropTypes.arrayOf(String), PropTypes.string]),
   options: PropTypes.arrayOf(Object).isRequired,
@@ -108,9 +108,9 @@ SelectFilter.propTypes = {
   multiple: PropTypes.bool,
 };
 
-SelectFilter.defaultProps = {
+SelectMultiple.defaultProps = {
   value: null,
   multiple: false,
 };
 
-export default withStyles(styles, { withTheme: true })(SelectFilter);
+export default withStyles(styles, { withTheme: true })(SelectMultiple);

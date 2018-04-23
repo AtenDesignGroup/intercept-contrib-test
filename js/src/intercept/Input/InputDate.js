@@ -1,11 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { withStyles } from '@material-ui/core/styles';
+import { withStyles } from 'material-ui/styles';
 import moment from 'moment';
 import MomentUtils from 'material-ui-pickers/utils/moment-utils';
 import DatePicker from 'material-ui-pickers/DatePicker';
 import MuiPickersUtilsProvider from 'material-ui-pickers/utils/MuiPickersUtilsProvider';
-import { withFormsy, propTypes, defaultProps } from 'formsy-react';
 
 const styles = theme => ({
   container: {
@@ -24,50 +23,36 @@ const InputLabelProps = value => ({
   className: 'date-filter__label',
 });
 
-class InputDate extends React.Component {
-  render() {
-    const { handleChange, clearable, required, label } = this.props;
-    const value = this.props.getValue();
-    const onChange = (date) => {
-      const d = date.toDate();
-      handleChange(d)
-      this.props.setValue(d);
-    };
-    const onClear = () => handleChange(null);
-    const inputValue = value === '' ? null : value;
+function InputDate(props) {
+  const { value, handleChange } = props;
+  const onChange = date => handleChange(date.toDate());
+  const onClear = () => handleChange(null);
+  const inputValue = value === '' ? null : value;
 
-    return (
-      <MuiPickersUtilsProvider utils={MomentUtils} moment={moment}>
-        <DatePicker
-          onChange={onChange}
-          onClear={onClear}
-          clearable={clearable}
-          label={label}
-          required={required}
-          InputLabelProps={InputLabelProps(inputValue)}
-          value={inputValue}
-          className="date-filter input input--date"
-          error={!this.props.isValid()}
-          helperText={this.props.getErrorMessage()}
-        />
-      </MuiPickersUtilsProvider>
-    );
-  }
+  return (
+    <MuiPickersUtilsProvider utils={MomentUtils} moment={moment}>
+      <DatePicker
+        onChange={onChange}
+        onClear={onClear}
+        clearable
+        label={'Date'}
+        InputLabelProps={InputLabelProps(inputValue)}
+        value={inputValue}
+        className="date-filter input input--date"
+      />
+    </MuiPickersUtilsProvider>
+  );
 }
 
-InputDate.propTypes = {
-  ...propTypes,
-  value: PropTypes.instanceOf(Date),
-  handleChange: PropTypes.func.isRequired,
-  clearable: PropTypes.bool,
-  label: PropTypes.string,
-};
 // Specifies the default values for props:
 InputDate.defaultProps = {
-  ...defaultProps,
   value: null,
   label: 'Date',
-  clearable: true,
 };
 
-export default withStyles(styles)(withFormsy(InputDate));
+InputDate.propTypes = {
+  value: PropTypes.instanceOf(Date),
+  handleChange: PropTypes.func.isRequired,
+};
+
+export default withStyles(styles)(InputDate);

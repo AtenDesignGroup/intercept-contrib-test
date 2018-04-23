@@ -1,7 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import SelectFilter from './../SelectFilter';
+import SelectMultiple from './../Select/SelectMultiple';
+import SelectSingle from './../Select/SelectSingle';
 import interceptClient from 'interceptClient';
 
 const { select, api } = interceptClient;
@@ -13,8 +14,10 @@ class SelectResource extends React.Component {
 
   render() {
     const { value, multiple } = this.props;
-    return (
-      <SelectFilter {...this.props} value={value === null && multiple ? [] : value} />
+    return multiple ? (
+      <SelectMultiple {...this.props} value={value === null ? [] : value} />
+    ) : (
+      <SelectSingle {...this.props} options={[{ key: '', value: 'None' }, ...this.props.options] } value={value} />
     );
   }
 }
@@ -36,10 +39,7 @@ SelectResource.defaultProps = {
 
 SelectResource.propTypes = {
   options: PropTypes.arrayOf(Object).isRequired,
-  value: PropTypes.oneOfType([
-    PropTypes.arrayOf(String),
-    PropTypes.string,
-  ]),
+  value: PropTypes.oneOfType([PropTypes.arrayOf(String), PropTypes.string]),
   handleChange: PropTypes.func.isRequired,
   fetchAll: PropTypes.func.isRequired,
   type: PropTypes.string.isRequired,

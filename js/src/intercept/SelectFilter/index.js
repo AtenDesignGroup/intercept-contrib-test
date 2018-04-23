@@ -82,11 +82,11 @@ class SelectFilter extends React.Component {
           >
             {options.map(option => (
               <MenuItem key={option.key} value={option.key} className="select-filter__menu-item">
-                <Checkbox
+                {multiple && <Checkbox
                   checked={multiple ? value.indexOf(option.key) > -1 : value === option.key}
                   id={checkboxId(option.key)}
                   className="select-filter__checkbox"
-                />
+                />}
                 <ListItemText
                   disableTypography
                   primary={checkboxLabel(option.value, checkboxId(option.key))}

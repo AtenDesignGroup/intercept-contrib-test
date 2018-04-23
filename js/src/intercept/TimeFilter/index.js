@@ -24,7 +24,7 @@ const InputLabelProps = value => ({
 });
 
 function TimeFilter(props) {
-  const { value, label } = props;
+  const { value, label, handleChange } = props;
   const inputValue = value === '' ? null : value;
   const onChange = date => handleChange(date.toDate());
   const onClear = () => handleChange(null);
@@ -45,7 +45,7 @@ function TimeFilter(props) {
 }
 
 TimeFilter.propTypes = {
-  value: PropTypes.string,
+  value: PropTypes.instanceOf(Date),
   label: PropTypes.string,
   handleChange: PropTypes.func.isRequired,
 };

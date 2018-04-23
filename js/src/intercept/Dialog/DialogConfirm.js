@@ -1,12 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import withMobileDialog from '@material-ui/core/withMobileDialog';
+import Button from 'material-ui/Button';
+import Dialog, {
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  withMobileDialog,
+} from 'material-ui/Dialog';
 
 class DialogConfirm extends React.PureComponent {
   render() {
@@ -29,29 +30,23 @@ class DialogConfirm extends React.PureComponent {
           open={open}
           onClose={this.handleClose}
           aria-labelledby="responsive-dialog-title"
-          onBackdropClick={onCancel}
         >
           <DialogTitle id="responsive-dialog-title">{heading}</DialogTitle>
-          { text || children
-            ? <DialogContent>
-              {text && <DialogContentText>{text}</DialogContentText>}
-              {children}
-              </DialogContent>
-            : null
-          }
+          <DialogContent>
+            {text && (
+              <DialogContentText>
+                {text}
+              </DialogContentText>
+            )}
+            {children}
+          </DialogContent>
           <DialogActions>
-            {onCancel &&
-              cancelText && (
-                <Button onClick={onCancel} color="secondary">
-                  {cancelText}
-                </Button>
-              )}
-            {onConfirm &&
-              confirmText && (
-                <Button onClick={onConfirm} color="primary" autoFocus>
-                  {confirmText}
-                </Button>
-              )}
+            <Button onClick={onConfirm} color="primary">
+              {confirmText}
+            </Button>
+            <Button onClick={onCancel} color="primary" autoFocus>
+              {cancelText}
+            </Button>
           </DialogActions>
         </Dialog>
       </div>
@@ -72,9 +67,9 @@ DialogConfirm.propTypes = {
 };
 
 DialogConfirm.defaultProps = {
-  confirmText: 'Yes',
-  cancelText: 'No',
-  heading: 'Are you sure?',
+  confirmText: 'Confirm',
+  cancelText: 'Cancel',
+  heading: null,
   text: null,
   onConfirm: null,
   onCancel: null,

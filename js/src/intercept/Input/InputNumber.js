@@ -1,47 +1,36 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import TextField from '@material-ui/core/TextField';
-import { withFormsy, propTypes, defaultProps } from 'formsy-react';
+import TextField from 'material-ui/TextField';
 
-class InputNumber extends React.PureComponent {
-  render() {
-    const { step, label, onChange, min, max, int, required } = this.props;
+function InputNumber(props) {
+  const { value, step, label, onChange, min, max, int } = props;
 
-    const handleChange = (event) => {
-      const parse = int ? parseInt : parseFloat;
-      const v = event.target.value ? parse(event.target.value) : null;
-      this.props.setValue(v);
-      onChange(v);
-    };
+  const handleChange = (event) => {
+    const parse = int ? parseInt : parseFloat;
+    onChange(event.target.value ? parse(event.target.value) : null);
+  };
 
-    const value = this.props.getValue();
-
-    return (
-      <TextField
-        label={label}
-        required={required}
-        type="number"
-        onChange={handleChange}
-        value={value === null ? '' : value}
-        error={!this.props.isValid()}
-        helperText={this.props.getErrorMessage()}
-        className="input input--number"
-        InputLabelProps={{
-          shrink: true,
-          className: 'input__label',
-        }}
-        inputProps={{
-          step,
-          min,
-          max,
-        }}
-      />
-    );
-  }
+  return (
+    <TextField
+      label={label}
+      type="number"
+      onChange={handleChange}
+      value={value === null ? '' : value}
+      className="input input--number"
+      InputLabelProps={{
+        shrink: true,
+        className: 'input__label',
+      }}
+      inputProps={{
+        step,
+        min,
+        max,
+      }}
+    />
+  );
 }
 
 InputNumber.propTypes = {
-  ...propTypes,
   onChange: PropTypes.func.isRequired,
   value: PropTypes.number,
   label: PropTypes.string,
@@ -50,10 +39,9 @@ InputNumber.propTypes = {
 };
 
 InputNumber.defaultProps = {
-  ...defaultProps,
   value: null,
   label: 'Number',
   step: 1,
 };
 
-export default withFormsy(InputNumber);
+export default InputNumber;

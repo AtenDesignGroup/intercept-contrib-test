@@ -1,14 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { withStyles } from '@material-ui/core/styles';
-import Input from '@material-ui/core/Input';
-import InputLabel from '@material-ui/core/InputLabel';
-import MenuItem from '@material-ui/core/MenuItem';
-import FormControl from '@material-ui/core/FormControl';
-import ListItemText from '@material-ui/core/ListItemText';
-import Select from '@material-ui/core/Select';
-import Checkbox from '@material-ui/core/Checkbox';
-import { withFormsy, propTypes, defaultProps } from 'formsy-react';
+import { withStyles } from 'material-ui/styles';
+import Input, { InputLabel } from 'material-ui/Input';
+import { MenuItem } from 'material-ui/Menu';
+import { FormControl } from 'material-ui/Form';
+import { ListItemText } from 'material-ui/List';
+import Select from 'material-ui/Select';
+import Checkbox from 'material-ui/Checkbox';
 
 const styles = theme => ({
   root: {
@@ -55,11 +53,10 @@ class SelectMultiple extends React.Component {
   };
 
   render() {
-    const { options, label, multiple, name, required } = this.props;
-    const value = this.props.getValue();
+    const { options, label, value, multiple } = this.props;
     const checkboxId = id => `select-filter--${id}`;
     const checkboxLabel = (text, id) => (
-      <label className="select-filter__checkbox-label">
+      <label className="select-filter__checkbox-label" htmlFor={id}>
         {text}
       </label>
     );
@@ -69,32 +66,27 @@ class SelectMultiple extends React.Component {
         <FormControl className="select-filter__control">
           <InputLabel
             className="select-filter__label"
-            htmlFor={name}
+            htmlFor="select-multiple-chip"
             shrink={false}
-            required={required}
           >
             {label}
           </InputLabel>
 
           <Select
             multiple={multiple}
-            value={!value ? '' : value}
+            value={value === null ? '' : value}
             onChange={this.handleChange}
-            input={<Input id={name} />}
+            input={<Input id="select-multiple-chip" />}
             renderValue={() => null}
             MenuProps={MenuProps}
-            error={!this.props.isValid()}
-            required={this.props.required}
           >
             {options.map(option => (
               <MenuItem key={option.key} value={option.key} className="select-filter__menu-item">
-                {multiple && (
-                  <Checkbox
-                    checked={multiple ? value.indexOf(option.key) > -1 : value === option.key}
-                    id={checkboxId(option.key)}
-                    className="select-filter__checkbox"
-                  />
-                )}
+                {multiple && <Checkbox
+                  checked={multiple ? value.indexOf(option.key) > -1 : value === option.key}
+                  id={checkboxId(option.key)}
+                  className="select-filter__checkbox"
+                />}
                 <ListItemText
                   disableTypography
                   primary={checkboxLabel(option.value, checkboxId(option.key))}
@@ -121,4 +113,4 @@ SelectMultiple.defaultProps = {
   multiple: false,
 };
 
-export default withStyles(styles, { withTheme: true })(withFormsy(SelectMultiple));
+export default withStyles(styles, { withTheme: true })(SelectMultiple);

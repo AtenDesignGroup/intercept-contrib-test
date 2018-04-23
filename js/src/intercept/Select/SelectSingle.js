@@ -1,13 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { withStyles } from '@material-ui/core/styles';
-import Input from '@material-ui/core/Input';
-import InputLabel from '@material-ui/core/InputLabel';
-import MenuItem from '@material-ui/core/MenuItem';
-import FormControl from '@material-ui/core/FormControl';
-import ListItemText from '@material-ui/core/ListItemText';
-import Select from '@material-ui/core/Select';
-import { withFormsy, propTypes, defaultProps } from 'formsy-react';
+import { withStyles } from 'material-ui/styles';
+import Input, { InputLabel } from 'material-ui/Input';
+import { MenuItem } from 'material-ui/Menu';
+import { FormControl } from 'material-ui/Form';
+import { ListItemText } from 'material-ui/List';
+import Select from 'material-ui/Select';
 
 const styles = theme => ({
   root: {
@@ -50,13 +48,11 @@ const MenuProps = {
 
 class SelectSingle extends React.Component {
   handleChange = (event) => {
-    this.props.setValue(event.target.value);
     this.props.handleChange(event);
   };
 
   render() {
-    const { options, label } = this.props;
-    const value = this.props.getValue();
+    const { options, label, value} = this.props;
     const checkboxId = id => `select-filter--${id}`;
     const checkboxLabel = (text, id) => (
       <label className="select-filter__checkbox-label" htmlFor={id}>
@@ -70,20 +66,17 @@ class SelectSingle extends React.Component {
           <InputLabel
             className="select-filter__label"
             htmlFor="select-multiple-chip"
-            required={this.props.required}
             // shrink={false}
           >
             {label}
           </InputLabel>
 
           <Select
-            value={value === null || !value ? '' : value}
+            value={value === null ? '' : value}
             onChange={this.handleChange}
             input={<Input id="select-multiple-chip" />}
             // renderValue={(value) => value}
             MenuProps={MenuProps}
-            error={!this.props.isValid()}
-            required={this.props.required}
           >
             {options.map(option => (
               <MenuItem key={option.key} value={option.key} className="select-filter__menu-item">
@@ -101,7 +94,6 @@ class SelectSingle extends React.Component {
 }
 
 SelectSingle.propTypes = {
-  ...propTypes,
   label: PropTypes.string.isRequired,
   value: PropTypes.oneOfType([PropTypes.arrayOf(String), PropTypes.string]),
   options: PropTypes.arrayOf(Object).isRequired,
@@ -110,9 +102,8 @@ SelectSingle.propTypes = {
 };
 
 SelectSingle.defaultProps = {
-  ...defaultProps,
   value: null,
   multiple: false,
 };
 
-export default withStyles(styles, { withTheme: true })(withFormsy(SelectSingle));
+export default withStyles(styles, { withTheme: true })(SelectSingle);

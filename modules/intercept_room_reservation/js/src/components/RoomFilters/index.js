@@ -13,6 +13,7 @@ import CurrentFilters from 'intercept/CurrentFilters';
 import DateFilter from 'intercept/DateFilter';
 import KeywordFilter from 'intercept/KeywordFilter';
 import SelectResource from 'intercept/SelectResource';
+import SelectSingle from 'intercept/Select/SelectSingle';
 
 const { constants } = interceptClient;
 const c = constants;
@@ -20,9 +21,17 @@ const c = constants;
 const labels = {
   [c.TYPE_LOCATION]: 'Location',
   [c.TYPE_ROOM_TYPE]: 'Room Type',
-  [c.DATE]: 'Date',
-  [c.KEYWORD]: 'Keyword',
+  capacity: 'Room Capacity',
 };
+
+const capacityOptions = [
+  { key: '0', value: 'none' },
+  { key: '5', value: '5+' },
+  { key: '10', value: '10+' },
+  { key: '20', value: '20+' },
+  { key: '50', value: '50+' },
+  { key: '100', value: '100+' },
+];
 
 const currentFiltersConfig = filters =>
   map(filters, (value, key) => ({
@@ -68,20 +77,25 @@ class EventFilters extends PureComponent {
         <h3 className="filters__heading">Filter</h3>
         <div className="filters__inputs">
           <SelectResource
+            multiple
             type={c.TYPE_LOCATION}
             handleChange={this.onInputChange(c.TYPE_LOCATION)}
             value={filters[c.TYPE_LOCATION]}
             label={labels[c.TYPE_LOCATION]}
           />
           <SelectResource
+            multiple
             type={c.TYPE_ROOM_TYPE}
             handleChange={this.onInputChange(c.TYPE_ROOM_TYPE)}
             value={filters[c.TYPE_ROOM_TYPE]}
             label={labels[c.TYPE_ROOM_TYPE]}
           />
-          {showDate && (
-            <DateFilter handleChange={this.onDateChange} defaultValue={null} value={filters.date} />
-          )}
+          <SelectSingle
+            options={capacityOptions}
+            handleChange={this.onInputChange('capacity')}
+            value={filters.capacity}
+            label={labels.capacity}
+          />
         </div>
         <div className="filters__current">
           <CurrentFilters filters={currentFilters} onChange={this.onFilterChange} />

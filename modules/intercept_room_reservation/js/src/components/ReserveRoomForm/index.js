@@ -187,13 +187,13 @@ class ReserveRoomForm extends PureComponent {
                     value="refreshments"
                   />
                 }
-                label="Serving food and/or Drink?"
+                label="Serving light refreshments?"
                 className={'input__label'}
               />
             </ExpansionPanelSummary>
             <ExpansionPanelDetails className={'input-group__details'}>
               <InputText
-                label="Food &amp; Description"
+                label="Please describe your light refreshments."
                 value={values.refreshmentsDesc}
                 onChange={this.onValueChange('refreshmentsDesc')}
               />
@@ -214,6 +214,33 @@ class ReserveRoomForm extends PureComponent {
           }}
           values={values}
         />
+
+        <Dialog
+          fullScreen
+          open={this.state.open}
+          onClose={this.handleClose}
+          transition={Transition}
+        >
+          <AppBar className={classes.appBar}>
+            <Toolbar>
+              <IconButton color="inherit" onClick={this.handleClose} aria-label="Close">
+                <CloseIcon />
+              </IconButton>
+              <Typography variant="title" color="inherit" className={classes.flex}>
+                Find a Room
+              </Typography>
+            </Toolbar>
+          </AppBar>
+          <List>
+            <ListItem button>
+              <ListItemText primary="Phone ringtone" secondary="Titania" />
+            </ListItem>
+            <Divider />
+            <ListItem button>
+              <ListItemText primary="Default notification ringtone" secondary="Tethys" />
+            </ListItem>
+          </List>
+        </Dialog>
       </div>
     );
   }

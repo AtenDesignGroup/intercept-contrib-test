@@ -20,12 +20,6 @@ class EventTeaser extends PureComponent {
 
     const date = moment(`${event.attributes['field_date_time'].value}Z`, moment.ISO_8601);
 
-    const eventTypeValues = event.relationships['field_event_type'].map(termMap).filter(i => i.id);
-    const eventTypes =
-      eventTypeValues.length > 0 ? (
-        <FieldInline label="Event type" key="eventType" values={eventTypeValues} />
-      ) : null;
-
     const audienceValues = event.relationships['field_event_audience']
       .map(termMap)
       .filter(i => i.id);
@@ -50,8 +44,8 @@ class EventTeaser extends PureComponent {
           date: date.format('D'),
           time: date.format('h:mm a').replace('m', '.m.'),
         }}
-        description={event.attributes['field_text_teaser']}
-        tags={[eventTypes, audiences]}
+        description={event.attributes['field_text_teaser'].value}
+        tags={[audiences]}
       />
     );
   }

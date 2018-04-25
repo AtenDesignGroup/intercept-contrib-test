@@ -16,6 +16,7 @@ function InputNumber(props) {
       type="number"
       onChange={handleChange}
       value={value === null ? '' : value}
+      error
       className="input input--number"
       InputLabelProps={{
         shrink: true,

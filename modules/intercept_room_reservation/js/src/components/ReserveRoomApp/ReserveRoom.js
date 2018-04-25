@@ -4,9 +4,11 @@ import { connect } from 'react-redux';
 import moment from 'moment';
 import debounce from 'lodash/debounce';
 import interceptClient from 'interceptClient';
+import drupalSettings from 'drupalSettings';
 import ViewSwitcher from 'intercept/ViewSwitcher';
 import PageSpinner from 'intercept/PageSpinner';
 import RoomFilters from './../RoomFilters';
+import FindARoom from './../FindARoom';
 import ReserveRoomForm from './../ReserveRoomForm';
 import RoomList from './../RoomList';
 import RoomCalendar from './../RoomCalendar';
@@ -135,6 +137,7 @@ class ReserveRoom extends Component {
         groupName: '',
         refreshments: false,
         refreshmentsDesc: '',
+        user: drupalSettings.intercept.user.uuid,
       },
       view: props.view,
     };
@@ -238,6 +241,10 @@ class ReserveRoom extends Component {
             <PageSpinner loading={roomsLoading} />
             {selectionComponent}
           </div> */}
+          <div className="l__primary">
+            <FindARoom onSelect={console.log} />
+          </div>
+
         </div>
       </div>
     );
@@ -254,6 +261,9 @@ const mapDispatchToProps = dispatch => ({
   fetchRooms: (options) => {
     dispatch(api[c.TYPE_ROOM].fetchAll(options));
   },
+  fetchUser: (options) => {
+    dispatch(api[c.TYPE_USER].fetchAll(options));
+  },
 });
 
 ReserveRoom.propTypes = {
@@ -261,6 +271,7 @@ ReserveRoom.propTypes = {
   rooms: PropTypes.arrayOf(Object).isRequired,
   roomsLoading: PropTypes.bool.isRequired,
   fetchRooms: PropTypes.func.isRequired,
+  fetchUser: PropTypes.func.isRequired,
   // calView: PropTypes.string,
   // date: PropTypes.instanceOf(Date),
   // view: PropTypes.string,

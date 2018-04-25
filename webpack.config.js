@@ -106,11 +106,13 @@ module.exports = function config(env) {
           react: 'React',
           'react-dom': 'ReactDOM',
           interceptClient: 'interceptClient',
+          drupalSettings: 'drupalSettings',
           moment: 'moment',
           redis: 'redis',
         };
         const dev = {
           interceptClient: 'interceptClient',
+          drupalSettings: 'drupalSettings',
           redis: 'redis',
           moment: 'moment',
         };

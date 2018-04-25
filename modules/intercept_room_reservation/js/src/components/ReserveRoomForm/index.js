@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 
 // Intercept
 import interceptClient from 'interceptClient';
+import drupalSettings from 'drupalSettings';
 
 // Components
 import Button from 'material-ui/Button';
@@ -228,6 +229,7 @@ ReserveRoomForm.propTypes = {
     groupName: PropTypes.string,
     refreshments: PropTypes.bool,
     refreshmentsDesc: PropTypes.string,
+    user: PropTypes.string,
   }),
   onChange: PropTypes.func.isRequired,
 };
@@ -242,6 +244,7 @@ ReserveRoomForm.defaultProps = {
     groupName: '',
     refreshments: false,
     refreshmentsDesc: '',
+    user: drupalSettings.intercept.user.uuid,
   },
 };
 

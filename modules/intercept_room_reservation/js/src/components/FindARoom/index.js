@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import moment from 'moment';
-import debounce from 'lodash/debounce';
+import get from 'lodash/get';
+import intersection from 'lodash/intersection';
 import interceptClient from 'interceptClient';
 import drupalSettings from 'drupalSettings';
 // import ViewSwitcher from 'intercept/ViewSwitcher';
@@ -13,17 +13,56 @@ import RoomList from './../RoomList';
 const { constants, api, select } = interceptClient;
 const c = constants;
 
-function getPublishedFilters(value = true) {
-  return {
-    published: {
-      path: 'status',
-      value: value ? '1' : '0',
-    },
-  };
+function filterByCapacity(items, filters, type, path) {
+  let output = items;
+
+  // Filter by location.
+  if (type in filters && filters[type]) {
+    output = output.filter(item => filters[type] <= get(item, path));
+  }
+
+  return output;
 }
 
-function filterRooms(rooms, filters) {
-  return rooms;
+function filterByRelationship(items, filters, type, path) {
+  let output = items;
+
+  // Filter by location.
+  if (type in filters && filters[type].length > 0) {
+    output = output.filter(item => filters[type].indexOf(get(item, path)) > -1);
+  }
+
+  return output;
+}
+
+function filterRooms(items, filters) {
+  let output = items;
+
+  // Filter by location.
+  output = filterByRelationship(
+    output,
+    filters,
+    c.TYPE_LOCATION,
+    'data.relationships.field_location.id',
+  );
+
+  // Filter by Room Type.
+  output = filterByRelationship(
+    output,
+    filters,
+    c.TYPE_ROOM_TYPE,
+    'data.relationships.field_room_type.id',
+  );
+
+  // Filter by Capcity.
+  output = filterByCapacity(
+    output,
+    filters,
+    'capacity',
+    'data.attributes.field_capacity_max',
+  );
+
+  return output;
 }
 
 class FindARoom extends Component {
@@ -39,7 +78,6 @@ class FindARoom extends Component {
     this.setState({ filters });
   }
 
-
   render() {
     const { rooms, onSelect } = this.props;
     const { filters } = this.state;
@@ -49,7 +87,7 @@ class FindARoom extends Component {
         <div className="l__main">
           <div className="l__primary">
             <RoomFilters onChange={this.onFilterChange} filters={filters} />
-            <RoomList rooms={filterRooms(rooms ,filters)} onSelect={onSelect} />
+            <RoomList rooms={filterRooms(rooms, filters)} onSelect={onSelect} />
           </div>
         </div>
       </div>

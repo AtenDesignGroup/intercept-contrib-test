@@ -22,7 +22,7 @@ function getPublishedFilters(value = true) {
   };
 }
 
-filterRooms(rooms, filters) {
+function filterRooms(rooms, filters) {
   return rooms;
 }
 
@@ -38,6 +38,7 @@ class FindARoom extends Component {
   onFilterChange(filters) {
     this.setState({ filters });
   }
+
 
   render() {
     const { rooms, onSelect } = this.props;

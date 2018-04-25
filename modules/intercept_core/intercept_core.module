@@ -7,12 +7,23 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
  * Implements hook_preprocess_page.
  */
 function intercept_core_preprocess_page(array &$variables) {
+  // Add the intercept_client consumer id.
   $consumer_id = Drupal::state()->get('intercept_client.id');
   $consumer = Drupal::service('entity_type.manager')->getStorage('consumer')->load($consumer_id);
   if ($consumer) {
     $consumer_token = $consumer ? $consumer->uuid() : NULL;
     $variables['#attached']['drupalSettings']['intercept']['consumer'] = $consumer_token;
   }
+
+  // Add user info.
+  $current_user = \Drupal::service('current_user');
+  $user = \Drupal\user\Entity\User::load($current_user->id());
+  $variables['#attached']['drupalSettings']['intercept']['user'] = [
+    'id' => $current_user->id(),
+    'uuid' => $user->uuid(),
+    'roles' => $current_user->getRoles(),
+    'timezone' => $current_user->getTimezone(),
+  ];
 }
 
 /**

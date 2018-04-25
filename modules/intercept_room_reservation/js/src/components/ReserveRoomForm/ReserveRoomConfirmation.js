@@ -42,12 +42,12 @@ const buildRoomReservation = (values) => {
           id: values[c.TYPE_ROOM],
         },
       },
-      // field_user: {
-      //   data: {
-      //     type: c.TYPE_USER,
-      //     id: "7c6402f2-5200-40d7-80cd-f12d7382568c"
-      //   },
-      // }
+      field_user: {
+        data: {
+          type: c.TYPE_USER,
+          id: values.user,
+        },
+      }
     },
   };
   return output;

@@ -1,77 +1,32 @@
-// React
-import React from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-
-// Redux
 import { connect } from 'react-redux';
-
-// Lodash
-import get from 'lodash/get';
-
-// Drupal
-import drupalSettings from 'drupalSettings';
-
-// Intercept
+import moment from 'moment';
+import debounce from 'lodash/debounce';
 import interceptClient from 'interceptClient';
-
-// Material UI
-import Button from '@material-ui/core/Button';
-
-// Local Components
+import drupalSettings from 'drupalSettings';
+// import ViewSwitcher from 'intercept/ViewSwitcher';
+// import PageSpinner from 'intercept/PageSpinner';
 import RoomFilters from './../RoomFilters';
 import RoomList from './../RoomList';
 
-const { constants, select } = interceptClient;
+const { constants, api, select } = interceptClient;
 const c = constants;
 
-function filterByCapacity(items, filters, type, path) {
-  let output = items;
-
-  // Filter by location.
-  if (type in filters && filters[type]) {
-    output = output.filter(item => filters[type] <= get(item, path));
-  }
-
-  return output;
+function getPublishedFilters(value = true) {
+  return {
+    published: {
+      path: 'status',
+      value: value ? '1' : '0',
+    },
+  };
 }
 
-function filterByRelationship(items, filters, type, path) {
-  let output = items;
-
-  // Filter by location.
-  if (type in filters && filters[type].length > 0) {
-    output = output.filter(item => filters[type].indexOf(get(item, path)) > -1);
-  }
-
-  return output;
+filterRooms(rooms, filters) {
+  return rooms;
 }
 
-function filterRooms(items, filters) {
-  let output = items;
-
-  // Filter by location.
-  output = filterByRelationship(
-    output,
-    filters,
-    c.TYPE_LOCATION,
-    'data.relationships.field_location.data.id',
-  );
-
-  // Filter by Room Type.
-  output = filterByRelationship(
-    output,
-    filters,
-    c.TYPE_ROOM_TYPE,
-    'data.relationships.field_room_type.data.id',
-  );
-
-  // Filter by Capcity.
-  output = filterByCapacity(output, filters, 'capacity', 'data.attributes.field_capacity_max');
-
-  return output;
-}
-
-class FindARoom extends React.Component {
+class FindARoom extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -87,22 +42,13 @@ class FindARoom extends React.Component {
   render() {
     const { rooms, onSelect } = this.props;
     const { filters } = this.state;
-    const teaserProps = {
-      footer: roomProps => (<Button variant="raised" size="small" color="primary" className="button button--small button--primary"onClick={() => onSelect(roomProps.uuid)} >Reserve</Button>),
-    };
 
     return (
-      <div className="l--offset l--default">
+      <div className="l--offset">
         <div className="l__main">
           <div className="l__primary">
-            <div className="l--subsection">
-              <RoomFilters onChange={this.onFilterChange} filters={filters} />
-            </div>
-            <RoomList
-              rooms={filterRooms(rooms, filters)}
-              onSelect={onSelect}
-              teaserProps={teaserProps}
-            />
+            <RoomFilters onChange={this.onFilterChange} filters={filters} />
+            <RoomList rooms={filterRooms(rooms ,filters)} onSelect={onSelect} />
           </div>
         </div>
       </div>

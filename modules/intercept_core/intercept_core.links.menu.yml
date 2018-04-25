@@ -1,5 +1,17 @@
+intercept_core.settings:
+  title: 'InterCEPT Settings'
+  description: 'Administer InterCEPT specific settings.'
+  route_name: intercept_core.settings
+  parent: system.admin_config
+
+intercept_core.general:
+  title: 'InterCEPT Settings'
+  description: 'InterCEPT general settings.'
+  route_name: intercept_core.general
+  parent: intercept_core.settings
+
 intercept_core.account.settings:
   title: 'Settings'
-  weight: 10
+  weight: 15
   route_name: intercept_core.account.settings
   menu_name: account

@@ -215,7 +215,7 @@ class ReserveRoomForm extends PureComponent {
           values={values}
         />
 
-        <Dialog
+        {/* <Dialog
           fullScreen
           open={this.state.open}
           onClose={this.handleClose}
@@ -240,7 +240,7 @@ class ReserveRoomForm extends PureComponent {
               <ListItemText primary="Default notification ringtone" secondary="Tethys" />
             </ListItem>
           </List>
-        </Dialog>
+        </Dialog> */}
       </div>
     );
   }

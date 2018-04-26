@@ -221,6 +221,13 @@ class ReserveRoom extends Component {
     //   />
     // );
 
+    const onRoomSelect = (id) => {
+      handleFormChange({
+        ...this.state.formValues,
+        [c.TYPE_ROOM]: id,
+      });
+    };
+
     return (
       <div className="l--offset l--sidebar-before">
         <header className="l__header">
@@ -242,9 +249,8 @@ class ReserveRoom extends Component {
             {selectionComponent}
           </div> */}
           <div className="l__primary">
-            <FindARoom onSelect={console.log} />
+            <FindARoom onSelect={onRoomSelect} />
           </div>
-
         </div>
       </div>
     );

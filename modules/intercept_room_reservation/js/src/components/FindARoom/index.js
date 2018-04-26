@@ -9,6 +9,7 @@ import drupalSettings from 'drupalSettings';
 // import PageSpinner from 'intercept/PageSpinner';
 import RoomFilters from './../RoomFilters';
 import RoomList from './../RoomList';
+import Button from 'material-ui/Button';
 
 const { constants, api, select } = interceptClient;
 const c = constants;
@@ -55,12 +56,7 @@ function filterRooms(items, filters) {
   );
 
   // Filter by Capcity.
-  output = filterByCapacity(
-    output,
-    filters,
-    'capacity',
-    'data.attributes.field_capacity_max',
-  );
+  output = filterByCapacity(output, filters, 'capacity', 'data.attributes.field_capacity_max');
 
   return output;
 }
@@ -81,13 +77,20 @@ class FindARoom extends Component {
   render() {
     const { rooms, onSelect } = this.props;
     const { filters } = this.state;
+    const teaserProps = {
+      footer: roomProps => (<Button onClick={() => onSelect(roomProps.uuid)} >Reserve</Button>),
+    };
 
     return (
       <div className="l--offset">
         <div className="l__main">
           <div className="l__primary">
             <RoomFilters onChange={this.onFilterChange} filters={filters} />
-            <RoomList rooms={filterRooms(rooms, filters)} onSelect={onSelect} />
+            <RoomList
+              rooms={filterRooms(rooms, filters)}
+              onSelect={onSelect}
+              teaserProps={teaserProps}
+            />
           </div>
         </div>
       </div>

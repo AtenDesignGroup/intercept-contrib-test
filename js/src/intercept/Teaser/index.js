@@ -14,6 +14,7 @@ const Teaser = (props) => {
     title,
     titleUrl,
     type,
+    uuid,
   } = props;
   const classes = `clearfix teaser ${modifiers.map(mod => `teaser--${mod}`).join(' ')}`;
 
@@ -24,7 +25,7 @@ const Teaser = (props) => {
   }
 
   return (
-    <article className={classes}>
+    <article uuid={uuid} className={classes}>
       <div className="teaser__image">
         {titleUrl && img ? (
           <a href={titleUrl} className="teaser__image-link" aria-hidden="true">
@@ -61,16 +62,17 @@ const Teaser = (props) => {
         )}
         {tags && <div className="teaser__tags">{tags}</div>}
 
-        {footer && <div className="teaser__footer">{footer}</div>}
+        {footer && <div className="teaser__footer">{footer(props)}</div>}
       </div>
     </article>
   );
 };
 
 Teaser.propTypes = {
+  uuid: PropTypes.string,
   date: PropTypes.object,
   description: PropTypes.string,
-  footer: PropTypes.arrayOf(PropTypes.node),
+  footer: PropTypes.func,
   image: PropTypes.string,
   modifiers: PropTypes.arrayOf(PropTypes.string),
   supertitle: PropTypes.string,
@@ -92,6 +94,7 @@ Teaser.defaultProps = {
   titleUrl: null,
   tags: null,
   type: null,
+  uuid: null,
 };
 
 export default Teaser;

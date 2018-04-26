@@ -27,6 +27,13 @@ function intercept_room_reservation_help($route_name, RouteMatchInterface $route
 }
 
 /**
+ * Implements hook_entity_type_alter().
+ */
+function intercept_room_reservation_entity_type_alter(array &$entity_types) {
+  /** @var $entity_types \Drupal\Core\Entity\EntityTypeInterface[] */
+  $entity_types['node']->setHandlerClass('access', '\Drupal\intercept_room_reservation\NodeAccessControlHandler');
+}
+/**
  * Implements hook_theme().
  */
 function intercept_room_reservation_theme() {

@@ -11,19 +11,17 @@ const c = constants;
 
 class RoomTeaser extends PureComponent {
   render() {
-    const { id, room, image } = this.props;
+    const { id, room, image, footer } = this.props;
 
     const termMap = item => ({
       id: item.id,
       name: get(item, 'attributes.name'),
     });
 
-
     const roomTypeValues = get(room, 'relationships.field_room_type');
-    const roomTypes =
-      roomTypeValues.id ? (
-        <FieldInline label="Room Type" key="roomType" values={termMap(roomTypeValues)} />
-      ) : null;
+    const roomTypes = roomTypeValues.id ? (
+      <FieldInline label="Room Type" key="roomType" values={termMap(roomTypeValues)} />
+    ) : null;
 
     const capacityValue = get(room, 'attributes.field_capacity_max');
     const capicity = capacityValue ? (
@@ -37,7 +35,9 @@ class RoomTeaser extends PureComponent {
     return (
       <Teaser
         key={id}
+        uuid={id}
         modifiers={[image ? 'with-image' : 'without-image']}
+        footer={footer}
         image={image}
         supertitle={get(room, 'relationships.field_location.attributes.title')}
         title={room.attributes.title}
@@ -52,10 +52,12 @@ RoomTeaser.propTypes = {
   id: PropTypes.string.isRequired,
   room: PropTypes.object.isRequired,
   image: PropTypes.string,
+  footer: PropTypes.func,
 };
 
 RoomTeaser.defaultProps = {
   image: null,
+  footer: null,
 };
 
 const mapStateToProps = (state, ownProps) => {

@@ -1,28 +1,23 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
-import map from 'lodash/map';
-import interceptClient from 'interceptClient';
 import RoomTeaser from 'intercept/RoomTeaser';
 import ContentList from 'intercept/ContentList';
 
-class RoomList extends Component {
+class RoomList extends React.Component {
   state = {};
 
   render() {
-    const { rooms } = this.props;
+    const { rooms, teaserProps, TeaserComponent } = this.props;
 
     const teasers = items =>
       items.map(item => ({
         key: item.data.id,
-        node: <RoomTeaser id={item.data.id} className="room-teaser" />,
+        node: <TeaserComponent uuid={item.data.id} id={item.data.id}className="room-teaser" {...teaserProps} />,
       }));
 
     const list =
       rooms.length > 0 ? (
-        <ContentList
-          items={teasers(rooms)}
-          key={0}
-        />
+        <ContentList items={teasers(rooms)} key={0} />
       ) : (
         <p key={0}>No rooms have been loaded.</p>
       );
@@ -33,6 +28,13 @@ class RoomList extends Component {
 
 RoomList.propTypes = {
   rooms: PropTypes.arrayOf(Object).isRequired,
+  TeaserComponent: PropTypes.func,
+  teaserProps: PropTypes.object,
+};
+
+RoomList.defaultProps = {
+  TeaserComponent: RoomTeaser,
+  teaserProps: {},
 };
 
 export default RoomList;

@@ -1,3 +1,10 @@
+entity.user.room_reservations:
+  path: '/user/{user}/room-reservations'
+  defaults:
+    _controller: '\Drupal\intercept_room_reservation\Controller\RoomReservationController::manage'
+  requirements:
+    node: \d+
+    _entity_access: 'user.update'
 
 intercept_room_reservation.reserve_room:
   path: '/reserve-room'
@@ -12,6 +19,6 @@ intercept_room_reservation.account.room_reservations:
   defaults:
     _controller: '\Drupal\intercept_core\Controller\UserAccount::userRedirect'
     _title: 'Room Reservations'
-    route_name: 'view.room_reservations.account'
+    route_name: 'entity.user.room_reservations'
   requirements:
     _user_is_logged_in: 'TRUE'

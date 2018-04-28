@@ -7,6 +7,7 @@ use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Url;
 use Drupal\intercept_room_reservation\Entity\RoomReservationInterface;
+use Drupal\user\UserInterface;
 
 /**
  * Class RoomReservationController.
@@ -14,6 +15,21 @@ use Drupal\intercept_room_reservation\Entity\RoomReservationInterface;
  *  Returns responses for Room reservation routes.
  */
 class RoomReservationController extends ControllerBase implements ContainerInjectionInterface {
+
+  /**
+   * Hello.
+   *
+   * @return string
+   *   Return Hello string.
+   */
+  public function manage(UserInterface $user) {
+    $build = [];
+    $build['#attached']['library'][] = 'intercept_room_reservation/manageRoomReservations';
+    $build['#markup'] = '';
+    $build['intercept_room_reserve']['#markup'] = '<div id="roomReservationsRoot" />';
+
+    return $build;
+  }
 
   /**
    * Displays a Room reservation  revision.

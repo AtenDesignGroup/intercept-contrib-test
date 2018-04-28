@@ -232,6 +232,9 @@ export const roomsAscending = createSelector(roomsArray, items =>
   items.sort((a, b) => recordLabel(a) - recordLabel(b)),
 );
 
+export const roomReservation = id => records(c.TYPE_ROOM_RESERVATION, id);
+export const roomReservations = records(c.TYPE_ROOM_RESERVATION);
+
 //
 // Tag
 //

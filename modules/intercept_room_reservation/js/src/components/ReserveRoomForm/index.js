@@ -15,6 +15,7 @@ import ExpansionPanel, {
 import { FormControlLabel } from 'material-ui/Form';
 import Switch from 'material-ui/Switch';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import Formsy, { addValidationRule } from 'formsy-react';
 import SelectResource from 'intercept/SelectResource';
 import InputDate from 'intercept/Input/InputDate';
 import InputTime from 'intercept/Input/InputTime';
@@ -33,10 +34,20 @@ const matchTime = (original, ref) => {
   output.setTime(original.getTime());
   output.setHours(ref.getHours());
   output.setMinutes(ref.getMinutes());
+  output.setSeconds(ref.getSeconds());
+  output.setMilliseconds(ref.getMilliseconds());
   return output;
 };
-
 const matchDate = (original, ref) => matchTime(ref, original);
+
+addValidationRule('isRequired', (values, value) => value !== '');
+addValidationRule('isPositive', (values, value) => value > 0);
+addValidationRule('isRequiredIfServingRefreshments', (values, value) => {
+  return !values.refreshments || value !== '';
+});
+addValidationRule('isFutureDate', (values, value) => value >= matchTime(new Date(), value));
+addValidationRule('isFutureTime', (values, value) => value > new Date());
+addValidationRule('isAfterStart', (values, value) => value > values.start);
 
 class ReserveRoomForm extends PureComponent {
   constructor(props) {
@@ -45,6 +56,7 @@ class ReserveRoomForm extends PureComponent {
     this.state = {
       expandRefreshments: false,
       openDialog: false,
+      canSubmit: false,
     };
 
     this.toggleState = this.toggleState.bind(this);
@@ -56,6 +68,10 @@ class ReserveRoomForm extends PureComponent {
     this.onOpenDialog = this.onOpenDialog.bind(this);
     this.onSwitchChange = this.onSwitchChange.bind(this);
     this.onValueChange = this.onValueChange.bind(this);
+
+    this.disableButton = this.disableButton.bind(this);
+    this.enableButton = this.enableButton.bind(this);
+
   }
 
   onInputChange(key) {
@@ -107,6 +123,14 @@ class ReserveRoomForm extends PureComponent {
     this.setState({ openDialog: false });
   };
 
+  disableButton() {
+    this.setState({ canSubmit: false });
+  }
+
+  enableButton() {
+    this.setState({ canSubmit: true });
+  }
+
   toggleState(key) {
     return () => {
       this.setState({
@@ -130,44 +154,75 @@ class ReserveRoomForm extends PureComponent {
 
     return (
       <div className="form">
-        <div className="form__main">
+        <Formsy
+          className="form__main"
+          ref="form"
+          onValidSubmit={this.onOpenDialog}
+          onValid={this.enableButton}
+          onInvalid={this.disableButton}
+        >
           <SelectResource
             multiple={false}
             type={c.TYPE_ROOM}
             handleChange={this.onInputChange(c.TYPE_ROOM)}
             value={values[c.TYPE_ROOM]}
             label={'Room'}
+            required
+            name={c.TYPE_ROOM}
           />
           <div className="input-group--date-time">
             <InputDate
               handleChange={this.onDateChange}
               defaultValue={null}
               value={values[c.DATE]}
+              name={c.DATE}
+              required
+              clearable={false}
+              validations="isFutureDate"
+              validationError="Date must be in the future"
             />
             <InputTime
               clearable
               label="Start Time"
               value={values.start}
               onChange={this.onValueChange('start')}
+              name="start"
+              required
+              validations="isFutureTime"
+              validationError="Must be in the future"
             />
             <InputTime
               clearable
               label="End Time"
               value={values.end}
               onChange={this.onValueChange('end')}
+              name="end"
+              required
+              validations={{
+                isFutureTime: true,
+                isAfterStart: true,
+              }}
+              validationErrors={{
+                isFutureTime: 'Must be in the future',
+                isAfterStart: 'Must be after start time',
+              }}
             />
           </div>
           <InputNumber
             label="Number of Attendees"
             value={values.attendees}
             onChange={this.onValueChange('attendees')}
+            name={'attendees'}
             min={0}
             int
+            validations="isPositive"
+            validationError="Attendees must be a positive number"
           />
           <InputText
             label="Group Name"
-            value={values.groupName}
             onChange={this.onValueChange('groupName')}
+            value={values.groupName}
+            name="groupName"
           />
           <ExpansionPanel
             elevation={0}
@@ -196,15 +251,19 @@ class ReserveRoomForm extends PureComponent {
                 label="Please describe your light refreshments."
                 value={values.refreshmentsDesc}
                 onChange={this.onValueChange('refreshmentsDesc')}
+                name="refreshmentDesc"
+                required={values.refreshments}
+                validations={'isRequiredIfServingRefreshments'}
+                validationError={'This field is required if serving refreshments'}
               />
             </ExpansionPanelDetails>
           </ExpansionPanel>
-        </div>
-        <div className="form__actions">
-          <Button onClick={this.onOpenDialog} color="primary">
-            Reserve
-          </Button>
-        </div>
+          <div className="form__actions">
+            <Button type="submit" color="primary" disabled={!this.state.canSubmit}>
+              Reserve
+            </Button>
+          </div>
+        </Formsy>
         <ReserveRoomConfirmation
           open={this.state.openDialog}
           onCancel={this.onCloseDialog}

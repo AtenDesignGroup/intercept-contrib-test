@@ -2,6 +2,8 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 
+import Formsy from 'formsy-react';
+
 // Lodash
 import map from 'lodash/map';
 
@@ -75,10 +77,11 @@ class EventFilters extends PureComponent {
     return (
       <div className="filters">
         <h3 className="filters__heading">Filter</h3>
-        <div className="filters__inputs">
+        <Formsy className="filters__inputs">
           <SelectResource
             multiple
             type={c.TYPE_LOCATION}
+            name={c.TYPE_LOCATION}
             handleChange={this.onInputChange(c.TYPE_LOCATION)}
             value={filters[c.TYPE_LOCATION]}
             label={labels[c.TYPE_LOCATION]}
@@ -86,6 +89,7 @@ class EventFilters extends PureComponent {
           <SelectResource
             multiple
             type={c.TYPE_ROOM_TYPE}
+            name={c.TYPE_ROOM_TYPE}
             handleChange={this.onInputChange(c.TYPE_ROOM_TYPE)}
             value={filters[c.TYPE_ROOM_TYPE]}
             label={labels[c.TYPE_ROOM_TYPE]}
@@ -95,8 +99,9 @@ class EventFilters extends PureComponent {
             handleChange={this.onInputChange('capacity')}
             value={filters.capacity}
             label={labels.capacity}
+            name={'capacity'}
           />
-        </div>
+        </Formsy>
         <div className="filters__current">
           <CurrentFilters filters={currentFilters} onChange={this.onFilterChange} />
         </div>

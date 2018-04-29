@@ -44,24 +44,26 @@ const Teaser = (props) => {
           </div>
         )}
       </div>
-      <div className="teaser__content clearfix">
-        {type && <span className="teaser__type">{type}</span>}
-        {supertitle && <span className="teaser__supertitle">{supertitle}</span>}
-        <h3 className="teaser__title">
-          {titleUrl ? (
-            <a href={titleUrl} className="teaser__title-link">
-              {title}
-            </a>
-          ) : (
-            title
+      <div className="teaser__main clearfix">
+        <div className="teaser__content">
+          {type && <span className="teaser__type">{type}</span>}
+          {supertitle && <span className="teaser__supertitle">{supertitle}</span>}
+          <h3 className="teaser__title">
+            {titleUrl ? (
+              <a href={titleUrl} className="teaser__title-link">
+                {title}
+              </a>
+            ) : (
+              title
+            )}
+          </h3>
+          {subtitle && <span className="teaser__subtitle">{subtitle}</span>}
+          {description && (
+            <div className="teaser__description" dangerouslySetInnerHTML={createMarkup(description)} />
           )}
-        </h3>
-        {subtitle && <span className="teaser__subtitle">{subtitle}</span>}
-        {description && (
-          <div className="teaser__description" dangerouslySetInnerHTML={createMarkup(description)} />
-        )}
-        {tags && <div className="teaser__tags">{tags}</div>}
+          {tags && <div className="teaser__tags">{tags}</div>}
 
+        </div>
         {footer && <div className="teaser__footer">{footer(props)}</div>}
       </div>
     </article>

@@ -7,6 +7,7 @@ import { FormControl } from 'material-ui/Form';
 import { ListItemText } from 'material-ui/List';
 import Select from 'material-ui/Select';
 import Checkbox from 'material-ui/Checkbox';
+import { withFormsy, propTypes, defaultProps } from 'formsy-react';
 
 const styles = theme => ({
   root: {
@@ -53,7 +54,8 @@ class SelectMultiple extends React.Component {
   };
 
   render() {
-    const { options, label, value, multiple } = this.props;
+    const { options, label, multiple } = this.props;
+    const value = this.props.getValue();
     const checkboxId = id => `select-filter--${id}`;
     const checkboxLabel = (text, id) => (
       <label className="select-filter__checkbox-label" htmlFor={id}>
@@ -74,19 +76,23 @@ class SelectMultiple extends React.Component {
 
           <Select
             multiple={multiple}
-            value={value === null ? '' : value}
+            value={!value ? '' : value}
             onChange={this.handleChange}
-            input={<Input id="select-multiple-chip" />}
+            input={<Input id="select-multiple-chip"  />}
             renderValue={() => null}
             MenuProps={MenuProps}
+            error={!this.props.isValid()}
+            required={this.props.required}
           >
             {options.map(option => (
               <MenuItem key={option.key} value={option.key} className="select-filter__menu-item">
-                {multiple && <Checkbox
-                  checked={multiple ? value.indexOf(option.key) > -1 : value === option.key}
-                  id={checkboxId(option.key)}
-                  className="select-filter__checkbox"
-                />}
+                {multiple && (
+                  <Checkbox
+                    checked={multiple ? value.indexOf(option.key) > -1 : value === option.key}
+                    id={checkboxId(option.key)}
+                    className="select-filter__checkbox"
+                  />
+                )}
                 <ListItemText
                   disableTypography
                   primary={checkboxLabel(option.value, checkboxId(option.key))}
@@ -113,4 +119,4 @@ SelectMultiple.defaultProps = {
   multiple: false,
 };
 
-export default withStyles(styles, { withTheme: true })(SelectMultiple);
+export default withStyles(styles, { withTheme: true })(withFormsy(SelectMultiple));

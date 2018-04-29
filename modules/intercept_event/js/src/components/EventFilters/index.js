@@ -2,6 +2,9 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 
+// Formsy
+import Formsy from 'formsy-react';
+
 // Lodash
 import map from 'lodash/map';
 
@@ -67,15 +70,17 @@ class EventFilters extends PureComponent {
     return (
       <div className="filters">
         <h3 className="filters__heading">Filter</h3>
-        <div className="filters__inputs">
+        <Formsy className="filters__inputs">
           <KeywordFilter
             handleChange={this.onInputChange(c.KEYWORD)}
             value={filters[c.KEYWORD]}
+            name={c.KEYWORD}
             label={labels[c.KEYWORD]}
           />
           <SelectResource
             multiple
             type={c.TYPE_LOCATION}
+            name={c.TYPE_LOCATION}
             handleChange={this.onInputChange(c.TYPE_LOCATION)}
             value={filters[c.TYPE_LOCATION]}
             label={labels[c.TYPE_LOCATION]}
@@ -83,6 +88,7 @@ class EventFilters extends PureComponent {
           <SelectResource
             multiple
             type={c.TYPE_EVENT_TYPE}
+            name={c.TYPE_EVENT_TYPE}
             handleChange={this.onInputChange(c.TYPE_EVENT_TYPE)}
             value={filters[c.TYPE_EVENT_TYPE]}
             label={labels[c.TYPE_EVENT_TYPE]}
@@ -90,14 +96,15 @@ class EventFilters extends PureComponent {
           <SelectResource
             multiple
             type={c.TYPE_AUDIENCE}
+            name={c.TYPE_AUDIENCE}
             handleChange={this.onInputChange(c.TYPE_AUDIENCE)}
             value={filters[c.TYPE_AUDIENCE]}
             label={labels[c.TYPE_AUDIENCE]}
           />
           {showDate && (
-            <DateFilter handleChange={this.onDateChange} defaultValue={null} value={filters.date} />
+            <DateFilter handleChange={this.onDateChange} defaultValue={null} value={filters.date} name="date" />
           )}
-        </div>
+        </Formsy>
         <div className="filters__current">
           <CurrentFilters filters={currentFilters} onChange={this.onFilterChange} />
         </div>

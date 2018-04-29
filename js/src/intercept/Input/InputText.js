@@ -1,40 +1,50 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import TextField from 'material-ui/TextField';
-import moment from 'moment';
+import { withFormsy, propTypes, defaultProps } from 'formsy-react';
 
-function InputTime(props) {
-  const { value, label, onChange } = props;
+class InputText extends React.Component {
+  render() {
+    const { label, isValid, onChange, getErrorMessages, isRequired } = this.props;
 
-  const handleChange = (event) => {
-    onChange(event.target.value);
-  };
+    const handleChange = (event) => {
+      // onChange(event.target.value);
+      this.props.setValue(event.target.value);
+    };
 
-  return (
-    <TextField
-      label={label}
-      type="text"
-      onChange={handleChange}
-      value={value}
-      className="input input--text"
-      InputLabelProps={{
-        shrink: true,
-        className: 'input__label',
-      }}
-      inputProps={{}}
-    />
-  );
+    return (
+      <TextField
+        label={label}
+        type="text"
+        onChange={handleChange}
+        value={this.props.getValue()}
+        className="input input--text"
+        InputLabelProps={{
+          shrink: true,
+          className: 'input__label',
+        }}
+        inputProps={{}}
+        error={!isValid()}
+        helperText={this.props.getErrorMessage()}
+        required={isRequired()}
+      />
+    );
+  }
 }
 
-InputTime.propTypes = {
+InputText.propTypes = {
+  ...propTypes,
   onChange: PropTypes.func.isRequired,
   value: PropTypes.string,
   label: PropTypes.string,
+  validators: PropTypes.arrayOf(String),
 };
 
-InputTime.defaultProps = {
+InputText.defaultProps = {
+  ...defaultProps,
   value: '',
   label: 'Text',
+  validators: [],
 };
 
-export default InputTime;
+export default withFormsy(InputText);

@@ -6,6 +6,7 @@ import { MenuItem } from 'material-ui/Menu';
 import { FormControl } from 'material-ui/Form';
 import { ListItemText } from 'material-ui/List';
 import Select from 'material-ui/Select';
+import { withFormsy, propTypes, defaultProps } from 'formsy-react';
 
 const styles = theme => ({
   root: {
@@ -48,11 +49,13 @@ const MenuProps = {
 
 class SelectSingle extends React.Component {
   handleChange = (event) => {
+    this.props.setValue(event.target.value);
     this.props.handleChange(event);
   };
 
   render() {
-    const { options, label, value} = this.props;
+    const { options, label } = this.props;
+    const value = this.props.getValue();
     const checkboxId = id => `select-filter--${id}`;
     const checkboxLabel = (text, id) => (
       <label className="select-filter__checkbox-label" htmlFor={id}>
@@ -72,11 +75,13 @@ class SelectSingle extends React.Component {
           </InputLabel>
 
           <Select
-            value={value === null ? '' : value}
+            value={value === null || !value ? '' : value}
             onChange={this.handleChange}
             input={<Input id="select-multiple-chip" />}
             // renderValue={(value) => value}
             MenuProps={MenuProps}
+            error={!this.props.isValid()}
+            required={this.props.required}
           >
             {options.map(option => (
               <MenuItem key={option.key} value={option.key} className="select-filter__menu-item">
@@ -94,6 +99,7 @@ class SelectSingle extends React.Component {
 }
 
 SelectSingle.propTypes = {
+  ...propTypes,
   label: PropTypes.string.isRequired,
   value: PropTypes.oneOfType([PropTypes.arrayOf(String), PropTypes.string]),
   options: PropTypes.arrayOf(Object).isRequired,
@@ -102,8 +108,9 @@ SelectSingle.propTypes = {
 };
 
 SelectSingle.defaultProps = {
+  ...defaultProps,
   value: null,
   multiple: false,
 };
 
-export default withStyles(styles, { withTheme: true })(SelectSingle);
+export default withStyles(styles, { withTheme: true })(withFormsy(SelectSingle));

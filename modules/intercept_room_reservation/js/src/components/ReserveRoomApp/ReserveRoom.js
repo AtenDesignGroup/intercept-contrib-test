@@ -8,7 +8,6 @@ import drupalSettings from 'drupalSettings';
 import ViewSwitcher from 'intercept/ViewSwitcher';
 import PageSpinner from 'intercept/PageSpinner';
 import RoomFilters from './../RoomFilters';
-import FindARoom from './../FindARoom';
 import ReserveRoomForm from './../ReserveRoomForm';
 import RoomList from './../RoomList';
 import RoomCalendar from './../RoomCalendar';
@@ -135,6 +134,16 @@ class ReserveRoom extends Component {
           .toDate(),
         attendees: 1,
         groupName: '',
+        meeting: false,
+        meetingStart: moment()
+          .startOf('hour')
+          .add(1, 'h')
+          .toDate(),
+        meetingEnd: moment()
+          .startOf('hour')
+          .add(2, 'h')
+          .toDate(),
+        [c.TYPE_MEETING_PURPSE]: null,
         refreshments: false,
         refreshmentsDesc: '',
         user: drupalSettings.intercept.user.uuid,
@@ -221,13 +230,6 @@ class ReserveRoom extends Component {
     //   />
     // );
 
-    const onRoomSelect = (id) => {
-      handleFormChange({
-        ...this.state.formValues,
-        [c.TYPE_ROOM]: id,
-      });
-    };
-
     return (
       <div className="l--offset l--sidebar-before">
         <header className="l__header">
@@ -249,7 +251,7 @@ class ReserveRoom extends Component {
             {selectionComponent}
           </div> */}
           <div className="l__primary">
-            <FindARoom onSelect={onRoomSelect} />
+
           </div>
         </div>
       </div>

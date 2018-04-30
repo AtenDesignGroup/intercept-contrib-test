@@ -3,14 +3,15 @@ import PropTypes from 'prop-types';
 import TextField from 'material-ui/TextField';
 import { withFormsy, propTypes, defaultProps } from 'formsy-react';
 
-class InputNumber extends React.Component {
+class InputNumber extends React.PureComponent {
   render() {
-    const { step, label, onChange, min, max, int } = this.props;
+    const { step, label, onChange, min, max, int, required } = this.props;
 
     const handleChange = (event) => {
       const parse = int ? parseInt : parseFloat;
-      this.props.setValue(event.target.value ? parse(event.target.value) : null);
-      // onChange(event.target.value ? parse(event.target.value) : null);
+      const v = event.target.value ? parse(event.target.value) : null;
+      this.props.setValue(v);
+      onChange(v);
     };
 
     const value = this.props.getValue();
@@ -18,6 +19,7 @@ class InputNumber extends React.Component {
     return (
       <TextField
         label={label}
+        required={required}
         type="number"
         onChange={handleChange}
         value={value === null ? '' : value}

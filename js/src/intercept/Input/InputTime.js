@@ -7,13 +7,14 @@ import { propTypes, defaultProps } from 'formsy-react';
 
 class InputTime extends React.Component {
   render() {
-    const { step, label, onChange } = this.props;
+    const { step, label, onChange, required } = this.props;
     const value = this.props.getValue();
 
     const handleChange = (event) => {
       const date = moment(event.target.value, 'HH:mm');
-      this.props.setValue(date.isValid() ? date.toDate() : null);
-      // onChange(date.isValid() ? date.toDate() : null);
+      const d = date.isValid() ? date.toDate() : null;
+      this.props.setValue(d);
+      onChange(d);
     };
 
     return (
@@ -23,6 +24,7 @@ class InputTime extends React.Component {
         onChange={handleChange}
         value={moment(value).format('HH:mm')}
         className="input input--time"
+        required={required}
         InputLabelProps={{
           shrink: true,
           className: 'input__label',

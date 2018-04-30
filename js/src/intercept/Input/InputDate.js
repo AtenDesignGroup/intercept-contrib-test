@@ -26,11 +26,12 @@ const InputLabelProps = value => ({
 
 class InputDate extends React.Component {
   render() {
-    const { handleChange, clearable } = this.props;
+    const { handleChange, clearable, required } = this.props;
     const value = this.props.getValue();
     const onChange = (date) => {
-      // handleChange(date.toDate())
-      this.props.setValue(date.toDate());
+      const d = date.toDate();
+      handleChange(d)
+      this.props.setValue(d);
     };
     const onClear = () => handleChange(null);
     const inputValue = value === '' ? null : value;
@@ -42,6 +43,7 @@ class InputDate extends React.Component {
           onClear={onClear}
           clearable={clearable}
           label={'Date'}
+          required={required}
           InputLabelProps={InputLabelProps(inputValue)}
           value={inputValue}
           className="date-filter input input--date"

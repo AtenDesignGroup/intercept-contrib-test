@@ -70,6 +70,7 @@ class SelectMultiple extends React.Component {
             className="select-filter__label"
             htmlFor="select-multiple-chip"
             shrink={false}
+            required={this.props.required}
           >
             {label}
           </InputLabel>
@@ -78,7 +79,7 @@ class SelectMultiple extends React.Component {
             multiple={multiple}
             value={!value ? '' : value}
             onChange={this.handleChange}
-            input={<Input id="select-multiple-chip"  />}
+            input={<Input id="select-multiple-chip" />}
             renderValue={() => null}
             MenuProps={MenuProps}
             error={!this.props.isValid()}

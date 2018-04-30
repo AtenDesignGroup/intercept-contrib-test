@@ -69,6 +69,7 @@ class SelectSingle extends React.Component {
           <InputLabel
             className="select-filter__label"
             htmlFor="select-multiple-chip"
+            required={this.props.required}
             // shrink={false}
           >
             {label}

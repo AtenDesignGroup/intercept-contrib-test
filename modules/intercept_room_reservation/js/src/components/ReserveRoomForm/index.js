@@ -15,6 +15,16 @@ import ExpansionPanel, {
 import { FormControlLabel } from 'material-ui/Form';
 import Switch from 'material-ui/Switch';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+
+// Dialog
+import AppBar from 'material-ui/AppBar';
+import Dialog from 'material-ui/Dialog';
+import Toolbar from 'material-ui/Toolbar';
+import IconButton from 'material-ui/IconButton';
+import Typography from 'material-ui/Typography';
+import CloseIcon from '@material-ui/icons/Close';
+import Slide from 'material-ui/transitions/Slide';
+
 import Formsy, { addValidationRule } from 'formsy-react';
 import SelectResource from 'intercept/SelectResource';
 import InputDate from 'intercept/Input/InputDate';
@@ -22,6 +32,7 @@ import InputTime from 'intercept/Input/InputTime';
 import InputNumber from 'intercept/Input/InputNumber';
 import InputText from 'intercept/Input/InputText';
 import ReserveRoomConfirmation from './ReserveRoomConfirmation';
+import FindARoom from './../FindARoom';
 
 const { constants } = interceptClient;
 const c = constants;
@@ -42,19 +53,35 @@ const matchDate = (original, ref) => matchTime(ref, original);
 
 addValidationRule('isRequired', (values, value) => value !== '');
 addValidationRule('isPositive', (values, value) => value > 0);
-addValidationRule('isRequiredIfServingRefreshments', (values, value) => {
-  return !values.refreshments || value !== '';
-});
+addValidationRule(
+  'isRequiredIfServingRefreshments',
+  (values, value) => !values.refreshments || value !== '',
+);
+addValidationRule('isRequiredIfMeeting', (values, value) => !values.meeting || value !== '');
 addValidationRule('isFutureDate', (values, value) => value >= matchTime(new Date(), value));
 addValidationRule('isFutureTime', (values, value) => value > new Date());
 addValidationRule('isAfterStart', (values, value) => value > values.start);
+addValidationRule('isOnOrAfterStart', (values, value) => value >= values.start);
+addValidationRule('isBeforeEnd', (values, value) => value < values.end);
+addValidationRule('isOnOrBeforeEnd', (values, value) => value <= values.end);
+addValidationRule('isAfterMeetingStart', (values, value) => value > values.meetingStart);
+
+function Transition(props) {
+  return <Slide direction="up" {...props} />;
+}
 
 class ReserveRoomForm extends PureComponent {
   constructor(props) {
     super(props);
 
     this.state = {
-      expandRefreshments: false,
+      expand: {
+        refreshments: false,
+        meeting: false,
+        confirm: false,
+        findRoom: false,
+        findTime: false,
+      },
       openDialog: false,
       canSubmit: false,
     };
@@ -68,10 +95,10 @@ class ReserveRoomForm extends PureComponent {
     this.onOpenDialog = this.onOpenDialog.bind(this);
     this.onSwitchChange = this.onSwitchChange.bind(this);
     this.onValueChange = this.onValueChange.bind(this);
+    this.onRoomSelect = this.onRoomSelect.bind(this);
 
     this.disableButton = this.disableButton.bind(this);
     this.enableButton = this.enableButton.bind(this);
-
   }
 
   onInputChange(key) {
@@ -110,10 +137,18 @@ class ReserveRoomForm extends PureComponent {
     return (event) => {
       this.updateValue(key, event.target.checked);
       this.setState({
-        expandRefreshments: event.target.checked,
+        expand: {
+          ...this.state.expand,
+          [key]: event.target.checked,
+        },
       });
     };
   }
+
+  onRoomSelect = (id) => {
+    this.collapse('findRoom')();
+    this.onValueChange(c.TYPE_ROOM)(id);
+  };
 
   onOpenDialog = () => {
     this.setState({ openDialog: true });
@@ -134,7 +169,32 @@ class ReserveRoomForm extends PureComponent {
   toggleState(key) {
     return () => {
       this.setState({
-        [key]: !this.state[key],
+        expand: {
+          ...this.state.expand,
+          [key]: !this.state.expand[key],
+        },
+      });
+    };
+  }
+
+  expand(key) {
+    return () => {
+      this.setState({
+        expand: {
+          ...this.state.expand,
+          [key]: true,
+        },
+      });
+    };
+  }
+
+  collapse(key) {
+    return () => {
+      this.setState({
+        expand: {
+          ...this.state.expand,
+          [key]: false,
+        },
       });
     };
   }
@@ -170,6 +230,7 @@ class ReserveRoomForm extends PureComponent {
             required
             name={c.TYPE_ROOM}
           />
+          <Button onClick={this.expand('findRoom')}>Find a Room</Button>
           <div className="input-group--date-time">
             <InputDate
               handleChange={this.onDateChange}
@@ -208,26 +269,103 @@ class ReserveRoomForm extends PureComponent {
               }}
             />
           </div>
-          <InputNumber
-            label="Number of Attendees"
-            value={values.attendees}
-            onChange={this.onValueChange('attendees')}
-            name={'attendees'}
-            min={0}
-            int
-            validations="isPositive"
-            validationError="Attendees must be a positive number"
-          />
-          <InputText
-            label="Group Name"
-            onChange={this.onValueChange('groupName')}
-            value={values.groupName}
-            name="groupName"
-          />
+
           <ExpansionPanel
             elevation={0}
-            expanded={this.state.expandRefreshments}
-            onChange={this.toggleState('expandRefreshments')}
+            expanded={this.state.expand.meeting}
+            onChange={this.toggleState('meeting')}
+            className={'input-group input-group--expandable'}
+          >
+            <ExpansionPanelSummary
+              expandIcon={<ExpandMoreIcon />}
+              className={'input-group__summary'}
+            >
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={values.meeting}
+                    onChange={this.onSwitchChange('meeting')}
+                    value="meeting"
+                    name="meeting"
+                  />
+                }
+                label="Are you hosting a meeting?"
+                className={'input__label'}
+              />
+            </ExpansionPanelSummary>
+            <ExpansionPanelDetails className={'input-group__details'}>
+              <div className="input-group--date-time">
+                <InputTime
+                  clearable
+                  label="Meeting Start Time"
+                  value={values.meetingStart}
+                  onChange={this.onValueChange('meetingStart')}
+                  name="meetingStart"
+                  required={values.meeting}
+                  validations={{
+                    isFutureTime: true,
+                    isOnOrAfterStart: true,
+                    isOnOrBeforeEnd: true,
+                  }}
+                  validationErrors={{
+                    isFutureTime: 'Must be in the future',
+                    isOnOrAfterStart: 'Must be on or after reservation start time',
+                    isOnOrBeforeEnd: 'Must be on or before reservation end time',
+                  }}
+                />
+                <InputTime
+                  clearable
+                  label="Meeting End Time"
+                  value={values.meetingEnd}
+                  onChange={this.onValueChange('meetingEnd')}
+                  name="meetingEnd"
+                  required={values.meeting}
+                  validations={{
+                    isFutureTime: true,
+                    isOnOrBeforeEnd: true,
+                    isAfterMeetingStart: true,
+                  }}
+                  validationErrors={{
+                    isFutureTime: 'Must be in the future',
+                    isOnOrBeforeEnd: 'Must be on or before reservation end time',
+                    isAfterMeetingStart: 'Must be after meeting start time',
+                  }}
+                />
+              </div>
+              <InputNumber
+                label="Number of Attendees"
+                value={values.attendees}
+                onChange={this.onValueChange('attendees')}
+                name={'attendees'}
+                min={0}
+                int
+                required={values.meeting}
+                validations="isPositive"
+                validationError="Attendees must be a positive number"
+              />
+              <InputText
+                label="Group Name"
+                onChange={this.onValueChange('groupName')}
+                value={values.groupName}
+                name="groupName"
+                required={values.meeting}
+                validations={'isRequiredIfMeeting'}
+                validationError={'This field is required if having a meeting'}
+              />
+              <SelectResource
+                type={c.TYPE_MEETING_PURPOSE}
+                name={c.TYPE_MEETING_PURPOSE}
+                handleChange={this.onInputChange(c.TYPE_MEETING_PURPOSE)}
+                value={values.meetingPurpose}
+                label={'Meeting Purpose'}
+                required={values.meeting}
+              />
+            </ExpansionPanelDetails>
+          </ExpansionPanel>
+          <ExpansionPanel
+            elevation={0}
+            expanded={this.state.expand.refreshments}
+            onChange={this.toggleState('refreshments')}
             className={'input-group input-group--expandable'}
           >
             <ExpansionPanelSummary
@@ -240,6 +378,7 @@ class ReserveRoomForm extends PureComponent {
                     checked={values.refreshments}
                     onChange={this.onSwitchChange('refreshments')}
                     value="refreshments"
+                    name="refreshments"
                   />
                 }
                 label="Serving light refreshments?"
@@ -274,32 +413,28 @@ class ReserveRoomForm extends PureComponent {
           values={values}
         />
 
-        {/* <Dialog
+        <Dialog
           fullScreen
-          open={this.state.open}
-          onClose={this.handleClose}
+          open={this.state.expand.findRoom}
+          onClose={() => {}}
           transition={Transition}
         >
-          <AppBar className={classes.appBar}>
+          <AppBar className={'app-bar'}>
             <Toolbar>
-              <IconButton color="inherit" onClick={this.handleClose} aria-label="Close">
+              <IconButton
+                color="inherit"
+                onClick={this.collapse('findRoom')}
+                aria-label="Close"
+              >
                 <CloseIcon />
               </IconButton>
-              <Typography variant="title" color="inherit" className={classes.flex}>
+              <Typography variant="title" color="inherit" className={'app-bar_heading'}>
                 Find a Room
               </Typography>
             </Toolbar>
           </AppBar>
-          <List>
-            <ListItem button>
-              <ListItemText primary="Phone ringtone" secondary="Titania" />
-            </ListItem>
-            <Divider />
-            <ListItem button>
-              <ListItemText primary="Default notification ringtone" secondary="Tethys" />
-            </ListItem>
-          </List>
-        </Dialog> */}
+          <FindARoom onSelect={this.onRoomSelect} />
+        </Dialog>
       </div>
     );
   }
@@ -313,6 +448,10 @@ ReserveRoomForm.propTypes = {
     end: PropTypes.instanceOf(Date),
     attendees: PropTypes.number,
     groupName: PropTypes.string,
+    meetings: PropTypes.bool,
+    meetingStart: PropTypes.instanceOf(Date),
+    meetingEnd: PropTypes.instanceOf(Date),
+    [c.TYPE_MEETING_PURPOSE]: PropTypes.string,
     refreshments: PropTypes.bool,
     refreshmentsDesc: PropTypes.string,
     user: PropTypes.string,
@@ -328,6 +467,10 @@ ReserveRoomForm.defaultProps = {
     end: new Date(),
     attendees: 1,
     groupName: '',
+    meetings: false,
+    meetingStart: new Date(),
+    meetingEnd: new Date(),
+    meetingPurpose: '',
     refreshments: false,
     refreshmentsDesc: '',
     user: drupalSettings.intercept.user.uuid,

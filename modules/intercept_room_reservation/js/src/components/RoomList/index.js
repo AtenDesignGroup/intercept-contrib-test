@@ -3,9 +3,7 @@ import PropTypes from 'prop-types';
 import RoomTeaser from 'intercept/RoomTeaser';
 import ContentList from 'intercept/ContentList';
 
-class RoomList extends React.Component {
-  state = {};
-
+class RoomList extends React.PureComponent {
   render() {
     const { rooms, teaserProps, TeaserComponent } = this.props;
 

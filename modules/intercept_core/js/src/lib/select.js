@@ -5,6 +5,7 @@ import groupBy from 'lodash/groupBy';
 import map from 'lodash/map';
 import mapValues from 'lodash/mapValues';
 import moment from 'moment';
+import cloneDeep from 'lodash/cloneDeep';
 import pickBy from 'lodash/pickBy';
 import sortBy from 'lodash/sortBy';
 import intercept from 'intercept-client';
@@ -43,12 +44,13 @@ export const getDayDisplay = (date) => {
   return moment(date).format('dddd, MMMM D, YYYY');
 };
 
-
 // Get a formatted time string.
-export const getTimeDisplay = (date) => {
+export const getTimeDisplay = date =>
   // 2p.m.
-  return moment(date).format('h:mm a').replace('m', '.m.');
-};
+  moment(date)
+    .format('h:mm a')
+    .replace('m', '.m.')
+;
 
 /**
  * Returns an array of published records.
@@ -109,7 +111,6 @@ export const bundle = identifier => (state) => {
   }
 
   const base = record(identifier)(state);
-
   // Just return an id if no record is found.
   // @todo This should probably be handled better and a warning or exception thrown
   //  as it could result in unintended side effects.
@@ -118,7 +119,7 @@ export const bundle = identifier => (state) => {
   }
 
   // Create temporary entity.
-  const entity = { ...base.data };
+  const entity = cloneDeep(base.data);
   const relationships = base.data.relationships;
   const selectors = [];
 

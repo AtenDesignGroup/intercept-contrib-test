@@ -221,182 +221,192 @@ class ReserveRoomForm extends PureComponent {
           onValid={this.enableButton}
           onInvalid={this.disableButton}
         >
-          <SelectResource
-            multiple={false}
-            type={c.TYPE_ROOM}
-            handleChange={this.onInputChange(c.TYPE_ROOM)}
-            value={values[c.TYPE_ROOM]}
-            label={'Room'}
-            required
-            name={c.TYPE_ROOM}
-          />
-          <Button onClick={this.expand('findRoom')}>Find a Room</Button>
-          <div className="input-group--date-time">
-            <InputDate
-              handleChange={this.onDateChange}
-              defaultValue={null}
-              value={values[c.DATE]}
-              name={c.DATE}
+          <div className="l--subsection">
+            <h4 className="">Choose a Room</h4>
+            <SelectResource
+              multiple={false}
+              type={c.TYPE_ROOM}
+              handleChange={this.onInputChange(c.TYPE_ROOM)}
+              value={values[c.TYPE_ROOM]}
+              label={'Room'}
               required
-              clearable={false}
-              validations="isFutureDate"
-              validationError="Date must be in the future"
+              name={c.TYPE_ROOM}
             />
-            <InputTime
-              clearable
-              label="Start Time"
-              value={values.start}
-              onChange={this.onValueChange('start')}
-              name="start"
-              required
-              validations="isFutureTime"
-              validationError="Must be in the future"
-            />
-            <InputTime
-              clearable
-              label="End Time"
-              value={values.end}
-              onChange={this.onValueChange('end')}
-              name="end"
-              required
-              validations={{
-                isFutureTime: true,
-                isAfterStart: true,
-              }}
-              validationErrors={{
-                isFutureTime: 'Must be in the future',
-                isAfterStart: 'Must be after start time',
-              }}
-            />
+            <Button onClick={this.expand('findRoom')}>Browse Rooms -></Button>
           </div>
 
-          <ExpansionPanel
-            elevation={0}
-            expanded={this.state.expand.meeting}
-            onChange={this.toggleState('meeting')}
-            className={'input-group input-group--expandable'}
-          >
-            <ExpansionPanelSummary
-              expandIcon={<ExpandMoreIcon />}
-              className={'input-group__summary'}
+          <div className="l--subsection">
+            <h4 className="">Choose a Time</h4>
+            <div className="input-group--date-time">
+              <InputDate
+                handleChange={this.onDateChange}
+                defaultValue={null}
+                value={values[c.DATE]}
+                name={c.DATE}
+                required
+                clearable={false}
+                validations="isFutureDate"
+                validationError="Date must be in the future"
+              />
+              <InputTime
+                clearable
+                label="Start Time"
+                value={values.start}
+                onChange={this.onValueChange('start')}
+                name="start"
+                required
+                validations="isFutureTime"
+                validationError="Must be in the future"
+              />
+              <InputTime
+                clearable
+                label="End Time"
+                value={values.end}
+                onChange={this.onValueChange('end')}
+                name="end"
+                required
+                validations={{
+                  isFutureTime: true,
+                  isAfterStart: true,
+                }}
+                validationErrors={{
+                  isFutureTime: 'Must be in the future',
+                  isAfterStart: 'Must be after start time',
+                }}
+              />
+            </div>
+          </div>
+          <div className="l--subsection">
+            <h4 className="">Hosting a group?</h4>
+            <ExpansionPanel
+              elevation={0}
+              expanded={this.state.expand.meeting}
+              onChange={this.toggleState('meeting')}
+              className={'input-group input-group--expandable'}
             >
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={values.meeting}
-                    onChange={this.onSwitchChange('meeting')}
-                    value="meeting"
-                    name="meeting"
+              <ExpansionPanelSummary expandIcon={null} className={'input-group__summary'}>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={values.meeting}
+                      onChange={this.onSwitchChange('meeting')}
+                      value="meeting"
+                      name="meeting"
+                    />
+                  }
+                  label="Yes"
+                  className={'input__label'}
+                />
+              </ExpansionPanelSummary>
+              <ExpansionPanelDetails className={'input-group__details'}>
+                <div className="input-group--date-time">
+                  <InputTime
+                    clearable
+                    label="Meeting Start Time"
+                    value={values.meetingStart}
+                    onChange={this.onValueChange('meetingStart')}
+                    name="meetingStart"
+                    required={values.meeting}
+                    validations={{
+                      isFutureTime: true,
+                      isOnOrAfterStart: true,
+                      isOnOrBeforeEnd: true,
+                    }}
+                    validationErrors={{
+                      isFutureTime: 'Must be in the future',
+                      isOnOrAfterStart: 'Must be on or after reservation start time',
+                      isOnOrBeforeEnd: 'Must be on or before reservation end time',
+                    }}
                   />
-                }
-                label="Are you hosting a meeting?"
-                className={'input__label'}
-              />
-            </ExpansionPanelSummary>
-            <ExpansionPanelDetails className={'input-group__details'}>
-              <div className="input-group--date-time">
-                <InputTime
-                  clearable
-                  label="Meeting Start Time"
-                  value={values.meetingStart}
-                  onChange={this.onValueChange('meetingStart')}
-                  name="meetingStart"
+                  <InputTime
+                    clearable
+                    label="Meeting End Time"
+                    value={values.meetingEnd}
+                    onChange={this.onValueChange('meetingEnd')}
+                    name="meetingEnd"
+                    required={values.meeting}
+                    validations={{
+                      isFutureTime: true,
+                      isOnOrBeforeEnd: true,
+                      isAfterMeetingStart: true,
+                    }}
+                    validationErrors={{
+                      isFutureTime: 'Must be in the future',
+                      isOnOrBeforeEnd: 'Must be on or before reservation end time',
+                      isAfterMeetingStart: 'Must be after meeting start time',
+                    }}
+                  />
+                </div>
+                <InputNumber
+                  label="Number of Attendees"
+                  value={values.attendees}
+                  onChange={this.onValueChange('attendees')}
+                  name={'attendees'}
+                  min={0}
+                  int
                   required={values.meeting}
-                  validations={{
-                    isFutureTime: true,
-                    isOnOrAfterStart: true,
-                    isOnOrBeforeEnd: true,
-                  }}
-                  validationErrors={{
-                    isFutureTime: 'Must be in the future',
-                    isOnOrAfterStart: 'Must be on or after reservation start time',
-                    isOnOrBeforeEnd: 'Must be on or before reservation end time',
-                  }}
+                  validations="isPositive"
+                  validationError="Attendees must be a positive number"
                 />
-                <InputTime
-                  clearable
-                  label="Meeting End Time"
-                  value={values.meetingEnd}
-                  onChange={this.onValueChange('meetingEnd')}
-                  name="meetingEnd"
+                <InputText
+                  label="Group Name"
+                  onChange={this.onValueChange('groupName')}
+                  value={values.groupName}
+                  name="groupName"
                   required={values.meeting}
-                  validations={{
-                    isFutureTime: true,
-                    isOnOrBeforeEnd: true,
-                    isAfterMeetingStart: true,
-                  }}
-                  validationErrors={{
-                    isFutureTime: 'Must be in the future',
-                    isOnOrBeforeEnd: 'Must be on or before reservation end time',
-                    isAfterMeetingStart: 'Must be after meeting start time',
-                  }}
+                  validations={'isRequiredIfMeeting'}
+                  validationError={'This field is required if having a meeting'}
                 />
-              </div>
-              <InputNumber
-                label="Number of Attendees"
-                value={values.attendees}
-                onChange={this.onValueChange('attendees')}
-                name={'attendees'}
-                min={0}
-                int
-                required={values.meeting}
-                validations="isPositive"
-                validationError="Attendees must be a positive number"
-              />
-              <InputText
-                label="Group Name"
-                onChange={this.onValueChange('groupName')}
-                value={values.groupName}
-                name="groupName"
-                required={values.meeting}
-                validations={'isRequiredIfMeeting'}
-                validationError={'This field is required if having a meeting'}
-              />
-              <SelectResource
-                type={c.TYPE_MEETING_PURPOSE}
-                name={c.TYPE_MEETING_PURPOSE}
-                handleChange={this.onInputChange(c.TYPE_MEETING_PURPOSE)}
-                value={values.meetingPurpose}
-                label={'Meeting Purpose'}
-                required={values.meeting}
-              />
-            </ExpansionPanelDetails>
-          </ExpansionPanel>
-          <ExpansionPanel
-            elevation={0}
-            expanded={this.state.expand.refreshments}
-            onChange={this.toggleState('refreshments')}
-            className={'input-group input-group--expandable'}
-          >
-            <ExpansionPanelSummary
-              expandIcon={<ExpandMoreIcon />}
-              className={'input-group__summary'}
+                <SelectResource
+                  type={c.TYPE_MEETING_PURPOSE}
+                  name={c.TYPE_MEETING_PURPOSE}
+                  handleChange={this.onInputChange(c.TYPE_MEETING_PURPOSE)}
+                  value={values.meetingPurpose}
+                  label={'Meeting Purpose'}
+                  required={values.meeting}
+                />
+              </ExpansionPanelDetails>
+            </ExpansionPanel>
+          </div>
+          <div className="l--subsection">
+            <h4 className="">Serving food or drink?</h4>
+            <ExpansionPanel
+              elevation={0}
+              expanded={this.state.expand.refreshments}
+              onChange={this.toggleState('refreshments')}
+              className={'input-group input-group--expandable'}
             >
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={values.refreshments}
-                    onChange={this.onSwitchChange('refreshments')}
-                    value="refreshments"
-                    name="refreshments"
-                  />
-                }
-                label="Serving light refreshments?"
-                className={'input__label'}
-              />
-            </ExpansionPanelSummary>
-            <ExpansionPanelDetails className={'input-group__details'}>
-              <InputText
-                label="Please describe your light refreshments."
-                value={values.refreshmentsDesc}
-                onChange={this.onValueChange('refreshmentsDesc')}
-                name="refreshmentDesc"
-                required={values.refreshments}
-                validations={'isRequiredIfServingRefreshments'}
-                validationError={'This field is required if serving refreshments'}
-              />
-            </ExpansionPanelDetails>
-          </ExpansionPanel>
+              <ExpansionPanelSummary
+                expandIcon={<ExpandMoreIcon />}
+                className={'input-group__summary'}
+              >
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={values.refreshments}
+                      onChange={this.onSwitchChange('refreshments')}
+                      value="refreshments"
+                      name="refreshments"
+                    />
+                  }
+                  label="Serving light refreshments?"
+                  className={'input__label'}
+                />
+              </ExpansionPanelSummary>
+              <ExpansionPanelDetails className={'input-group__details'}>
+                <InputText
+                  label="Please describe your light refreshments."
+                  value={values.refreshmentsDesc}
+                  onChange={this.onValueChange('refreshmentsDesc')}
+                  name="refreshmentDesc"
+                  required={values.refreshments}
+                  validations={'isRequiredIfServingRefreshments'}
+                  validationError={'This field is required if serving refreshments'}
+                />
+              </ExpansionPanelDetails>
+            </ExpansionPanel>
+          </div>
+
           <div className="form__actions">
             <Button type="submit" color="primary" disabled={!this.state.canSubmit}>
               Reserve
@@ -421,11 +431,7 @@ class ReserveRoomForm extends PureComponent {
         >
           <AppBar className={'app-bar'}>
             <Toolbar>
-              <IconButton
-                color="inherit"
-                onClick={this.collapse('findRoom')}
-                aria-label="Close"
-              >
+              <IconButton color="inherit" onClick={this.collapse('findRoom')} aria-label="Close">
                 <CloseIcon />
               </IconButton>
               <Typography variant="title" color="inherit" className={'app-bar_heading'}>

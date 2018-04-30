@@ -267,7 +267,6 @@ class ReserveRoom extends Component {
         </header>
         <div className="l__main">
           <div className="l__secondary">
-            <h4 className="">Reservation Details</h4>
             <ReserveRoomForm values={this.state.formValues} onChange={handleFormChange} />
           </div>
           {/* <div className="l__primary">

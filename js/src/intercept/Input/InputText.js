@@ -8,7 +8,7 @@ class InputText extends React.Component {
     const { label, isValid, onChange, getErrorMessages, isRequired } = this.props;
 
     const handleChange = (event) => {
-      // onChange(event.target.value);
+      onChange(event.target.value);
       this.props.setValue(event.target.value);
     };
 

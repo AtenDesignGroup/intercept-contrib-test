@@ -1,11 +1,10 @@
 <?php
 
-namespace Drupal\intercept_room_reservation\Field;
-
+namespace Drupal\intercept_room_reservation\Field\Computed;
 
 use Drupal\Core\Entity\EntityInterface;
 
-trait ComputedItemTraverseTrait {
+trait ItemTraverseTrait {
 
   protected function computeValue() {
     if (!$fields = $this->getSetting('target_fields')) {

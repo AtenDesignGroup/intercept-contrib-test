@@ -9,8 +9,9 @@ use Drupal\Core\Entity\RevisionableInterface;
 use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
-use Drupal\intercept_room_reservation\Field\ComputedEntityReferenceFieldItemList;
-use Drupal\intercept_room_reservation\Field\ComputedFileFieldItemList;
+use Drupal\intercept_room_reservation\Field\Computed\EntityReferenceFieldItemList;
+use Drupal\intercept_room_reservation\Field\Computed\FileFieldItemList;
+use Drupal\intercept_room_reservation\Field\Computed\MethodItemList;
 use Drupal\user\UserInterface;
 
 /**
@@ -50,7 +51,7 @@ use Drupal\user\UserInterface;
  *     "id" = "id",
  *     "revision" = "vid",
  *     "uuid" = "uuid",
- *     "uid" = "user_id",
+ *     "uid" = "author",
  *     "langcode" = "langcode",
  *     "status" = "status",
  *   },
@@ -75,6 +76,17 @@ class RoomReservation extends RevisionableContentEntityBase implements RoomReser
 
   use StringTranslationTrait;
 
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function preCreate(EntityStorageInterface $storage_controller, array &$values) {
+    parent::preCreate($storage_controller, $values);
+    $values += [
+      'author' => \Drupal::currentUser()->id(),
+    ];
+  }
+
   public function label() {
     $dates = $this->get('field_dates')->first();
     if (!$dates || !$dates->get('value') || !$dates->get('end_value')) {
@@ -91,14 +103,11 @@ class RoomReservation extends RevisionableContentEntityBase implements RoomReser
     return !empty($values) ? $this->t('@date from @time_start to @time_end', $values) : '';
   }
 
-  /**
-   * {@inheritdoc}
-   */
-  public static function preCreate(EntityStorageInterface $storage_controller, array &$values) {
-    parent::preCreate($storage_controller, $values);
-    $values += [
-      'user_id' => \Drupal::currentUser()->id(),
-    ];
+  public function location() {
+    return $this->t('At @location @room', [
+      '@location' => $this->get('room_location')->entity ? $this->get('room_location')->entity->label() : '',
+      '@room' => $this->get('field_room')->entity ? $this->get('field_room')->entity->label() : '',
+    ]);
   }
 
   /**
@@ -158,21 +167,21 @@ class RoomReservation extends RevisionableContentEntityBase implements RoomReser
    * {@inheritdoc}
    */
   public function getOwner() {
-    return $this->get('user_id')->entity;
+    return $this->get('author')->entity;
   }
 
   /**
    * {@inheritdoc}
    */
   public function getOwnerId() {
-    return $this->get('user_id')->target_id;
+    return $this->get('author')->target_id;
   }
 
   /**
    * {@inheritdoc}
    */
   public function setOwnerId($uid) {
-    $this->set('user_id', $uid);
+    $this->set('author', $uid);
     return $this;
   }
 
@@ -180,7 +189,7 @@ class RoomReservation extends RevisionableContentEntityBase implements RoomReser
    * {@inheritdoc}
    */
   public function setOwner(UserInterface $account) {
-    $this->set('user_id', $account->id());
+    $this->set('author', $account->id());
     return $this;
   }
 
@@ -199,13 +208,31 @@ class RoomReservation extends RevisionableContentEntityBase implements RoomReser
     return $this;
   }
 
+  public function title() {
+    return $this->label();
+  }
+
   /**
    * {@inheritdoc}
    */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
     $fields = parent::baseFieldDefinitions($entity_type);
 
-    $fields['user_id'] = BaseFieldDefinition::create('entity_reference')
+    $fields['title'] = BaseFieldDefinition::create('string')
+      ->setLabel(t('Title'))
+      ->setComputed(TRUE)
+      ->setClass(MethodItemList::class)
+      ->setSetting('method', 'label')
+      ->setReadOnly(TRUE);
+
+    $fields['location'] = BaseFieldDefinition::create('string')
+      ->setLabel(t('Title'))
+      ->setComputed(TRUE)
+      ->setClass(MethodItemList::class)
+      ->setSetting('method', 'location')
+      ->setReadOnly(TRUE);
+
+    $fields['author'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Authored by'))
       ->setDescription(t('The user ID of author of the Room reservation entity.'))
       ->setRevisionable(TRUE)
@@ -234,17 +261,17 @@ class RoomReservation extends RevisionableContentEntityBase implements RoomReser
       ->setLabel(t('Image'))
       ->setDescription(t('The related room entity\'s image.'))
       ->setComputed(TRUE)
-      ->setClass(ComputedFileFieldItemList::class)
+      ->setClass(FileFieldItemList::class)
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE)
       ->setSetting('target_fields', ['field_room', 'image_primary', 'field_media_image'])
       ->setReadOnly(TRUE);
 
-    $fields['location'] = BaseFieldDefinition::create('entity_reference')
+    $fields['room_location'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Location'))
       ->setDescription(t('The related room\'s location entity.'))
       ->setComputed(TRUE)
-      ->setClass(ComputedEntityReferenceFieldItemList::class)
+      ->setClass(EntityReferenceFieldItemList::class)
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE)
       ->setTargetEntityTypeId('node')->setTargetBundle('location')

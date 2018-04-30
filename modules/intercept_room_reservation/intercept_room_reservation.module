@@ -110,10 +110,7 @@ function intercept_room_reservation_room_reservation_view(array &$build, RoomRes
     '#type' => 'html_tag',
     '#tag' => 'div',
     '#attributes' => ['class' => 'field-location-full'],
-    '#value' => t('At @location @room', [
-      '@location' => $room_reservation->get('location')->entity ? $room_reservation->get('location')->entity->label() : '',
-      '@room' => $room_reservation->get('field_room')->entity ? $room_reservation->get('field_room')->entity->label() : '',
-    ]),
+    '#value' => $room_reservation->location(),
    ];
 
   $count = $room_reservation->field_attendee_count->getString();

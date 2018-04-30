@@ -9,6 +9,7 @@ use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Render\Element;
 use Drupal\intercept_room_reservation\Entity\RoomReservationInterface;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
+use Drupal\Core\Url;
 
 /**
  * Implements hook_help().
@@ -33,6 +34,28 @@ function intercept_room_reservation_entity_type_alter(array &$entity_types) {
   /** @var $entity_types \Drupal\Core\Entity\EntityTypeInterface[] */
   $entity_types['node']->setHandlerClass('access', '\Drupal\intercept_room_reservation\NodeAccessControlHandler');
 }
+
+/**
+ * Implements hook_entity_operation().
+ */
+function intercept_room_reservation_entity_operation(\Drupal\Core\Entity\EntityInterface $entity) {
+  if ($entity->getEntityTypeId() == 'room_reservation' ) {
+    $operation = function($op) use ($entity) {
+      return [
+        'title' => t(ucwords($op)),
+        'url' => Url::fromRoute("entity.room_reservation.{$op}_form", [
+          'room_reservation' => $entity->id(),
+          'destination' => Url::fromRoute('<current>')->toString(),
+        ]),
+      ];
+    };
+    return [
+      'cancel' => $operation('cancel'), 'approve' => $operation('approve'), 'decline' => $operation('decline'),
+    ];
+  }
+  return [];
+}
+
 /**
  * Implements hook_theme().
  */

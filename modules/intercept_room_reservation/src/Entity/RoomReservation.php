@@ -31,12 +31,16 @@ use Drupal\user\UserInterface;
  *
  *     "form" = {
  *       "default" = "Drupal\intercept_room_reservation\Form\RoomReservationForm",
+ *       "reserve" = "Drupal\intercept_room_reservation\Form\RoomReservationReserveForm",
  *       "add" = "Drupal\intercept_room_reservation\Form\RoomReservationForm",
  *       "edit" = "Drupal\intercept_room_reservation\Form\RoomReservationForm",
  *       "delete" = "Drupal\intercept_room_reservation\Form\RoomReservationDeleteForm",
+ *       "cancel" = "Drupal\intercept_room_reservation\Form\RoomReservationUpdateStatusForm",
+ *       "approve" = "Drupal\intercept_room_reservation\Form\RoomReservationUpdateStatusForm",
+ *       "decline" = "Drupal\intercept_room_reservation\Form\RoomReservationUpdateStatusForm",
  *     },
  *     "access" = "Drupal\intercept_room_reservation\RoomReservationAccessControlHandler",
- *     "permission_provider" = "Drupal\entity\EntityPermissionProvider",
+ *     "permission_provider" = "Drupal\intercept_room_reservation\RoomReservationPermissionsProvider",
  *     "route_provider" = {
  *       "html" = "Drupal\intercept_room_reservation\RoomReservationHtmlRouteProvider",
  *     },
@@ -56,9 +60,12 @@ use Drupal\user\UserInterface;
  *     "status" = "status",
  *   },
  *   links = {
- *     "canonical" = "/room-reservation/{room_reservation}",
+ *     "approve-form" = "/room-reservation/{room_reservation}/approve",
  *     "add-form" = "/room-reservation/add",
+ *     "cancel-form" = "/room-reservation/{room_reservation}/cancel",
+ *     "canonical" = "/room-reservation/{room_reservation}",
  *     "edit-form" = "/room-reservation/{room_reservation}/edit",
+ *     "decline-form" = "/room-reservation/{room_reservation}/decline",
  *     "delete-form" = "/room-reservation/{room_reservation}/delete",
  *     "version-history" = "/admin/structure/room_reservation/{room_reservation}/revisions",
  *     "revision" = "/admin/structure/room_reservation/{room_reservation}/revisions/{room_reservation_revision}/view",
@@ -124,6 +131,25 @@ class RoomReservation extends RevisionableContentEntityBase implements RoomReser
     }
 
     return $uri_route_parameters;
+  }
+
+  public function cancel() {
+    $this->set('field_status', 'canceled');
+    return $this;
+  }
+
+  public function approve() {
+    $this->set('field_status', 'approved');
+    return $this;
+  }
+
+  public function deny() {
+    return $this->decline();
+  }
+
+  public function decline() {
+    $this->set('field_status', 'denied');
+    return $this;
   }
 
   /**

@@ -11,7 +11,9 @@ import RoomFilters from './../RoomFilters';
 import ReserveRoomForm from './../ReserveRoomForm';
 import RoomList from './../RoomList';
 import RoomCalendar from './../RoomCalendar';
+import RoomTeaser from 'intercept/RoomTeaser';
 import SelectResource from 'intercept/SelectResource';
+import Slide from 'material-ui/transitions/Slide';
 
 const { constants, api, select } = interceptClient;
 const c = constants;
@@ -149,12 +151,18 @@ class ReserveRoom extends Component {
         user: drupalSettings.intercept.user.uuid,
       },
       view: props.view,
+      room: {
+        current: null,
+        previous: null,
+        exiting: false,
+      },
     };
     this.handleCalendarNavigate = this.handleCalendarNavigate.bind(this);
     this.handleCalendarView = this.handleCalendarView.bind(this);
     this.handleFilterChange = this.handleFilterChange.bind(this);
     this.handleViewChange = this.handleViewChange.bind(this);
     this.handleFormChange = this.handleFormChange.bind(this);
+    this.onExited = this.onExited.bind(this);
     this.doFetchRooms = debounce(this.doFetchRooms, 500).bind(this);
   }
 
@@ -183,8 +191,27 @@ class ReserveRoom extends Component {
   }
 
   handleFormChange(formValues) {
+    let room = this.state.room;
+    if (formValues[c.TYPE_ROOM] !== this.state.formValues[c.TYPE_ROOM]) {
+      room = {
+        current: formValues[c.TYPE_ROOM],
+        previous: this.state.room.current,
+        exiting: this.state.room.current !== this.state.room.previous,
+      };
+    }
     this.setState({
+      room,
       formValues,
+    });
+  }
+
+  onExited() {
+    console.log('exited');
+    this.setState({
+      room: {
+        ...this.state.room,
+        exiting: false,
+      },
     });
   }
 
@@ -216,6 +243,8 @@ class ReserveRoom extends Component {
       handleFormChange,
     } = this;
     const { calendarRooms, rooms, roomsLoading, filters, view, date, calView } = props;
+
+    const roomToShow = this.state.room[this.state.room.exiting ? 'previous' : 'current'];
 
     const selectionComponent = null;
     // view === 'list' ? (
@@ -251,7 +280,11 @@ class ReserveRoom extends Component {
             {selectionComponent}
           </div> */}
           <div className="l__primary">
-
+            {(this.state.room.previous || this.state.room.current) && (
+              <Slide direction="up" in={!this.state.room.exiting} onExited={this.onExited} mountOnEnter>
+                <RoomTeaser uuid={roomToShow} id={roomToShow} className="room-teaser" />
+              </Slide>
+              )}
           </div>
         </div>
       </div>

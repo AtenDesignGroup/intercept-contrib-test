@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import v4 from 'uuid/v4';
 import interceptClient from 'interceptClient';
 import DialogConfirm from 'intercept/Dialog/DialogConfirm';
+import RoomReservationSummary from './RoomReservationSummary';
 
 const { actions, api, constants, select, utils } = interceptClient;
 const c = constants;
@@ -47,7 +48,7 @@ const buildRoomReservation = (values) => {
           type: c.TYPE_USER,
           id: values.user,
         },
-      }
+      },
     },
   };
   return output;
@@ -61,6 +62,7 @@ class ReserveRoomConfirmation extends React.PureComponent {
       save(buildRoomReservation(values));
       onConfirm();
     };
+
     return (
       <DialogConfirm
         confirmText={'Submit'}
@@ -70,7 +72,7 @@ class ReserveRoomConfirmation extends React.PureComponent {
         onCancel={onCancel}
         open={open}
       >
-        {`${values.date.getTime()} ${values.start.getHours()} ${values.end.getHours()}`}
+        <RoomReservationSummary {...values} />
       </DialogConfirm>
     );
   }

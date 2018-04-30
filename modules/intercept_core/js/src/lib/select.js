@@ -43,6 +43,13 @@ export const getDayDisplay = (date) => {
   return moment(date).format('dddd, MMMM D, YYYY');
 };
 
+
+// Get a formatted time string.
+export const getTimeDisplay = (date) => {
+  // 2p.m.
+  return moment(date).format('h:mm a').replace('m', '.m.');
+};
+
 /**
  * Returns an array of published records.
  *

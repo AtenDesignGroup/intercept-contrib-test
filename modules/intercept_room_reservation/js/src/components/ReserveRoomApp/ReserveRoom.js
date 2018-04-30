@@ -168,6 +168,7 @@ class ReserveRoom extends Component {
 
   componentDidMount() {
     this.doFetchRooms(this.props.filters, this.props.view, this.props.calView, this.props.date);
+    this.props.fetchLocations();
   }
 
   handleViewChange = (value) => {
@@ -302,6 +303,9 @@ const mapDispatchToProps = dispatch => ({
   fetchRooms: (options) => {
     dispatch(api[c.TYPE_ROOM].fetchAll(options));
   },
+  fetchLocations: (options) => {
+    dispatch(api[c.TYPE_LOCATION].fetchAll(options));
+  },
   fetchUser: (options) => {
     dispatch(api[c.TYPE_USER].fetchAll(options));
   },
@@ -311,6 +315,7 @@ ReserveRoom.propTypes = {
   // calendarRooms: PropTypes.arrayOf(Object).isRequired,
   rooms: PropTypes.arrayOf(Object).isRequired,
   roomsLoading: PropTypes.bool.isRequired,
+  fetchLocations: PropTypes.func.isRequired,
   fetchRooms: PropTypes.func.isRequired,
   fetchUser: PropTypes.func.isRequired,
   // calView: PropTypes.string,

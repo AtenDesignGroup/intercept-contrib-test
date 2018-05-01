@@ -44,7 +44,7 @@ function filterRooms(items, filters) {
     output,
     filters,
     c.TYPE_LOCATION,
-    'data.relationships.field_location.id',
+    'data.relationships.field_location.data.id',
   );
 
   // Filter by Room Type.
@@ -52,7 +52,7 @@ function filterRooms(items, filters) {
     output,
     filters,
     c.TYPE_ROOM_TYPE,
-    'data.relationships.field_room_type.id',
+    'data.relationships.field_room_type.data.id',
   );
 
   // Filter by Capcity.

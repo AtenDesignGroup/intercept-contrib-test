@@ -26,7 +26,7 @@ class RoomTeaser extends PureComponent {
     const capacityValue = get(room, 'attributes.field_capacity_max');
     const capicity = capacityValue ? (
       <FieldInline
-        label="Capicity"
+        label="Capacity"
         key="capacity"
         values={{ id: 'capacity', name: capacityValue }}
       />

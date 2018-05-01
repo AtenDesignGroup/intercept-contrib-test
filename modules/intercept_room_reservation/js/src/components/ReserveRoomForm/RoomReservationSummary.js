@@ -2,12 +2,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import interceptClient from 'interceptClient';
 import { connect } from 'react-redux';
-import { moment } from 'moment';
 
 const { constants, select } = interceptClient;
 const c = constants;
 
-const RoomReservationSummary = (props) => (
+const RoomReservationSummary = props => (
   <article className="room-res-summary">
     <p className="room-res-summary__location">{props.location}</p>
     <h3 className="room-res-summary__room">{props.room}</h3>
@@ -15,7 +14,6 @@ const RoomReservationSummary = (props) => (
     <span className="room-res-summary__time">{`${select.getTimeDisplay(props.start)} to ${select.getTimeDisplay(props.end)}`}</span>
   </article>
 );
-
 
 RoomReservationSummary.propTypes = {
   room: PropTypes.string.isRequired,
@@ -30,7 +28,7 @@ const mapStateToProps = (state, ownProps) => {
 
   return {
     room: select.recordLabel(roomId)(state),
-    location: select.recordLabel(room.data.relationships.field_location)(state),
+    location: select.recordLabel(room.data.relationships.field_location.data)(state),
   };
 };
 

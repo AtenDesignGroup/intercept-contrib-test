@@ -5,9 +5,11 @@ import v4 from 'uuid/v4';
 import interceptClient from 'interceptClient';
 import DialogConfirm from 'intercept/Dialog/DialogConfirm';
 import RoomReservationSummary from './RoomReservationSummary';
+import RoomReservationStatus from './RoomReservationStatus';
 
 const { actions, api, constants, select, utils } = interceptClient;
 const c = constants;
+
 const buildRoomReservation = (values) => {
   const uuid = v4();
 
@@ -55,24 +57,58 @@ const buildRoomReservation = (values) => {
 };
 
 class ReserveRoomConfirmation extends React.PureComponent {
-  render() {
-    const { open, onConfirm, onCancel, values, save } = this.props;
+  constructor(props) {
+    super(props);
 
-    const handleConfirm = () => {
-      save(buildRoomReservation(values));
-      onConfirm();
+    this.state = {
+      uuid: null,
+    };
+
+    this.handleConfirm = this.handleConfirm.bind(this);
+  }
+
+  handleConfirm() {
+    const { onConfirm, values, save } = this.props;
+    const entity = buildRoomReservation(values);
+    this.setState({
+      uuid: entity.id,
+    });
+    save(entity);
+    // onConfirm();
+  }
+
+  render() {
+    const { open, onCancel, values } = this.props;
+    const { uuid } = this.state;
+
+    const content = uuid ? (
+      <RoomReservationStatus uuid={uuid} />
+    ) : (
+      <RoomReservationSummary {...values} />
+    );
+
+    const dialogProps = uuid ? {
+      confirmText: 'View Your Reservations',
+      cancelText: 'Close',
+      heading: '',
+      onConfirm: () => {
+        window.location.href = '/account/room-reservations';
+      },
+      onCancel,
+    } : {
+      confirmText: 'Submit',
+      cancelText: 'Cancel',
+      heading: 'Confirm Reservation Request?',
+      onConfirm: this.handleConfirm,
+      onCancel,
     };
 
     return (
       <DialogConfirm
-        confirmText={'Submit'}
-        cancelText={'Cancel'}
-        heading={'Confirm Reservation Request?'}
-        onConfirm={handleConfirm}
-        onCancel={onCancel}
+        {...dialogProps}
         open={open}
       >
-        <RoomReservationSummary {...values} />
+        {content}
       </DialogConfirm>
     );
   }

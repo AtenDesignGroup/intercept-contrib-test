@@ -106,12 +106,14 @@ module.exports = function config(env) {
           react: 'React',
           'react-dom': 'ReactDOM',
           interceptClient: 'interceptClient',
+          interceptTheme: 'interceptTheme',
           drupalSettings: 'drupalSettings',
           moment: 'moment',
           redis: 'redis',
         };
         const dev = {
           interceptClient: 'interceptClient',
+          interceptTheme: 'interceptTheme',
           drupalSettings: 'drupalSettings',
           redis: 'redis',
           moment: 'moment',
@@ -164,6 +166,51 @@ module.exports = function config(env) {
           drupalSettings: 'drupalSettings',
           moment: 'moment',
           redis: 'redis',
+        };
+
+        return isProduction ? prod : dev;
+      })(),
+      module: {
+        loaders: [babelLoader],
+      },
+    },
+
+    //
+    // interceptTheme.js
+    //   This should function as a standalone library so it needs its own config.
+    //
+    {
+      entry: {
+        'modules/intercept_core/js/dist/interceptTheme':
+          './modules/intercept_core/js/src/interceptTheme.js',
+      },
+      output: {
+        filename: '[name].js',
+        path: path.resolve(__dirname),
+        libraryTarget: 'umd',
+      },
+      resolve: {
+        // Allow common modules in the root module to be referenced.
+        modules: [path.resolve(__dirname, 'js/src'), 'node_modules'],
+      },
+      plugins: (() => {
+        const nodeEnv = isProduction ? 'production' : 'development';
+        const plugins = [
+          new webpack.DefinePlugin({ 'process.env': { NODE_ENV: JSON.stringify(nodeEnv) } }),
+        ];
+
+        if (isProduction) {
+          plugins.push(new Minify());
+        }
+
+        return plugins;
+      })(),
+      externals: (() => {
+        const prod = {
+          drupalSettings: 'drupalSettings',
+        };
+        const dev = {
+          drupalSettings: 'drupalSettings',
         };
 
         return isProduction ? prod : dev;

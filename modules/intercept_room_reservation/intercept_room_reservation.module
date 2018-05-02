@@ -28,6 +28,14 @@ function intercept_room_reservation_help($route_name, RouteMatchInterface $route
 }
 
 /**
+ * Implements hook_preprocess_page.
+ */
+function intercept_room_reservation_preprocess_page(array &$variables) {
+  $limit = \Drupal::config('intercept_core.room_reservations')->get('reservation_limit', 0);
+  $variables['#attached']['drupalSettings']['intercept']['room_reservations']['customer_limit'] = $limit;
+}
+
+/**
  * Implements hook_entity_type_alter().
  */
 function intercept_room_reservation_entity_type_alter(array &$entity_types) {

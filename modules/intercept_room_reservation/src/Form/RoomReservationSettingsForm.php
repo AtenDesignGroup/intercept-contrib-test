@@ -44,6 +44,11 @@ class RoomReservationSettingsForm extends ConfigFormBase {
   public function buildForm(array $form, FormStateInterface $form_state) {
     $form = parent::buildForm($form, $form_state);
     $config = $this->config('intercept_core.room_reservations');
+    $form['reservation_limit'] = [
+      '#title' => $this->t('Room reservation limit'),
+      '#type' => 'number',
+      '#default_value' => $config->get('reservation_limit'),
+    ];
     $form['email'] = [
       '#type' => 'vertical_tabs',
       '#title' => $this->t('Emails'),
@@ -102,10 +107,12 @@ class RoomReservationSettingsForm extends ConfigFormBase {
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $config = $this->config('intercept_core.room_reservations');
     $values = $form_state->cleanValues()->getValues();
-    unset($values['email']);
     foreach ($values as $key => $info) {
-      ksm($info);
-      $config->set("email.$key", $info);
+      if (!empty($info["{$key}__active_tab"])) {
+        continue;
+      }
+      $key = !empty($form[$key]['#group']) ? $form[$key]['#group'] . ".{$key}" : $key;
+      $config->set($key, $info);
     }
     $config->save();
     parent::submitForm($form, $form_state);

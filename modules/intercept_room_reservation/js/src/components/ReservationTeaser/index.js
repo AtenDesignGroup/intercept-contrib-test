@@ -22,7 +22,14 @@ class ReservationTeaser extends PureComponent {
         values={{ id: 'attendee', name: attendeeCount }}
       />
     ) : null;
-
+    const statusValue = get(reservation, 'attributes.field_status');
+    const statusField = statusValue ? (
+      <FieldInline
+        label="Status"
+        key="status"
+        values={{ id: 'status', name: statusValue }}
+      />
+    ) : null;
 
     return (
       <Teaser
@@ -32,8 +39,7 @@ class ReservationTeaser extends PureComponent {
         image={image}
         supertitle={get(reservation, 'attributes.location')}
         footer={roomProps => (actions)}
-                
-        tags={[attendee]}
+        tags={[attendee, statusField]}
         description={get(reservation, 'attributes.field_group_name')}
       />
     );

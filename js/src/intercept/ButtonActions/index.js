@@ -97,8 +97,8 @@ const mapStateToProps = (state, ownProps) => ({
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
   onConfirm (meh) {
-    const data = { ...this.props.reservation.data };
-    data.attributes.field_status = { "value": this.getActionProperties(this.state.action).status };
+    const data = this.props.reservation.data;
+    data.attributes.field_status = this.getActionProperties(this.state.action).status;
     dispatch(interceptClient.actions.edit(data, c.TYPE_ROOM_RESERVATION, this.props.id));
     dispatch(interceptClient.api[c.TYPE_ROOM_RESERVATION].sync(this.props.id));
     this.setState({open: false});

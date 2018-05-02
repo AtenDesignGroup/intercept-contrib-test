@@ -102,10 +102,10 @@ class RoomReservation extends RevisionableContentEntityBase implements RoomReser
     $values = [];
     if ($from_date = $dates->get('value')->getDateTime()) {
       $values['@date'] = $from_date->format('F n, Y');
-      $values['@time_start'] = $from_date->format('H:i A');
+      $values['@time_start'] = $from_date->format('h:i A');
     }
     if ($to_date = $dates->get('end_value')->getDateTime()) {
-      $values['@time_end'] = $to_date->format('H:i A');
+      $values['@time_end'] = $to_date->format('h:i A');
     }
     return !empty($values) ? $this->t('@date from @time_start to @time_end', $values) : '';
   }

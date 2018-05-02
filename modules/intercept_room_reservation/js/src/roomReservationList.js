@@ -18,8 +18,11 @@ import ContentList from 'intercept/ContentList';
 import { connect } from 'react-redux';
 import ReservationTeaser from './components/ReservationTeaser';
 import ButtonActions from 'intercept/ButtonActions';
+import drupalSettings from 'drupalSettings';
 
 const store = interceptClient.store;
+
+const uuid = drupalSettings.intercept.user.uuid;
 
 const mapStateToProps = state => ({
   reservations: select.roomReservations(state),
@@ -48,6 +51,12 @@ class AccountRoomReservations extends Component {
 
   doFetch() {
     this.props.fetchReservations({
+      filters: {
+        user: {
+          path: 'field_user.uuid',
+          value: uuid,
+        },
+      },
       include: ['field_room', 'field_room.image_primary', 'field_room.image_primary.field_media_image'],
       replace: true,
       headers: {
@@ -75,7 +84,8 @@ class AccountRoomReservations extends Component {
           actions={
             <ButtonActions
               id={item.data.id}
-              actions={["cancel", "approve", "deny"]}
+              //actions={["cancel", "approve", "deny"]}
+              actions={["cancel"]}
             ></ButtonActions>
           }
           className="room-teaser" />

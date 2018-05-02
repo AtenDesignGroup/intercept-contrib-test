@@ -1,6 +1,6 @@
 manageRoomReservations:
   js:
-    js/dist/accountRoomReservations.js:
+    js/dist/roomReservationList.js:
       preprocess: false
 
   dependencies:

@@ -221,8 +221,9 @@ class ReserveRoomForm extends PureComponent {
           onValid={this.enableButton}
           onInvalid={this.disableButton}
         >
-          <div className="l--subsection">
+          <div className="l--subsection input-group--find-room">
             <h4 className="">Choose a Room</h4>
+
             <SelectResource
               multiple={false}
               type={c.TYPE_ROOM}
@@ -232,7 +233,14 @@ class ReserveRoomForm extends PureComponent {
               required
               name={c.TYPE_ROOM}
             />
-            <Button onClick={this.expand('findRoom')}>Browse Rooms -></Button>
+            <Button
+              variant="raised"
+              color="secondary"
+              size="small"
+              onClick={this.expand('findRoom')}
+            >
+              Browse Rooms
+            </Button>
           </div>
 
           <div className="l--subsection">
@@ -275,9 +283,17 @@ class ReserveRoomForm extends PureComponent {
                 }}
               />
             </div>
+              <Button
+                variant="raised"
+                color="secondary"
+                size="small"
+                onClick={this.expand('findRoom')}
+              >
+                Find a Time
+              </Button>
           </div>
-          <div className="l--subsection">
-            <h4 className="">Hosting a group?</h4>
+          <div className="l--subsection--tight">
+            <h4 className="">Groups</h4>
             <ExpansionPanel
               elevation={0}
               expanded={this.state.expand.meeting}
@@ -294,7 +310,7 @@ class ReserveRoomForm extends PureComponent {
                       name="meeting"
                     />
                   }
-                  label="Yes"
+                  label="Hosting a group?"
                   className={'input__label'}
                 />
               </ExpansionPanelSummary>
@@ -368,18 +384,15 @@ class ReserveRoomForm extends PureComponent {
               </ExpansionPanelDetails>
             </ExpansionPanel>
           </div>
-          <div className="l--subsection">
-            <h4 className="">Serving food or drink?</h4>
+          <div className="l--subsection--tight">
+            <h4 className="">Refreshments</h4>
             <ExpansionPanel
               elevation={0}
               expanded={this.state.expand.refreshments}
               onChange={this.toggleState('refreshments')}
               className={'input-group input-group--expandable'}
             >
-              <ExpansionPanelSummary
-                expandIcon={<ExpandMoreIcon />}
-                className={'input-group__summary'}
-              >
+              <ExpansionPanelSummary expandIcon={null} className={'input-group__summary'}>
                 <FormControlLabel
                   control={
                     <Switch
@@ -408,7 +421,14 @@ class ReserveRoomForm extends PureComponent {
           </div>
 
           <div className="form__actions">
-            <Button type="submit" color="primary" disabled={!this.state.canSubmit}>
+            <Button
+              variant="raised"
+              size="small"
+              color="primary"
+              type="submit"
+              className="button button--primary"
+              disabled={!this.state.canSubmit}
+            >
               Reserve
             </Button>
           </div>
@@ -428,8 +448,9 @@ class ReserveRoomForm extends PureComponent {
           open={this.state.expand.findRoom}
           onClose={() => {}}
           transition={Transition}
+          className="dialog dialog--fullscreen"
         >
-          <AppBar className={'app-bar'}>
+          <AppBar className={'dialog__app-bar app-bar'}>
             <Toolbar>
               <IconButton color="inherit" onClick={this.collapse('findRoom')} aria-label="Close">
                 <CloseIcon />
@@ -439,7 +460,9 @@ class ReserveRoomForm extends PureComponent {
               </Typography>
             </Toolbar>
           </AppBar>
-          <FindARoom onSelect={this.onRoomSelect} />
+          <div className="dialog__panel">
+            <FindARoom onSelect={this.onRoomSelect} />
+          </div>
         </Dialog>
       </div>
     );

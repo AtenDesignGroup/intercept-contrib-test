@@ -14,6 +14,9 @@ import RoomCalendar from './../RoomCalendar';
 import RoomTeaser from 'intercept/RoomTeaser';
 import SelectResource from 'intercept/SelectResource';
 import Slide from 'material-ui/transitions/Slide';
+import FindARoom from './../FindARoom';
+import ReserveRoomStepper from './ReserveRoomStepper';
+import ReserveRoomTabs from './ReserveRoomTabs';
 
 const { constants, api, select } = interceptClient;
 const c = constants;
@@ -280,11 +283,19 @@ class ReserveRoom extends Component {
             {selectionComponent}
           </div> */}
           <div className="l__primary">
+
+            {/* <FindARoom onSelect={this.onRoomSelect} /> */}
+
             {(this.state.room.previous || this.state.room.current) && (
-              <Slide direction="up" in={!this.state.room.exiting} onExited={this.onExited} mountOnEnter>
+              <Slide
+                direction="up"
+                in={!this.state.room.exiting}
+                onExited={this.onExited}
+                mountOnEnter
+              >
                 <RoomTeaser uuid={roomToShow} id={roomToShow} className="room-teaser" />
               </Slide>
-              )}
+            )}
           </div>
         </div>
       </div>

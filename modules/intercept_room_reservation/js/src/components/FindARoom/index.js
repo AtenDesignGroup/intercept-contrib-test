@@ -78,14 +78,16 @@ class FindARoom extends Component {
     const { rooms, onSelect } = this.props;
     const { filters } = this.state;
     const teaserProps = {
-      footer: roomProps => (<Button onClick={() => onSelect(roomProps.uuid)} >Reserve</Button>),
+      footer: roomProps => (<Button variant="raised" size="small" color="primary" className="button button--small button--primary"onClick={() => onSelect(roomProps.uuid)} >Reserve</Button>),
     };
 
     return (
-      <div className="l--offset">
+      <div className="l--offset l--default">
         <div className="l__main">
           <div className="l__primary">
-            <RoomFilters onChange={this.onFilterChange} filters={filters} />
+            <div className="l--subsection">
+              <RoomFilters onChange={this.onFilterChange} filters={filters} />
+            </div>
             <RoomList
               rooms={filterRooms(rooms, filters)}
               onSelect={onSelect}

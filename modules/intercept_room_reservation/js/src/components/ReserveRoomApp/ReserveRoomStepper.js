@@ -1,11 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { withStyles } from '@material-ui/core/styles';
-import Stepper from '@material-ui/core/Stepper';
-import Step from '@material-ui/core/Step';
-import StepButton from '@material-ui/core/StepButton';
-import Button from '@material-ui/core/Button';
-import Typography from '@material-ui/core/Typography';
+import { withStyles } from 'material-ui/styles';
+import Stepper, { Step, StepButton } from 'material-ui/Stepper';
+import Button from 'material-ui/Button';
+import Typography from 'material-ui/Typography';
 
 const styles = theme => ({
   root: {
@@ -25,7 +23,7 @@ const styles = theme => ({
     textTransform: 'none',
     textAlign: 'left',
     letterSpacing: 0,
-  },
+  }
 });
 
 function getSteps() {
@@ -136,7 +134,7 @@ class HorizontalNonLinearStepper extends React.Component {
             <Step key={label}>
               <StepButton
                 className={classes.labelButton}
-                onClick={this.handleStep(index)}
+                 onClick={this.handleStep(index)}
                 completed={this.state.completed[index]}
               >
                 {label}
@@ -192,7 +190,7 @@ class HorizontalNonLinearStepper extends React.Component {
 }
 
 HorizontalNonLinearStepper.propTypes = {
-  classes: PropTypes.object.isRequired,
+  classes: PropTypes.object,
 };
 
 export default withStyles(styles)(HorizontalNonLinearStepper);

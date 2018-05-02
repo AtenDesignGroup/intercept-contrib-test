@@ -11,4 +11,6 @@ eventList:
     - intercept_core/moment
     - intercept_core/interceptClient
     - intercept_core/interceptCommon
+    - intercept_core/interceptTheme
     - intercept_core/bigCalendar
+    - intercept_core/materialIcons

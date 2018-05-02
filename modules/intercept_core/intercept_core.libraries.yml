@@ -16,6 +16,12 @@ moment:
     https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/moment.min.js:
       external: true
 
+materialIcons:
+  remote: https://fonts.googleapis.com
+  css:
+    theme:
+      https://fonts.googleapis.com/icon?family=Material+Icons: { type: external, minified: true }
+
 babelHelpers:
   js:
     js/dist/babelHelpers.js:
@@ -29,6 +35,21 @@ interceptCommon:
 interceptClient:
   js:
     js/dist/interceptClient.js:
+      preprocess: false
+  dependencies:
+    - core/drupalSettings
+    - intercept_core/materialIcons
+
+interceptTheme:
+  js:
+    js/dist/interceptTheme.js:
+      preprocess: false
+  dependencies:
+    - core/drupalSettings
+
+materialIcons:
+  js:
+    js/dist/interceptTheme.js:
       preprocess: false
   dependencies:
     - core/drupalSettings

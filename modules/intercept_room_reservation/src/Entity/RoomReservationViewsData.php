@@ -15,8 +15,13 @@ class RoomReservationViewsData extends EntityViewsData {
   public function getViewsData() {
     $data = parent::getViewsData();
 
-    // Additional information for Views integration, such as table joins, can be
-    // put here.
+    $data['room_reservation']['room_reservation_bulk_form'] = [
+      'title' => $this->t('Room reservation operations bulk form'),
+      'help' => $this->t('Add a form element that lets you run operations on multiple room reservations.'),
+      'field' => [
+        'id' => 'room_reservation_bulk_form',
+      ],
+    ];
 
     return $data;
   }

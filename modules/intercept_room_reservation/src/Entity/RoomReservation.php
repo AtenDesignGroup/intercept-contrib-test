@@ -44,6 +44,7 @@ use Drupal\user\UserInterface;
  *     "route_provider" = {
  *       "html" = "Drupal\intercept_room_reservation\RoomReservationHtmlRouteProvider",
  *       "revision" = "Drupal\intercept_room_reservation\RoomReservationRevisionRouteProvider",
+ *       "delete-multiple" = "Drupal\entity\Routing\DeleteMultipleRouteProvider",
  *     },
  *   },
  *   base_table = "room_reservation",
@@ -63,17 +64,18 @@ use Drupal\user\UserInterface;
  *   links = {
  *     "approve-form" = "/room-reservation/{room_reservation}/approve",
  *     "add-form" = "/room-reservation/add",
+ *     "collection" = "/admin/content/room-reservations",
  *     "cancel-form" = "/room-reservation/{room_reservation}/cancel",
  *     "canonical" = "/room-reservation/{room_reservation}",
  *     "edit-form" = "/room-reservation/{room_reservation}/edit",
  *     "decline-form" = "/room-reservation/{room_reservation}/decline",
  *     "delete-form" = "/room-reservation/{room_reservation}/delete",
+ *     "delete-multiple-form" = "/room-reservation/delete",
  *     "version-history" = "/room-reservation/{room_reservation}/revisions",
  *     "revision" = "/room-reservation/{room_reservation}/revisions/{room_reservation_revision}/view",
  *     "revision-revert-form" = "/room-reservation/{room_reservation}/revisions/{room_reservation_revision}/revert",
  *     "revision-delete-form" = "/room-reservation/{room_reservation}/revisions/{room_reservation_revision}/delete",
  *     "translation_revert" = "/admin/structure/room_reservation/{room_reservation}/revisions/{room_reservation_revision}/revert/{langcode}",
- *     "collection" = "/admin/content/room_reservations",
  *   },
  *   field_ui_base_route = "room_reservation.settings"
  * )

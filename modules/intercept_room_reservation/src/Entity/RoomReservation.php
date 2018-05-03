@@ -43,6 +43,7 @@ use Drupal\user\UserInterface;
  *     "permission_provider" = "Drupal\intercept_room_reservation\RoomReservationPermissionsProvider",
  *     "route_provider" = {
  *       "html" = "Drupal\intercept_room_reservation\RoomReservationHtmlRouteProvider",
+ *       "revision" = "Drupal\intercept_room_reservation\RoomReservationRevisionRouteProvider",
  *     },
  *   },
  *   base_table = "room_reservation",
@@ -67,10 +68,10 @@ use Drupal\user\UserInterface;
  *     "edit-form" = "/room-reservation/{room_reservation}/edit",
  *     "decline-form" = "/room-reservation/{room_reservation}/decline",
  *     "delete-form" = "/room-reservation/{room_reservation}/delete",
- *     "version-history" = "/admin/structure/room_reservation/{room_reservation}/revisions",
- *     "revision" = "/admin/structure/room_reservation/{room_reservation}/revisions/{room_reservation_revision}/view",
- *     "revision_revert" = "/admin/structure/room_reservation/{room_reservation}/revisions/{room_reservation_revision}/revert",
- *     "revision_delete" = "/admin/structure/room_reservation/{room_reservation}/revisions/{room_reservation_revision}/delete",
+ *     "version-history" = "/room-reservation/{room_reservation}/revisions",
+ *     "revision" = "/room-reservation/{room_reservation}/revisions/{room_reservation_revision}/view",
+ *     "revision-revert-form" = "/room-reservation/{room_reservation}/revisions/{room_reservation_revision}/revert",
+ *     "revision-delete-form" = "/room-reservation/{room_reservation}/revisions/{room_reservation_revision}/delete",
  *     "translation_revert" = "/admin/structure/room_reservation/{room_reservation}/revisions/{room_reservation_revision}/revert/{langcode}",
  *     "collection" = "/admin/content/room_reservations",
  *   },
@@ -123,10 +124,10 @@ class RoomReservation extends RevisionableContentEntityBase implements RoomReser
   protected function urlRouteParameters($rel) {
     $uri_route_parameters = parent::urlRouteParameters($rel);
 
-    if ($rel === 'revision_revert' && $this instanceof RevisionableInterface) {
+    if ($rel === 'revision-revert-form' && $this instanceof RevisionableInterface) {
       $uri_route_parameters[$this->getEntityTypeId() . '_revision'] = $this->getRevisionId();
     }
-    elseif ($rel === 'revision_delete' && $this instanceof RevisionableInterface) {
+    if ($rel === 'revision-delete-form' && $this instanceof RevisionableInterface) {
       $uri_route_parameters[$this->getEntityTypeId() . '_revision'] = $this->getRevisionId();
     }
 
@@ -152,10 +153,14 @@ class RoomReservation extends RevisionableContentEntityBase implements RoomReser
     return $this;
   }
 
+
   /**
    * {@inheritdoc}
    */
   public function preSave(EntityStorageInterface $storage) {
+    if ($this->getOriginalId() && !$this->original->get('field_status')->equals($this->get('field_status'))){
+      $this->setNewRevision(TRUE);
+    }
     parent::preSave($storage);
 
     foreach (array_keys($this->getTranslationLanguages()) as $langcode) {

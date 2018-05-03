@@ -160,7 +160,7 @@ class RoomReservation extends RevisionableContentEntityBase implements RoomReser
    * {@inheritdoc}
    */
   public function preSave(EntityStorageInterface $storage) {
-    if ($this->getOriginalId() && !$this->original->get('field_status')->equals($this->get('field_status'))){
+    if (!empty($this->original) && !$this->original->get('field_status')->equals($this->get('field_status'))){
       $this->setNewRevision(TRUE);
     }
     parent::preSave($storage);
@@ -174,10 +174,23 @@ class RoomReservation extends RevisionableContentEntityBase implements RoomReser
       }
     }
 
-    // If no revision author has been set explicitly, make the room_reservation owner the
-    // revision author.
-    if (!$this->getRevisionUser()) {
-      $this->setRevisionUserId($this->getOwnerId());
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function preSaveRevision(EntityStorageInterface $storage, \stdClass $record) {
+    parent::preSaveRevision($storage, $record);
+
+    $is_new_revision = $this->isNewRevision();
+      // @see \Drupal\media\Entity\Media::preSaveRevision()
+    if (!$is_new_revision && isset($this->original) && empty($record->revision_log_message)) {
+      $record->revision_log_message = $this->original->revision_log_message->value;
+    }
+
+    if ($is_new_revision) {
+      $record->revision_created = \Drupal::time()->getRequestTime();
+      $record->revision_user =  \Drupal::currentUser()->id();
     }
   }
 

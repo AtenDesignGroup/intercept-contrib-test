@@ -5,6 +5,7 @@
  * Contains intercept_room_reservation.module.
  */
 
+use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Render\Element;
 use Drupal\intercept_room_reservation\Entity\RoomReservationInterface;
@@ -28,19 +29,24 @@ function intercept_room_reservation_help($route_name, RouteMatchInterface $route
 }
 
 /**
+ * Implements hook_node_access().
+ */
+function intercept_room_reservation_node_access(\Drupal\node\NodeInterface $node, $op, \Drupal\Core\Session\AccountInterface $account) {
+  if ($node->bundle() == 'room' && $op == 'view') {
+    if ($node->field_staff_use_only->getString() === "1" && !$account->hasPermission('view staff use room reservation')) {
+      return AccessResult::forbidden()->cachePerPermissions()->cachePerUser()->addCacheableDependency($node);
+    }
+  }
+   // No opinion.
+  return AccessResult::neutral();
+}
+
+/**
  * Implements hook_preprocess_page.
  */
 function intercept_room_reservation_preprocess_page(array &$variables) {
   $limit = \Drupal::config('intercept_core.room_reservations')->get('reservation_limit', 0);
   $variables['#attached']['drupalSettings']['intercept']['room_reservations']['customer_limit'] = $limit;
-}
-
-/**
- * Implements hook_entity_type_alter().
- */
-function intercept_room_reservation_entity_type_alter(array &$entity_types) {
-  /** @var $entity_types \Drupal\Core\Entity\EntityTypeInterface[] */
-  $entity_types['node']->setHandlerClass('access', '\Drupal\intercept_room_reservation\NodeAccessControlHandler');
 }
 
 /**

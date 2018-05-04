@@ -15,7 +15,4 @@ class UserAccount extends ControllerBase {
     return ['#markup' => 'events page'];
   }
 
-  public function settingsPage(UserInterface $user) {
-    return ['#markup' => 'settings page'];
-  }
 }

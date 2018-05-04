@@ -2,6 +2,9 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 
+// Redux
+import { connect } from 'react-redux';
+
 // Intercept
 import interceptClient from 'interceptClient';
 import drupalSettings from 'drupalSettings';
@@ -24,6 +27,7 @@ import IconButton from 'material-ui/IconButton';
 import Typography from 'material-ui/Typography';
 import CloseIcon from '@material-ui/icons/Close';
 import Slide from 'material-ui/transitions/Slide';
+import Collapse from 'material-ui/transitions/Collapse';
 
 import Formsy, { addValidationRule } from 'formsy-react';
 import SelectResource from 'intercept/SelectResource';
@@ -34,7 +38,7 @@ import InputText from 'intercept/Input/InputText';
 import ReserveRoomConfirmation from './ReserveRoomConfirmation';
 import FindARoom from './../FindARoom';
 
-const { constants } = interceptClient;
+const { constants, select } = interceptClient;
 const c = constants;
 
 const matchTime = (original, ref) => {
@@ -50,6 +54,9 @@ const matchTime = (original, ref) => {
   return output;
 };
 const matchDate = (original, ref) => matchTime(ref, original);
+
+const purposeRequiresExplanation = meetingPurpose =>
+  meetingPurpose && meetingPurpose.data.attributes.field_requires_explanation;
 
 addValidationRule('isRequired', (values, value) => value !== '');
 addValidationRule('isPositive', (values, value) => value > 0);
@@ -210,7 +217,8 @@ class ReserveRoomForm extends PureComponent {
   }
 
   render() {
-    const { values } = this.props;
+    const { values, meetingPurpose } = this.props;
+    const showMeetingPurposeExplanation = !!purposeRequiresExplanation(meetingPurpose);
 
     return (
       <div className="form">
@@ -283,14 +291,14 @@ class ReserveRoomForm extends PureComponent {
                 }}
               />
             </div>
-              <Button
-                variant="raised"
-                color="secondary"
-                size="small"
-                onClick={this.expand('findRoom')}
-              >
-                Find a Time
-              </Button>
+            <Button
+              variant="raised"
+              color="secondary"
+              size="small"
+              onClick={this.expand('findRoom')}
+            >
+              Find a Time
+            </Button>
           </div>
           <div className="l--subsection--tight">
             <h4 className="">Groups</h4>
@@ -381,6 +389,15 @@ class ReserveRoomForm extends PureComponent {
                   label={'Meeting Purpose'}
                   required={values.meeting}
                 />
+                <Collapse in={showMeetingPurposeExplanation}>
+                  <InputText
+                    label="Please Explain"
+                    onChange={this.onValueChange('meetingDetails')}
+                    value={values.meetingDetails}
+                    name="meetingDetails"
+                    required={showMeetingPurposeExplanation}
+                  />
+                </Collapse>
               </ExpansionPanelDetails>
             </ExpansionPanel>
           </div>
@@ -437,7 +454,6 @@ class ReserveRoomForm extends PureComponent {
           open={this.state.openDialog}
           onCancel={this.onCloseDialog}
           onConfirm={() => {
-            console.log(values);
             this.onCloseDialog();
           }}
           values={values}
@@ -480,12 +496,14 @@ ReserveRoomForm.propTypes = {
     meetings: PropTypes.bool,
     meetingStart: PropTypes.instanceOf(Date),
     meetingEnd: PropTypes.instanceOf(Date),
+    meetingDetails: PropTypes.string,
     [c.TYPE_MEETING_PURPOSE]: PropTypes.string,
     refreshments: PropTypes.bool,
     refreshmentsDesc: PropTypes.string,
     user: PropTypes.string,
   }),
   onChange: PropTypes.func.isRequired,
+  meetingPurpose: PropTypes.object,
 };
 
 ReserveRoomForm.defaultProps = {
@@ -500,10 +518,22 @@ ReserveRoomForm.defaultProps = {
     meetingStart: new Date(),
     meetingEnd: new Date(),
     meetingPurpose: '',
+    meetingDetails: '',
     refreshments: false,
     refreshmentsDesc: '',
     user: drupalSettings.intercept.user.uuid,
   },
+  meetingPurpose: null,
 };
 
-export default ReserveRoomForm;
+const mapStateToProps = (state, ownProps) => {
+  return {
+    meetingPurpose: ownProps.values[c.TYPE_MEETING_PURPOSE]
+      ? select.record(
+        select.getIdentifier(c.TYPE_MEETING_PURPOSE, ownProps.values[c.TYPE_MEETING_PURPOSE]),
+      )(state)
+      : null,
+  };
+};
+
+export default connect(mapStateToProps)(ReserveRoomForm);

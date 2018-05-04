@@ -148,7 +148,8 @@ class ReserveRoom extends Component {
           .startOf('hour')
           .add(2, 'h')
           .toDate(),
-        [c.TYPE_MEETING_PURPSE]: null,
+        [c.TYPE_MEETING_PURPOSE]: null,
+        meetingDetails: '',
         refreshments: false,
         refreshmentsDesc: '',
         user: drupalSettings.intercept.user.uuid,

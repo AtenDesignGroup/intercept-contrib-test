@@ -24,10 +24,11 @@ const buildRoomReservation = (values) => {
         end_value: utils.dateToDrupal(values.end),
       },
       field_group_name: values.groupName,
-      // field_meeting_dates: {
-      //   value: null,
-      //   end_value: null
-      // },
+      field_meeting_dates: {
+        value: utils.dateToDrupal(values.meetingStart),
+        end_value: utils.dateToDrupal(values.meetingEnd),
+      },
+      field_meeting_purpose_details: values.meetingDetails,
       field_refreshments: values.refreshments,
       field_refreshments_description: {
         value: values.refreshmentsDesc,
@@ -44,6 +45,12 @@ const buildRoomReservation = (values) => {
           type: c.TYPE_ROOM,
           id: values[c.TYPE_ROOM],
         },
+      },
+      field_meeting_purpose: {
+        data: values[c.TYPE_MEETING_PURPOSE] ? {
+          type: c.TYPE_MEETING_PURPOSE,
+          id: values[c.TYPE_MEETING_PURPOSE],
+        } : null,
       },
       field_user: {
         data: {
@@ -87,27 +94,26 @@ class ReserveRoomConfirmation extends React.PureComponent {
       <RoomReservationSummary {...values} />
     );
 
-    const dialogProps = uuid ? {
-      confirmText: 'View Your Reservations',
-      cancelText: 'Close',
-      heading: '',
-      onConfirm: () => {
-        window.location.href = '/account/room-reservations';
-      },
-      onCancel,
-    } : {
-      confirmText: 'Submit',
-      cancelText: 'Cancel',
-      heading: 'Confirm Reservation Request?',
-      onConfirm: this.handleConfirm,
-      onCancel,
-    };
+    const dialogProps = uuid
+      ? {
+        confirmText: 'View Your Reservations',
+        cancelText: 'Close',
+        heading: '',
+        onConfirm: () => {
+          window.location.href = '/account/room-reservations';
+        },
+        onCancel,
+      }
+      : {
+        confirmText: 'Submit',
+        cancelText: 'Cancel',
+        heading: 'Confirm Reservation Request?',
+        onConfirm: this.handleConfirm,
+        onCancel,
+      };
 
     return (
-      <DialogConfirm
-        {...dialogProps}
-        open={open}
-      >
+      <DialogConfirm {...dialogProps} open={open}>
         {content}
       </DialogConfirm>
     );
@@ -128,11 +134,7 @@ ReserveRoomConfirmation.defaultProps = {
   open: false,
 };
 
-const mapStateToProps = state => ({
-  // events: select.eventsByDateAscending(state),
-  // eventsLoading: select.recordsAreLoading(c.TYPE_ROOM_RESERVATION)(state),
-  // calendarEvents: select.calendarEvents(state),
-});
+const mapStateToProps = () => ({});
 
 const mapDispatchToProps = dispatch => ({
   save: (data) => {

@@ -7,7 +7,6 @@ use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityTypeInterface;
-use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\intercept_room_reservation\Field\Computed\MethodItemList;
 use Drupal\user\UserInterface;
 
@@ -30,8 +29,7 @@ use Drupal\user\UserInterface;
  *       "edit" = "Drupal\intercept_event\Form\EventRegistrationForm",
  *       "delete" = "Drupal\intercept_event\Form\EventRegistrationDeleteForm",
  *     },
- *     "access" = "Drupal\intercept_event\EventAccessControlHandler",
- *     "permission_provider" = "Drupal\intercept_event\EventPermissionProvider",
+ *     "access" = "Drupal\intercept_event\EventRegistrationAccessControlHandler",
  *     "route_provider" = {
  *       "html" = "Drupal\intercept_event\EventRegistrationHtmlRouteProvider",
  *     },
@@ -59,37 +57,6 @@ class EventRegistration extends ContentEntityBase implements EventRegistrationIn
 
   use EntityChangedTrait;
 
-  use StringTranslationTrait;
-
-  public function label() {
-    return $this->getTitle();
-  }
-
-  public function getTitle() {
-    if (!$event = $this->get('field_event')->entity) {
-      return $this->t('Event registration');
-    }
-    $dates = $event->get('field_date_time')->first();
-    if (!$dates || !$dates->get('value') || !$dates->get('end_value')) {
-      return '';
-    }
-    $values = [
-      '@title' => $event->label(),
-    ];
-    if ($from_date = $dates->get('value')->getDateTime()) {
-      $values['@date'] = $from_date->format('n/j/Y');
-      $values['@time_start'] = $from_date->format('g:i A');
-    }
-    if ($to_date = $dates->get('end_value')->getDateTime()) {
-      $values['@time_end'] = $to_date->format('g:i A');
-    }
-    return !empty($values) ? $this->t('@title @date: @time_start - @time_end', $values) : '';
-  }
-
-  public function total() {
-    return $this->get('field_registrants')->getTotal();
-  }
-
   /**
    * {@inheritdoc}
    */
@@ -98,6 +65,21 @@ class EventRegistration extends ContentEntityBase implements EventRegistrationIn
     $values += [
       'author' => \Drupal::currentUser()->id(),
     ];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getName() {
+    return $this->get('name')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setName($name) {
+    $this->set('name', $name);
+    return $this;
   }
 
   /**
@@ -148,6 +130,21 @@ class EventRegistration extends ContentEntityBase implements EventRegistrationIn
   /**
    * {@inheritdoc}
    */
+  public function isPublished() {
+    return (bool) $this->getEntityKey('status');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setPublished($published) {
+    $this->set('status', $published ? TRUE : FALSE);
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
     $fields = parent::baseFieldDefinitions($entity_type);
 
@@ -183,18 +180,30 @@ class EventRegistration extends ContentEntityBase implements EventRegistrationIn
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
 
-    $fields['status'] = BaseFieldDefinition::create('list_string')
-      ->setLabel(t('Status'))
-      ->setDescription(t('A boolean indicating whether the Event Registration is published.'))
-      ->setDefaultValue('active')
-      ->setCardinality(1)
-      ->setSetting('allowed_values', [
-        'canceled' => 'Canceled',
-        'active' => 'Active',
-        'waitlist' => 'Waitlist'
+    $fields['name'] = BaseFieldDefinition::create('string')
+      ->setLabel(t('Name'))
+      ->setDescription(t('The name of the Event Registration entity.'))
+      ->setSettings([
+        'max_length' => 50,
+        'text_processing' => 0,
+      ])
+      ->setDefaultValue('')
+      ->setDisplayOptions('view', [
+        'label' => 'above',
+        'type' => 'string',
+        'weight' => -4,
+      ])
+      ->setDisplayOptions('form', [
+        'type' => 'string_textfield',
+        'weight' => -4,
       ])
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
+
+    $fields['status'] = BaseFieldDefinition::create('boolean')
+      ->setLabel(t('Publishing status'))
+      ->setDescription(t('A boolean indicating whether the Event Registration is published.'))
+      ->setDefaultValue(TRUE);
 
     $fields['created'] = BaseFieldDefinition::create('created')
       ->setLabel(t('Created'))

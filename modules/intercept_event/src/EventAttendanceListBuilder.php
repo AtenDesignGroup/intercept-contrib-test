@@ -13,18 +13,13 @@ use Drupal\Core\Link;
  */
 class EventAttendanceListBuilder extends EntityListBuilder {
 
-  use EventListBuilderTrait;
 
   /**
    * {@inheritdoc}
    */
   public function buildHeader() {
-    $header = [];
-    $this->addEventHeader($header);
+    $header['id'] = $this->t('Event Attendance ID');
     $header['name'] = $this->t('Name');
-    $header['count'] = $this->t('Total');
-    $header['user'] = $this->t('User');
-    $header['author'] = $this->t('Author');
     return $header + parent::buildHeader();
   }
 
@@ -32,14 +27,13 @@ class EventAttendanceListBuilder extends EntityListBuilder {
    * {@inheritdoc}
    */
   public function buildRow(EntityInterface $entity) {
-    $row = [];
-    $this->addEventRow($row, $entity);
-    $row['name'] = $entity->link();
-    $row['count'] = $entity->total();
-    $zip = $entity->field_guest_zip_code->getString();
-    $link = !empty($zip) ? $this->t('Guest: @zip', ['@zip' => $zip]) : $this->getUserLink($entity);
-    $row['user'] = $link;
-    $row['author'] = $this->getUserLink($entity, 'author');
+    /* @var $entity \Drupal\intercept_event\Entity\EventAttendance */
+    $row['id'] = $entity->id();
+    $row['name'] = Link::createFromRoute(
+      $entity->label(),
+      'entity.event_attendance.edit_form',
+      ['event_attendance' => $entity->id()]
+    );
     return $row + parent::buildRow($entity);
   }
 

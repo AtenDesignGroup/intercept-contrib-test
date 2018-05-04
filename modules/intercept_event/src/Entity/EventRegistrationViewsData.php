@@ -15,13 +15,8 @@ class EventRegistrationViewsData extends EntityViewsData {
   public function getViewsData() {
     $data = parent::getViewsData();
 
-    $data['event_registration']['event_registration_bulk_form'] = [
-      'title' => $this->t('Event registration operations bulk form'),
-      'help' => $this->t('Add a form element that lets you run operations on multiple event registrations.'),
-      'field' => [
-        'id' => 'event_registration_bulk_form',
-      ],
-    ];
+    // Additional information for Views integration, such as table joins, can be
+    // put here.
 
     return $data;
   }

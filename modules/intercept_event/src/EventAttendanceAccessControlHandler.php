@@ -2,6 +2,7 @@
 
 namespace Drupal\intercept_event;
 
+use Drupal\Core\Entity\EntityAccessControlHandler;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Access\AccessResult;
@@ -11,7 +12,7 @@ use Drupal\Core\Access\AccessResult;
  *
  * @see \Drupal\intercept_event\Entity\EventAttendance.
  */
-class EventAttendanceAccessControlHandler extends EventAccessControlHandler {
+class EventAttendanceAccessControlHandler extends EntityAccessControlHandler {
 
   /**
    * {@inheritdoc}
@@ -19,12 +20,28 @@ class EventAttendanceAccessControlHandler extends EventAccessControlHandler {
   protected function checkAccess(EntityInterface $entity, $operation, AccountInterface $account) {
     /** @var \Drupal\intercept_event\Entity\EventAttendanceInterface $entity */
     switch ($operation) {
-      case 'scan':
-        return AccessResult::allowedIfHasPermission($account, 'scan event_attendance');
+      case 'view':
+        if (!$entity->isPublished()) {
+          return AccessResult::allowedIfHasPermission($account, 'view unpublished event attendance entities');
+        }
+        return AccessResult::allowedIfHasPermission($account, 'view published event attendance entities');
+
+      case 'update':
+        return AccessResult::allowedIfHasPermission($account, 'edit event attendance entities');
+
+      case 'delete':
+        return AccessResult::allowedIfHasPermission($account, 'delete event attendance entities');
     }
 
-    // All other operations follow the parent.
-    return parent::checkAccess($entity, $operation, $account);
+    // Unknown operation, no opinion.
+    return AccessResult::neutral();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function checkCreateAccess(AccountInterface $account, array $context, $entity_bundle = NULL) {
+    return AccessResult::allowedIfHasPermission($account, 'add event attendance entities');
   }
 
 }

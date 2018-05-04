@@ -27,12 +27,38 @@ function intercept_core_preprocess_page(array &$variables) {
 }
 
 /**
+ * Implements hook_entity_type_build().
+ */
+function intercept_core_entity_type_build(array &$entity_types) {
+  /** @var $entity_types \Drupal\Core\Entity\EntityTypeInterface[] */
+  $entity_types['profile']->setFormClass('customer', '\Drupal\intercept_core\Form\ProfileForm');
+}
+
+/**
  * Implements hook_menu_links_discovered_alter().
  */
 function intercept_core_menu_links_discovered_alter(&$links) {
   // Add a warning to the end of route links to the admin section.
   if (isset($links['user.page'])) {
     $links['user.page']['title'] = t('Dashboard');
+  }
+}
+
+/**
+ * Alter local tasks plugins.
+ *
+ * @param array $local_tasks
+ *   The array of local tasks plugin definitions, keyed by plugin ID.
+ *
+ * @see \Drupal\Core\Menu\LocalTaskInterface
+ * @see \Drupal\Core\Menu\LocalTaskManager
+ *
+ * @ingroup menu
+ */
+function intercept_core_local_tasks_alter(&$local_tasks) {
+  // Change the title of the profile customer user tab.
+  if (isset($local_tasks['entity.profile.user_profile_form:profile.type.customer'])) {
+    $local_tasks['entity.profile.user_profile_form:profile.type.customer']['title'] = t('Settings');
   }
 }
 
@@ -49,4 +75,27 @@ function intercept_core_inline_entity_form_entity_form_alter(&$entity_form, &$fo
     // Hide the revision log message field on all media forms.
     $entity_form['revision_log_message']['#access'] = FALSE;
   }
+}
+
+/**
+ * Implements hook_entity_extra_field_info().
+ */
+function intercept_core_entity_extra_field_info() {
+  $extra = [];
+
+  $extra['profile']['customer']['form']['card_number'] = [
+    'label' => t('Card number'),
+    'description' => t('ILS card number'),
+    'weight' => 10,
+    'visible' => FALSE,
+  ];
+
+  $extra['profile']['customer']['form']['pin'] = [
+    'label' => t('Pin'),
+    'description' => t('ILS pin'),
+    'weight' => 15,
+    'visible' => FALSE,
+  ];
+
+  return $extra;
 }

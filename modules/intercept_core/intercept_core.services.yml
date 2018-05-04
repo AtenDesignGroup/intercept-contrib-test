@@ -1,0 +1,6 @@
+services:
+  intercept_core.customer_event_subscriber:
+    class: Drupal\intercept_core\EventSubscriber\Customer
+    arguments: ['@current_user', '@entity_type.manager', '@polaris.client']
+    tags:
+      - { name: event_subscriber }

@@ -15,7 +15,7 @@
     "babel-polyfill": "^6.26.0",
     "formsy-react": "^1.1.4",
     "history": "^4.7.2",
-    "intercept-client": "^1.1.33",
+    "intercept-client": "^1.1.34",
     "lodash": "^4.17.5",
     "material-ui": "^1.0.0-beta.33",
     "material-ui-icons": "^1.0.0-beta.17",

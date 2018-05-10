@@ -57,6 +57,11 @@ class EventRegistration extends ContentEntityBase implements EventRegistrationIn
 
   use EntityChangedTrait;
 
+  public function title() {
+    // TODO: Make this dynamic.
+    return 'Event registration';
+  }
+
   /**
    * {@inheritdoc}
    */
@@ -65,21 +70,6 @@ class EventRegistration extends ContentEntityBase implements EventRegistrationIn
     $values += [
       'author' => \Drupal::currentUser()->id(),
     ];
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getName() {
-    return $this->get('name')->value;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function setName($name) {
-    $this->set('name', $name);
-    return $this;
   }
 
   /**
@@ -130,21 +120,6 @@ class EventRegistration extends ContentEntityBase implements EventRegistrationIn
   /**
    * {@inheritdoc}
    */
-  public function isPublished() {
-    return (bool) $this->getEntityKey('status');
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function setPublished($published) {
-    $this->set('status', $published ? TRUE : FALSE);
-    return $this;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
     $fields = parent::baseFieldDefinitions($entity_type);
 
@@ -180,30 +155,18 @@ class EventRegistration extends ContentEntityBase implements EventRegistrationIn
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
 
-    $fields['name'] = BaseFieldDefinition::create('string')
-      ->setLabel(t('Name'))
-      ->setDescription(t('The name of the Event Registration entity.'))
-      ->setSettings([
-        'max_length' => 50,
-        'text_processing' => 0,
-      ])
-      ->setDefaultValue('')
-      ->setDisplayOptions('view', [
-        'label' => 'above',
-        'type' => 'string',
-        'weight' => -4,
-      ])
-      ->setDisplayOptions('form', [
-        'type' => 'string_textfield',
-        'weight' => -4,
+    $fields['status'] = BaseFieldDefinition::create('list_string')
+      ->setLabel(t('Status'))
+      ->setDescription(t('A boolean indicating whether the Event Registration is published.'))
+      ->setDefaultValue('active')
+      ->setCardinality(1)
+      ->setSetting('allowed_values', [
+        'canceled' => 'Canceled',
+        'active' => 'Active',
+        'waitlist' => 'Waitlist'
       ])
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
-
-    $fields['status'] = BaseFieldDefinition::create('boolean')
-      ->setLabel(t('Publishing status'))
-      ->setDescription(t('A boolean indicating whether the Event Registration is published.'))
-      ->setDefaultValue(TRUE);
 
     $fields['created'] = BaseFieldDefinition::create('created')
       ->setLabel(t('Created'))

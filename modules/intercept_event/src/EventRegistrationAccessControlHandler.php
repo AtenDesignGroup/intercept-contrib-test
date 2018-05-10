@@ -21,7 +21,7 @@ class EventRegistrationAccessControlHandler extends EntityAccessControlHandler {
     /** @var \Drupal\intercept_event\Entity\EventRegistrationInterface $entity */
     switch ($operation) {
       case 'view':
-        if (!$entity->isPublished()) {
+        if (!$entity->get('status') == 'active') {
           return AccessResult::allowedIfHasPermission($account, 'view unpublished event registration entities');
         }
         return AccessResult::allowedIfHasPermission($account, 'view published event registration entities');

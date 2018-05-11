@@ -3,6 +3,7 @@
 namespace Drupal\intercept_event\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Url;
 
 /**
  * Class EventsController.
@@ -22,5 +23,18 @@ class EventsController extends ControllerBase {
     $build['intercept_event_list']['#markup'] = '<div id="eventListRoot" />';
 
     return $build;
+  }
+
+  /**
+   * Event registration form.
+   */
+  public function register(\Drupal\node\NodeInterface $node) {
+    $access_handler = $this->entityTypeManager()->getAccessControlHandler('event_registration');
+    if (!$access_handler->createAccess('event_registration')) {
+      return $this->redirect('user.login', [
+        'destination' => Url::fromRoute('<current>')->toString(),
+      ]);
+    }
+    return [];
   }
 }

@@ -23,3 +23,10 @@ entity.user.events:
   requirements:
     _entity_access: 'user.update'
     user: \d+
+
+entity.node.register:
+  path: '/event/{node}/register'
+  defaults:
+    _controller: '\Drupal\intercept_event\Controller\EventsController::register'
+  requirements:
+    _access: 'TRUE'

@@ -1,0 +1,22 @@
+<?php
+
+/**
+ * @file
+ * Contains intercept_equipment.module.
+ */
+
+use Drupal\Core\Access\AccessResult;
+
+/**
+ * Implements hook_node_access().
+ */
+function intercept_equipment_node_access(\Drupal\node\NodeInterface $node, $op, \Drupal\Core\Session\AccountInterface $account) {
+  if ($node->bundle() == 'equipment' && $op == 'view') {
+    return AccessResult::forbiddenIf(!$account->hasPermission('view reservation content'))
+      ->cachePerPermissions()
+      ->cachePerUser()
+      ->addCacheableDependency($node);
+  }
+   // No opinion.
+  return AccessResult::neutral();
+}

@@ -1,0 +1,3 @@
+view reservation content:
+  title: "Equipment: View published content"
+  description: "Overrides view published content for equipment node"

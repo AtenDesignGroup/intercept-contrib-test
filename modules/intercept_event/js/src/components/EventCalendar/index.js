@@ -1,7 +1,12 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import BigCalendar from 'react-big-calendar';
+import Toolbar from 'react-big-calendar/lib/Toolbar';
 import moment from 'moment';
+import ArrowBack from '@material-ui/icons/ArrowBack';
+import ArrowForward from '@material-ui/icons/ArrowForward';
+import Button from 'material-ui/Button';
+import IconButton from 'material-ui/IconButton';
 
 BigCalendar.setLocalizer(BigCalendar.momentLocalizer(moment));
 
@@ -24,12 +29,59 @@ const CalendarEvent = (props) => {
   );
 };
 
+class CustomToolbar extends Toolbar {
+  render() {
+    const { messages, label } = this.props;
+
+    return (
+      <div className="rbc-toolbar">
+        <span className="rbc-btn-group">
+          <Button
+            variant="raised"
+            color="primary"
+            size="small"
+            className="rbc-btn rbc-btn--today"
+            onClick={() => this.navigate('TODAY')}
+          >
+            {messages.today}
+          </Button>
+        </span>
+        <div className="rbc-toolbar__heading">
+          <IconButton
+            className={'rbc-toolbar__pager-button rbc-toolbar__pager-button--prev'}
+            onClick={() => this.navigate('PREV')}
+            color="primary"
+            aria-label="Previous"
+            variant="flat"
+          >
+            <ArrowBack />
+          </IconButton>
+          <h2 className="rbc-toolbar__label">{label}</h2>
+          <IconButton
+            className={'rbc-toolbar__pager-button rbc-toolbar__pager-button--next'}
+            onClick={() => this.navigate('NEXT')}
+            color="primary"
+            aria-label="Next"
+          >
+            <ArrowForward />
+          </IconButton>
+        </div>
+
+        <span className="rbc-btn-group rbc-btn-group--views">{this.viewNamesGroup(messages)}</span>
+      </div>
+    );
+  }
+}
+
 const components = {
   event: CalendarEvent,
+  toolbar: CustomToolbar,
 };
 
 const onSelectEvent = (event) => {
-  const url = event.data.attributes.path ? event.data.attributes.path.alias : `/node/${event.data.attributes.nid}`;
+  const url = event.data.attributes.path
+    ? event.data.attributes.path.alias
+    : `/node/${event.data.attributes.nid}`;
   window.location.href = url;
 };
 

@@ -1,3 +1,9 @@
+edit event field field_event_is_template:
+  title: 'Mark an event node as template'
+
+edit event field field_featured:
+  title: 'Mark an event node as featured'
+
 add event recurrence entities:
   title: 'Create new Event Recurrence entities'
 

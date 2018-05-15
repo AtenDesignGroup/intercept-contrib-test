@@ -1,0 +1,19 @@
+<?php
+
+use Drupal\Core\Access\AccessResult;
+
+/**
+ * Implements hook_entity_field_access().
+ */
+function intercept_event_entity_field_access($operation, \Drupal\Core\Field\FieldDefinitionInterface $field_definition, \Drupal\Core\Session\AccountInterface $account, \Drupal\Core\Field\FieldItemListInterface $items = NULL) {
+  // Check if it's edit because 'view' might not have any items.
+  if ($operation == 'edit') {
+    if ($items->getEntity()->bundle() == 'event' && $field_definition->getName() == 'field_event_is_template') {
+      return AccessResult::forbiddenIf(!$account->hasPermission('edit event field field_event_is_template'));
+    }
+    if ($items->getEntity()->bundle() == 'event' && $field_definition->getName() == 'field_featured') {
+      return AccessResult::forbiddenIf(!$account->hasPermission('edit event field field_featured'));
+    }
+  }
+  return AccessResult::neutral();
+}

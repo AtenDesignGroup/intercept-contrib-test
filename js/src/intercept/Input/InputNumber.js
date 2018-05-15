@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import TextField from 'material-ui/TextField';
+import TextField from '@material-ui/core/TextField';
 import { withFormsy, propTypes, defaultProps } from 'formsy-react';
 
 class InputNumber extends React.PureComponent {

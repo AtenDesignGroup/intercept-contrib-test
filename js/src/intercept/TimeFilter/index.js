@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { withStyles } from 'material-ui/styles';
+import { withStyles } from '@material-ui/core/styles';
 import moment from 'moment';
 import MomentUtils from 'material-ui-pickers/utils/moment-utils';
 import TimePicker from 'material-ui-pickers/TimePicker';

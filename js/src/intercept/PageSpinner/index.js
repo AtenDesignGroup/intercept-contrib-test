@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { withStyles } from 'material-ui/styles';
-import { LinearProgress } from 'material-ui/Progress';
+import { withStyles } from '@material-ui/core/styles';
+import LinearProgress from '@material-ui/core/LinearProgress';
 
 const styles = {
   root: {
@@ -16,11 +16,11 @@ const styles = {
 
 function PageSpinner(props) {
   const { classes, loading } = props;
-  return loading
-    ? (<div className={`${classes.root} page-spinner`}>
+  return loading ? (
+    <div className={`${classes.root} page-spinner`}>
       <LinearProgress />
-    </div>)
-    : null;
+    </div>
+  ) : null;
 }
 
 PageSpinner.propTypes = {

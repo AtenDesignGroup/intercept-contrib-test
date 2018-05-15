@@ -1,5 +1,5 @@
 import React from 'react';
-import Chip from 'material-ui/Chip';
+import Chip from '@material-ui/core/Chip';
 
 class OptionChip extends React.PureComponent {
   render() {

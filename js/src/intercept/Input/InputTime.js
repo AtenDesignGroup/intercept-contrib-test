@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import TextField from 'material-ui/TextField';
+import TextField from '@material-ui/core/TextField';
 import moment from 'moment';
 import { withFormsy } from 'formsy-react';
 import { propTypes, defaultProps } from 'formsy-react';

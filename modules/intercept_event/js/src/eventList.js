@@ -5,7 +5,7 @@ import { Provider } from 'react-redux';
 import interceptClient from 'interceptClient';
 import BrowseEventsApp from './components/BrowseEventsApp';
 import interceptTheme from 'interceptTheme';
-import { MuiThemeProvider, createMuiTheme } from 'material-ui/styles';
+import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 
 const theme = createMuiTheme(interceptTheme);
 

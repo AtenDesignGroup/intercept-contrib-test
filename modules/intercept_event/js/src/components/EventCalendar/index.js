@@ -5,8 +5,9 @@ import Toolbar from 'react-big-calendar/lib/Toolbar';
 import moment from 'moment';
 import ArrowBack from '@material-ui/icons/ArrowBack';
 import ArrowForward from '@material-ui/icons/ArrowForward';
-import Button from 'material-ui/Button';
-import IconButton from 'material-ui/IconButton';
+import Button from '@material-ui/core/Button';
+import IconButton from '@material-ui/core/IconButton';
+import EventSummaryDialog from './EventSummaryDialog';
 
 BigCalendar.setLocalizer(BigCalendar.momentLocalizer(moment));
 
@@ -78,36 +79,64 @@ const components = {
   toolbar: CustomToolbar,
 };
 
-const onSelectEvent = (event) => {
-  const url = event.data.attributes.path
-    ? event.data.attributes.path.alias
-    : `/node/${event.data.attributes.nid}`;
-  window.location.href = url;
-};
+class EventCalendar extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      showEvent: false,
+      selectedEvent: null,
+    };
 
-const EventCalendar = props => (
-  <BigCalendar
-    components={components}
-    events={props.events}
-    onSelectEvent={onSelectEvent}
-    titleAccessor={titleAccessor}
-    startAccessor={startAccessor}
-    endAccessor={endAccessor}
-    onNavigate={props.onNavigate}
-    onView={props.onView}
-    defaultView={props.defaultView}
-    defaultDate={props.defaultDate}
-    popup
-    views={['month', 'week', 'day']}
-    elementProps={{
-      style: {
-        height: 'calc(100vh - 26rem)',
-      },
-    }}
-    min={new Date('Jan 1, 2000 07:00:00')}
-    max={new Date('Jan 1, 2000 22:00:00')}
-  />
-);
+    this.onSelectEvent = this.onSelectEvent.bind(this);
+    this.onHideEvent = this.onHideEvent.bind(this);
+  }
+
+  onSelectEvent(event) {
+    this.setState({
+      showEvent: true,
+      selectedEvent: event.data.id,
+    });
+  }
+
+  onHideEvent() {
+    this.setState({
+      showEvent: false,
+    });
+  }
+
+  render() {
+    return (
+      <React.Fragment>
+        <BigCalendar
+          components={components}
+          events={this.props.events}
+          onSelectEvent={this.onSelectEvent}
+          titleAccessor={titleAccessor}
+          startAccessor={startAccessor}
+          endAccessor={endAccessor}
+          onNavigate={this.props.onNavigate}
+          onView={this.props.onView}
+          defaultView={this.props.defaultView}
+          defaultDate={this.props.defaultDate}
+          popup
+          views={['month', 'week', 'day']}
+          elementProps={{
+            style: {
+              height: 'calc(100vh - 26rem)',
+            },
+          }}
+          min={new Date('Jan 1, 2000 07:00:00')}
+          max={new Date('Jan 1, 2000 22:00:00')}
+        />
+        <EventSummaryDialog
+          id={this.state.selectedEvent}
+          open={this.state.showEvent}
+          onClose={this.onHideEvent}
+        />
+      </React.Fragment>
+    );
+  }
+}
 
 EventCalendar.propTypes = {
   events: PropTypes.arrayOf(Object).isRequired,

@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
-import Button from 'material-ui/Button';
+import Button from '@material-ui/core/Button';
 import DialogConfirm from 'intercept/Dialog/DialogConfirm';
 import interceptClient from 'interceptClient';
 const { constants, api, select } = interceptClient;
@@ -40,13 +40,13 @@ class ButtonActions extends PureComponent {
   }
 
   onCancel () {
-    this.setState({ 
+    this.setState({
       open: false,
     });
   }
 
   onClick (action) {
-    this.setState({ 
+    this.setState({
       open: true,
       text: this.getActionProperties(action).text,
       heading: this.getActionProperties(action).text,
@@ -72,7 +72,7 @@ class ButtonActions extends PureComponent {
             </Button>
           ))}
         </div>
-        <DialogConfirm 
+        <DialogConfirm
           open={this.state.open}
           onClose={this.onClose.bind(this)}
           onConfirm={this.props.onConfirm.bind(this)}

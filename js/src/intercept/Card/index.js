@@ -28,22 +28,14 @@ CardImage.defaultProps = {
 };
 
 const CardDate = props => (
-  <div className="card__dateline-wrapper">
-    <p className="card__dateline">
-      <span className="card__dateline-date">{'October 20, 2017'}</span>
-      {/* <span className="card__date-month">{props.dateStart.month}</span> */}
-      <span className="card__dateline-time">{'11 a.m.–2 p.m.'}</span>
-    </p>
+  <div className="card__dateline">
+    <p className="card__dateline-date">{props.date.date}</p>
+    <p className="card__dateline-time">{props.date.time}</p>
   </div>
 );
 
 CardDate.propTypes = {
-  dateStart: PropTypes.object.isRequired,
-  dateEnd: PropTypes.object,
-};
-
-CardDate.defaultProps = {
-  dateEnd: null,
+  date: PropTypes.object.isRequired,
 };
 
 const Card = (props) => {
@@ -82,11 +74,11 @@ const Card = (props) => {
             )}
           </h3>
           {subtitle && <span className="card__subtitle">{subtitle}</span>}
-          {date && <CardDate dateStart={date} />}
+          {date && <CardDate date={date} />}
         </header>
 
         {body && <div className="card__body" dangerouslySetInnerHTML={createMarkup(body)} />}
-        {label && <span className="card__label">{label}</span>}
+        {label && <p className="card__label">{label}</p>}
       </div>
       {footer && <div className="card__footer">{footer(props)}</div>}
     </article>

@@ -1,8 +1,8 @@
 react:
   js:
-    https://unpkg.com/react@16/umd/react.production.min.js:
+    https://unpkg.com/react@16.3.2/umd/react.production.min.js:
       external: true
-    https://unpkg.com/react-dom@16/umd/react-dom.production.min.js:
+    https://unpkg.com/react-dom@16.3.2/umd/react-dom.production.min.js:
       external: true
 
 bigCalendar:
@@ -13,7 +13,9 @@ bigCalendar:
 
 moment:
   js:
-    https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/moment.min.js:
+    https://unpkg.com/moment@2.20.1/min/moment.min.js:
+      external: true
+    https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.17/moment-timezone-with-data-2012-2022.min.js:
       external: true
 
 materialIcons:

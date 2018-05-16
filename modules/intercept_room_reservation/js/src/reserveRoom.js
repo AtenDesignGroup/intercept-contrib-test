@@ -7,17 +7,19 @@ import ReserveRoomApp from './components/ReserveRoomApp';
 import interceptTheme from 'interceptTheme';
 import { MuiThemeProvider, createMuiTheme } from 'material-ui/styles';
 
-const theme = createMuiTheme(interceptTheme);
+(function (interceptTheme) {
+  const theme = createMuiTheme(interceptTheme);
 
-// link the history used in our app to url-query so it can update the URL with it.
-configureUrlQuery({ history: interceptClient.history });
+  // link the history used in our app to url-query so it can update the URL with it.
+  configureUrlQuery({ history: interceptClient.history });
 
-const store = interceptClient.store;
-render(
-  <Provider store={store}>
-    <MuiThemeProvider theme={theme}>
-      <ReserveRoomApp />
-    </MuiThemeProvider>
-  </Provider>,
-  document.getElementById('reserveRoomRoot'),
-);
+  const store = interceptClient.store;
+  render(
+    <Provider store={store}>
+      <MuiThemeProvider theme={theme}>
+        <ReserveRoomApp />
+      </MuiThemeProvider>
+    </Provider>,
+    document.getElementById('reserveRoomRoot'),
+  );
+}(interceptTheme));

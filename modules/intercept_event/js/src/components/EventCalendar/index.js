@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import BigCalendar from 'react-big-calendar';
+import BigCalendar from 'intercept/BigCalendar';
+// import BigCalendar from 'react-big-calendar';
 import Toolbar from 'react-big-calendar/lib/Toolbar';
 import moment from 'moment';
 import ArrowBack from '@material-ui/icons/ArrowBack';
@@ -8,11 +9,12 @@ import ArrowForward from '@material-ui/icons/ArrowForward';
 import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import EventSummaryDialog from './EventSummaryDialog';
+import interceptClient from 'interceptClient';
 
-BigCalendar.setLocalizer(BigCalendar.momentLocalizer(moment));
+const { utils } = interceptClient;
 
 const dateAccessor = prop => item =>
-  moment(`${item.data.attributes.field_date_time[prop]}Z`, moment.ISO_8601).toDate();
+  utils.dateFromDrupal(item.data.attributes.field_date_time[prop]);
 const startAccessor = dateAccessor('value');
 const endAccessor = dateAccessor('end_value');
 const titleAccessor = item => (
@@ -108,6 +110,7 @@ class EventCalendar extends React.Component {
     return (
       <React.Fragment>
         <BigCalendar
+          timeZoneName={utils.getUserTimezone()}
           components={components}
           events={this.props.events}
           onSelectEvent={this.onSelectEvent}

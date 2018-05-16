@@ -1,13 +1,14 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import moment from 'moment';
+import moment from 'moment-timezone';
+// import momentTimezone from 'moment-timezone';
 import get from 'lodash/get';
 import interceptClient from 'interceptClient';
 import FieldInline from './../FieldInline';
 import Teaser from './../Teaser';
 
-const { select, constants } = interceptClient;
+const { select, constants, utils } = interceptClient;
 const c = constants;
 class EventTeaser extends PureComponent {
   render() {
@@ -18,7 +19,7 @@ class EventTeaser extends PureComponent {
       name: get(item, 'attributes.name'),
     });
 
-    const date = moment(`${event.attributes['field_date_time'].value}Z`, moment.ISO_8601);
+    const date = moment(utils.dateFromDrupal(event.attributes['field_date_time'].value));
 
     const audienceValues = event.relationships['field_event_audience']
       .map(termMap)
@@ -40,9 +41,9 @@ class EventTeaser extends PureComponent {
           event.attributes.path ? event.attributes.path.alias : `/node/${event.attributes.nid}`
         }
         date={{
-          month: date.format('MMM'),
-          date: date.format('D'),
-          time: date.format('h:mm a').replace('m', '.m.'),
+          month: date.utcOffset(utils.getUserUtcOffset()).format('MMM'),
+          date: date.utcOffset(utils.getUserUtcOffset()).format('D'),
+          time: utils.getTimeDisplay(date),
         }}
         description={event.attributes['field_text_teaser'].value}
         tags={[audiences]}

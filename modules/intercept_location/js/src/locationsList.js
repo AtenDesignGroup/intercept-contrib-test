@@ -1,13 +1,8 @@
 import React from 'react';
 import { render } from 'react-dom';
-import { Provider } from 'react-redux';
-import interceptClient from 'interceptClient';
+import withIntercept from 'intercept/withIntercept';
 import LocationsList from './components/locationsList';
 
-const store = interceptClient.store;
-render(
-  <Provider store={store}>
-    <LocationsList location={{}} />
-  </Provider>,
-  document.getElementById('locationsListRoot'),
-);
+const App = withIntercept(LocationsList);
+
+render(<App />, document.getElementById('locationsListRoot'));

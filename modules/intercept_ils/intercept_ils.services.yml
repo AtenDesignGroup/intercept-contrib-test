@@ -5,3 +5,6 @@ services:
     decorates: user.auth
     decoration_inner_name: intercept_ils.auth.user_auth
     arguments: ['@entity.manager', '@password', '@intercept_ils.auth.user_auth', '@polaris.client', '@externalauth.externalauth', '@externalauth.authmap']
+  intercept_ils.mapping_manager:
+    class: Drupal\intercept_ils\MappingManager
+    arguments: ['@entity_type.manager', '@polaris.client', '@entity.query']

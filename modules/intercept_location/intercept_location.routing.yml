@@ -6,3 +6,11 @@ intercept_location.general:
   requirements:
     _permission: 'administer intercept_core'
 
+
+intercept_location.organization_mapping_form:
+  path: '/admin/config/intercept/location/{node}/mapping'
+  defaults:
+    _form: '\Drupal\intercept_location\Form\OrganizationMappingForm'
+    _title: 'OrganizationMappingForm'
+  requirements:
+    _access: 'TRUE'

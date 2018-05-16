@@ -3,13 +3,14 @@
 namespace Drupal\intercept_location;
 
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Url;
 use Drupal\node\NodeListBuilder;
 
 class LocationListBuilder extends NodeListBuilder {
 
   public function buildRow(EntityInterface $entity) {
     $row = parent::buildRow($entity);
-    $row['type'] = $entity->field_ils_id->getString();
+    $row['type'] = $entity->field_polaris_id->getString();
     return $row;
   }
 
@@ -26,6 +27,20 @@ class LocationListBuilder extends NodeListBuilder {
     $entity_query->tableSort($header);
     $ids = $entity_query->execute();
     return $this->storage->loadMultiple($ids);
+  }
+
+  public function getOperations(EntityInterface $entity) {
+    $operations = parent::getOperations($entity);
+    $operations['mapping'] = [
+      'title' => $this->t('Mapping'),
+      'url' => Url::fromRoute('intercept_location.organization_mapping_form', [
+        'node' => $entity->id(),
+      ]),
+      'query' => [
+        'destination' => Url::fromRoute('<current>')->toString(),
+      ],
+    ];
+    return $operations;
   }
 
 }

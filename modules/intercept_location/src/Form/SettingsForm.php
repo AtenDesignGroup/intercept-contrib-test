@@ -40,7 +40,7 @@ class SettingsForm extends ConfigFormBase {
   }
 
   protected function getEditableConfigNames() {
-    return ['intercept.settings'];
+    return ['intercept_location.settings'];
   }
 
   public function getFormId() {
@@ -48,11 +48,11 @@ class SettingsForm extends ConfigFormBase {
   }
 
   public function buildForm(array $form, FormStateInterface $form_state) {
-    $settings = $this->config('intercept_core.settings')->get('location');
+    $settings = $this->config('intercept_location.settings');
     $form['mapping_enabled'] = [
       '#title' => $this->t('Enable ILS location mapping'),
       '#type' => 'checkbox',
-      '#default_value' => !empty($settings['mapping_enabled']),
+      '#default_value' => $settings->get('mapping_enabled', 0),
     ];
     $form['mapping_integration_type'] = [
       '#title' => $this->t('Import organizations as locations from Polaris'),
@@ -61,8 +61,9 @@ class SettingsForm extends ConfigFormBase {
         'once' => $this->t('Run once'),
         'cron' => $this->t('Run regularly with cron'),
       ],
-      '#default_value' => isset($settings['mapping_integration_type']) ? $settings['mapping_integration_type'] : NULL,
+      '#default_value' => $settings->get('mapping_integration_type', NULL),
     ];
+
     $entity_type = $this->entityTypeManager->getDefinition('node');
     $form['list'] = $this->entityTypeManager->createHandlerInstance(LocationListBuilder::class, $entity_type)->render();
 
@@ -94,7 +95,7 @@ class SettingsForm extends ConfigFormBase {
   public function runDelete(array &$form, FormStateInterface $form_state) {
     $storage = $this->entityTypeManager->getStorage('node');
     $nodes = $storage->getQuery()
-      ->condition('field_ils_id', NULL, 'IS NOT')
+      ->condition('field_polaris_id', NULL, 'IS NOT')
       ->condition('type', 'location', '=')
       ->execute();
     $nodes = $storage->loadMultiple(array_values($nodes));
@@ -103,8 +104,10 @@ class SettingsForm extends ConfigFormBase {
 
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $values = $form_state->cleanValues()->getValues();
-    $config = $this->config('intercept_core.settings');
-    $config->set('location', $values);
+    $config = $this->config('intercept_location.settings');
+    foreach ($values as $key => $value) {
+      $config->set($key, $value);
+    }
     $config->save();
     parent::submitForm($form, $form_state);
   }

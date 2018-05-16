@@ -42,22 +42,14 @@ function intercept_core_entity_type_build(array &$entity_types) {
  * Implements hook_menu_links_discovered_alter().
  */
 function intercept_core_menu_links_discovered_alter(&$links) {
-  // Add a warning to the end of route links to the admin section.
+  // Change the title of the default user view menu link.
   if (isset($links['user.page'])) {
     $links['user.page']['title'] = t('Dashboard');
   }
 }
 
 /**
- * Alter local tasks plugins.
- *
- * @param array $local_tasks
- *   The array of local tasks plugin definitions, keyed by plugin ID.
- *
- * @see \Drupal\Core\Menu\LocalTaskInterface
- * @see \Drupal\Core\Menu\LocalTaskManager
- *
- * @ingroup menu
+ * Implements hook_local_tasks_alter().
  */
 function intercept_core_local_tasks_alter(&$local_tasks) {
   // Change the title of the profile customer user tab.

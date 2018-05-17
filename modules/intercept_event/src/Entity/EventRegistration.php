@@ -7,6 +7,7 @@ use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\intercept_room_reservation\Field\Computed\MethodItemList;
 use Drupal\user\UserInterface;
 
@@ -57,9 +58,40 @@ class EventRegistration extends ContentEntityBase implements EventRegistrationIn
 
   use EntityChangedTrait;
 
-  public function title() {
-    // TODO: Make this dynamic.
-    return 'Event registration';
+  use StringTranslationTrait;
+
+  public function label() {
+    return $this->getTitle();
+  }
+
+  public function getTitle() {
+    if (!$event = $this->get('field_event')->entity) {
+      return $this->t('Event registration');
+    }
+    $dates = $event->get('field_date_time')->first();
+    if (!$dates || !$dates->get('value') || !$dates->get('end_value')) {
+      return '';
+    }
+    $values = [
+      '@title' => $event->label(),
+    ];
+    if ($from_date = $dates->get('value')->getDateTime()) {
+      $values['@date'] = $from_date->format('n/j/Y');
+      $values['@time_start'] = $from_date->format('g:i A');
+    }
+    if ($to_date = $dates->get('end_value')->getDateTime()) {
+      $values['@time_end'] = $to_date->format('g:i A');
+    }
+    return !empty($values) ? $this->t('@title @date: @time_start - @time_end', $values) : '';
+  }
+
+  public function total() {
+    $value = $this->get('field_registrants')->getValue();
+    $counts = array_column($value, 'count');
+    return array_reduce($counts, function($carry, $item) {
+      $carry += (int) $item;
+      return $carry;
+    });
   }
 
   /**

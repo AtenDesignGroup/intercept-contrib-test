@@ -3,7 +3,6 @@ eventList:
   js:
     js/dist/eventList.js:
       preprocess: false
-
   dependencies:
     - core/drupalSettings
     - intercept_core/babelHelpers
@@ -13,4 +12,18 @@ eventList:
     - intercept_core/interceptCommon
     - intercept_core/interceptTheme
     - intercept_core/bigCalendar
+    - intercept_core/materialIcons
+
+eventRegister:
+  js:
+    js/dist/eventRegister.js:
+      preprocess: false
+  dependencies:
+    - core/drupalSettings
+    - intercept_core/babelHelpers
+    - intercept_core/react
+    - intercept_core/moment
+    - intercept_core/interceptClient
+    - intercept_core/interceptCommon
+    - intercept_core/interceptTheme
     - intercept_core/materialIcons

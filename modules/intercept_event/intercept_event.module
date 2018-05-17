@@ -17,3 +17,25 @@ function intercept_event_entity_field_access($operation, \Drupal\Core\Field\Fiel
   }
   return AccessResult::neutral();
 }
+
+/**
+ * Implements hook_entity_bundle_field_info().
+ */
+function intercept_event_entity_bundle_field_info(\Drupal\Core\Entity\EntityTypeInterface $entity_type, $bundle, array $base_field_definitions) {
+  $fields = [];
+  if ($entity_type->id() == 'node' && $bundle == 'event') {
+    $fields['registration'] = \Drupal\Core\Field\BaseFieldDefinition::create('intercept_computed')
+      ->setLabel(t('Registration details'))
+      ->setComputed(TRUE)
+      ->setSetting('properties', [
+        'total' => DataDefinition::create('integer')->setLabel(t('Total registrations')),
+        'total_waitlist' => DataDefinition::create('integer')->setLabel(t('Total waitlisted')),
+        'status' => DataDefinition::create('string')->setLabel(t('Status')),
+        'status_user' => DataDefinition::create('string')->setLabel(t('Status for current user')),
+      ])
+      ->setClass(\Drupal\intercept_event\EventRegistrationField::class);
+
+  }
+  return $fields;
+
+}

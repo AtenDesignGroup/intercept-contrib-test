@@ -1,6 +1,7 @@
 <?php
 
 use Drupal\Core\Access\AccessResult;
+use Drupal\Core\TypedData\DataDefinition;
 
 /**
  * Implements hook_entity_field_access().

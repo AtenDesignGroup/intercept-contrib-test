@@ -86,3 +86,14 @@ entity.event_registration.collection:
   route_name: entity.event_registration.collection
   base_route: system.admin_content
   weight: 20 
+
+entity.node.attendance:
+  title: 'Attendance'
+  route_name: entity.node.attendance
+  base_route: entity.node.canonical
+
+entity.node.registrations:
+  title: 'Registrations'
+  route_name: entity.node.registrations
+  base_route: entity.node.canonical
+

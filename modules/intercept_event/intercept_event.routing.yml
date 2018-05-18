@@ -27,6 +27,27 @@ entity.user.events:
 entity.node.register:
   path: '/event/{node}/register'
   defaults:
-    _controller: '\Drupal\intercept_event\Controller\EventsController::register'
+    _controller: '\Drupal\intercept_event\Controller\EventRegistrationController::register'
+  requirements:
+    _access: 'TRUE'
+
+entity.node.registrations:
+  path: '/event/{node}/registrations'
+  defaults:
+    _controller: '\Drupal\intercept_event\Controller\EventsController::registrations'
+  requirements:
+    _custom_access: '\Drupal\intercept_event\Controller\EventsController::registrationsAccess'
+
+entity.node.attendance:
+  path: '/event/{node}/attendance'
+  defaults:
+    _controller: '\Drupal\intercept_event\Controller\EventsController::attendance'
+  requirements:
+    _custom_access: '\Drupal\intercept_event\Controller\EventsController::attendanceAccess'
+
+entity.event_attendance.scan_form:
+  path: '/event/{node}/scanin'
+  defaults:
+    _controller: '\Drupal\intercept_event\Controller\EventAttendanceController::scanForm'
   requirements:
     _access: 'TRUE'

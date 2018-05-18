@@ -27,6 +27,7 @@ use Drupal\user\UserInterface;
  *     "form" = {
  *       "default" = "Drupal\intercept_event\Form\EventAttendanceForm",
  *       "add" = "Drupal\intercept_event\Form\EventAttendanceForm",
+ *       "scan" = "Drupal\intercept_event\Form\EventAttendanceForm",
  *       "edit" = "Drupal\intercept_event\Form\EventAttendanceForm",
  *       "delete" = "Drupal\intercept_event\Form\EventAttendanceDeleteForm",
  *     },

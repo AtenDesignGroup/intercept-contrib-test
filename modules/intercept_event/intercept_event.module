@@ -20,6 +20,38 @@ function intercept_event_entity_field_access($operation, \Drupal\Core\Field\Fiel
 }
 
 /**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function intercept_event_form_node_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state) {
+  if ($form_state->getFormObject()->getEntity()->bundle() == 'event') {
+    $form['#validate'][] = 'intercept_event_node_event_form_validate';
+  }
+}
+
+/**
+ * Custom form validation for the event node form.
+ *
+ * @see intercept_event_form_node_form_alter()
+ */
+function intercept_event_node_event_form_validate(&$form, \Drupal\Core\Form\FormStateInterface $form_state) {
+  $values = $form_state->getValues();
+  $must_register = $values['field_must_register']['value'];
+  $dates_event = $values['field_date_time'][0];
+  $dates_registration = $values['field_event_register_period'][0];
+  if ($must_register) {
+    $dates_registration = $form_state->getValue('field_event_register_period')[0];
+    if (empty($dates_registration['value']) || empty($dates_registration['end_value'])) {
+      $form_state->setErrorByName('field_event_register_period', t('Registration period is required.'));
+    }
+  }
+  if (!empty($dates_registration['value']) && !empty($dates_event['value'])) {
+    if (!$dates_event['value']->diff($dates_registration['value'])->invert) {
+      $form_state->setErrorByName('field_date_time', t('Registration start date must be before the event start date.'));
+    }
+  }
+}
+
+/**
  * Implements hook_entity_bundle_field_info().
  */
 function intercept_event_entity_bundle_field_info(\Drupal\Core\Entity\EntityTypeInterface $entity_type, $bundle, array $base_field_definitions) {

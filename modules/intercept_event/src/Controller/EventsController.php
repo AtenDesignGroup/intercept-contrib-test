@@ -70,25 +70,6 @@ class EventsController extends ControllerBase {
   }
 
   /**
-   * Event registration form.
-   */
-  public function register(\Drupal\node\NodeInterface $node) {
-    $access_handler = $this->entityTypeManager()->getAccessControlHandler('event_registration');
-    if (!$access_handler->createAccess('event_registration')) {
-      return $this->redirect('user.login', [
-        'destination' => Url::fromRoute('<current>')->toString(),
-      ]);
-    }
-
-    $build = [];
-    $build['#attached']['library'][] = 'intercept_event/eventRegister';
-    $build['#markup'] = '';
-    $build['intercept_event_register']['#markup'] = '<div id="eventRegisterRoot" data-uuid="' . $node->uuid() . '" />';
-
-    return $build;
-  }
-
-  /**
    * Check bundle access and permissions.
    */
   public function registrationsAccess(NodeInterface $node) {

@@ -2,10 +2,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import v4 from 'uuid/v4';
+import map from 'lodash/map';
 import interceptClient from 'interceptClient';
 import DialogConfirm from 'intercept/Dialog/DialogConfirm';
 // import RoomReservationSummary from './RoomReservationSummary';
-// import RoomReservationStatus from './RoomReservationStatus';
+import EventRegistrationStatus from './EventRegistrationStatus';
 
 const { actions, api, constants, select, utils } = interceptClient;
 const c = constants;
@@ -15,42 +16,25 @@ const buildRoomReservation = (values) => {
 
   const output = {
     id: uuid,
-    type: c.TYPE_ROOM_RESERVATION,
+    type: c.TYPE_EVENT_REGISTRATION,
     attributes: {
       uuid,
-      field_attendee_count: values.attendees,
-      field_dates: {
-        value: utils.dateToDrupal(values.start),
-        end_value: utils.dateToDrupal(values.end),
-      },
-      field_group_name: values.groupName,
-      field_meeting_dates: {
-        value: utils.dateToDrupal(values.meetingStart),
-        end_value: utils.dateToDrupal(values.meetingEnd),
-      },
-      field_meeting_purpose_details: values.meetingDetails,
-      field_refreshments: values.refreshments,
-      field_refreshments_description: {
-        value: values.refreshmentsDesc,
-        // format: "basic_html"
-      },
-      field_status: 'requested',
     },
     relationships: {
       field_event: {
-        data: null,
-      },
-      field_room: {
         data: {
-          type: c.TYPE_ROOM,
-          id: values[c.TYPE_ROOM],
+          type: c.TYPE_EVENT,
+          id: values.event,
         },
       },
-      field_meeting_purpose: {
-        data: values[c.TYPE_MEETING_PURPOSE] ? {
-          type: c.TYPE_MEETING_PURPOSE,
-          id: values[c.TYPE_MEETING_PURPOSE],
-        } : null,
+      field_registrants: {
+        data: map(values.registrants, (value, id) => ({
+          type: c.TYPE_POPULATION_SEGMENT,
+          id,
+          meta: {
+            count: value,
+          },
+        })),
       },
       field_user: {
         data: {
@@ -89,16 +73,12 @@ class EventRegisterConfirmation extends React.PureComponent {
     const { uuid } = this.state;
 
     const content = uuid ? (
-      null
-      // <RoomReservationStatus uuid={uuid} />
-    ) : (
-      // <RoomReservationSummary {...values} />
-      null
-    );
+      <EventRegistrationStatus uuid={uuid} />
+    ) : null;
 
     const dialogProps = uuid
       ? {
-        confirmText: 'View Your Reservations',
+        confirmText: null,
         cancelText: 'Close',
         heading: '',
         onConfirm: () => {
@@ -109,7 +89,7 @@ class EventRegisterConfirmation extends React.PureComponent {
       : {
         confirmText: 'Submit',
         cancelText: 'Cancel',
-        heading: 'Confirm Reservation Request?',
+        heading: 'Confirm Registration',
         onConfirm: this.handleConfirm,
         onCancel,
       };
@@ -140,8 +120,8 @@ const mapStateToProps = () => ({});
 
 const mapDispatchToProps = dispatch => ({
   save: (data) => {
-    dispatch(actions.add(data, c.TYPE_ROOM_RESERVATION, data.id));
-    dispatch(api[c.TYPE_ROOM_RESERVATION].sync(data.id));
+    dispatch(actions.add(data, c.TYPE_EVENT_REGISTRATION, data.id));
+    dispatch(api[c.TYPE_EVENT_REGISTRATION].sync(data.id));
   },
 });
 

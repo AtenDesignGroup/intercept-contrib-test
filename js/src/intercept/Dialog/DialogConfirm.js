@@ -29,23 +29,26 @@ class DialogConfirm extends React.PureComponent {
           open={open}
           onClose={this.handleClose}
           aria-labelledby="responsive-dialog-title"
+          onBackdropClick={onCancel}
         >
           <DialogTitle id="responsive-dialog-title">{heading}</DialogTitle>
           <DialogContent>
-            {text && (
-              <DialogContentText>
-                {text}
-              </DialogContentText>
-            )}
+            {text && <DialogContentText>{text}</DialogContentText>}
             {children}
           </DialogContent>
           <DialogActions>
-            <Button onClick={onConfirm} color="primary">
-              {confirmText}
-            </Button>
-            <Button onClick={onCancel} color="primary" autoFocus>
-              {cancelText}
-            </Button>
+            {onCancel &&
+              cancelText && (
+                <Button onClick={onCancel} color="primary">
+                  {cancelText}
+                </Button>
+              )}
+            {onConfirm &&
+              confirmText && (
+                <Button onClick={onConfirm} color="primary" autoFocus>
+                  {confirmText}
+                </Button>
+              )}
           </DialogActions>
         </Dialog>
       </div>

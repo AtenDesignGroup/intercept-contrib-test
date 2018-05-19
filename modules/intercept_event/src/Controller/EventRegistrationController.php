@@ -56,7 +56,13 @@ class EventRegistrationController extends ControllerBase {
         'destination' => Url::fromRoute('<current>')->toString(),
       ]);
     }
-    return [];
+
+    $build = [];
+    $build['#attached']['library'][] = 'intercept_event/eventRegister';
+    $build['#markup'] = '';
+    $build['intercept_event_register']['#markup'] = '<div id="eventRegisterRoot" data-uuid="' . $node->uuid() . '" />';
+
+    return $build;
   }
 
   public function overview() {

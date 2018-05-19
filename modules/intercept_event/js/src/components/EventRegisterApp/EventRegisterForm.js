@@ -37,9 +37,19 @@ const c = constants;
 
 addValidationRule('isRequired', (values, value) => value !== '');
 addValidationRule('isPositive', (values, value) => value >= 0);
+addValidationRule('isPositiveTotal', (values, value) => values >= 0);
 
 function Transition(props) {
   return <Slide direction="up" {...props} />;
+}
+
+function FormWrapper(props) {
+  return (
+    <div className="form">
+      <h2 className="form__heading">Number of Attendees?</h2>
+      {props.children}
+    </div>
+  );
 }
 
 class EventRegisterForm extends PureComponent {
@@ -50,19 +60,22 @@ class EventRegisterForm extends PureComponent {
       openDialog: false,
       canSubmit: false,
       values: {},
+      validationErrors: {},
     };
 
     this.form = React.createRef();
 
-    this.updateValue = this.updateValue.bind(this);
-    this.updateValues = this.updateValues.bind(this);
+    this.disableButton = this.disableButton.bind(this);
+    this.enableButton = this.enableButton.bind(this);
+    this.getCurrentValues = this.getCurrentValues.bind(this);
+    this.getValuesTotal = this.getValuesTotal.bind(this);
     this.onCloseDialog = this.onCloseDialog.bind(this);
     this.onInputChange = this.onInputChange.bind(this);
     this.onOpenDialog = this.onOpenDialog.bind(this);
     this.onValueChange = this.onValueChange.bind(this);
-
-    this.disableButton = this.disableButton.bind(this);
-    this.enableButton = this.enableButton.bind(this);
+    this.updateValue = this.updateValue.bind(this);
+    this.updateValues = this.updateValues.bind(this);
+    this.validateForm = this.validateForm.bind(this);
   }
 
   onInputChange(key) {
@@ -85,6 +98,17 @@ class EventRegisterForm extends PureComponent {
     this.setState({ openDialog: false });
   };
 
+  getCurrentValues() {
+    return this.form.current
+      ? this.form.current.getModel()
+      : this.props.values;
+  }
+
+  getValuesTotal() {
+    const values = this.getCurrentValues();
+    return this.props.segments.reduce((total, s) => total + (values[s.key] || 0), 0);
+  }
+
   disableButton() {
     this.setState({ canSubmit: false });
   }
@@ -103,33 +127,58 @@ class EventRegisterForm extends PureComponent {
     this.setState({ values });
   }
 
+  validateForm(values) {
+    if (this.getValuesTotal(values) <= 0) {
+      this.setState({
+        validationErrors: {
+          [this.props.segments[0].key]: 'You must register at least one person',
+        },
+      });
+    }
+    else {
+      this.setState({
+        validationErrors: {},
+      });
+    }
+  }
+
   render() {
-    const { values, segments } = this.props;
+    const { values, segments, user, eventId } = this.props;
+
+    if (segments.length <= 0) {
+      return (
+        <FormWrapper>
+          <p>Loading segments</p>
+        </FormWrapper>
+      );
+    }
 
     return (
-      <div className="form">
-        <h2 className="form__heading">Number of Attendees?</h2>
+      <FormWrapper>
         <Formsy
           className="form__main"
           ref={this.form}
+          onChange={this.validateForm}
           onValidSubmit={this.onOpenDialog}
           onValid={this.enableButton}
           onInvalid={this.disableButton}
+          validationErrors={this.state.validationErrors}
         >
           <div className="l--subsection input-group--find-room">
-            {segments.map(s => (<InputIncrementer
-              label={s.value}
-              value={values[s.key] || 0}
-              onChange={this.onValueChange(s.key)}
-              key={s.key}
-              name={s.key}
-              min={0}
-              int
-              required={values.meeting}
-              validations="isPositive"
-              validationError="Attendees must be a positive number"
-            />))}
-
+            {segments.map(s => (
+              <InputIncrementer
+                label={s.value}
+                value={values[s.key] || 0}
+                onChange={this.onValueChange(s.key)}
+                key={s.key}
+                name={s.key}
+                min={0}
+                int
+                required={values.meeting}
+                validations="isPositive"
+                validationError="Attendees must be a positive number"
+              />
+            ))}
           </div>
 
           <div className="form__actions">
@@ -139,7 +188,7 @@ class EventRegisterForm extends PureComponent {
               color="primary"
               type="submit"
               className="button button--primary"
-              disabled={!this.state.canSubmit}
+              disabled={!this.state.canSubmit || this.getValuesTotal() <= 0}
             >
               Register
             </Button>
@@ -151,56 +200,28 @@ class EventRegisterForm extends PureComponent {
           onConfirm={() => {
             this.onCloseDialog();
           }}
-          values={values}
+          values={{
+            user: user.uuid,
+            event: eventId,
+            registrants: this.getCurrentValues()
+          }}
         />
-
-        {/* <Dialog
-          fullScreen
-          open={this.state.expand.findRoom}
-          onClose={() => {}}
-          transition={Transition}
-          className="dialog dialog--fullscreen"
-        >
-          <AppBar className={'dialog__app-bar app-bar'}>
-            <Toolbar>
-              <IconButton color="inherit" onClick={this.collapse('findRoom')} aria-label="Close">
-                <CloseIcon />
-              </IconButton>
-              <Typography variant="title" color="inherit" className={'app-bar_heading'}>
-                Find a Room
-              </Typography>
-            </Toolbar>
-          </AppBar>
-          <div className="dialog__panel">
-            <FindARoom onSelect={this.onRoomSelect} />
-          </div>
-        </Dialog> */}
-      </div>
+      </FormWrapper>
     );
   }
 }
 
 EventRegisterForm.propTypes = {
+  segments: PropTypes.array,
   values: PropTypes.shape({}),
+  user: PropTypes.object,
+  eventId: PropTypes.string.isRequired,
 };
 
 EventRegisterForm.defaultProps = {
-  values: {
-    [c.TYPE_ROOM]: '',
-    date: new Date(),
-    start: new Date(),
-    end: new Date(),
-    attendees: 1,
-    groupName: '',
-    meetings: false,
-    meetingStart: new Date(),
-    meetingEnd: new Date(),
-    meetingPurpose: '',
-    meetingDetails: '',
-    refreshments: false,
-    refreshmentsDesc: '',
-    user: drupalSettings.intercept.user.uuid,
-  },
+  segments: [],
+  values: {},
+  user: {},
 };
 
 const mapStateToProps = (state, ownProps) => ({

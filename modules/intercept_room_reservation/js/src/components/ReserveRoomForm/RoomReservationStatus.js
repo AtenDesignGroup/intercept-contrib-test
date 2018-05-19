@@ -1,12 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import interceptClient from 'interceptClient';
-import { connect } from 'react-redux';
-import get from 'lodash/get';
-import { CircularProgress } from 'material-ui/Progress';
+import EntityStatus from 'intercept/EntityStatus';
 
-const { constants, select } = interceptClient;
-const c = constants;
+const c = interceptClient.constants;
 
 const messages = {
   default: 'The status of the reservation is unknown',
@@ -30,51 +27,17 @@ const messages = {
   },
 };
 
-const getMessage = (state, status) => {
-  let message = messages.default;
-
-  if (!status) {
-    return message;
-  }
-
-  if (state.syncing) {
-    message = messages.syncing[status];
-    return message;
-  }
-
-  if (state.error) {
-    message = messages.error[status];
-    return message;
-  }
-
-  if (state.saved) {
-    message = messages.saved[status];
-    return message;
-  }
-
-  return message;
-};
-
 const RoomReservationStatus = props => (
-  <div className="room-res-status">
-    <p className="room-res-status__location">
-      {getMessage(props.reservation.state, get(props.reservation, 'data.attributes.field_status'))}
-    </p>
-    {props.reservation.state.syncing && <CircularProgress size={50} />}
-  </div>
+  <EntityStatus
+    type={c.TYPE_ROOM_RESERVATION}
+    id={props.uuid}
+    messages={messages}
+    statusPath={'data.attributes.field_status'}
+  />
 );
 
 RoomReservationStatus.propTypes = {
-  reservation: PropTypes.instanceOf(Object).isRequired,
+  uuid: PropTypes.string.isRequired,
 };
 
-const mapStateToProps = (state, ownProps) => {
-  const reservationId = select.getIdentifier(c.TYPE_ROOM_RESERVATION, ownProps.uuid);
-  const reservation = select.record(reservationId)(state);
-
-  return {
-    reservation,
-  };
-};
-
-export default connect(mapStateToProps)(RoomReservationStatus);
+export default RoomReservationStatus;

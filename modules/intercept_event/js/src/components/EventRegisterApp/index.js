@@ -15,12 +15,17 @@ class EventRegisterApp extends React.Component {
   }
 
   render() {
-    return (<EventRegisterForm {...this.props} />);
+    return (
+      <div className="l--offset">
+        <EventRegisterForm {...this.props} />
+      </div>
+    );
   }
 }
 
 EventRegisterApp.propTypes = {
   event: PropTypes.object,
+  user: PropTypes.object,
   segments: PropTypes.arrayOf(PropTypes.object),
   eventId: PropTypes.string.isRequired,
   fetchEvent: PropTypes.func.isRequired,

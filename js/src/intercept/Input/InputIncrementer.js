@@ -19,6 +19,7 @@ const styles = theme => ({
   inputWrapper: {
     borderBottom: `1px solid ${theme.palette.grey[300]}`,
     borderTop: `1px solid ${theme.palette.grey[300]}`,
+    fontSize: 'inherit',
     margin: 0,
     textAlign: 'center',
     display: 'flex',
@@ -28,13 +29,14 @@ const styles = theme => ({
     appearance: 'none',
     margin: 0,
     textAlign: 'center',
-    fontSize: '1.25em',
-    width: '3em',
+    fontSize: 'inherit',
+    width: '2em',
     padding: '.25em 0 .25em .5em',
   },
   button: {
+    fontSize: '1em',
     minWidth: 0,
-    padding: '.75em',
+    padding: '.4em',
   },
   buttonFirst: {
     borderRadius: '.3em 0 0 .3em',
@@ -44,14 +46,15 @@ const styles = theme => ({
     marginRight: '1em',
   },
   icon: {
-    height: '.75em',
-    width: '.75em',
+    fontSize: '1em !important',
+    height: '1em !important',
+    width: '1em !important',
   },
   label: {
     marginBottom: 'auto',
     marginTop: 'auto',
     fontWeight: '700',
-    fontSize: `${14 / 18}1em`,
+    fontSize: `${14 / 18}em`,
     fontFamily: 'inherit',
   },
 });
@@ -78,7 +81,7 @@ class InputIncrementer extends React.PureComponent {
     const increment = () => updateValue(value + 1);
 
     return (
-      <div className="input__wrapper input__wrapper--incrementer">
+      <div className="input input--incrementer">
         <FormControl className={classes.container} aria-live="polite">
           <Button
             className={[classes.button, classes.buttonFirst].join(' ')}

@@ -7,6 +7,8 @@ import get from 'lodash/get';
 import interceptClient from 'interceptClient';
 import FieldInline from './../FieldInline';
 import Teaser from './../Teaser';
+import ButtonRegister from './../ButtonRegister';
+import EventRegistrationStatus from '../../../../modules/intercept_event/js/src/components/EventRegisterApp/EventRegistrationStatus';
 
 const { select, constants, utils } = interceptClient;
 const c = constants;
@@ -47,6 +49,8 @@ class EventTeaser extends PureComponent {
         }}
         description={event.attributes['field_text_teaser'].value}
         tags={[audiences]}
+        footer={props => (<ButtonRegister event={props.event} />)}
+        event={event}
       />
     );
   }

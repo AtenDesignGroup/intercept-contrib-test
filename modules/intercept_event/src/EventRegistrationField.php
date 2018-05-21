@@ -26,7 +26,7 @@ class EventRegistrationField extends ComputedItemList {
 
   protected function getTotal() {
     $node = $this->getEntity();
-    
+
     $ids = $this->getStorage()->getQuery()
       ->condition('field_event', $node->id(), '=')
       ->condition('status', 'active', '=')
@@ -59,6 +59,10 @@ class EventRegistrationField extends ComputedItemList {
     if ($this->regEnded()) {
       return 'closed';
     }
+    // Registration date has not started.
+    if ($this->regPending()) {
+      return 'open_pending';
+    }
     // Has a capacity and it's filled.
     if ($this->capacityFull()) {
       // Has a waiting list and it's not full.
@@ -66,10 +70,6 @@ class EventRegistrationField extends ComputedItemList {
         return 'waitlist';
       }
       return 'full';
-    }
-    // Registration date has not started.
-    if ($this->regPending()) {
-      return 'open_pending';
     }
     return $default_status;
   }

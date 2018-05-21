@@ -196,6 +196,9 @@ export const eventsByDateDescending = createSelector(eventsByDateAscending, item
   items.reverse(),
 );
 
+export const eventRegistration = id => records(c.TYPE_EVENT_REGISTRATION, id);
+export const eventRegistrations = records(c.TYPE_EVENT_REGISTRATION);
+
 //
 // Locations
 //

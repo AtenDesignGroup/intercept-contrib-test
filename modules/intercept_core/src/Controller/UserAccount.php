@@ -11,8 +11,4 @@ class UserAccount extends ControllerBase {
     return $this->redirect($route_name, ['user' => $this->currentUser()->id()]);
   }
 
-  public function eventsPage(UserInterface $user) {
-    return ['#markup' => 'events page'];
-  }
-
 }

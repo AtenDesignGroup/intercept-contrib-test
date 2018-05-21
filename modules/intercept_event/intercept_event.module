@@ -4,6 +4,43 @@ use Drupal\Core\Access\AccessResult;
 use Drupal\Core\TypedData\DataDefinition;
 
 /**
+ * Implements hook_theme().
+ */
+function intercept_event_theme() {
+  return [
+    'event_attendance_scan_form' => [
+      'render element' => 'form',
+    ],
+  ];
+}
+
+/**
+ * Implements hook_entity_extra_field_info().
+ */
+function intercept_event_entity_extra_field_info() {
+  $extra = [];
+
+  $extra['event_attendance']['event_attendance']['form']['event_summary'] = [
+    'label' => t('Event summary'),
+    'description' => t('View event summary information.'),
+    'weight' => 10,
+    'visible' => FALSE,
+  ];
+
+  return $extra;
+}
+
+/**
+ * Implements hook_node_access().
+ */
+function intercept_event_node_access(\Drupal\node\NodeInterface $node, $op, \Drupal\Core\Session\AccountInterface $account) {
+  if ($node->bundle() == 'event' && $op == 'scan') {
+    return AccessResult::allowedIfHasPermission($account, 'scan event_attendance');
+  }
+  return AccessResult::neutral();
+}
+
+/**
  * Implements hook_entity_field_access().
  */
 function intercept_event_entity_field_access($operation, \Drupal\Core\Field\FieldDefinitionInterface $field_definition, \Drupal\Core\Session\AccountInterface $account, \Drupal\Core\Field\FieldItemListInterface $items = NULL) {

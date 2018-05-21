@@ -5,15 +5,21 @@ import moment from 'moment';
 import debounce from 'lodash/debounce';
 import interceptClient from 'interceptClient';
 import drupalSettings from 'drupalSettings';
+
+// Material UI
+import Slide from '@material-ui/core/Slide';
+
+// Intercept Components
 import ViewSwitcher from 'intercept/ViewSwitcher';
 import PageSpinner from 'intercept/PageSpinner';
+import RoomTeaser from 'intercept/RoomTeaser';
+import SelectResource from 'intercept/SelectResource';
+
+// Local Components
 import RoomFilters from './../RoomFilters';
 import ReserveRoomForm from './../ReserveRoomForm';
 import RoomList from './../RoomList';
 import RoomCalendar from './../RoomCalendar';
-import RoomTeaser from 'intercept/RoomTeaser';
-import SelectResource from 'intercept/SelectResource';
-import Slide from 'material-ui/transitions/Slide';
 import FindARoom from './../FindARoom';
 import ReserveRoomStepper from './ReserveRoomStepper';
 import ReserveRoomTabs from './ReserveRoomTabs';

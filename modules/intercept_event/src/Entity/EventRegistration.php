@@ -30,7 +30,8 @@ use Drupal\user\UserInterface;
  *       "edit" = "Drupal\intercept_event\Form\EventRegistrationForm",
  *       "delete" = "Drupal\intercept_event\Form\EventRegistrationDeleteForm",
  *     },
- *     "access" = "Drupal\intercept_event\EventRegistrationAccessControlHandler",
+ *     "access" = "Drupal\intercept_event\EventAccessControlHandler",
+ *     "permission_provider" = "Drupal\intercept_event\EventPermissionProvider",
  *     "route_provider" = {
  *       "html" = "Drupal\intercept_event\EventRegistrationHtmlRouteProvider",
  *     },

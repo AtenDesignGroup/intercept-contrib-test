@@ -97,3 +97,7 @@ entity.node.registrations:
   route_name: entity.node.registrations
   base_route: entity.node.canonical
 
+entity.node.scan:
+  title: 'Scan'
+  route_name: entity.node.scan
+  base_route: entity.node.canonical

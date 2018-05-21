@@ -40,6 +40,26 @@ export const getDayDisplay = (date) => {
     .format('dddd, MMMM D, YYYY');
 };
 
+// Get a formatted short date string.
+export const getDateDisplay = (date) => {
+  const d = getDayTimeStamp(date);
+
+  // Today
+  if (d === getDayTimeStamp(new Date())) {
+    return 'Today';
+  }
+  // Tommorrow
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  if (d === getDayTimeStamp(tomorrow)) {
+    return 'Tomorrow';
+  }
+  // Friday, October 20, 2017
+  return moment(date)
+    .utcOffset(getUserUtcOffset())
+    .format('M/D/YYYY');
+};
+
 // Get a formatted time string.
 export const getTimeDisplay = date =>
   // 2p.m.

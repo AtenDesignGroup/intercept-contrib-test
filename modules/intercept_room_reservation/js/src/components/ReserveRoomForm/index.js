@@ -9,32 +9,34 @@ import { connect } from 'react-redux';
 import interceptClient from 'interceptClient';
 import drupalSettings from 'drupalSettings';
 
-// Components
-import Button from 'material-ui/Button';
-import ExpansionPanel, {
-  ExpansionPanelDetails,
-  ExpansionPanelSummary,
-} from 'material-ui/ExpansionPanel';
-import { FormControlLabel } from 'material-ui/Form';
-import Switch from 'material-ui/Switch';
+// Material UI
+import Button from '@material-ui/core/Button';
+import ExpansionPanel from '@material-ui/core/ExpansionPanel';
+import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
+import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Switch from '@material-ui/core/Switch';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-
-// Dialog
-import AppBar from 'material-ui/AppBar';
-import Dialog from 'material-ui/Dialog';
-import Toolbar from 'material-ui/Toolbar';
-import IconButton from 'material-ui/IconButton';
-import Typography from 'material-ui/Typography';
+import AppBar from '@material-ui/core/AppBar';
+import Dialog from '@material-ui/core/Dialog';
+import Toolbar from '@material-ui/core/Toolbar';
+import IconButton from '@material-ui/core/IconButton';
+import Typography from '@material-ui/core/Typography';
 import CloseIcon from '@material-ui/icons/Close';
-import Slide from 'material-ui/transitions/Slide';
-import Collapse from 'material-ui/transitions/Collapse';
+import Slide from '@material-ui/core/Slide';
+import Collapse from '@material-ui/core/Collapse';
 
-import Formsy, { addValidationRule } from 'formsy-react';
+// Intercept Components
 import SelectResource from 'intercept/SelectResource';
 import InputDate from 'intercept/Input/InputDate';
 import InputTime from 'intercept/Input/InputTime';
 import InputNumber from 'intercept/Input/InputNumber';
 import InputText from 'intercept/Input/InputText';
+
+// Formsy
+import Formsy, { addValidationRule } from 'formsy-react';
+
+// Local Components
 import ReserveRoomConfirmation from './ReserveRoomConfirmation';
 import FindARoom from './../FindARoom';
 
@@ -92,6 +94,8 @@ class ReserveRoomForm extends PureComponent {
       openDialog: false,
       canSubmit: false,
     };
+
+    this.form = React.createRef();
 
     this.toggleState = this.toggleState.bind(this);
     this.updateValue = this.updateValue.bind(this);
@@ -224,7 +228,7 @@ class ReserveRoomForm extends PureComponent {
       <div className="form">
         <Formsy
           className="form__main"
-          ref="form"
+          ref={this.form}
           onValidSubmit={this.onOpenDialog}
           onValid={this.enableButton}
           onInvalid={this.disableButton}
@@ -526,14 +530,12 @@ ReserveRoomForm.defaultProps = {
   meetingPurpose: null,
 };
 
-const mapStateToProps = (state, ownProps) => {
-  return {
-    meetingPurpose: ownProps.values[c.TYPE_MEETING_PURPOSE]
-      ? select.record(
-        select.getIdentifier(c.TYPE_MEETING_PURPOSE, ownProps.values[c.TYPE_MEETING_PURPOSE]),
-      )(state)
-      : null,
-  };
-};
+const mapStateToProps = (state, ownProps) => ({
+  meetingPurpose: ownProps.values[c.TYPE_MEETING_PURPOSE]
+    ? select.record(
+      select.getIdentifier(c.TYPE_MEETING_PURPOSE, ownProps.values[c.TYPE_MEETING_PURPOSE]),
+    )(state)
+    : null,
+});
 
 export default connect(mapStateToProps)(ReserveRoomForm);

@@ -1,17 +1,27 @@
-import React, { Component } from 'react';
+// React
+import React from 'react';
 import PropTypes from 'prop-types';
+
+// Redux
 import { connect } from 'react-redux';
+
+// Lodash
 import get from 'lodash/get';
-import intersection from 'lodash/intersection';
-import interceptClient from 'interceptClient';
+
+// Drupal
 import drupalSettings from 'drupalSettings';
-// import ViewSwitcher from 'intercept/ViewSwitcher';
-// import PageSpinner from 'intercept/PageSpinner';
+
+// Intercept
+import interceptClient from 'interceptClient';
+
+// Material UI
+import Button from '@material-ui/core/Button';
+
+// Local Components
 import RoomFilters from './../RoomFilters';
 import RoomList from './../RoomList';
-import Button from 'material-ui/Button';
 
-const { constants, api, select } = interceptClient;
+const { constants, select } = interceptClient;
 const c = constants;
 
 function filterByCapacity(items, filters, type, path) {
@@ -61,7 +71,7 @@ function filterRooms(items, filters) {
   return output;
 }
 
-class FindARoom extends Component {
+class FindARoom extends React.Component {
   constructor(props) {
     super(props);
     this.state = {

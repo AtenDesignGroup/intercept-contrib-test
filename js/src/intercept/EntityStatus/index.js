@@ -1,12 +1,20 @@
+// React
 import React from 'react';
 import PropTypes from 'prop-types';
-import interceptClient from 'interceptClient';
-import { connect } from 'react-redux';
-import get from 'lodash/get';
-import { CircularProgress } from 'material-ui/Progress';
 
-const { constants, select } = interceptClient;
-const c = constants;
+// Intercept
+import interceptClient from 'interceptClient';
+
+// Redux
+import { connect } from 'react-redux';
+
+// Lodash
+import get from 'lodash/get';
+
+// Material UI
+import CircularProgress from '@material-ui/core/CircularProgress';
+
+const { select } = interceptClient;
 
 class EntityStatus extends React.PureComponent {
   constructor(props) {

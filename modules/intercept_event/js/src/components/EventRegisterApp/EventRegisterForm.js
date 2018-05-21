@@ -2,46 +2,21 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 
-// Redux
-import { connect } from 'react-redux';
-
 // Intercept
 import interceptClient from 'interceptClient';
 import drupalSettings from 'drupalSettings';
 
 // Components
-import Button from 'material-ui/Button';
-import ExpansionPanel, {
-  ExpansionPanelDetails,
-  ExpansionPanelSummary,
-} from 'material-ui/ExpansionPanel';
-import { FormControlLabel } from 'material-ui/Form';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import Button from '@material-ui/core/Button';
 
-// Dialog
-import AppBar from 'material-ui/AppBar';
-import Dialog from 'material-ui/Dialog';
-import Toolbar from 'material-ui/Toolbar';
-import IconButton from 'material-ui/IconButton';
-import Typography from 'material-ui/Typography';
-import CloseIcon from '@material-ui/icons/Close';
-import Slide from 'material-ui/transitions/Slide';
-import Collapse from 'material-ui/transitions/Collapse';
 import InputIncrementer from 'intercept/Input/InputIncrementer';
 
 import Formsy, { addValidationRule } from 'formsy-react';
 import EventRegisterConfirmation from './EventRegisterConfirmation';
 
-const { constants, select } = interceptClient;
-const c = constants;
-
 addValidationRule('isRequired', (values, value) => value !== '');
 addValidationRule('isPositive', (values, value) => value >= 0);
-addValidationRule('isPositiveTotal', (values, value) => values >= 0);
-
-function Transition(props) {
-  return <Slide direction="up" {...props} />;
-}
+addValidationRule('isPositiveTotal', values => values >= 0);
 
 function FormWrapper(props) {
   return (
@@ -99,9 +74,7 @@ class EventRegisterForm extends PureComponent {
   };
 
   getCurrentValues() {
-    return this.form.current
-      ? this.form.current.getModel()
-      : this.props.values;
+    return this.form.current ? this.form.current.getModel() : this.props.values;
   }
 
   getValuesTotal() {
@@ -203,7 +176,7 @@ class EventRegisterForm extends PureComponent {
           values={{
             user: user.uuid,
             event: eventId,
-            registrants: this.getCurrentValues()
+            registrants: this.getCurrentValues(),
           }}
         />
       </FormWrapper>
@@ -224,12 +197,4 @@ EventRegisterForm.defaultProps = {
   user: {},
 };
 
-const mapStateToProps = (state, ownProps) => ({
-  // meetingPurpose: ownProps.values[c.TYPE_MEETING_PURPOSE]
-  //   ? select.record(
-  //     select.getIdentifier(c.TYPE_MEETING_PURPOSE, ownProps.values[c.TYPE_MEETING_PURPOSE]),
-  //   )(state)
-  //   : null,
-});
-
-export default connect(mapStateToProps)(EventRegisterForm);
+export default EventRegisterForm;

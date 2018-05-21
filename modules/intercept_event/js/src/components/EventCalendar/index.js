@@ -1,9 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import BigCalendar from 'intercept/BigCalendar';
-// import BigCalendar from 'react-big-calendar';
 import Toolbar from 'react-big-calendar/lib/Toolbar';
-import moment from 'moment';
 import ArrowBack from '@material-ui/icons/ArrowBack';
 import ArrowForward from '@material-ui/icons/ArrowForward';
 import Button from '@material-ui/core/Button';

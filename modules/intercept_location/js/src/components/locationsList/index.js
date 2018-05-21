@@ -1,11 +1,11 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
-import { withStyles } from 'material-ui/styles';
+import withStyles from '@material-ui/core/styles';
 import map from 'lodash/map';
 
 const styles = theme => ({});
 
-class LocationList extends Component {
+class LocationList extends React.Component {
   state = {};
 
   render() {

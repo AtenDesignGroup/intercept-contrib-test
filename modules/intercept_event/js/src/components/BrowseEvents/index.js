@@ -18,6 +18,11 @@ const eventIncludes = [
   'field_room',
 ];
 
+const viewOptions = [
+  { key: 'list', value: 'List' },
+  { key: 'calendar', value: 'Calendar' },
+];
+
 function getDateSpan(value, view = 'day') {
   const start = moment(value).startOf(view);
   const end = moment(value).endOf(view);
@@ -238,7 +243,7 @@ class BrowseEvents extends Component {
         <div className="clearfix">
           <div className="l__main">
             <div className="l--subsection">
-              <ViewSwitcher value={view} handleChange={handleViewChange} />
+              <ViewSwitcher value={view} handleChange={handleViewChange} options={viewOptions} />
               <PageSpinner loading={eventsLoading} />
               <EventFilters
                 onChange={handleFilterChange}

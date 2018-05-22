@@ -40,4 +40,4 @@ manageEventRegistrations:
     - intercept_core/moment
     - intercept_core/interceptClient
     - intercept_core/interceptCommon
-    - intercept_core/bigCalendar
+    - intercept_core/interceptTheme

@@ -20,11 +20,7 @@ const styles = theme => ({
 
 class ViewSwitcher extends React.PureComponent {
   render() {
-    const { value, handleChange } = this.props;
-    const options = [
-      { key: 'list', value: 'List' },
-      { key: 'calendar', value: 'Calendar' },
-    ];
+    const { value, handleChange, options } = this.props;
     const itemClasses = active => `view-switcher__button ${active && 'view-switcher__button--active'}`;
 
     return (
@@ -44,6 +40,10 @@ class ViewSwitcher extends React.PureComponent {
 ViewSwitcher.propTypes = {
   handleChange: PropTypes.func.isRequired,
   value: PropTypes.string,
+  options: PropTypes.arrayOf(PropTypes.shape({
+    key: PropTypes.string,
+    value: PropTypes.string,
+  })).isRequired,
 };
 
 ViewSwitcher.defaultProps = {

@@ -15,8 +15,13 @@ class EventRecurrenceViewsData extends EntityViewsData {
   public function getViewsData() {
     $data = parent::getViewsData();
 
-    // Additional information for Views integration, such as table joins, can be
-    // put here.
+    $data['event_recurrence']['event_recurrence_bulk_form'] = [
+      'title' => $this->t('Event recurrence operations bulk form'),
+      'help' => $this->t('Add a form element that lets you run operations on multiple event recurrences.'),
+      'field' => [
+        'id' => 'event_recurrence_bulk_form',
+      ],
+    ];
 
     return $data;
   }

@@ -31,7 +31,8 @@ use Drupal\user\UserInterface;
  *       "edit" = "Drupal\intercept_event\Form\EventRecurrenceForm",
  *       "delete" = "Drupal\intercept_event\Form\EventRecurrenceDeleteForm",
  *     },
- *     "access" = "Drupal\intercept_event\EventRecurrenceAccessControlHandler",
+ *     "access" = "Drupal\intercept_event\EventAccessControlHandler",
+ *     "permission_provider" = "Drupal\intercept_event\EventPermissionProvider",
  *     "route_provider" = {
  *       "html" = "Drupal\intercept_event\EventRecurrenceHtmlRouteProvider",
  *     },
@@ -44,7 +45,7 @@ use Drupal\user\UserInterface;
  *     "id" = "id",
  *     "revision" = "vid",
  *     "uuid" = "uuid",
- *     "uid" = "user_id",
+ *     "uid" = "author",
  *     "langcode" = "langcode",
  *   },
  *   links = {
@@ -71,7 +72,7 @@ class EventRecurrence extends RevisionableContentEntityBase implements EventRecu
   public static function preCreate(EntityStorageInterface $storage_controller, array &$values) {
     parent::preCreate($storage_controller, $values);
     $values += [
-      'user_id' => \Drupal::currentUser()->id(),
+      'author' => \Drupal::currentUser()->id(),
     ];
   }
 
@@ -142,21 +143,21 @@ class EventRecurrence extends RevisionableContentEntityBase implements EventRecu
    * {@inheritdoc}
    */
   public function getOwner() {
-    return $this->get('user_id')->entity;
+    return $this->get('author')->entity;
   }
 
   /**
    * {@inheritdoc}
    */
   public function getOwnerId() {
-    return $this->get('user_id')->target_id;
+    return $this->get('author')->target_id;
   }
 
   /**
    * {@inheritdoc}
    */
   public function setOwnerId($uid) {
-    $this->set('user_id', $uid);
+    $this->set('author', $uid);
     return $this;
   }
 
@@ -164,7 +165,7 @@ class EventRecurrence extends RevisionableContentEntityBase implements EventRecu
    * {@inheritdoc}
    */
   public function setOwner(UserInterface $account) {
-    $this->set('user_id', $account->id());
+    $this->set('author', $account->id());
     return $this;
   }
 
@@ -174,7 +175,7 @@ class EventRecurrence extends RevisionableContentEntityBase implements EventRecu
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
     $fields = parent::baseFieldDefinitions($entity_type);
 
-    $fields['user_id'] = BaseFieldDefinition::create('entity_reference')
+    $fields['author'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Authored by'))
       ->setDescription(t('The user ID of author of the Event Recurrence entity.'))
       ->setRevisionable(TRUE)

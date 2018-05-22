@@ -2,6 +2,15 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 
+// Redux
+import { connect } from 'react-redux';
+
+// UUID
+import v4 from 'uuid/v4';
+
+// Lodash
+import map from 'lodash/map';
+
 // Intercept
 import interceptClient from 'interceptClient';
 import drupalSettings from 'drupalSettings';
@@ -13,6 +22,9 @@ import InputIncrementer from 'intercept/Input/InputIncrementer';
 
 import Formsy, { addValidationRule } from 'formsy-react';
 import EventRegisterConfirmation from './EventRegisterConfirmation';
+
+const { actions, constants } = interceptClient;
+const c = constants;
 
 addValidationRule('isRequired', (values, value) => value !== '');
 addValidationRule('isPositive', (values, value) => value >= 0);
@@ -27,6 +39,42 @@ function FormWrapper(props) {
   );
 }
 
+const buildRoomReservation = (values) => {
+  const uuid = v4();
+
+  const output = {
+    id: uuid,
+    type: c.TYPE_EVENT_REGISTRATION,
+    attributes: {
+      uuid,
+    },
+    relationships: {
+      field_event: {
+        data: {
+          type: c.TYPE_EVENT,
+          id: values.event,
+        },
+      },
+      field_registrants: {
+        data: map(values.registrants, (value, id) => ({
+          type: c.TYPE_POPULATION_SEGMENT,
+          id,
+          meta: {
+            count: value,
+          },
+        })),
+      },
+      field_user: {
+        data: {
+          type: c.TYPE_USER,
+          id: values.user,
+        },
+      },
+    },
+  };
+  return output;
+};
+
 class EventRegisterForm extends PureComponent {
   constructor(props) {
     super(props);
@@ -36,6 +84,7 @@ class EventRegisterForm extends PureComponent {
       canSubmit: false,
       values: {},
       validationErrors: {},
+      uuid: null,
     };
 
     this.form = React.createRef();
@@ -44,6 +93,7 @@ class EventRegisterForm extends PureComponent {
     this.enableButton = this.enableButton.bind(this);
     this.getCurrentValues = this.getCurrentValues.bind(this);
     this.getValuesTotal = this.getValuesTotal.bind(this);
+    this.saveEntitytoStore = this.saveEntitytoStore.bind(this);
     this.onCloseDialog = this.onCloseDialog.bind(this);
     this.onInputChange = this.onInputChange.bind(this);
     this.onOpenDialog = this.onOpenDialog.bind(this);
@@ -82,6 +132,16 @@ class EventRegisterForm extends PureComponent {
     return this.props.segments.reduce((total, s) => total + (values[s.key] || 0), 0);
   }
 
+  saveEntitytoStore = (values) => {
+    const { save } = this.props;
+    const entity = buildRoomReservation(values);
+    this.setState({
+      uuid: entity.id,
+    });
+    save(entity);
+    return entity.id;
+  };
+
   disableButton() {
     this.setState({ canSubmit: false });
   }
@@ -117,6 +177,7 @@ class EventRegisterForm extends PureComponent {
 
   render() {
     const { values, segments, user, eventId } = this.props;
+    const { uuid } = this.state;
 
     if (segments.length <= 0) {
       return (
@@ -170,14 +231,12 @@ class EventRegisterForm extends PureComponent {
         <EventRegisterConfirmation
           open={this.state.openDialog}
           onCancel={this.onCloseDialog}
-          onConfirm={() => {
-            this.onCloseDialog();
-          }}
-          values={{
+          uuid={uuid}
+          onConfirm={() => this.saveEntitytoStore({
             user: user.uuid,
             event: eventId,
             registrants: this.getCurrentValues(),
-          }}
+          })}
         />
       </FormWrapper>
     );
@@ -189,6 +248,7 @@ EventRegisterForm.propTypes = {
   values: PropTypes.shape({}),
   user: PropTypes.object,
   eventId: PropTypes.string.isRequired,
+  save: PropTypes.func.isRequired,
 };
 
 EventRegisterForm.defaultProps = {
@@ -197,4 +257,12 @@ EventRegisterForm.defaultProps = {
   user: {},
 };
 
-export default EventRegisterForm;
+const mapStateToProps = () => ({});
+
+const mapDispatchToProps = dispatch => ({
+  save: (data) => {
+    dispatch(actions.add(data, c.TYPE_EVENT_REGISTRATION, data.id));
+  },
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(EventRegisterForm);

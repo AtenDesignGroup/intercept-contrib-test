@@ -8,6 +8,7 @@ const entries = {
     'eventList',
     'eventRegister',
     'eventRegisterButton',
+    'eventRegistrationList',
   ],
   intercept_location: [
     'locationsList',

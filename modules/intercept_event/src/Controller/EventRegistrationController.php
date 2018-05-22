@@ -7,6 +7,7 @@ use Drupal\Core\Entity\EntityFormBuilderInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Url;
 use Drupal\node\NodeInterface;
+use Drupal\user\UserInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -61,6 +62,16 @@ class EventRegistrationController extends ControllerBase {
     $build['#attached']['library'][] = 'intercept_event/eventRegister';
     $build['#markup'] = '';
     $build['intercept_event_register']['#markup'] = '<div id="eventRegisterRoot" data-uuid="' . $node->uuid() . '" />';
+
+    return $build;
+  }
+
+  public function manage(UserInterface $user) {
+    $build = [];
+    $build['#attached']['library'][] = 'intercept_event/manageEventRegistrations';
+    $build['#markup'] = '';
+    $build['intercept_event_registration']['#markup'] = '<div id="eventRegistrationRoot" />';
+    $build['#attached']['drupalSettings']['intercept']['parameters']['user']['uuid'] = $user->uuid();
 
     return $build;
   }

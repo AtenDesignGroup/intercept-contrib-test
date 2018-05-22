@@ -19,7 +19,7 @@ intercept_event.account.events:
 entity.user.events:
   path: '/user/{user}/events'
   defaults:
-    _controller: '\Drupal\intercept_core\Controller\UserAccount::eventsPage'
+    _controller: '\Drupal\intercept_event\Controller\EventRegistrationController::manage'
   requirements:
     _entity_access: 'user.update'
     user: \d+
@@ -45,9 +45,9 @@ entity.node.attendance:
   requirements:
     _custom_access: '\Drupal\intercept_event\Controller\EventsController::attendanceAccess'
 
-entity.event_attendance.scan_form:
+entity.node.scan:
   path: '/event/{node}/scanin'
   defaults:
     _controller: '\Drupal\intercept_event\Controller\EventAttendanceController::scanForm'
   requirements:
-    _access: 'TRUE'
+    _entity_access: 'node.scan'

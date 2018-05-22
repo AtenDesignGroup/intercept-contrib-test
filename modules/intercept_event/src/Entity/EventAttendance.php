@@ -27,11 +27,12 @@ use Drupal\user\UserInterface;
  *     "form" = {
  *       "default" = "Drupal\intercept_event\Form\EventAttendanceForm",
  *       "add" = "Drupal\intercept_event\Form\EventAttendanceForm",
- *       "scan" = "Drupal\intercept_event\Form\EventAttendanceForm",
+ *       "scan" = "Drupal\intercept_event\Form\EventAttendanceScanForm",
  *       "edit" = "Drupal\intercept_event\Form\EventAttendanceForm",
  *       "delete" = "Drupal\intercept_event\Form\EventAttendanceDeleteForm",
  *     },
- *     "access" = "Drupal\intercept_event\EventAttendanceAccessControlHandler",
+ *     "access" = "Drupal\intercept_event\EventAccessControlHandler",
+ *     "permission_provider" = "Drupal\intercept_event\EventPermissionProvider",
  *     "route_provider" = {
  *       "html" = "Drupal\intercept_event\EventAttendanceHtmlRouteProvider",
  *     },

@@ -15,23 +15,6 @@ class RegistrationTeaser extends PureComponent {
 
     const date = moment(utils.dateFromDrupal(event.attributes['field_date_time'].value));
 
-    const attendeeCount = get(registration, 'attributes.field_attendee_count');
-    const attendee = attendeeCount ? (
-      <FieldInline
-        label="Attendees"
-        key="attendee"
-        values={{ id: 'attendee', name: attendeeCount }}
-      />
-    ) : null;
-    const statusValue = get(registration, 'attributes.field_status');
-    const statusField = statusValue ? (
-      <FieldInline
-        label="Status"
-        key="status"
-        values={{ id: 'status', name: statusValue }}
-      />
-    ) : null;
-
     return (
       <Teaser
         key={id}

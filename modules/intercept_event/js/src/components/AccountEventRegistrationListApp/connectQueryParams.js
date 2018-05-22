@@ -5,8 +5,6 @@ import updateWithHistory from 'intercept/updateWithHistory';
 
 const urlPropsQueryConfig = {
   view: { type: UrlQueryParamTypes.string },
-  showSaves: { type: UrlQueryParamTypes.boolean },
-  showRegistrations: { type: UrlQueryParamTypes.boolean },
 };
 
 const connectQueryParams = component => updateWithHistory(

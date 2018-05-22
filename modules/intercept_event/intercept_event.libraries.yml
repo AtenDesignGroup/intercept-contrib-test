@@ -28,11 +28,10 @@ eventRegister:
     - intercept_core/interceptTheme
     - intercept_core/materialIcons
 
-manageEventRegistrations:
+eventRegisterButton:
   js:
-    js/dist/eventRegistrationList.js:
+    js/dist/eventRegisterButton.js:
       preprocess: false
-
   dependencies:
     - core/drupalSettings
     - intercept_core/babelHelpers
@@ -41,3 +40,4 @@ manageEventRegistrations:
     - intercept_core/interceptClient
     - intercept_core/interceptCommon
     - intercept_core/interceptTheme
+    - intercept_core/materialIcons

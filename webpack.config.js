@@ -4,9 +4,18 @@ const webpack = require('webpack');
 
 // Create an object map of entry file arrays keyed by submodule.
 const entries = {
-  intercept_event: ['eventList', 'eventRegister', 'eventRegistrationList'],
-  intercept_location: ['locationsList'],
-  intercept_room_reservation: ['reserveRoom', 'roomReservationList'],
+  intercept_event: [
+    'eventList',
+    'eventRegister',
+    'eventRegisterButton',
+  ],
+  intercept_location: [
+    'locationsList',
+  ],
+  intercept_room_reservation: [
+    'reserveRoom',
+    'roomReservationList',
+  ],
 };
 
 const babelLoader = {

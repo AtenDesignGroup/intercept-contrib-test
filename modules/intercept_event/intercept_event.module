@@ -66,6 +66,18 @@ function intercept_event_form_node_form_alter(&$form, \Drupal\Core\Form\FormStat
 }
 
 /**
+ * Implements hook_node_view().
+ */
+function intercept_event_node_view(array &$build, \Drupal\Core\Entity\EntityInterface $entity, \Drupal\Core\Entity\Display\EntityViewDisplayInterface $display, $view_mode) {
+  $build['register_prompt'] = [
+    '#markup' => '<div class="event-register-button js--event-register-button" data-uuid="' . $entity->uuid() . '" />',
+    '#attached' => [
+      'library' => ['intercept_event/eventRegisterButton'],
+    ]
+  ];
+}
+
+/**
  * Custom form validation for the event node form.
  *
  * @see intercept_event_form_node_form_alter()

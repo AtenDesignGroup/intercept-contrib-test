@@ -6,7 +6,7 @@ import DialogConfirm from 'intercept/Dialog/DialogConfirm';
 // import RoomReservationSummary from './RoomReservationSummary';
 import EventRegistrationStatus from './EventRegistrationStatus';
 
-const { actions, api, constants, select, utils } = interceptClient;
+const { actions, api, constants, session } = interceptClient;
 const c = constants;
 
 class EventRegisterConfirmation extends React.PureComponent {
@@ -31,10 +31,7 @@ class EventRegisterConfirmation extends React.PureComponent {
     const { open, onCancel } = this.props;
     const { saved } = this.state;
 
-    // const content = false ? (
-    //   <EventRegistrationStatus uuid={uuid} />
-    // ) : null;
-    const content = null;
+    const content = uuid ? <EventRegistrationStatus uuid={uuid} /> : null;
 
     const dialogProps = saved
       ? {
@@ -78,8 +75,19 @@ EventRegisterConfirmation.defaultProps = {
 const mapStateToProps = () => ({});
 
 const mapDispatchToProps = dispatch => ({
-  save: (uuid) => {
-    dispatch(api[c.TYPE_EVENT_REGISTRATION].sync(uuid));
+  save: (data) => {
+    dispatch(actions.add(data, c.TYPE_EVENT_REGISTRATION, data.id));
+
+    session
+      .getToken()
+      .then((token) => {
+        dispatch(
+          api[c.TYPE_EVENT_REGISTRATION].sync(data.id, { headers: { 'X-CSRF-Token': token } }),
+        );
+      })
+      .catch((e) => {
+        console.log('Unable to save Registration', e);
+      });
   },
 });
 

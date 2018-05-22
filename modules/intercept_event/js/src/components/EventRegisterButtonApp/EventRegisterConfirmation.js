@@ -72,7 +72,9 @@ class EventRegisterConfirmation extends React.PureComponent {
     const { open, onCancel, values } = this.props;
     const { uuid } = this.state;
 
-    const content = uuid ? <EventRegistrationStatus uuid={uuid} /> : null;
+    const content = uuid ? (
+      <EventRegistrationStatus uuid={uuid} />
+    ) : null;
 
     const dialogProps = uuid
       ? {
@@ -120,16 +122,13 @@ const mapDispatchToProps = dispatch => ({
   save: (data) => {
     dispatch(actions.add(data, c.TYPE_EVENT_REGISTRATION, data.id));
 
-    session
-      .getToken()
+    session.getToken()
       .then((token) => {
-        dispatch(
-          api[c.TYPE_EVENT_REGISTRATION].sync(data.id, { headers: { 'X-CSRF-Token': token } }),
-        );
+        dispatch(api[c.TYPE_EVENT_REGISTRATION].sync(data.id, { headers: { 'X-CSRF-Token': token } }));
       })
       .catch((e) => {
         console.log('Unable to save Registration', e);
-      });
+      })
   },
 });
 

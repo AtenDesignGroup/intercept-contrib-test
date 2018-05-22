@@ -39,7 +39,7 @@ class DialogConfirm extends React.PureComponent {
           <DialogActions>
             {onCancel &&
               cancelText && (
-                <Button onClick={onCancel} color="primary">
+                <Button onClick={onCancel} color="secondary">
                   {cancelText}
                 </Button>
               )}

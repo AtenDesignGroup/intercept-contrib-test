@@ -22,6 +22,10 @@ function getStatus(event) {
   return get(event, 'attributes.registration.status');
 }
 
+function getStatusUser(event) {
+  return get(event, 'attributes.registration.status_user');
+}
+
 function getRegistrationOpenDate(event) {
   const openDate = get(event, 'attributes.field_event_register_period.value');
 
@@ -81,14 +85,14 @@ function ButtonRegister(props) {
         variant="raised"
         size="small"
         color="primary"
-        className={classes.button}
+        className={[classes.button, 'action-button__button'].join(' ')}
       >
         {text}
       </Button>
     );
   }
 
-  return <p>{text}</p>;
+  return <p className="action-button__message">{text}</p>;
 }
 
 ButtonRegister.propTypes = {

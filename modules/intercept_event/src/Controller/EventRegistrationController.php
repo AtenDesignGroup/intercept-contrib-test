@@ -59,6 +59,12 @@ class EventRegistrationController extends ControllerBase {
     }
 
     $build = [];
+
+    // Add Event Header
+    $view_builder = \Drupal::entityTypeManager()->getViewBuilder('node');
+    $build['header'] = $view_builder->view($node, 'header');
+
+    // Add Registration Form
     $build['#attached']['library'][] = 'intercept_event/eventRegister';
     $build['#markup'] = '';
     $build['intercept_event_register']['#markup'] = '<div id="eventRegisterRoot" data-uuid="' . $node->uuid() . '" />';
@@ -68,6 +74,7 @@ class EventRegistrationController extends ControllerBase {
 
   public function manage(UserInterface $user) {
     $build = [];
+
     $build['#attached']['library'][] = 'intercept_event/manageEventRegistrations';
     $build['#markup'] = '';
     $build['intercept_event_registration']['#markup'] = '<div id="eventRegistrationRoot" />';

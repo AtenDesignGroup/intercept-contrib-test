@@ -9,7 +9,7 @@ id: profile.customer.field_preferred_location
 field_name: field_preferred_location
 entity_type: profile
 bundle: customer
-label: 'Preferred Location'
+label: 'Favorite Locations'
 description: ''
 required: false
 translatable: false

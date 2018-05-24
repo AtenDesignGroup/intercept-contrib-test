@@ -1,15 +1,27 @@
-import React, { PureComponent } from 'react';
+// React
+import React from 'react';
 import PropTypes from 'prop-types';
+
+// Redux
 import { connect } from 'react-redux';
+
+// Lodash
 import get from 'lodash/get';
+
+// Moment
+import moment from 'moment';
+
+// Intercept
 import interceptClient from 'interceptClient';
+
+// Intercept Components
 import FieldInline from 'intercept/FieldInline';
 import Teaser from 'intercept/Teaser';
 
 const { select, constants, utils } = interceptClient;
 const c = constants;
 
-class RegistrationTeaser extends PureComponent {
+class RegistrationTeaser extends React.PureComponent {
   render() {
     const { id, registration, event, image, actions } = this.props;
 
@@ -55,11 +67,11 @@ const mapStateToProps = (state, ownProps) => {
   const identifier = select.getIdentifier(c.TYPE_EVENT_REGISTRATION, ownProps.id);
   const registration = select.bundle(identifier)(state);
   const event = get(registration, 'relationships.field_event');
-  const event_identifier = select.getIdentifier(c.TYPE_EVENT, event.id);
+  const eventIdentifier = select.getIdentifier(c.TYPE_EVENT, event.id);
   return {
-    registration: registration,
-    image: select.resourceImageStyle(event_identifier, '4to3_740x556')(state),
-    event: event
+    registration,
+    image: select.resourceImageStyle(eventIdentifier, '4to3_740x556')(state),
+    event,
   };
 };
 

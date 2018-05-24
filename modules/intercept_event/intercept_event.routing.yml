@@ -46,8 +46,15 @@ entity.node.attendance:
     _custom_access: '\Drupal\intercept_event\Controller\EventsController::attendanceAccess'
 
 entity.node.scan:
-  path: '/event/{node}/scanin'
+  path: '/event/{node}/checkin'
   defaults:
     _controller: '\Drupal\intercept_event\Controller\EventAttendanceController::scanForm'
+  requirements:
+    _entity_access: 'node.scan'
+
+entity.node.scan_guest:
+  path: '/event/{node}/checkin/guest'
+  defaults:
+    _controller: '\Drupal\intercept_event\Controller\EventAttendanceController::scanGuestForm'
   requirements:
     _entity_access: 'node.scan'

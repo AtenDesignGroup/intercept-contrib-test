@@ -28,6 +28,7 @@ use Drupal\user\UserInterface;
  *       "default" = "Drupal\intercept_event\Form\EventAttendanceForm",
  *       "add" = "Drupal\intercept_event\Form\EventAttendanceForm",
  *       "scan" = "Drupal\intercept_event\Form\EventAttendanceScanForm",
+ *       "scan_guest" = "Drupal\intercept_event\Form\EventAttendanceScanGuestForm",
  *       "edit" = "Drupal\intercept_event\Form\EventAttendanceForm",
  *       "delete" = "Drupal\intercept_event\Form\EventAttendanceDeleteForm",
  *     },
@@ -76,6 +77,9 @@ class EventAttendance extends ContentEntityBase implements EventAttendanceInterf
     return $this->t('Event attendance');
   }
 
+  public function total() {
+    return $this->get('field_attendees')->getTotal();
+  }
   /**
    * {@inheritdoc}
    */

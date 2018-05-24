@@ -73,14 +73,20 @@ class EventsController extends ControllerBase {
    * Check bundle access and permissions.
    */
   public function registrationsAccess(NodeInterface $node) {
-    return AccessResult::allowedIf($node->bundle() == 'event');
+    $has_permission = $this->currentUser()->hasPermission('administer event_registration');
+    return AccessResult::allowedIf($this->isEventBundle($node) && $has_permission);
   }
 
   /**
    * Check bundle access and permissions.
    */
   public function attendanceAccess(NodeInterface $node) {
-    return $this->registrationsAccess($node);
+    $has_permission = $this->currentUser()->hasPermission('administer event_attendance');
+    return AccessResult::allowedIf($this->isEventBundle($node) && $has_permission);
+  }
+
+  private function isEventBundle(NodeInterface $node) {
+    return $node->bundle() == 'event';
   }
 
   protected function getListBuilder($entity_type_id, NodeInterface $node = NULL) {

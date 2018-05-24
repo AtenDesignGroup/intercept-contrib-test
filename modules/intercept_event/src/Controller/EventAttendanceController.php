@@ -46,7 +46,7 @@ class EventAttendanceController extends ControllerBase {
     );
   }
 
-  public function scanForm(NodeInterface $node) {
+  private function buildScanForm(NodeInterface $node, $type) {
     $values = [
       'field_event' => $node,
     ];
@@ -55,7 +55,15 @@ class EventAttendanceController extends ControllerBase {
       ->getStorage('event_attendance')
       ->create($values);
 
-    return $this->entityFormBuilder->getForm($event_attendance, 'scan');
+    return $this->entityFormBuilder->getForm($event_attendance, $type);
+  }
+
+  public function scanGuestForm(NodeInterface $node) {
+    return $this->buildScanForm($node, 'scan_guest');
+  }
+
+  public function scanForm(NodeInterface $node) {
+    return $this->buildScanForm($node, 'scan');
   }
 
   public function overview(NodeInterface $node) {

@@ -32,10 +32,13 @@ class DialogConfirm extends React.PureComponent {
           onBackdropClick={onCancel}
         >
           <DialogTitle id="responsive-dialog-title">{heading}</DialogTitle>
-          <DialogContent>
-            {text && <DialogContentText>{text}</DialogContentText>}
-            {children}
-          </DialogContent>
+          { text || children
+            ? <DialogContent>
+              {text && <DialogContentText>{text}</DialogContentText>}
+              {children}
+              </DialogContent>
+            : null
+          }
           <DialogActions>
             {onCancel &&
               cancelText && (
@@ -69,9 +72,9 @@ DialogConfirm.propTypes = {
 };
 
 DialogConfirm.defaultProps = {
-  confirmText: 'Confirm',
-  cancelText: 'Cancel',
-  heading: null,
+  confirmText: 'Yes',
+  cancelText: 'No',
+  heading: 'Are you sure?',
   text: null,
   onConfirm: null,
   onCancel: null,

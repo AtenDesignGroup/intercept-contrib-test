@@ -17,20 +17,46 @@ import interceptClient from 'interceptClient';
 // Intercept Components
 import FieldInline from 'intercept/FieldInline';
 import Teaser from 'intercept/Teaser';
+import TeaserStub from 'intercept/Teaser/TeaserStub';
+import EventRegistrationActions from './../EventRegistrationActions';
 
 const { select, constants, utils } = interceptClient;
 const c = constants;
 
 class RegistrationTeaser extends React.PureComponent {
   render() {
-    const { id, registration, event, image, actions } = this.props;
+    const { id, registration, event, image } = this.props;
 
+    // Render a stub teaser until the entity has fully loaded.
+    if (!event.attributes) {
+      return <TeaserStub />;
+    }
+    const status = get(registration, 'attributes.status');;
     const date = moment(utils.dateFromDrupal(event.attributes['field_date_time'].value));
+    let actions = [];
+    let statusMessage;
+
+    switch (status) {
+      case 'active':
+        actions = ['cancel'];
+        statusMessage = 'Registeration Confirmed';
+        break;
+      case 'canceled':
+        actions = [];
+        statusMessage = ['Canceled'];
+        break;
+      case 'waitlist':
+        actions = ['cancel'];
+        statusMessage = 'Added to Waitlist';
+        break;
+      default:
+        break;
+    }
 
     return (
       <Teaser
         key={id}
-        modifiers={[image ? 'with-image' : 'without-image']}
+        modifiers={[image ? 'with-image' : 'without-image', status]}
         title={event.attributes.title}
         titleUrl={
           event.attributes.path ? event.attributes.path.alias : `/node/${event.attributes.nid}`
@@ -42,7 +68,12 @@ class RegistrationTeaser extends React.PureComponent {
           date: date.utcOffset(utils.getUserUtcOffset()).format('D'),
           time: utils.getTimeDisplay(date),
         }}
-        footer={registrationProps => (actions)}
+        footer={() => (
+          <React.Fragment>
+            {statusMessage && <p className="action-button__message">{statusMessage}</p>}
+            <EventRegistrationActions id={id} actions={actions} />
+          </React.Fragment>
+        )}
         description={event.attributes['field_text_teaser'].value}
       />
     );
@@ -54,13 +85,11 @@ RegistrationTeaser.propTypes = {
   registration: PropTypes.object.isRequired,
   event: PropTypes.object,
   image: PropTypes.string,
-  actions: PropTypes.object,
 };
 
 RegistrationTeaser.defaultProps = {
   image: null,
   event: null,
-  actions: []
 };
 
 const mapStateToProps = (state, ownProps) => {
@@ -68,6 +97,7 @@ const mapStateToProps = (state, ownProps) => {
   const registration = select.bundle(identifier)(state);
   const event = get(registration, 'relationships.field_event');
   const eventIdentifier = select.getIdentifier(c.TYPE_EVENT, event.id);
+
   return {
     registration,
     image: select.resourceImageStyle(eventIdentifier, '4to3_740x556')(state),

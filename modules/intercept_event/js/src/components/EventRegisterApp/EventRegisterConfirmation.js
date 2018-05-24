@@ -15,6 +15,7 @@ class EventRegisterConfirmation extends React.PureComponent {
 
     this.state = {
       saved: false,
+      uuid: props.uuid || null,
     };
 
     this.handleConfirm = this.handleConfirm.bind(this);
@@ -24,12 +25,12 @@ class EventRegisterConfirmation extends React.PureComponent {
     const { onConfirm, save } = this.props;
     const uuid = onConfirm();
     save(uuid);
-    this.setState({ saved: true });
+    this.setState({ saved: true, uuid });
   }
 
   render() {
-    const { open, onCancel } = this.props;
-    const { saved } = this.state;
+    const { open, onCancel, heading, text } = this.props;
+    const { saved, uuid } = this.state;
 
     const content = uuid ? <EventRegistrationStatus uuid={uuid} /> : null;
 
@@ -44,16 +45,17 @@ class EventRegisterConfirmation extends React.PureComponent {
         onCancel,
       }
       : {
-        confirmText: 'Submit',
-        cancelText: 'Cancel',
-        heading: 'Confirm Registration',
+        confirmText: 'Yes',
+        cancelText: 'No',
+        heading,
+        text,
         onConfirm: this.handleConfirm,
         onCancel,
       };
 
     return (
       <DialogConfirm {...dialogProps} open={open}>
-        {content}
+        {saved && uuid ? <EventRegistrationStatus uuid={uuid} /> : null}
       </DialogConfirm>
     );
   }
@@ -64,12 +66,18 @@ EventRegisterConfirmation.propTypes = {
   onCancel: PropTypes.func,
   open: PropTypes.bool,
   save: PropTypes.func.isRequired,
+  uuid: PropTypes.string,
+  heading: PropTypes.string,
+  text: PropTypes.string,
 };
 
 EventRegisterConfirmation.defaultProps = {
   onConfirm: null,
   onCancel: null,
   open: false,
+  uuid: null,
+  heading: 'Are you sure you want to register?',
+  text: null,
 };
 
 const mapStateToProps = () => ({});

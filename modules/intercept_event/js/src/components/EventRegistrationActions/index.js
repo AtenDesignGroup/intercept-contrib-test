@@ -42,25 +42,6 @@ const actionProperties = {
   },
 };
 
-function getRegistrationActions(status) {
-  let actions = [];
-  switch (status) {
-    case 'active':
-      actions = ['cancel'];
-      break;
-    case 'canceled':
-      actions = [];
-      break;
-    case 'waitlist':
-      actions = ['cancel'];
-      break;
-    default:
-      break;
-  }
-
-  return actions;
-}
-
 class EventRegistrationActions extends PureComponent {
   constructor(props) {
     super(props);
@@ -94,23 +75,28 @@ class EventRegistrationActions extends PureComponent {
   }
 
   render() {
-    const { entity, registrationId, status } = this.props;
-    const actions = getRegistrationActions(status);
+    const { actions, id } = this.props;
 
     return (
       <div>
-        {actions.length > 0 &&
+        {actions.length > 0 && (
           actions.map(action => (
-            <Button key={action} onClick={this.onClick(action)} variant={action === 'cancel' ? 'outlined' : 'raised'} color="primary">
+            <Button
+              key={action}
+              onClick={this.onClick(action)}
+              variant="raised"
+              color="primary"
+            >
               {action}
             </Button>
-          ))}
+          ))
+        )}
         <EventRegisterConfirmation
           open={this.state.open}
           onClose={this.onClose}
-          onConfirm={this.onConfirm(entity, this.state.action)}
+          onConfirm={this.onConfirm}
           onCancel={this.onCancel}
-          uuid={registrationId}
+          uuid={id}
           text={actionProperties[this.state.action].text}
           heading={actionProperties[this.state.action].heading}
         />
@@ -120,39 +106,29 @@ class EventRegistrationActions extends PureComponent {
 }
 
 EventRegistrationActions.propTypes = {
-  // Pased Props
-  registrationId: PropTypes.string.isRequired,
-  // Connect
+  id: PropTypes.string.isRequired,
+  actions: PropTypes.array,
   entity: PropTypes.object,
-  status: PropTypes.string,
   onConfirm: PropTypes.func,
 };
 
 EventRegistrationActions.defaultProps = {
   entity: null,
   onConfirm: null,
-  status: null,
+  actions: [],
 };
 
 const mapStateToProps = (state, ownProps) => ({
-  entity: select.record({ type: c.TYPE_EVENT_REGISTRATION, id: ownProps.registrationId })(state),
-  status: select.registrationStatus(ownProps.registrationId)(state),
+  entity: select.record({ type: c.TYPE_EVENT_REGISTRATION, id: ownProps.id })(state),
 });
 
-const mapDispatchToProps = (dispatch, ownProps) => {
-  const onConfirm = (entity, action) => () => {
-    const data = { ...entity.data };
-    data.attributes.status = actionProperties[action].status;
-    dispatch(interceptClient.actions.edit(data, c.TYPE_EVENT_REGISTRATION, ownProps.registrationId));
-    return ownProps.registrationId;
-  };
+const mapDispatchToProps = (dispatch, ownProps) => ({
+  onConfirm() {
+    const data = this.props.entity.data;
+    data.attributes.status = actionProperties[this.state.action].status;
+    dispatch(interceptClient.actions.edit(data, c.TYPE_EVENT_REGISTRATION, this.props.id));
+    return this.props.id;
+  },
+});
 
-  return {
-    onConfirm,
-  };
-};
-
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps,
-)(EventRegistrationActions);
+export default connect(mapStateToProps, mapDispatchToProps)(EventRegistrationActions);

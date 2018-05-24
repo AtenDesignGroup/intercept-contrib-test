@@ -49,8 +49,7 @@ export const getTimeDisplay = date =>
   // 2p.m.
   moment(date)
     .format('h:mm a')
-    .replace('m', '.m.')
-;
+    .replace('m', '.m.');
 
 /**
  * Returns an array of published records.
@@ -105,6 +104,10 @@ export const recordOptions = type =>
     ),
   );
 
+// Converts the records object into an Array.
+export const recordsList = type =>
+  createSelector(records(type), items => map(items, item => item));
+
 export const bundle = identifier => (state) => {
   if (identifier.type in state === false) {
     return identifier;
@@ -146,6 +149,14 @@ export const bundle = identifier => (state) => {
 
 export const bundles = type => state =>
   mapValues(records(type)(state), (value, id) => bundle(getIdentifier(type, id))(state));
+
+//
+// Audience
+//
+export const audience = id => record('taxonomy_term--audience', id);
+export const audiences = records('taxonomy_term--audience');
+export const audiencesOptions = keyValues(audiences, 'data.attributes.name');
+export const audiencesLabels = peek(audiences, 'data.attributes.name');
 
 //
 // Images
@@ -196,24 +207,23 @@ export const eventsByDateDescending = createSelector(eventsByDateAscending, item
   items.reverse(),
 );
 
+//
+// Event Registrations
+//
 export const eventRegistration = id => records(c.TYPE_EVENT_REGISTRATION, id);
 export const eventRegistrations = records(c.TYPE_EVENT_REGISTRATION);
-
-//
-// Locations
-//
-export const location = id => state => state['node--location'].items[id];
-export const locations = state => state['node--location'].items;
-export const locationsOptions = keyValues(locations, 'data.attributes.title');
-export const locationsLabels = peek(locations, 'data.attributes.title');
-
-//
-// Audience
-//
-export const audience = id => record('taxonomy_term--audience', id);
-export const audiences = records('taxonomy_term--audience');
-export const audiencesOptions = keyValues(audiences, 'data.attributes.name');
-export const audiencesLabels = peek(audiences, 'data.attributes.name');
+export const eventRegistrationsByEvent = id =>
+  createSelector(recordsList(c.TYPE_EVENT_REGISTRATION), items =>
+    items.filter(item => get(item, 'data.relationships.field_event.data.id') === id)
+  );
+export const eventRegistrationsByUser = id =>
+  createSelector(recordsList(c.TYPE_EVENT_REGISTRATION), items =>
+    items.filter(item => get(item, 'data.relationships.field_user.data.id') === id)
+  );
+export const eventRegistrationsByEventByUser = (eventId, userId) =>
+  createSelector(eventRegistrationsByEvent(eventId), items =>
+    items.filter(item => get(item, 'data.relationships.field_user.data.id') === userId)
+  );
 
 //
 // Event Types
@@ -222,6 +232,14 @@ export const eventType = id => record('taxonomy_term--event_type', id);
 export const eventTypes = records('taxonomy_term--event_type');
 export const eventTypesOptions = keyValues(eventTypes, 'data.attributes.name');
 export const eventTypesLabels = peek(eventTypes, 'data.attributes.name');
+
+//
+// Locations
+//
+export const location = id => state => state['node--location'].items[id];
+export const locations = state => state['node--location'].items;
+export const locationsOptions = keyValues(locations, 'data.attributes.title');
+export const locationsLabels = peek(locations, 'data.attributes.title');
 
 //
 // Rooms

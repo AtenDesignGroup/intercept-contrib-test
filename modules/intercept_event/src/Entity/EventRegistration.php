@@ -87,12 +87,7 @@ class EventRegistration extends ContentEntityBase implements EventRegistrationIn
   }
 
   public function total() {
-    $value = $this->get('field_registrants')->getValue();
-    $counts = array_column($value, 'count');
-    return array_reduce($counts, function($carry, $item) {
-      $carry += (int) $item;
-      return $carry;
-    });
+    return $this->get('field_registrants')->getTotal();
   }
 
   /**

@@ -10,15 +10,10 @@ entity.event_attendance.add_form:
     - entity.event_attendance.collection
     - entity.node.attendance
 
-entity.event_attendance.scan_form:
-  route_name: entity.event_attendance.scan_form
-  title: 'Scan Event Attendance'
-  appears_on:
-    - entity.node.attendance
-
 entity.event_registration.add_form:
   route_name: entity.event_registration.add_form
   title: 'Add Event Registration'
   appears_on:
     - entity.event_registration.collection
+    - entity.node.registrations
 

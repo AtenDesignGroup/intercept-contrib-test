@@ -22,7 +22,9 @@ class EventAttendanceListBuilder extends EntityListBuilder {
     $header = [];
     $this->addEventHeader($header);
     $header['name'] = $this->t('Name');
+    $header['count'] = $this->t('Total');
     $header['user'] = $this->t('User');
+    $header['author'] = $this->t('Author');
     return $header + parent::buildHeader();
   }
 
@@ -33,7 +35,11 @@ class EventAttendanceListBuilder extends EntityListBuilder {
     $row = [];
     $this->addEventRow($row, $entity);
     $row['name'] = $entity->link();
-    $row['user'] = $this->getUserLink($entity);
+    $row['count'] = $entity->total();
+    $zip = $entity->field_guest_zip_code->getString();
+    $link = !empty($zip) ? $this->t('Guest: @zip', ['@zip' => $zip]) : $this->getUserLink($entity);
+    $row['user'] = $link;
+    $row['author'] = $this->getUserLink($entity, 'author');
     return $row + parent::buildRow($entity);
   }
 

@@ -62,11 +62,11 @@ trait EventListBuilderTrait {
     }
   }
 
-  protected function getUserLink(EntityInterface $entity) {
-    if (empty($entity->field_user->entity)) {
+  protected function getUserLink(EntityInterface $entity, $user_field = 'field_user') {
+    if (empty($entity->{$user_field}->entity)) {
       return '';
     }
-    return $this->getLink($entity->field_user->entity, $entity->field_user->entity->getUsername());
+    return $this->getLink($entity->{$user_field}->entity, $entity->{$user_field}->entity->getUsername());
   }
 
   protected function getLink(EntityInterface $entity = NULL, $title = NULL) {

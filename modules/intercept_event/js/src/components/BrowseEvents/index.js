@@ -261,13 +261,13 @@ class BrowseEvents extends Component {
 
 const mapStateToProps = state => ({
   events: select.eventsByDateAscending(state),
-  eventsLoading: select.recordsAreLoading('node--event')(state),
+  eventsLoading: select.recordsAreLoading(c.TYPE_EVENT)(state),
   calendarEvents: select.calendarEvents(state),
 });
 
 const mapDispatchToProps = dispatch => ({
   fetchEvents: (options) => {
-    dispatch(api['node--event'].fetchAll(options));
+    dispatch(api[c.TYPE_EVENT].fetchAll(options));
   },
 });
 

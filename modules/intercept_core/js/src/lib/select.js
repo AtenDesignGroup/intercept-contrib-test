@@ -214,12 +214,18 @@ export const eventRegistration = id => records(c.TYPE_EVENT_REGISTRATION, id);
 export const eventRegistrations = records(c.TYPE_EVENT_REGISTRATION);
 export const eventRegistrationsByEvent = id =>
   createSelector(recordsList(c.TYPE_EVENT_REGISTRATION), items =>
-    items.filter(item => get(item, 'data.relationships.field_event.data.id') === id)
+    items
+      .filter(item => get(item, 'data.relationships.field_event.data.id') === id)
+      .sort((a, b) => get(b, 'data.attributes.created') - get(a, 'data.attributes.created') )
   );
+
 export const eventRegistrationsByUser = id =>
   createSelector(recordsList(c.TYPE_EVENT_REGISTRATION), items =>
-    items.filter(item => get(item, 'data.relationships.field_user.data.id') === id)
+    items
+      .filter(item => get(item, 'data.relationships.field_user.data.id') === id)
+      .sort((a, b) => get(b, 'data.attributes.created') - get(a, 'data.attributes.created'))
   );
+
 export const eventRegistrationsByEventByUser = (eventId, userId) =>
   createSelector(eventRegistrationsByEvent(eventId), items =>
     items.filter(item => get(item, 'data.relationships.field_user.data.id') === userId)

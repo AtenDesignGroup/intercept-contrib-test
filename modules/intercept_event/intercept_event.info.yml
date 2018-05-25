@@ -8,6 +8,7 @@ dependencies:
   - entity_browser_entity_form
   - field
   - field_group
+  - flag
   - inline_entity_form
   - intercept_core
   - intercept_location

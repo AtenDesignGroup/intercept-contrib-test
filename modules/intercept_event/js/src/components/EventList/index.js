@@ -21,7 +21,7 @@ class EventList extends Component {
       events.length > 0 ? (
         map(events, group => (
           <ContentList
-            heading={interceptClient.select.getDayDisplay(group.date)}
+            heading={interceptClient.utils.getDayDisplay(group.date)}
             items={teasers(group.items)}
             key={group.key}
           />

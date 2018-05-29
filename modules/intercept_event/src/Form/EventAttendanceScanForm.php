@@ -71,7 +71,7 @@ class EventAttendanceScanForm extends EventAttendanceScanFormBase {
   public function validateForm(array &$form, FormStateInterface $form_state) {
     $barcode = $form_state->getValue('barcode');
     // First load from mapping.
-    $user = \Drupal::service('polaris.client')->patron->getByBarcode($barcode);
+    $user = \Drupal::service('polaris.client')->patron->getUserByBarcode($barcode);
 
     /** @var UserStorage $storage */
     $storage = \Drupal::service('entity_type.manager')->getStorage('user');

@@ -4,12 +4,12 @@ import get from 'lodash/get';
 import groupBy from 'lodash/groupBy';
 import map from 'lodash/map';
 import mapValues from 'lodash/mapValues';
-import moment from 'moment';
 import cloneDeep from 'lodash/cloneDeep';
 import pickBy from 'lodash/pickBy';
 import sortBy from 'lodash/sortBy';
 import uniqBy from 'lodash/uniqBy';
 import intercept from 'intercept-client';
+import * as utils from './utils';
 
 const { constants } = intercept;
 const c = constants;
@@ -23,34 +23,34 @@ export const getIdentifier = (type, id) => ({
 // Date Functions
 //
 
-// Make sure the current value is a valid date object.
-export const ensureDate = date => (date instanceof Date ? date : new Date(date));
-// Normalize a date object to a single day. Used to compare days for different dates.
-export const getDayTimeStamp = date => ensureDate(date).setHours(0, 0, 0, 0);
-// Get a formatted date string.
-export const getDayDisplay = (date) => {
-  const d = getDayTimeStamp(date);
+// // Make sure the current value is a valid date object.
+// export const ensureDate = date => (date instanceof Date ? date : new Date(date));
+// // Normalize a date object to a single day. Used to compare days for different dates.
+// export const getDayTimeStamp = date => ensureDate(date).setHours(0, 0, 0, 0);
+// // Get a formatted date string.
+// export const getDayDisplay = (date) => {
+//   const d = getDayTimeStamp(date);
 
-  // Today
-  if (d === getDayTimeStamp(new Date())) {
-    return 'Today';
-  }
-  // Tommorrow
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  if (d === getDayTimeStamp(tomorrow)) {
-    return 'Tomorrow';
-  }
-  // Friday, October 20, 2017
-  return moment(date).format('dddd, MMMM D, YYYY');
-};
+//   // Today
+//   if (d === getDayTimeStamp(new Date())) {
+//     return 'Today';
+//   }
+//   // Tommorrow
+//   const tomorrow = new Date();
+//   tomorrow.setDate(tomorrow.getDate() + 1);
+//   if (d === getDayTimeStamp(tomorrow)) {
+//     return 'Tomorrow';
+//   }
+//   // Friday, October 20, 2017
+//   return moment(date).format('dddd, MMMM D, YYYY');
+// };
 
-// Get a formatted time string.
-export const getTimeDisplay = date =>
-  // 2p.m.
-  moment(date)
-    .format('h:mm a')
-    .replace('m', '.m.');
+// // Get a formatted time string.
+// export const getTimeDisplay = date =>
+//   // 2p.m.
+//   moment(date)
+//     .format('h:mm a')
+//     .replace('m', '.m.');
 
 /**
  * Returns an array of published records.
@@ -106,8 +106,7 @@ export const recordOptions = type =>
   );
 
 // Converts the records object into an Array.
-export const recordsList = type =>
-  createSelector(records(type), items => map(items, item => item));
+export const recordsList = type => createSelector(records(type), items => map(items, item => item));
 
 export const bundle = identifier => (state) => {
   if (identifier.type in state === false) {
@@ -179,6 +178,7 @@ export const event = id => state => state[c.TYPE_EVENT].items[id];
 export const events = state => state[c.TYPE_EVENT].items;
 export const eventsArray = state => map(state[c.TYPE_EVENT].items, item => item);
 export const getEventStartDate = item => get(item, 'data.attributes.field_date_time.value');
+export const getEventEndDate = item => get(item, 'data.attributes.field_date_time.end_value');
 export const eventIds = recordIds(events);
 export const eventsOptions = keyValues(events, 'title');
 export const eventsLabels = peek(events, 'data.attributes.title');
@@ -193,7 +193,7 @@ export const eventsAscending = createSelector(eventsArray, items =>
 export const eventsDecending = createSelector(eventsAscending, items => items.reverse());
 
 export const eventsByDate = createSelector(eventsAscending, items =>
-  groupBy(items, item => getDayTimeStamp(`${get(item, 'data.attributes.field_date_time.value')}Z`)),
+  groupBy(items, item => utils.getDayTimeStamp(`${get(item, 'data.attributes.field_date_time.value')}Z`)),
 );
 
 export const eventsByDateAscending = createSelector(eventsByDate, items =>
@@ -217,28 +217,27 @@ export const eventRegistrationsByEvent = id =>
   createSelector(recordsList(c.TYPE_EVENT_REGISTRATION), items =>
     items
       .filter(item => get(item, 'data.relationships.field_event.data.id') === id)
-      .sort((a, b) => get(b, 'data.attributes.created') - get(a, 'data.attributes.created') )
+      .sort((a, b) => get(b, 'data.attributes.created') - get(a, 'data.attributes.created')),
   );
 
 export const eventRegistrationsByUser = id =>
   createSelector(recordsList(c.TYPE_EVENT_REGISTRATION), items =>
     items
       .filter(item => get(item, 'data.relationships.field_user.data.id') === id)
-      .sort((a, b) => get(b, 'data.attributes.created') - get(a, 'data.attributes.created'))
+      .sort((a, b) => get(b, 'data.attributes.created') - get(a, 'data.attributes.created')),
   );
 
-export const eventsFromRegistrationsByUser = id =>
-  createSelector(eventRegistrationsByUser(id), items =>
-    items
-      .map(item => record({
-        type: c.TYPE_EVENT,
-        id: get(item, 'data.relationships.field_event.data.id')
-      }))
+export const eventsFromRegistrationsByUser = id => state =>
+  eventRegistrationsByUser(id)(state).map(item =>
+    record({
+      type: c.TYPE_EVENT,
+      id: get(item, 'data.relationships.field_event.data.id'),
+    })(state),
   );
 
 export const eventRegistrationsByEventByUser = (eventId, userId) =>
   createSelector(eventRegistrationsByEvent(eventId), items =>
-    items.filter(item => get(item, 'data.relationships.field_user.data.id') === userId)
+    items.filter(item => get(item, 'data.relationships.field_user.data.id') === userId),
   );
 
 // Saved Event Flag
@@ -246,16 +245,15 @@ export const savedEventsByUser = id =>
   createSelector(recordsList(c.TYPE_SAVED_EVENT), items =>
     items
       .filter(item => get(item, 'data.relationships.uid.data.id') === id)
-      .sort((a, b) => get(b, 'data.attributes.created') - get(a, 'data.attributes.created'))
+      .sort((a, b) => get(b, 'data.attributes.created') - get(a, 'data.attributes.created')),
   );
 
-export const eventsFromSavedEventsByUser = id =>
-  createSelector(savedEventsByUser(id), items =>
-    items
-      .map(item => record({
-        type: c.TYPE_EVENT,
-        id: get(item, 'data.relationships.flagged_entity.data.id')
-      }))
+export const eventsFromSavedEventsByUser = id => state =>
+  savedEventsByUser(id)(state).map(item =>
+    record({
+      type: c.TYPE_EVENT,
+      id: get(item, 'data.relationships.flagged_entity.data.id'),
+    })(state),
   );
 
 //
@@ -298,10 +296,33 @@ export const tagsOptions = keyValues(tags, 'data.attributes.name');
 export const tagsLabels = peek(tags, 'data.attributes.name');
 
 // User
-export const usersEvents = userId =>
-  createSelector(
-    eventsFromEventRegistrationsByUser(userId),
-    eventsFromSavedEventsByUser(userId),
-    (registrations, saves) =>
-      uniqBy([registrations, saves], item => item.data.id)
+export const usersSavedEvents = eventsFromSavedEventsByUser;
+export const usersRegisteredEvents = eventsFromRegistrationsByUser;
+
+export const onlyPastEvents = (items) => {
+  const now = new Date();
+  return items.filter(item => utils.dateFromDrupal(getEventEndDate(item)) < now);
+};
+
+export const onlyUpcomingEvents = (items) => {
+  const now = new Date();
+  return items.filter(item => utils.dateFromDrupal(getEventStartDate(item)) > now);
+};
+
+export const usersEvents = userId => (state) => {
+  const registrations = usersSavedEvents(userId)(state);
+  const saves = usersRegisteredEvents(userId)(state);
+  return uniqBy([].concat(registrations, saves), item => item.data.id).sort(
+    (a, b) => getEventStartDate(a) - getEventStartDate(b),
+  );
+};
+
+export const usersPastEvents = userId =>
+  createSelector(usersEvents(userId), items =>
+    onlyPastEvents(items).reverse()
+  );
+
+export const usersUpcomingEvents = userId =>
+  createSelector(usersEvents(userId), items =>
+    onlyUpcomingEvents(items)
   );

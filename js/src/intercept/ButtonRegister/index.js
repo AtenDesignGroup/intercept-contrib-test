@@ -18,6 +18,10 @@ const styles = theme => ({
 // closed: registration is closed but not expired
 // expired: registration is expired
 
+function getMustRegister(event) {
+  return get(event, 'attributes.field_must_register');
+}
+
 function getStatus(event) {
   return get(event, 'attributes.registration.status');
 }
@@ -37,9 +41,10 @@ function getRegistrationOpenDate(event) {
 }
 
 function getText(event) {
+  const mustRegister = getMustRegister(event);
   const status = getStatus(event);
 
-  if (!status) {
+  if (!status || !mustRegister) {
     return null;
   }
 
@@ -64,6 +69,12 @@ function getRegisterUrl(event) {
 }
 
 function registrationAllowed(event) {
+  const mustRegister = getMustRegister(event);
+
+  if (!mustRegister) {
+    return false;
+  }
+
   const status = getStatus(event);
   switch (status) {
     case 'open':

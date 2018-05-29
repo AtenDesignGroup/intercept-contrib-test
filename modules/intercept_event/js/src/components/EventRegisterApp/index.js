@@ -12,8 +12,10 @@ import EventRegistrationList from './../EventRegistrationList';
 const { api, select } = interceptClient;
 const c = interceptClient.constants;
 
-function onlyActive(registrations) {
-  return registrations.filter(r => r.data.attributes.status === 'active');
+function onlyActiveOrWaitlist(registrations) {
+  return registrations.filter(
+    r => r.data.attributes.status === 'active' || r.data.attributes.status === 'waitlist',
+  );
 }
 
 class EventRegisterApp extends React.Component {
@@ -30,7 +32,7 @@ class EventRegisterApp extends React.Component {
 
     if (!registrationsLoading) {
       content =
-        onlyActive(registrations).length > 0 ? (
+        onlyActiveOrWaitlist(registrations).length > 0 ? (
           <EventRegistrationList items={registrations.map(r => r.data.id)} />
         ) : (
           <EventRegisterForm {...this.props} />

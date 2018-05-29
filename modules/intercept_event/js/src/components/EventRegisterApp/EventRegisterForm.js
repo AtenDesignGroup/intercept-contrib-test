@@ -9,6 +9,7 @@ import { connect } from 'react-redux';
 import v4 from 'uuid/v4';
 
 // Lodash
+import get from 'lodash/get';
 import map from 'lodash/map';
 
 // Intercept
@@ -23,7 +24,7 @@ import InputIncrementer from 'intercept/Input/InputIncrementer';
 import Formsy, { addValidationRule } from 'formsy-react';
 import EventRegisterConfirmation from './EventRegisterConfirmation';
 
-const { actions, constants } = interceptClient;
+const { actions, constants, select } = interceptClient;
 const c = constants;
 
 addValidationRule('isRequired', (values, value) => value !== '');
@@ -39,6 +40,17 @@ function FormWrapper(props) {
   );
 }
 
+const text = {
+  active: {
+    button: 'Register',
+    dialogHeading: 'Are you sure you want to register?',
+  },
+  waitlist: {
+    button: 'Join Waitlist',
+    dialogHeading: 'Are you sure you want to join the waitlist?',
+  },
+};
+
 const buildRoomReservation = (values) => {
   const uuid = v4();
 
@@ -47,6 +59,7 @@ const buildRoomReservation = (values) => {
     type: c.TYPE_EVENT_REGISTRATION,
     attributes: {
       uuid,
+      status: values.status,
     },
     relationships: {
       field_event: {
@@ -176,7 +189,8 @@ class EventRegisterForm extends PureComponent {
   }
 
   render() {
-    const { values, segments, user, eventId } = this.props;
+    const { values, segments, user, eventId, status } = this.props;
+    const { uuid } = this.state;
 
     if (segments.length <= 0) {
       return (
@@ -223,20 +237,23 @@ class EventRegisterForm extends PureComponent {
               className="button button--primary"
               disabled={!this.state.canSubmit || this.getValuesTotal() <= 0}
             >
-              Register
+              {text[status].button}
             </Button>
           </div>
         </Formsy>
         <EventRegisterConfirmation
           open={this.state.openDialog}
           onCancel={this.onCloseDialog}
-          onConfirm={() => {
-            return this.saveEntitytoStore({
+          uuid={uuid}
+          heading={text[status].dialogHeading}
+          onConfirm={() =>
+            this.saveEntitytoStore({
               user: user.uuid,
               event: eventId,
+              status,
               registrants: this.getCurrentValues(),
-            });
-          }}
+            })
+          }
         />
       </FormWrapper>
     );
@@ -248,15 +265,24 @@ EventRegisterForm.propTypes = {
   values: PropTypes.shape({}),
   user: PropTypes.object,
   eventId: PropTypes.string.isRequired,
+  save: PropTypes.func.isRequired,
+  status: PropTypes.string,
 };
 
 EventRegisterForm.defaultProps = {
   segments: [],
   values: {},
   user: {},
+  status: 'active',
 };
 
-const mapStateToProps = () => ({});
+const mapStateToProps = (state, ownProps) => {
+  const event = select.record(select.getIdentifier(c.TYPE_EVENT, ownProps.eventId))(state);
+  const registrationStatus = get(event, 'data.attributes.registration.status');
+  const status = registrationStatus === 'waitlist' ? 'waitlist' : 'active';
+
+  return { status };
+};
 
 const mapDispatchToProps = (dispatch) => ({
   save: (data) => {

@@ -11,7 +11,6 @@ import moment from 'moment';
 // Drupal
 import drupalSettings from 'drupalSettings';
 
-
 // Lodash
 import debounce from 'lodash/debounce';
 
@@ -26,6 +25,7 @@ import DialogConfirm from 'intercept/Dialog/DialogConfirm';
 import ViewSwitcher from 'intercept/ViewSwitcher';
 
 // Local Components
+import ContentList from 'intercept/ContentList';
 import EventRegistrationActions from '../EventRegistrationActions';
 import EventList from '../EventList';
 import EventTeaser from 'intercept/EventTeaser';
@@ -94,13 +94,13 @@ class AccountEventList extends Component {
   }
 
   doFetchSavedEvents(view) {
-    this.props.fetchRegistrations({
+    this.props.fetchSavedEvents({
       filters: {
         user: {
           path: 'uid.uuid',
           value: uuid,
         },
-        ...getDateFilters(view, 'flagged_entity.field_date_time.end_value'),
+        // ...getDateFilters(view, 'flagged_entity.field_date_time.end_value'),
       },
       include: [
         'flagged_entity',
@@ -133,60 +133,76 @@ class AccountEventList extends Component {
 
   render() {
     const { props, handleViewChange } = this;
-    const { registrations, view, isLoading } = props;
-    const items = Object.values(registrations).map(item => item.data.id);
+    const { events, view, isLoading } = props;
 
-    const list = items.length > 0
-      ? <EventList items={items} key={0} />
+    const teasers = items =>
+      items.map(item => ({
+        key: item.data.id,
+        node: <EventTeaser id={item.data.id} className="event-teaser" />,
+      }));
+
+    const list = events.length > 0
+      ? <ContentList
+          heading={null}
+          items={teasers(events)}
+        />
       : isLoading
       ? <CircularProgress size={50} />
-      : <p key={0}>No events available.</p>;
+      : <p>No events available.</p>;
 
     return (
       <div className="l--main">
         <div className="l--subsection">
           <ViewSwitcher options={viewOptions} value={view} handleChange={handleViewChange} />
         </div>
-        <div className="l--subsection">
-          {list}
-        </div>
+        <div className="l--subsection">{list}</div>
       </div>
     );
   }
 }
 
 AccountEventList.propTypes = {
+  events: PropTypes.array,
   onChangeView: PropTypes.func.isRequired,
   fetchRegistrations: PropTypes.func.isRequired,
+  fetchSavedEvents: PropTypes.func.isRequired,
   view: PropTypes.string,
   showSaves: PropTypes.bool,
   showRegistrations: PropTypes.bool,
 };
 
 AccountEventList.defaultProps = {
+  events: [],
   view: 'upcoming',
   showSaves: true,
   showRegistrations: true,
 };
 
 const mapStateToProps = (state, ownProps) => {
-  let selector = 'usersEvents';
+  let selector = ownProps.view === 'past'
+    ? 'usersPastEvents'
+    : 'usersUpcomingEvents';
 
   // Only show registrations if we are not showing saves.
-  if (!ownProps.showSaves) {
-    selector = 'eventsFromEventRegistrationsByUser';
+  if (ownProps.showSaves === false) {
+    selector = ownProps.view === 'past'
+      ? 'usersPastRegisteredEvents'
+      : 'usersUpcomingRegisteredEvents';
   }
 
   // Only show saved events if we are not showing registrations.
-  if (!ownProps.showRegistrations) {
-    selector = 'eventsFromSavedEventsByUser';
+  if (ownProps.showRegistrations === false) {
+    selector = ownProps.view === 'past'
+      ? 'usersPastSavedEvents'
+      : 'usersUpcomingSavedEvents';
   }
 
   return {
-    events: select[selector](ownProps.uuid)(state),
+    events: select[selector](uuid)(state),
     registrations: select.eventRegistrations(state),
-    isLoading: select.recordsAreLoading(c.TYPE_EVENT_REGISTRATION)(state)
-      || select.recordsAreLoading(c.TYPE_SAVED_EVENT)(state),
+    isLoading:
+      select.recordsAreLoading(c.TYPE_EVENT_REGISTRATION)(state) ||
+      select.recordsAreLoading(c.TYPE_SAVED_EVENT)(state),
   };
 };
 
@@ -194,7 +210,7 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
   fetchRegistrations: (options) => {
     dispatch(api[c.TYPE_EVENT_REGISTRATION].fetchAll(options));
   },
-  fetchEventSaves: (options) => {
+  fetchSavedEvents: (options) => {
     dispatch(api[c.TYPE_SAVED_EVENT].fetchAll(options));
   },
 });

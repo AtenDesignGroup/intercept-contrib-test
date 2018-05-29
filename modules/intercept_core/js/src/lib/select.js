@@ -8,6 +8,7 @@ import moment from 'moment';
 import cloneDeep from 'lodash/cloneDeep';
 import pickBy from 'lodash/pickBy';
 import sortBy from 'lodash/sortBy';
+import uniqBy from 'lodash/uniqBy';
 import intercept from 'intercept-client';
 
 const { constants } = intercept;
@@ -226,9 +227,35 @@ export const eventRegistrationsByUser = id =>
       .sort((a, b) => get(b, 'data.attributes.created') - get(a, 'data.attributes.created'))
   );
 
+export const eventsFromRegistrationsByUser = id =>
+  createSelector(eventRegistrationsByUser(id), items =>
+    items
+      .map(item => record({
+        type: c.TYPE_EVENT,
+        id: get(item, 'data.relationships.field_event.data.id')
+      }))
+  );
+
 export const eventRegistrationsByEventByUser = (eventId, userId) =>
   createSelector(eventRegistrationsByEvent(eventId), items =>
     items.filter(item => get(item, 'data.relationships.field_user.data.id') === userId)
+  );
+
+// Saved Event Flag
+export const savedEventsByUser = id =>
+  createSelector(recordsList(c.TYPE_SAVED_EVENT), items =>
+    items
+      .filter(item => get(item, 'data.relationships.uid.data.id') === id)
+      .sort((a, b) => get(b, 'data.attributes.created') - get(a, 'data.attributes.created'))
+  );
+
+export const eventsFromSavedEventsByUser = id =>
+  createSelector(savedEventsByUser(id), items =>
+    items
+      .map(item => record({
+        type: c.TYPE_EVENT,
+        id: get(item, 'data.relationships.flagged_entity.data.id')
+      }))
   );
 
 //
@@ -269,3 +296,12 @@ export const tag = id => record('taxonomy_term--tag', id);
 export const tags = records('taxonomy_term--tag');
 export const tagsOptions = keyValues(tags, 'data.attributes.name');
 export const tagsLabels = peek(tags, 'data.attributes.name');
+
+// User
+export const usersEvents = userId =>
+  createSelector(
+    eventsFromEventRegistrationsByUser(userId),
+    eventsFromSavedEventsByUser(userId),
+    (registrations, saves) =>
+      uniqBy([registrations, saves], item => item.data.id)
+  );

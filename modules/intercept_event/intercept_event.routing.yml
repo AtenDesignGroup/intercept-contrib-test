@@ -49,6 +49,7 @@ entity.node.scan:
   path: '/event/{node}/checkin'
   defaults:
     _controller: '\Drupal\intercept_event\Controller\EventAttendanceController::scanForm'
+    _title: 'Check-in'
   requirements:
     _entity_access: 'node.scan'
 
@@ -56,5 +57,6 @@ entity.node.scan_guest:
   path: '/event/{node}/checkin/guest'
   defaults:
     _controller: '\Drupal\intercept_event\Controller\EventAttendanceController::scanGuestForm'
+    _title: 'Check-in'
   requirements:
     _entity_access: 'node.scan'

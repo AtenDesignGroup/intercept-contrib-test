@@ -33,7 +33,7 @@ class EventAttendanceScanForm extends EventAttendanceScanFormBase {
     $form['event'] = $node_view->view($event, 'summary');
     $form['instructions_header'] = [
       '#type' => 'html_tag',
-      '#tag' => 'h4',
+      '#tag' => 'h3',
       '#attributes' => ['class' => ['instructions-header']],
       '#value' => $this->t('Scan your library card or enter your username'),
     ];
@@ -58,7 +58,7 @@ class EventAttendanceScanForm extends EventAttendanceScanFormBase {
     ];
     $form['guest'] = [
       '#type' => 'link',
-      '#title' => $this->t("Don't have an account? Attend as a guest >"),
+      '#title' => $this->t("Don't have an account? Attend as a guest"),
       '#url' => \Drupal\Core\Url::fromRoute('entity.node.scan_guest', [
         'node' => $event->id(),
       ]),
@@ -97,7 +97,7 @@ class EventAttendanceScanForm extends EventAttendanceScanFormBase {
       $storage = $this->entityTypeManager->getStorage('event_registration');
       $registrations = $storage->loadByProperties(['field_event' => $this->entity->field_event->entity->id(), 'field_user' => $user->id()]);
       if (!empty($registrations) && ($registration = reset($registrations))) {
-        $value = $registration->field_registrants->getValue(); 
+        $value = $registration->field_registrants->getValue();
         if (!empty($value)) {
           $this->entity->field_attendees->setValue($value);
         }

@@ -2,6 +2,7 @@
 
 namespace Drupal\intercept_event\Controller;
 
+use Drupal\Core\Access\AccessResultForbidden;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Entity\EntityFormBuilderInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
@@ -9,6 +10,7 @@ use Drupal\Core\Url;
 use Drupal\node\NodeInterface;
 use Drupal\user\UserInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 /**
  * Class EventRegistrationController.
@@ -51,11 +53,14 @@ class EventRegistrationController extends ControllerBase {
    * Event registration form.
    */
   public function register(NodeInterface $node) {
-    $access_handler = $this->entityTypeManager()->getAccessControlHandler('event_registration');
-    if (!$access_handler->createAccess('event_registration')) {
+    if ($this->currentUser()->isAnonymous()) {
       return $this->redirect('user.login', [
         'destination' => Url::fromRoute('<current>')->toString(),
       ]);
+    }
+    $access_handler = $this->entityTypeManager()->getAccessControlHandler('event_registration');
+    if (!$access_handler->createAccess('event_registration')) {
+      throw new AccessDeniedHttpException();
     }
 
     $build = [];

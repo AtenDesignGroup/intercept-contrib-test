@@ -101,3 +101,8 @@ entity.node.scan:
   title: 'Scan'
   route_name: entity.node.scan
   base_route: entity.node.canonical
+
+entity.node.analysis:
+  title: 'Analysis'
+  route_name: entity.node.analysis
+  base_route: entity.node.canonical

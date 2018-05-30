@@ -120,4 +120,21 @@ class EventsController extends ControllerBase {
     return $build;
   }
 
+  public function analysis(NodeInterface $node) {
+    return [
+      '#theme' => 'event_analysis',
+      '#content' => [
+        'block_1' => [
+          '#markup' => 'analysis page block 1',
+        ],
+        'block_2' => [
+          '#markup' => 'analysis page block 2',
+        ],
+        'block_3' => [
+          '#markup' => 'analysis page block 3',
+        ],
+      ],
+    ];
+  }
+
 }

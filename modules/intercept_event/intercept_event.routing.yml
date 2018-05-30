@@ -60,3 +60,10 @@ entity.node.scan_guest:
     _title: 'Check-in'
   requirements:
     _entity_access: 'node.scan'
+
+entity.node.analysis:
+  path: '/event/{node}/analysis'
+  defaults:
+    _controller: '\Drupal\intercept_event\Controller\EventsController::analysis'
+  requirements:
+    _entity_access: 'node.analysis'

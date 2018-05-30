@@ -13,7 +13,11 @@ Drupal.behaviors.eventCheckinForm = {
   attach: function (context, settings) {
     var $success = $(".messages--status:contains('" + $.escapeSelector(settings.eventCheckinMessage) + "')");
     if ($success.length) {
-      $success.fadeOut(3000);
+      setTimeout(function () {
+        $success.animate({
+          opacity: 0,
+          height: 0,
+        }, 1000)}, 3000)
     }
   },
 };

@@ -43,7 +43,7 @@ class EventAttendanceScanGuestForm extends EventAttendanceScanFormBase {
       '#title' => $this->t('Cancel'),
       '#url' => \Drupal\Core\Url::fromRoute('entity.node.scan', [
         'node' => $event->id(),
-      ]), 
+      ]),
     ];
 
     return $form;

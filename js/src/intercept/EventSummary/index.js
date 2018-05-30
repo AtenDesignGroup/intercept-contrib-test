@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import { withStyles } from '@material-ui/core/styles';
 import get from 'lodash/get';
 import interceptClient from 'interceptClient';
-import Card from 'intercept/Card';
+import Summary from 'intercept/Summary';
 
 const { constants, select, utils } = interceptClient;
 const c = constants;
@@ -31,11 +31,11 @@ function EventSummary(props) {
   const dateEnd = utils.dateFromDrupal(event.attributes['field_date_time'].end_value);
   return (
     <div>
-      <Card
+      <Summary
         key={id}
-        modifiers={[image ? 'with-image' : 'without-image', 'constrained']}
+        modifiers={[image ? 'with-image' : 'without-image', 'constrained', 'card']}
         image={image}
-        supertitle={get(event, 'relationships.field_location.attributes.title')}
+        subtitle={get(event, 'relationships.field_location.attributes.title')}
         title={event.attributes.title}
         titleUrl={
           event.attributes.path ? event.attributes.path.alias : `/node/${event.attributes.nid}`

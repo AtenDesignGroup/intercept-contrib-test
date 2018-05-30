@@ -8,6 +8,10 @@ use Drupal\Core\TypedData\DataDefinition;
  */
 function intercept_event_theme() {
   return [
+    'event_analysis' => [
+      'variables' => ['content' => NULL],
+      'template' => 'event-analysis',
+    ],
     'event_attendance_scan_form' => [
       'render element' => 'form',
     ],
@@ -34,6 +38,9 @@ function intercept_event_entity_extra_field_info() {
  * Implements hook_node_access().
  */
 function intercept_event_node_access(\Drupal\node\NodeInterface $node, $op, \Drupal\Core\Session\AccountInterface $account) {
+  if ($node->bundle() == 'event' && $op == 'analysis') {
+    return AccessResult::allowedIfHasPermission($account, 'analyze events');
+  }
   if ($node->bundle() == 'event' && $op == 'scan') {
     return AccessResult::allowedIfHasPermission($account, 'scan event_attendance');
   }

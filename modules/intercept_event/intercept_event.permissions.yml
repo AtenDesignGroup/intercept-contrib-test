@@ -6,3 +6,6 @@ edit event field field_featured:
 
 scan event_attendance:
   title: 'Scan in event attendance'
+
+analyze events:
+  title: 'Analyze events'

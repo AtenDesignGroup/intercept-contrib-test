@@ -1,15 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { withStyles } from '@material-ui/core/styles';
 import get from 'lodash/get';
-import Button from '@material-ui/core/Button';
 import interceptClient from 'interceptClient';
 
 const { utils } = interceptClient;
-
-const styles = theme => ({
-  button: {},
-});
 
 // open_pending: registration is not yet open
 // open: registration is open and not full
@@ -49,55 +43,29 @@ function getText(event) {
   }
 
   switch (status) {
+    case 'open_pending':
+      return `Registration Opens ${getRegistrationOpenDate(event)}`;
     case 'waitlist':
-      return 'Join Waitlist';
+      return 'On a Waitlist';
+    case 'full':
+      return 'Registration is Full';
+    case 'closed':
+      return 'Registration is closed';
+    case 'expired':
+      return 'This event has expired';
     default:
-      return 'register';
+      return null;
   }
 }
 
-function getRegisterUrl(event) {
-  return `/event/${event.attributes.nid}/register`;
-}
-
-function registrationAllowed(event) {
-  const mustRegister = getMustRegister(event);
-
-  if (!mustRegister) {
-    return false;
-  }
-
-  const status = getStatus(event);
-  switch (status) {
-    case 'open':
-    case 'waitlist':
-      return true;
-    default:
-      return false;
-  }
-}
-
-function ButtonRegister(props) {
-  const { classes, event } = props;
+function RegistrationStatus(props) {
+  const { event } = props;
   const text = getText(event);
-
-  return getMustRegister(event)
-    ? (<Button
-        href={getRegisterUrl(event)}
-        variant="raised"
-        size="small"
-        color="primary"
-        className={[classes.button, 'action-button__button'].join(' ')}
-        disabled={!registrationAllowed(event)}
-      >
-      {text}
-    </Button>)
-    : null;
+  return text ? <p className="action-button__message">{text}</p> : null;
 }
 
-ButtonRegister.propTypes = {
-  classes: PropTypes.object.isRequired,
+RegistrationStatus.propTypes = {
   event: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(ButtonRegister);
+export default RegistrationStatus;

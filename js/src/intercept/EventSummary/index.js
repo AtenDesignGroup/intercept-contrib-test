@@ -5,6 +5,7 @@ import { withStyles } from '@material-ui/core/styles';
 import get from 'lodash/get';
 import interceptClient from 'interceptClient';
 import Summary from 'intercept/Summary';
+import RegistrationStatus from './../RegistrationStatus';
 
 const { constants, select, utils } = interceptClient;
 const c = constants;
@@ -46,7 +47,9 @@ function EventSummary(props) {
         }}
         label={event.attributes.field_must_register ? 'Registration Required' : null}
         body={event.attributes['field_text_teaser'].value}
-      />
+      >
+        <RegistrationStatus event={event} />
+      </Summary>
     </div>
   );
 }

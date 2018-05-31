@@ -9,6 +9,7 @@ import FieldInline from './../FieldInline';
 import Teaser from './../Teaser';
 import ButtonRegister from './../ButtonRegister';
 import EventRegistrationStatus from '../../../../modules/intercept_event/js/src/components/EventRegisterApp/EventRegistrationStatus';
+import RegistrationStatus from './../RegistrationStatus';
 
 const { select, constants, utils } = interceptClient;
 const c = constants;
@@ -49,7 +50,11 @@ class EventTeaser extends PureComponent {
         }}
         description={event.attributes['field_text_teaser'].value}
         tags={[audiences]}
-        footer={props => (<ButtonRegister event={props.event} />)}
+        footer={props => (<React.Fragment>
+            <ButtonRegister event={props.event} />
+            <RegistrationStatus event={props.event} />
+          </React.Fragment>
+        )}
         event={event}
       />
     );

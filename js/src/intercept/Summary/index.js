@@ -79,6 +79,7 @@ const Summary = (props) => {
 
         {body && <div className="summary__body" dangerouslySetInnerHTML={createMarkup(body)} />}
         {label && <p className="summary__label">{label}</p>}
+        {props.children}
       </div>
       {footer && <div className="summary__footer">{footer(props)}</div>}
     </article>

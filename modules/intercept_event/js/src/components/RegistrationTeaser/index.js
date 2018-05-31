@@ -19,6 +19,7 @@ import FieldInline from 'intercept/FieldInline';
 import Teaser from 'intercept/Teaser';
 import TeaserStub from 'intercept/Teaser/TeaserStub';
 import EventRegistrationActions from './../EventRegistrationActions';
+import RegistrationStatus from 'intercept/RegistrationStatus';
 
 const { select, constants, utils } = interceptClient;
 const c = constants;
@@ -70,8 +71,8 @@ class RegistrationTeaser extends React.PureComponent {
         }}
         footer={() => (
           <React.Fragment>
-            {statusMessage && <p className="action-button__message">{statusMessage}</p>}
             <EventRegistrationActions id={id} actions={actions} />
+            <RegistrationStatus event={event} />
           </React.Fragment>
         )}
         description={event.attributes['field_text_teaser'].value}

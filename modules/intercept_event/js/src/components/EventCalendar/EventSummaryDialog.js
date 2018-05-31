@@ -51,4 +51,4 @@ EventSummaryDialog.defaultProps = {
   id: null,
 };
 
-export default withStyles(styles, { withTheme: true })(EventSummaryDialog);
+export default withStyles(styles)(EventSummaryDialog);

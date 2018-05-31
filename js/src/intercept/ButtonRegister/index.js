@@ -49,16 +49,8 @@ function getText(event) {
   }
 
   switch (status) {
-    case 'open_pending':
-      return `Registration Opens ${getRegistrationOpenDate(event)}`;
     case 'waitlist':
       return 'Join Waitlist';
-    case 'full':
-      return 'Registration is Full';
-    case 'closed':
-      return 'Registration is closed';
-    case 'expired':
-      return 'This event has expired';
     default:
       return 'register';
   }
@@ -89,21 +81,18 @@ function ButtonRegister(props) {
   const { classes, event } = props;
   const text = getText(event);
 
-  if (registrationAllowed(event)) {
-    return (
-      <Button
+  return getMustRegister(event)
+    ? (<Button
         href={getRegisterUrl(event)}
         variant="raised"
         size="small"
         color="primary"
         className={[classes.button, 'action-button__button'].join(' ')}
+        disabled={!registrationAllowed(event)}
       >
-        {text}
-      </Button>
-    );
-  }
-
-  return <p className="action-button__message">{text}</p>;
+      {text}
+    </Button>)
+    : null;
 }
 
 ButtonRegister.propTypes = {

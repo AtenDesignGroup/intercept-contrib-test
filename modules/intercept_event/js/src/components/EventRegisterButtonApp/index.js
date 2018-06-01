@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import interceptClient from 'interceptClient';
 
 import ButtonRegister from 'intercept/ButtonRegister';
+import RegistrationStatus from 'intercept/RegistrationStatus';
 
 const { api, select } = interceptClient;
 const c = interceptClient.constants;
@@ -17,6 +18,7 @@ class EventRegisterButtonApp extends React.Component {
     return (
       <div className="event-register-button__inner">
         {this.props.event && <ButtonRegister {...this.props} event={this.props.event.data} />}
+        {this.props.event && <RegistrationStatus {...this.props} event={this.props.event.data} />}
       </div>
     );
   }

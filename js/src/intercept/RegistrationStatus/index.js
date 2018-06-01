@@ -37,9 +37,18 @@ function getRegistrationOpenDate(event) {
 function getText(event) {
   const mustRegister = getMustRegister(event);
   const status = getStatus(event);
+  const userStatus = getStatusUser(event);
 
   if (!status || !mustRegister) {
     return null;
+  }
+
+  if (userStatus === 'registered') {
+    return 'You are Registered!';
+  }
+
+  if (userStatus === 'waitlist') {
+    return 'You are on the waitlist';
   }
 
   switch (status) {
@@ -61,6 +70,7 @@ function getText(event) {
 function RegistrationStatus(props) {
   const { event } = props;
   const text = getText(event);
+
   return text ? <p className="action-button__message">{text}</p> : null;
 }
 

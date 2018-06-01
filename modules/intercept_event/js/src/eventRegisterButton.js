@@ -9,7 +9,7 @@ const roots = [...document.getElementsByClassName('js--event-register-button')];
 const user = drupalSettings.intercept.user;
 
 function renderButton(root) {
-  const uuid = root.getAttribute('data-uuid');
+  const uuid = root.getAttribute('data-event-uuid');
   render(<App eventId={uuid} user={user} />, root);
 }
 roots.map(renderButton);

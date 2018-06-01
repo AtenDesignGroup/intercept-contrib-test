@@ -4,8 +4,10 @@ import { connect } from 'react-redux';
 import { withStyles } from '@material-ui/core/styles';
 import get from 'lodash/get';
 import interceptClient from 'interceptClient';
+import Summary from 'intercept/Summary';
+import RegistrationStatus from './../RegistrationStatus';
 
-const { constants, select } = interceptClient;
+const { constants, select, utils } = interceptClient;
 const c = constants;
 
 const styles = {
@@ -38,12 +40,10 @@ const mapStateToProps = (state, ownProps) => {
   const segments = select.records(c.TYPE_POPULATION_SEGMENT)(state);
   const tallies = get(entity, ownProps.valuePath);
 
-  const tally = tallies
-    .filter(i => get(i, 'meta.count') > 0)
-    .map(i => ({
-      label: get(segments[i.id], 'data.attributes.name'),
-      count: get(i, 'meta.count'),
-    }));
+  const tally = tallies.map(i => ({
+    label: get(segments[i.id], 'data.attributes.name'),
+    count: get(i, 'meta.count'),
+  }));
 
   return {
     tally,

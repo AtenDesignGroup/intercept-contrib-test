@@ -143,7 +143,7 @@ class EventRegistrationField extends ComputedItemList {
     $status = 'available';
     if (!$user) {
       $id = \Drupal::service('current_user')->id();
-      $id = 353;
+      // $id = 353;
       $user = \Drupal\user\Entity\User::load($id);
     }
     $ids = $this->getStorage()->getQuery()

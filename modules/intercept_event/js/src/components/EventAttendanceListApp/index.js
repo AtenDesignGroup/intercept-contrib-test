@@ -51,6 +51,7 @@ class EventAttendanceListApp extends Component {
   }
 
   handleViewChange = (value) => {
+    this.props.onChangeView(value);
     this.doFetch(value);
   };
 
@@ -59,7 +60,7 @@ class EventAttendanceListApp extends Component {
       filters: {
         event: {
           path: 'field_event.uuid',
-          value: this.props.event.uuid,
+          value: this.props.eventId,
         },
       },
       include: ['field_user'],
@@ -74,12 +75,7 @@ class EventAttendanceListApp extends Component {
       filters: {
         event: {
           path: 'field_event.uuid',
-          value: this.props.event.uuid,
-        },
-        status: {
-          path: 'status',
-          value: ['active', 'waitlist'],
-          operator: 'IN',
+          value: this.props.eventId,
         },
       },
       include: ['field_user'],
@@ -93,8 +89,8 @@ class EventAttendanceListApp extends Component {
     this.props.fetchSavedEvents({
       filters: {
         event: {
-          path: 'entity_id',
-          value: this.props.event.nid,
+          path: 'flagged_entity.uuid',
+          value: this.props.eventId,
         },
       },
       include: ['uid'],
@@ -105,7 +101,7 @@ class EventAttendanceListApp extends Component {
   }
 
   doFetch() {
-    this.doFetchSavedEvents();
+    // this.doFetchSavedEvents();
     this.doFetchRegistrations();
     this.doFetchAttendance();
   }
@@ -118,10 +114,10 @@ class EventAttendanceListApp extends Component {
   }
 
   render() {
-    const { isLoading, event, users, registrations, attendance, savedEvents } = this.props;
+    const { isLoading, eventId, users, registrations, attendance, savedEvents } = this.props;
 
     const tableProps = {
-      eventId: event.uuid,
+      eventId,
       users,
       registrations,
       attendance,
@@ -139,10 +135,7 @@ class EventAttendanceListApp extends Component {
 }
 
 EventAttendanceListApp.propTypes = {
-  event: PropTypes.shape({
-    nid: PropTypes.string.isRequired,
-    uuid: PropTypes.string.isRequired,
-  }).isRequired,
+  eventId: PropTypes.string.isRequired,
   fetchAttendance: PropTypes.func.isRequired,
   fetchRegistrations: PropTypes.func.isRequired,
   fetchSavedEvents: PropTypes.func.isRequired,

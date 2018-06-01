@@ -62,6 +62,11 @@ function getRegisterUrl(event) {
 
 function registrationAllowed(event) {
   const mustRegister = getMustRegister(event);
+  const userStatus = getStatusUser(event);
+
+  if (userStatus !== 'available') {
+    return false;
+  }
 
   if (!mustRegister) {
     return false;
@@ -81,18 +86,18 @@ function ButtonRegister(props) {
   const { classes, event } = props;
   const text = getText(event);
 
-  return getMustRegister(event)
-    ? (<Button
-        href={getRegisterUrl(event)}
-        variant="raised"
-        size="small"
-        color="primary"
-        className={[classes.button, 'action-button__button'].join(' ')}
-        disabled={!registrationAllowed(event)}
-      >
+  return getMustRegister(event) ? (
+    <Button
+      href={getRegisterUrl(event)}
+      variant="raised"
+      size="small"
+      color="primary"
+      className={[classes.button, 'action-button__button'].join(' ')}
+      disabled={!registrationAllowed(event)}
+    >
       {text}
-    </Button>)
-    : null;
+    </Button>
+  ) : null;
 }
 
 ButtonRegister.propTypes = {

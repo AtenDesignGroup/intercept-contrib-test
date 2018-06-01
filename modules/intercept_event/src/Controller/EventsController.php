@@ -63,7 +63,6 @@ class EventsController extends ControllerBase {
   public function list() {
     $build = [];
     $build['#attached']['library'][] = 'intercept_event/eventList';
-    $build['#markup'] = '';
     $build['intercept_event_list']['#markup'] = '<div id="eventListRoot" />';
 
     return $build;
@@ -121,20 +120,24 @@ class EventsController extends ControllerBase {
   }
 
   public function analysis(NodeInterface $node) {
+    $event_uuid = $node->uuid();
+
     return [
       '#theme' => 'event_analysis',
       '#content' => [
-        'block_1' => [
-          '#markup' => 'analysis page block 1',
+        'event_attendance_form' => [
+          '#markup' => '',
         ],
-        'block_2' => [
-          '#markup' => 'analysis page block 2',
+        'event_staff_commments' => [
+          '#markup' => '',
         ],
-        'block_3' => [
-          '#markup' => 'analysis page block 3',
+        'event_attendance_list' => [
+          '#markup' => '<div id="eventAttendanceListRoot" data-event-uuid="' . $event_uuid . '"></div>',
+          '#attached' => [
+            'library' => ['intercept_event/eventAttendanceList']
+          ],
         ],
       ],
     ];
   }
-
 }

@@ -72,7 +72,7 @@ const mapStateToProps = (state, ownProps) => ({
   segmentsLoading: select.recordsAreLoading(c.TYPE_POPULATION_SEGMENT)(state),
 });
 
-const mapDispatchToProps = dispatch => ({
+const mapDispatchToProps = (dispatch, ownProps) => ({
   fetchEvent: (id) => {
     dispatch(
       api[c.TYPE_EVENT].fetchAll({
@@ -101,6 +101,10 @@ const mapDispatchToProps = dispatch => ({
           event: {
             value: eventId,
             path: 'field_event.uuid',
+          },
+          user: {
+            value: ownProps.user.uid,
+            path: 'field_user.uid',
           },
         },
       }),

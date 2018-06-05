@@ -47,6 +47,7 @@ class EventAttendanceScanForm extends EventAttendanceScanFormBase {
       '#type' => 'textfield',
       '#attributes' => [
         'placeholder' => $this->t('Card Number or Username'),
+        'autofocus' => TRUE,
       ],
       '#required' => TRUE,
     ];

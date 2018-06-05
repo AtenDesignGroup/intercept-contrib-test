@@ -23,7 +23,7 @@ class EventAttendanceScanFormBase extends ContentEntityForm {
   /**
    * @var ExternalAuth
    */
-  private $externalAuth;
+  protected $externalAuth;
 
   /**
    * {@inheritdoc}

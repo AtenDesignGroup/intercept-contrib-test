@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import map from 'lodash/map';
 import interceptClient from 'interceptClient';
 import EventTeaser from 'intercept/EventTeaser';
+// import ContentListInfinite from 'intercept/ContentList/ContentListInfinite';
 import ContentList from 'intercept/ContentList';
 
 class EventList extends Component {
@@ -30,7 +31,9 @@ class EventList extends Component {
         <p key={0}>No events have been loaded.</p>
       );
 
-    return <div className="events-list">{list}</div>;
+    return <div className="events-list">
+      {list}
+    </div>;
   }
 }
 

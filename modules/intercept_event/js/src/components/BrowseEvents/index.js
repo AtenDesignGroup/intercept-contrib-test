@@ -1,27 +1,30 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import moment from 'moment';
+
+// Lodash
 import debounce from 'lodash/debounce';
+import throttle from 'lodash/throttle';
+
+// Moment
+import moment from 'moment';
+
 import interceptClient from 'interceptClient';
 import ViewSwitcher from 'intercept/ViewSwitcher';
 import PageSpinner from 'intercept/PageSpinner';
+
+// Material UI
+import CircularProgress from '@material-ui/core/CircularProgress';
+
 import EventFilters from './../EventFilters';
 import EventList from './../EventList';
 import EventCalendar from './../EventCalendar';
 
 const { constants, api, select } = interceptClient;
 const c = constants;
-const eventIncludes = [
-  'image_primary',
-  'image_primary.field_media_image',
-  'field_room',
-];
+const eventIncludes = ['image_primary', 'image_primary.field_media_image', 'field_room'];
 
-const viewOptions = [
-  { key: 'list', value: 'List' },
-  { key: 'calendar', value: 'Calendar' },
-];
+const viewOptions = [{ key: 'list', value: 'List' }, { key: 'calendar', value: 'Calendar' }];
 
 function getDateSpan(value, view = 'day') {
   const start = moment(value).startOf(view);
@@ -165,54 +168,106 @@ class BrowseEvents extends Component {
       date: props.date,
       filters: props.filters,
       view: props.view,
+      fetcher: null,
     };
     this.handleCalendarNavigate = this.handleCalendarNavigate.bind(this);
     this.handleCalendarView = this.handleCalendarView.bind(this);
     this.handleFilterChange = this.handleFilterChange.bind(this);
     this.handleViewChange = this.handleViewChange.bind(this);
+    this.setFetcher = this.setFetcher.bind(this);
     this.doFetchEvents = debounce(this.doFetchEvents, 500).bind(this);
+    this.doFetchMoreEvents = this.doFetchMoreEvents.bind(this);
+    this.handleScroll = throttle(this.handleScroll, 30, { leading: true }).bind(this);
   }
 
   componentDidMount() {
-    this.doFetchEvents(this.props.filters, this.props.view, this.props.calView, this.props.date);
+    this.setFetcher(this.props.filters, this.props.view, this.props.calView, this.props.date);
+    window.addEventListener('scroll', this.handleScroll);
   }
 
-  handleViewChange = (value) => {
-    this.props.onChangeView(value);
-    this.doFetchEvents(this.props.filters, value, this.props.calView, this.props.date);
-  };
-
-  handleCalendarNavigate = (date, calView) => {
-    this.props.onChangeDate(date);
-    this.doFetchEvents(this.props.filters, 'calendar', calView, date);
-  };
-
-  handleCalendarView = (calView) => {
-    this.props.onChangeCalView(calView);
-    this.doFetchEvents(this.props.filters, 'calendar', calView, this.props.date);
-  };
-
-  handleFilterChange(values) {
-    this.props.onChangeFilters(values);
-    this.doFetchEvents(values);
+  componentWillUnmount() {
+    window.removeEventListener('scroll', this.handleScroll);
   }
 
-  doFetchEvents(
+  setFetcher(
     values = this.props.filters,
     view = this.props.view,
     calView = this.props.calView,
     date = this.props.date,
   ) {
-    const { fetchEvents } = this.props;
-
-    fetchEvents({
+    const options = {
       filters: getFilters(values, view, calView, date),
       include: eventIncludes,
       replace: true,
+      sort: {
+        date: {
+          path: 'field_date_time.value',
+          dir: 'ASC',
+        },
+      },
+      count: 10,
       headers: {
         'X-Consumer-ID': interceptClient.consumer,
       },
+      limit: 10,
+    };
+
+    const fetcher = api[c.TYPE_EVENT].fetcher(options);
+    this.setState({
+      fetcher,
     });
+    this.doFetchEvents(fetcher);
+  }
+
+  handleViewChange = (value) => {
+    this.props.onChangeView(value);
+    this.setFetcher(this.props.filters, value, this.props.calView, this.props.date);
+  };
+
+  handleCalendarNavigate = (date, calView) => {
+    this.props.onChangeDate(date);
+    this.setFetcher(this.props.filters, 'calendar', calView, date);
+  };
+
+  handleCalendarView = (calView) => {
+    this.props.onChangeCalView(calView);
+    this.setFetcher(this.props.filters, 'calendar', calView, this.props.date);
+  };
+
+  handleFilterChange(values) {
+    this.props.onChangeFilters(values);
+    this.setFetcher(values);
+  }
+
+  handleScroll() {
+    const windowHeight =
+      'innerHeight' in window ? window.innerHeight : document.documentElement.offsetHeight;
+    const body = document.body;
+    const html = document.documentElement;
+    const docHeight = Math.max(
+      body.scrollHeight,
+      body.offsetHeight,
+      html.clientHeight,
+      html.scrollHeight,
+      html.offsetHeight,
+    );
+    const windowBottom = windowHeight + window.pageYOffset;
+
+    if (windowBottom >= docHeight - 1500) {
+      this.doFetchMoreEvents();
+    }
+  }
+
+  doFetchEvents(fetcher) {
+    const { fetchEvents } = this.props;
+    fetchEvents(fetcher);
+  }
+
+  doFetchMoreEvents() {
+    const { fetchEvents, eventsLoading } = this.props;
+    if (!eventsLoading && !this.state.fetcher.isDone()) {
+      fetchEvents(this.state.fetcher);
+    }
   }
 
   render() {
@@ -227,7 +282,10 @@ class BrowseEvents extends Component {
 
     const eventComponent =
       view === 'list' ? (
-        <EventList events={events} />
+        <React.Fragment>
+          <EventList events={events} />
+          { eventsLoading && <CircularProgress size={50} /> }
+        </React.Fragment>
       ) : (
         <EventCalendar
           events={calendarEvents}
@@ -251,7 +309,9 @@ class BrowseEvents extends Component {
                 filters={filters}
               />
             </div>
-            <div className="l__primary">{eventComponent}</div>
+            <div className="l__primary">
+              {eventComponent}
+            </div>
           </div>
         </div>
       </div>
@@ -266,8 +326,8 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-  fetchEvents: (options) => {
-    dispatch(api[c.TYPE_EVENT].fetchAll(options));
+  fetchEvents: (fetcher) => {
+    dispatch(fetcher.next());
   },
 });
 

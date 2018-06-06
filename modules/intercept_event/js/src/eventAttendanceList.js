@@ -9,4 +9,5 @@ const root = document.getElementById('eventAttendanceListRoot');
 const user = drupalSettings.intercept.user;
 
 const uuid = root.getAttribute('data-event-uuid');
-render(<App eventId={uuid} user={user} />, root);
+const nid = root.getAttribute('data-event-nid');
+render(<App event={{ uuid, nid }} user={user} />, root);

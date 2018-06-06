@@ -74,4 +74,6 @@ BrowseEventsApp.defaultProps = {
   filters: {},
 };
 
-export default updateWithHistory(addUrlProps({ urlPropsQueryConfig })(BrowseEventsApp));
+export default updateWithHistory(
+  addUrlProps({ urlPropsQueryConfig })(BrowseEventsApp)
+);

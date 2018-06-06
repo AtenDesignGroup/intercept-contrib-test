@@ -121,6 +121,7 @@ class EventsController extends ControllerBase {
 
   public function analysis(NodeInterface $node) {
     $event_uuid = $node->uuid();
+    $event_nid = $node->id();
 
     return [
       '#theme' => 'event_analysis',
@@ -132,7 +133,7 @@ class EventsController extends ControllerBase {
           '#markup' => '',
         ],
         'event_attendance_list' => [
-          '#markup' => '<div id="eventAttendanceListRoot" data-event-uuid="' . $event_uuid . '"></div>',
+          '#markup' => '<div id="eventAttendanceListRoot" data-event-uuid="' . $event_uuid . '" data-event-nid="' . $event_nid . '"></div>',
           '#attached' => [
             'library' => ['intercept_event/eventAttendanceList']
           ],

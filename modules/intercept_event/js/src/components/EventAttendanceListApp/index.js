@@ -51,7 +51,6 @@ class EventAttendanceListApp extends Component {
   }
 
   handleViewChange = (value) => {
-    this.props.onChangeView(value);
     this.doFetch(value);
   };
 
@@ -60,7 +59,7 @@ class EventAttendanceListApp extends Component {
       filters: {
         event: {
           path: 'field_event.uuid',
-          value: this.props.eventId,
+          value: this.props.event.uuid,
         },
       },
       include: ['field_user'],
@@ -75,7 +74,7 @@ class EventAttendanceListApp extends Component {
       filters: {
         event: {
           path: 'field_event.uuid',
-          value: this.props.eventId,
+          value: this.props.event.uuid,
         },
       },
       include: ['field_user'],
@@ -89,8 +88,8 @@ class EventAttendanceListApp extends Component {
     this.props.fetchSavedEvents({
       filters: {
         event: {
-          path: 'flagged_entity.uuid',
-          value: this.props.eventId,
+          path: 'entity_id',
+          value: this.props.event.nid,
         },
       },
       include: ['uid'],
@@ -101,7 +100,7 @@ class EventAttendanceListApp extends Component {
   }
 
   doFetch() {
-    // this.doFetchSavedEvents();
+    this.doFetchSavedEvents();
     this.doFetchRegistrations();
     this.doFetchAttendance();
   }
@@ -114,10 +113,10 @@ class EventAttendanceListApp extends Component {
   }
 
   render() {
-    const { isLoading, eventId, users, registrations, attendance, savedEvents } = this.props;
+    const { isLoading, event, users, registrations, attendance, savedEvents } = this.props;
 
     const tableProps = {
-      eventId,
+      eventId: event.uuid,
       users,
       registrations,
       attendance,
@@ -135,7 +134,10 @@ class EventAttendanceListApp extends Component {
 }
 
 EventAttendanceListApp.propTypes = {
-  eventId: PropTypes.string.isRequired,
+  event: PropTypes.shape({
+    nid: PropTypes.string.isRequired,
+    uuid: PropTypes.string.isRequired,
+  }).isRequired,
   fetchAttendance: PropTypes.func.isRequired,
   fetchRegistrations: PropTypes.func.isRequired,
   fetchSavedEvents: PropTypes.func.isRequired,

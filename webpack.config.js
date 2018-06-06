@@ -23,7 +23,7 @@ const entries = {
 const babelLoader = {
   test: /\.js$/,
   loader: 'babel-loader',
-  exclude: ['/node_modules/'],
+  exclude: /node_modules/,
   query: {
     plugins: [
       'external-helpers',
@@ -150,6 +150,7 @@ module.exports = function config(env) {
         filename: '[name].js',
         path: path.resolve(__dirname),
         libraryTarget: 'umd',
+        library: 'interceptClient',
       },
       resolve: {
         // Allow common modules in the root module to be referenced.

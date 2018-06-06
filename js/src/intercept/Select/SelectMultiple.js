@@ -55,11 +55,11 @@ class SelectMultiple extends React.Component {
   };
 
   render() {
-    const { options, label, multiple } = this.props;
+    const { options, label, multiple, name, required } = this.props;
     const value = this.props.getValue();
     const checkboxId = id => `select-filter--${id}`;
     const checkboxLabel = (text, id) => (
-      <label className="select-filter__checkbox-label" htmlFor={id}>
+      <label className="select-filter__checkbox-label">
         {text}
       </label>
     );
@@ -69,9 +69,9 @@ class SelectMultiple extends React.Component {
         <FormControl className="select-filter__control">
           <InputLabel
             className="select-filter__label"
-            htmlFor="select-multiple-chip"
+            htmlFor={name}
             shrink={false}
-            required={this.props.required}
+            required={required}
           >
             {label}
           </InputLabel>
@@ -80,7 +80,7 @@ class SelectMultiple extends React.Component {
             multiple={multiple}
             value={!value ? '' : value}
             onChange={this.handleChange}
-            input={<Input id="select-multiple-chip" />}
+            input={<Input id={name} />}
             renderValue={() => null}
             MenuProps={MenuProps}
             error={!this.props.isValid()}

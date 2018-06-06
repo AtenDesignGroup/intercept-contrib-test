@@ -24,11 +24,6 @@ const styles = theme => ({
   },
 });
 
-// function createData(name, calories, fat, carbs, protein) {
-//   id += 1;
-//   return { id, name, calories, fat, carbs, protein };
-// }
-
 const getData = (users, registrations, attendance, savedEvents) => {
   const registrationsByUser = groupBy(registrations, i =>
     get(i, 'data.relationships.field_user.data.id'),
@@ -49,14 +44,6 @@ const getData = (users, registrations, attendance, savedEvents) => {
       saved: savedByUser[id] || [],
     };
   });
-
-  // return [
-  //   createData('Frozen yoghurt', 159, 6.0, 24, 4.0),
-  //   createData('Ice cream sandwich', 237, 9.0, 37, 4.3),
-  //   createData('Eclair', 262, 16.0, 24, 6.0),
-  //   createData('Cupcake', 305, 3.7, 67, 4.3),
-  //   createData('Gingerbread', 356, 16.0, 49, 3.9),
-  // ];
 };
 
 const getAttendance = item => (
@@ -76,6 +63,8 @@ const getRegistered = item => (
     type={c.TYPE_EVENT_REGISTRATION}
   />
 );
+
+const getSaved = item => <p key={get(item, 'data.id')}>Yes</p>;
 
 function EventAttendanceTable(props) {
   const { classes, users, registrations, attendance, savedEvents } = props;
@@ -97,7 +86,7 @@ function EventAttendanceTable(props) {
             <TableCell component="th" scope="row">
               {n.name}
             </TableCell>
-            <TableCell>{n.saved || null}</TableCell>
+            <TableCell>{n.saved.map(getSaved) || null}</TableCell>
             <TableCell>{n.registered.map(getRegistered) || null}</TableCell>
             <TableCell>{n.attendance.map(getAttendance) || null}</TableCell>
           </TableRow>

@@ -1,24 +1,30 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
-import map from 'lodash/map';
 
-const ContentList = (props) => {
-  const { items, heading, modifiers } = props;
+class ContentList extends React.PureComponent {
+  constructor(props) {
+    super(props);
+    this.listRef = React.createRef();
+  }
 
-  const classes = ['content-list'].concat(modifiers.map(modifier => `content-list--${modifier}`)).join(' ');
+  render() {
+    const { items, heading, modifiers } = this.props;
 
-  const title = heading && <h3 className="content-list__heading">{heading}</h3>;
+    const classes = ['content-list'].concat(modifiers.map(modifier => `content-list--${modifier}`)).join(' ');
 
-  const list = items.map(item => <li key={item.key} className="content-list__item">{item.node}</li>);
+    const title = heading && <h3 className="content-list__heading">{heading}</h3>;
 
-  return (
-    <div className={classes}>
-      {title}
-      <ul className="content-list__list">
-        {list}
-      </ul>
-    </div>
-  );
+    const list = items.map(item => <li key={item.key} className="content-list__item">{item.node}</li>);
+
+    return (
+      <div className={classes} ref={'list'}>
+        {title}
+        <ul className="content-list__list">
+          {list}
+        </ul>
+      </div>
+    );
+  }
 }
 
 ContentList.propTypes = {

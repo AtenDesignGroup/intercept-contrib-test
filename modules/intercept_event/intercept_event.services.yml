@@ -1,0 +1,4 @@
+services:
+  intercept_event.manager:
+    class: Drupal\intercept_event\EventManager
+    arguments: ['@current_user', '@entity_type.manager']

@@ -64,6 +64,49 @@ function intercept_event_entity_field_access($operation, \Drupal\Core\Field\Fiel
 }
 
 /**
+ * Implements hook_pathauto_alias_alter().
+ */
+function intercept_event_pathauto_alias_alter(&$alias, array &$context) {
+  if ($context['module'] == 'node' && $context['bundle'] == 'event') {
+    \Drupal::service('intercept_event.manager')->addRegisterAlias($context['data']['node'], $alias); 
+  }
+}
+
+/**
+ * Implements hook_node_delete().
+ */
+function intercept_event_node_update(\Drupal\node\NodeInterface $node) {
+  if ($node->bundle() == 'event') {
+    if ($node->path->pathauto) {
+      return;
+    }
+    \Drupal::service('intercept_event.manager')->addRegisterAlias($node); 
+  }
+}
+
+/**
+ * Implements hook_node_insert().
+ */
+function intercept_event_node_insert(Drupal\node\NodeInterface $node) {
+  if ($node->bundle() == 'event') {
+    if ($node->path->pathauto) {
+      return;
+    }
+    \Drupal::service('intercept_event.manager')->addRegisterAlias($node); 
+  }
+}
+
+/**
+ * Implements hook_node_delete().
+ */
+function intercept_event_node_delete(Drupal\node\NodeInterface $node) {
+  if ($node->bundle() == 'event') {
+    \Drupal::service('intercept_event.manager')->deleteRegisterAlias($node); 
+    return;
+  }
+}
+
+/**
  * Implements hook_form_FORM_ID_alter().
  */
 function intercept_event_form_node_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state) {

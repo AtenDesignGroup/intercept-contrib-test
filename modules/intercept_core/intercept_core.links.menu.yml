@@ -15,3 +15,19 @@ intercept_core.account.settings:
   weight: 15
   route_name: intercept_core.account.settings
   menu_name: account
+
+intercept_core.account.staff:
+  title: 'Staff'
+  weight: 20
+  route_name: intercept_core.management.staff_default.redirect
+  menu_name: account
+
+intercept_core.account.admin:
+  title: 'Admin'
+  weight: 25
+  route_name: intercept_core.management.admin_default.redirect
+  menu_name: account
+
+# Staff menu
+intercept_core.manage:
+  deriver: \Drupal\intercept_core\Plugin\Derivative\InterceptMenuLinks

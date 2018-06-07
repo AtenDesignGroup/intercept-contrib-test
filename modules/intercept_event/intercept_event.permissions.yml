@@ -9,3 +9,6 @@ scan event_attendance:
 
 analyze events:
   title: 'Analyze events'
+
+create event content from template:
+  title: 'Event: Create new content from template'

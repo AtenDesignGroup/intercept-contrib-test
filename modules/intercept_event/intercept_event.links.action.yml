@@ -17,3 +17,8 @@ entity.event_registration.add_form:
     - entity.event_registration.collection
     - entity.node.registrations
 
+intercept_event.manage.staff.event_templates:
+  route_name: intercept_event.management.staff_event_templates
+  title: 'Create an Event'
+  appears_on:
+    - intercept_event.management.staff_events

@@ -45,4 +45,11 @@ class EventManager implements EventManagerInterface {
     }
   }
 
+  public function addFromTemplate(\Drupal\node\NodeInterface $node) {
+    $new_node = $node->createDuplicate();
+    $new_node->set('field_event_is_template', 0);
+    $new_node->setOwnerId(\Drupal::currentUser()->id());
+    $form = \Drupal::service('entity.form_builder')->getForm($new_node);
+    return $form;
+  }
 }

@@ -53,6 +53,20 @@ entity.node.scan:
   requirements:
     _entity_access: 'node.scan'
 
+entity.node.template:
+  path: '/node/add/event/{node}'
+  defaults:
+    _controller: 'intercept_event.manager:addFromTemplate'
+  requirements:
+    _entity_access: 'node.template'
+
+entity.node.template_form:
+  path: '/event/{node}/template'
+  defaults:
+    _entity_form: 'node.template'
+  requirements:
+    _entity_access: 'node.scan'
+
 entity.node.scan_guest:
   path: '/event/{node}/checkin/guest'
   defaults:

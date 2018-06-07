@@ -35,9 +35,22 @@ function intercept_event_entity_extra_field_info() {
 }
 
 /**
+ * Implements hook_entity_type_build().
+ */
+function intercept_event_entity_type_build(array &$entity_types) {
+  /** @var $entity_types \Drupal\Core\Entity\EntityTypeInterface[] */
+  $entity_types['node']
+    ->setFormClass('template', 'Drupal\intercept_event\Form\EventTemplateForm')
+    ->setLinkTemplate('template-form', '/node/{node}/template');
+}
+
+/**
  * Implements hook_node_access().
  */
 function intercept_event_node_access(\Drupal\node\NodeInterface $node, $op, \Drupal\Core\Session\AccountInterface $account) {
+  if ($node->bundle() == 'event' && $op == 'template') {
+    return AccessResult::allowedIfHasPermission($account, 'create event content from template');
+  }
   if ($node->bundle() == 'event' && $op == 'analysis') {
     return AccessResult::allowedIfHasPermission($account, 'analyze events');
   }

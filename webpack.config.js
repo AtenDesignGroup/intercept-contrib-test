@@ -118,6 +118,7 @@ module.exports = function config(env) {
           'react-dom': 'ReactDOM',
           interceptClient: 'interceptClient',
           interceptTheme: 'interceptTheme',
+          Drupal: 'Drupal',
           drupalSettings: 'drupalSettings',
           moment: 'moment',
           redis: 'redis',
@@ -125,6 +126,7 @@ module.exports = function config(env) {
         const dev = {
           interceptClient: 'interceptClient',
           interceptTheme: 'interceptTheme',
+          Drupal: 'Drupal',
           drupalSettings: 'drupalSettings',
           redis: 'redis',
           moment: 'moment',
@@ -170,11 +172,13 @@ module.exports = function config(env) {
       })(),
       externals: (() => {
         const prod = {
+          Drupal: 'Drupal',
           drupalSettings: 'drupalSettings',
           moment: 'moment',
           redis: 'redis',
         };
         const dev = {
+          Drupal: 'Drupal',
           drupalSettings: 'drupalSettings',
           moment: 'moment',
           redis: 'redis',
@@ -219,9 +223,11 @@ module.exports = function config(env) {
       })(),
       externals: (() => {
         const prod = {
+          Drupal: 'Drupal',
           drupalSettings: 'drupalSettings',
         };
         const dev = {
+          Drupal: 'Drupal',
           drupalSettings: 'drupalSettings',
         };
 

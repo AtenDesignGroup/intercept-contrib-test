@@ -12,6 +12,7 @@ eventAttendanceList:
     js/dist/eventAttendanceList.js:
       preprocess: false
   dependencies:
+    - core/drupal
     - core/drupalSettings
     - intercept_core/babelHelpers
     - intercept_core/react
@@ -26,6 +27,7 @@ eventList:
     js/dist/eventList.js:
       preprocess: false
   dependencies:
+    - core/drupal
     - core/drupalSettings
     - intercept_core/babelHelpers
     - intercept_core/react
@@ -41,6 +43,7 @@ eventRegister:
     js/dist/eventRegister.js:
       preprocess: false
   dependencies:
+    - core/drupal
     - core/drupalSettings
     - intercept_core/babelHelpers
     - intercept_core/react
@@ -55,6 +58,7 @@ eventRegisterButton:
     js/dist/eventRegisterButton.js:
       preprocess: false
   dependencies:
+    - core/drupal
     - core/drupalSettings
     - intercept_core/babelHelpers
     - intercept_core/react
@@ -68,6 +72,7 @@ manageEventRegistrations:
     js/dist/eventRegistrationList.js:
       preprocess: false
   dependencies:
+    - core/drupal
     - core/drupalSettings
     - intercept_core/babelHelpers
     - intercept_core/react

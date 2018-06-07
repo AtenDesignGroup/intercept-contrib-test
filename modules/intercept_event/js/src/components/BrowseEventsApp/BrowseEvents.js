@@ -1,5 +1,8 @@
+// React
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+
+// Redux
 import { connect } from 'react-redux';
 
 // Lodash
@@ -9,9 +12,11 @@ import throttle from 'lodash/throttle';
 // Moment
 import moment from 'moment';
 
+/* eslint-disable */
 import interceptClient from 'interceptClient';
 import ViewSwitcher from 'intercept/ViewSwitcher';
 import PageSpinner from 'intercept/PageSpinner';
+/* eslint-enable */
 
 // Material UI
 import CircularProgress from '@material-ui/core/CircularProgress';
@@ -130,7 +135,7 @@ function getFilters(values, view = 'list', calView = 'day', date = new Date()) {
     { id: c.TYPE_AUDIENCE, path: 'field_event_audience.uuid', conjunction: 'OR' },
   ];
 
-  types.forEach((type) => {
+  types.forEach(type => {
     if (values[type.id] && values[type.id].length > 0) {
       if (type.conjunction === 'AND') {
         const group = `${type.id}-group`;
@@ -146,8 +151,7 @@ function getFilters(values, view = 'list', calView = 'day', date = new Date()) {
             memberOf: group,
           };
         });
-      }
-      else {
+      } else {
         filter[type.id] = {
           path: type.path,
           value: values[type.id],
@@ -219,7 +223,7 @@ class BrowseEvents extends Component {
     this.doFetchEvents(fetcher);
   }
 
-  handleViewChange = (value) => {
+  handleViewChange = value => {
     this.props.onChangeView(value);
     this.setFetcher(this.props.filters, value, this.props.calView, this.props.date);
   };
@@ -229,7 +233,7 @@ class BrowseEvents extends Component {
     this.setFetcher(this.props.filters, 'calendar', calView, date);
   };
 
-  handleCalendarView = (calView) => {
+  handleCalendarView = calView => {
     this.props.onChangeCalView(calView);
     this.setFetcher(this.props.filters, 'calendar', calView, this.props.date);
   };
@@ -284,7 +288,7 @@ class BrowseEvents extends Component {
       view === 'list' ? (
         <React.Fragment>
           <EventList events={events} />
-          { eventsLoading && <CircularProgress size={50} /> }
+          {eventsLoading && <CircularProgress size={50} />}
         </React.Fragment>
       ) : (
         <EventCalendar
@@ -309,9 +313,7 @@ class BrowseEvents extends Component {
                 filters={filters}
               />
             </div>
-            <div className="l__primary">
-              {eventComponent}
-            </div>
+            <div className="l__primary">{eventComponent}</div>
           </div>
         </div>
       </div>
@@ -326,7 +328,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-  fetchEvents: (fetcher) => {
+  fetchEvents: fetcher => {
     dispatch(fetcher.next());
   },
 });
@@ -353,4 +355,7 @@ BrowseEvents.defaultProps = {
   filters: {},
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(BrowseEvents);
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(BrowseEvents);

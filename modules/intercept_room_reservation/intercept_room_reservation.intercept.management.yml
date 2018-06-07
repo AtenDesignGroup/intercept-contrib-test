@@ -1,0 +1,9 @@
+intercept_room_reservation:
+  controller: 'Drupal\intercept_room_reservation\Controller\ManagementController::view'
+  pages:
+    staff:
+      room_reservations:
+        title: 'Room Reservations'
+    admin:
+      room_reservations:
+        title: 'Room Reservations'

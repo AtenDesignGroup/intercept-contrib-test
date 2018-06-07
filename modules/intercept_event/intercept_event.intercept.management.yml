@@ -1,0 +1,12 @@
+intercept_event:
+  controller: 'Drupal\intercept_event\Controller\ManagementController::view'
+  pages:
+    staff:
+      events:
+        title: 'Events'
+      event_templates:
+        title: 'Create an Event'
+        menu_link: FALSE
+    admin:
+      events:
+        title: 'Events'

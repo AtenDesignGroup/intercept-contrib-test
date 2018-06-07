@@ -1,8 +1,16 @@
 import React from 'react';
 import { render } from 'react-dom';
+
+/*eslint-disable */
+import Drupal from 'Drupal';
 import withIntercept from 'intercept/withIntercept';
+/* eslint-enable */
+
 import BrowseEventsApp from './components/BrowseEventsApp';
 
-const App = withIntercept(BrowseEventsApp);
-
-render(<App />, document.getElementById('eventListRoot'));
+Drupal.behaviors.myBehavior = {
+  attach: (context) => {
+    const App = withIntercept(BrowseEventsApp);
+    render(<App />, context.getElementById('eventListRoot'));
+  },
+};

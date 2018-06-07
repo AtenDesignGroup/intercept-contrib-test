@@ -7,8 +7,6 @@ import { connect } from 'react-redux';
 
 // Lodash
 import debounce from 'lodash/debounce';
-import mapValues from 'lodash/mapValues';
-import pick from 'lodash/pick';
 import throttle from 'lodash/throttle';
 
 // Moment
@@ -17,9 +15,11 @@ import moment from 'moment';
 /* eslint-disable */
 import interceptClient from 'interceptClient';
 import ViewSwitcher from 'intercept/ViewSwitcher';
-import LoadingIndicator from 'intercept/LoadingIndicator';
 import PageSpinner from 'intercept/PageSpinner';
 /* eslint-enable */
+
+// Material UI
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 import EventFilters from './../EventFilters';
 import EventList from './../EventList';
@@ -31,68 +31,18 @@ const eventIncludes = ['image_primary', 'image_primary.field_media_image', 'fiel
 
 const viewOptions = [{ key: 'list', value: 'List' }, { key: 'calendar', value: 'Calendar' }];
 
-const sparseFieldsets = {
-  [c.TYPE_EVENT]: [
-    'nid',
-    'uuid',
-    'status',
-    'title',
-    'path',
-    'field_date_time',
-    'field_must_register',
-    'field_text_teaser',
-    'registration',
-    'field_event_audience',
-    'field_event_type',
-    'field_event_tags',
-    'field_location',
-    'field_room',
-    'image_primary',
-  ],
-  [c.TYPE_EVENT_REGISTRATION]: [
-    'uuid',
-    'field_event',
-    'field_user',
-    'status',
-  ],
-  [c.TYPE_ROOM]: [
-    'nid',
-    'uuid',
-    'title',
-    'field_location',
-  ],
-  [c.TYPE_MEDIA_IMAGE]: [
-    'mid',
-    'uuid',
-    'field_media_caption',
-    'field_media_credit',
-    'field_media_image',
-  ],
-  [c.TYPE_FILE]: [
-    'fid',
-    'uuid',
-    'uri',
-    'url',
-  ],
-};
-
-function getDate(value, view = 'day', boundary = 'start') {
-  const method = boundary === 'start' ? 'startOf' : 'endOf';
-  const date = moment(value)[method](view);
+function getDateSpan(value, view = 'day') {
+  const start = moment(value).startOf(view);
+  const end = moment(value).endOf(view);
 
   // The calendar view may include date from the previous or next month
   // so we make sure to include the beginning of the first week and
   // end of the last week.
   if (view === 'month') {
-    date[method]('week');
+    start.startOf('week');
+    end.endOf('week');
   }
-  return date.toISOString();
-}
-
-function getDateSpan(value, view = 'day') {
-  const start = getDate(value, view, 'start');
-  const end = getDate(value, view, 'end');
-  return [start, end];
+  return [start.toISOString(), end.toISOString()];
 }
 
 function getPublishedFilters(value = true) {
@@ -119,20 +69,9 @@ function getDateFilters(values, view = 'list', calView = 'day', date = new Date(
     value = getDateSpan(date, calView);
     operator = 'BETWEEN';
   }
-  else if (values[c.DATE_START] && values[c.DATE_END]) {
-    value = [
-      getDate(values[c.DATE_START], 'day', 'start'),
-      getDate(values[c.DATE_END], 'day', 'end'),
-    ];
+  else if (values.date) {
+    value = getDateSpan(values.date, 'day');
     operator = 'BETWEEN';
-  }
-  else if (values[c.DATE_START]) {
-    value = getDate(values[c.DATE_START], 'day', 'start');
-    operator = '>';
-  }
-  else if (values[c.DATE_END]) {
-    value = getDate(values[c.DATE_END], 'day', 'end');
-    operator = '<';
   }
 
   return {
@@ -196,7 +135,7 @@ function getFilters(values, view = 'list', calView = 'day', date = new Date()) {
     { id: c.TYPE_AUDIENCE, path: 'field_event_audience.uuid', conjunction: 'OR' },
   ];
 
-  types.forEach((type) => {
+  types.forEach(type => {
     if (values[type.id] && values[type.id].length > 0) {
       if (type.conjunction === 'AND') {
         const group = `${type.id}-group`;
@@ -212,8 +151,7 @@ function getFilters(values, view = 'list', calView = 'day', date = new Date()) {
             memberOf: group,
           };
         });
-      }
-      else {
+      } else {
         filter[type.id] = {
           path: type.path,
           value: values[type.id],
@@ -224,28 +162,6 @@ function getFilters(values, view = 'list', calView = 'day', date = new Date()) {
   });
 
   return filter;
-}
-
-function getSortDirection(view, values) {
-  let dir = 'ASC';
-  if (view === 'list' && values[c.DATE_END] && !values[c.DATE_START]) {
-    dir = 'DESC';
-  }
-  return dir;
-}
-
-function getRegistrationFilters(eventFilters) {
-  return {
-    ...mapValues(eventFilters, filter => ({
-      ...filter,
-      path: `field_event.${filter.path}`,
-    })),
-    status: {
-      path: 'status',
-      value: ['active', 'waitlist'],
-      operator: 'IN',
-    },
-  };
 }
 
 class BrowseEvents extends Component {
@@ -262,14 +178,14 @@ class BrowseEvents extends Component {
     this.handleCalendarView = this.handleCalendarView.bind(this);
     this.handleFilterChange = this.handleFilterChange.bind(this);
     this.handleViewChange = this.handleViewChange.bind(this);
-    this.setFetchers = this.setFetchers.bind(this);
-    this.doFetch = debounce(this.doFetch, 500).bind(this);
-    this.doFetchMore = this.doFetchMore.bind(this);
+    this.setFetcher = this.setFetcher.bind(this);
+    this.doFetchEvents = debounce(this.doFetchEvents, 500).bind(this);
+    this.doFetchMoreEvents = this.doFetchMoreEvents.bind(this);
     this.handleScroll = throttle(this.handleScroll, 30, { leading: true }).bind(this);
   }
 
   componentDidMount() {
-    this.setFetchers(this.props.filters, this.props.view, this.props.calView, this.props.date);
+    this.setFetcher(this.props.filters, this.props.view, this.props.calView, this.props.date);
     window.addEventListener('scroll', this.handleScroll);
   }
 
@@ -277,7 +193,7 @@ class BrowseEvents extends Component {
     window.removeEventListener('scroll', this.handleScroll);
   }
 
-  setFetchers(
+  setFetcher(
     values = this.props.filters,
     view = this.props.view,
     calView = this.props.calView,
@@ -287,69 +203,47 @@ class BrowseEvents extends Component {
       filters: getFilters(values, view, calView, date),
       include: eventIncludes,
       replace: true,
-      fields: pick(sparseFieldsets, [
-        c.TYPE_EVENT,
-        c.TYPE_MEDIA_IMAGE,
-        c.TYPE_FILE,
-        c.TYPE_ROOM,
-      ]),
       sort: {
         date: {
           path: 'field_date_time.value',
-          direction: getSortDirection(view, values),
+          dir: 'ASC',
         },
       },
-      count: view === 'list' ? 10 : 0,
+      count: 10,
       headers: {
         'X-Consumer-ID': interceptClient.consumer,
       },
       limit: 10,
     };
 
-    const fetcher = {
-      [c.TYPE_EVENT]: api[c.TYPE_EVENT].fetcher(options),
-      [c.TYPE_EVENT_REGISTRATION]: api[c.TYPE_EVENT_REGISTRATION].fetcher({
-        ...options,
-        filters: getRegistrationFilters(options.filters),
-        include: null,
-        fields: pick(sparseFieldsets, [c.TYPE_EVENT_REGISTRATION]),
-        sort: null,
-      }),
-    };
-
+    const fetcher = api[c.TYPE_EVENT].fetcher(options);
     this.setState({
       fetcher,
     });
-
-    this.doFetch(fetcher);
+    this.doFetchEvents(fetcher);
   }
 
-  handleViewChange = (value) => {
+  handleViewChange = value => {
     this.props.onChangeView(value);
-    this.setFetchers(this.props.filters, value, this.props.calView, this.props.date);
+    this.setFetcher(this.props.filters, value, this.props.calView, this.props.date);
   };
 
   handleCalendarNavigate = (date, calView) => {
     this.props.onChangeDate(date);
-    this.setFetchers(this.props.filters, 'calendar', calView, date);
+    this.setFetcher(this.props.filters, 'calendar', calView, date);
   };
 
-  handleCalendarView = (calView) => {
+  handleCalendarView = calView => {
     this.props.onChangeCalView(calView);
-    this.setFetchers(this.props.filters, 'calendar', calView, this.props.date);
+    this.setFetcher(this.props.filters, 'calendar', calView, this.props.date);
   };
 
   handleFilterChange(values) {
     this.props.onChangeFilters(values);
-    this.setFetchers(values);
+    this.setFetcher(values);
   }
 
   handleScroll() {
-    // The calendar view should fetch all visible events so no need to load on scroll.
-    if (this.props.view === 'calendar') {
-      return;
-    }
-
     const windowHeight =
       'innerHeight' in window ? window.innerHeight : document.documentElement.offsetHeight;
     const body = document.body;
@@ -364,21 +258,19 @@ class BrowseEvents extends Component {
     const windowBottom = windowHeight + window.pageYOffset;
 
     if (windowBottom >= docHeight - 1500) {
-      this.doFetchMore(c.TYPE_EVENT);
-      this.doFetchMore(c.TYPE_EVENT_REGISTRATION);
+      this.doFetchMoreEvents();
     }
   }
 
-  doFetch(fetcher) {
-    const { fetchEntities } = this.props;
-    fetchEntities(fetcher[c.TYPE_EVENT]);
-    fetchEntities(fetcher[c.TYPE_EVENT_REGISTRATION]);
+  doFetchEvents(fetcher) {
+    const { fetchEvents } = this.props;
+    fetchEvents(fetcher);
   }
 
-  doFetchMore(type) {
-    const { fetchEntities, loading } = this.props;
-    if (!loading[type] && !this.state.fetcher[type].isDone()) {
-      fetchEntities(this.state.fetcher[type]);
+  doFetchMoreEvents() {
+    const { fetchEvents, eventsLoading } = this.props;
+    if (!eventsLoading && !this.state.fetcher.isDone()) {
+      fetchEvents(this.state.fetcher);
     }
   }
 
@@ -390,13 +282,13 @@ class BrowseEvents extends Component {
       handleCalendarView,
       handleFilterChange,
     } = this;
-    const { calendarEvents, events, loading, filters, view, date, calView } = props;
-    const eventsLoading = loading[c.TYPE_EVENT];
+    const { calendarEvents, events, eventsLoading, filters, view, date, calView } = props;
+
     const eventComponent =
       view === 'list' ? (
         <React.Fragment>
-          <EventList events={events} loading={eventsLoading} />
-          <LoadingIndicator loading={eventsLoading} />
+          <EventList events={events} />
+          {eventsLoading && <CircularProgress size={50} />}
         </React.Fragment>
       ) : (
         <EventCalendar
@@ -429,20 +321,14 @@ class BrowseEvents extends Component {
   }
 }
 
-const mapStateToProps = (state, ownProps) => {
-  const dir = getSortDirection(ownProps.view, ownProps.filters);
-  return {
-    events: select[dir === 'DESC' ? 'eventsByDateAscending' : 'eventsByDateDescending'](state),
-    loading: {
-      [c.TYPE_EVENT]: select.recordsAreLoading(c.TYPE_EVENT)(state),
-      [c.TYPE_EVENT_REGISTRATION]: select.recordsAreLoading(c.TYPE_EVENT_REGISTRATION)(state),
-    },
-    calendarEvents: select.calendarEvents(state),
-  };
-};
+const mapStateToProps = state => ({
+  events: select.eventsByDateAscending(state),
+  eventsLoading: select.recordsAreLoading(c.TYPE_EVENT)(state),
+  calendarEvents: select.calendarEvents(state),
+});
 
 const mapDispatchToProps = dispatch => ({
-  fetchEntities: (fetcher) => {
+  fetchEvents: fetcher => {
     dispatch(fetcher.next());
   },
 });
@@ -450,8 +336,8 @@ const mapDispatchToProps = dispatch => ({
 BrowseEvents.propTypes = {
   calendarEvents: PropTypes.arrayOf(Object).isRequired,
   events: PropTypes.arrayOf(Object).isRequired,
-  loading: PropTypes.object.isRequired,
-  fetchEntities: PropTypes.func.isRequired,
+  eventsLoading: PropTypes.bool.isRequired,
+  fetchEvents: PropTypes.func.isRequired,
   calView: PropTypes.string,
   date: PropTypes.instanceOf(Date),
   view: PropTypes.string,

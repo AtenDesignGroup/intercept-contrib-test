@@ -135,20 +135,60 @@ function intercept_event_node_view(array &$build, \Drupal\Core\Entity\EntityInte
  * @see intercept_event_form_node_form_alter()
  */
 function intercept_event_node_event_form_validate(&$form, \Drupal\Core\Form\FormStateInterface $form_state) {
+  // Skip validation if registration is not required.
   $values = $form_state->getValues();
   $must_register = $values['field_must_register']['value'];
+  if (!$must_register) {
+    return;
+  }
+
+  // In this case a partial date was entered, but is invalid.
+  $errors = $form_state->getErrors();
+  if (!empty($errors['field_event_register_period][0']) || !empty($errors['field_date_time][0'])) {
+    // Skip to avoid overcomplicating our date validation.
+    return;
+  }
+
+  $valid_dates = function($date_array) {
+    if (empty($date_array['value']) || empty($date_array['end_value'])) {
+      return FALSE;
+    }
+    if (!($date_array['value'] instanceof \Drupal\Component\Datetime\DateTimePlus) || !($date_array['end_value'] instanceof \Drupal\Component\Datetime\DateTimePlus)) {
+      return FALSE;
+    }
+    return TRUE;
+  };
+
   $dates_event = $values['field_date_time'][0];
   $dates_registration = $values['field_event_register_period'][0];
-  if ($must_register) {
-    $dates_registration = $form_state->getValue('field_event_register_period')[0];
-    if (empty($dates_registration['value']) || empty($dates_registration['end_value'])) {
-      $form_state->setErrorByName('field_event_register_period', t('Registration period is required.'));
-    }
+
+  if (!$valid_dates($dates_registration)) {
+    $form_state->setErrorByName('field_event_register_period[0', t('Registration period is required.'));
+    return;
   }
-  if (!empty($dates_registration['value']) && !empty($dates_event['value'])) {
-    if (!$dates_event['value']->diff($dates_registration['value'])->invert) {
-      $form_state->setErrorByName('field_date_time', t('Registration start date must be before the event start date.'));
-    }
+  if (!$valid_dates($dates_event)) {
+    // This should not be possible, but just in case so further validation does not break.
+    $form_state->setErrorByName('field_event_register_period[0', t('Event date is invalid.'));
+  }
+
+  // TODO: Check to see if date module has already set an error on the
+  // end value being before the start value.
+  $get_field_name = function ($field, $field_name = 'field_event_register') {
+   $parents = [$field_name . '_period', 0, $field];
+   return implode('][', $parents);
+  };
+
+  $title = $form['field_event_register_period']['widget']['#title'];
+
+  if (!$dates_event['end_value']->diff($dates_registration['end_value'])->invert) {
+    $form_state->setErrorByName($get_field_name('end_value'), t('The @title must end before the event end date.', [
+      '@title' => $title,
+    ]));
+  }
+  if (!$dates_event['value']->diff($dates_registration['value'])->invert) {
+    $form_state->setErrorByName($get_field_name('value'), t('The @title must start before the event start date.', [
+      '@title' => $title,
+    ]));
   }
 }
 

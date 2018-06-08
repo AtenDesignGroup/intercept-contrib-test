@@ -8,6 +8,7 @@ import Formsy from 'formsy-react';
 // Lodash
 import map from 'lodash/map';
 
+/* eslint-disable */
 // Intercept
 import interceptClient from 'interceptClient';
 
@@ -16,6 +17,7 @@ import CurrentFilters from 'intercept/CurrentFilters';
 import DateFilter from 'intercept/DateFilter';
 import KeywordFilter from 'intercept/KeywordFilter';
 import SelectResource from 'intercept/SelectResource';
+/* eslint-enable */
 
 const { constants } = interceptClient;
 const c = constants;
@@ -102,7 +104,12 @@ class EventFilters extends PureComponent {
             label={labels[c.TYPE_AUDIENCE]}
           />
           {showDate && (
-            <DateFilter handleChange={this.onDateChange} defaultValue={null} value={filters.date} name="date" />
+            <DateFilter
+              handleChange={this.onDateChange}
+              defaultValue={null}
+              value={filters.date}
+              name="date"
+            />
           )}
         </Formsy>
         <div className="filters__current">

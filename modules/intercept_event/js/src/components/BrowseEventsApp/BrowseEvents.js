@@ -15,11 +15,9 @@ import moment from 'moment';
 /* eslint-disable */
 import interceptClient from 'interceptClient';
 import ViewSwitcher from 'intercept/ViewSwitcher';
+import LoadingIndicator from 'intercept/LoadingIndicator';
 import PageSpinner from 'intercept/PageSpinner';
 /* eslint-enable */
-
-// Material UI
-import CircularProgress from '@material-ui/core/CircularProgress';
 
 import EventFilters from './../EventFilters';
 import EventList from './../EventList';
@@ -135,7 +133,7 @@ function getFilters(values, view = 'list', calView = 'day', date = new Date()) {
     { id: c.TYPE_AUDIENCE, path: 'field_event_audience.uuid', conjunction: 'OR' },
   ];
 
-  types.forEach(type => {
+  types.forEach((type) => {
     if (values[type.id] && values[type.id].length > 0) {
       if (type.conjunction === 'AND') {
         const group = `${type.id}-group`;
@@ -151,7 +149,8 @@ function getFilters(values, view = 'list', calView = 'day', date = new Date()) {
             memberOf: group,
           };
         });
-      } else {
+      }
+      else {
         filter[type.id] = {
           path: type.path,
           value: values[type.id],
@@ -223,7 +222,7 @@ class BrowseEvents extends Component {
     this.doFetchEvents(fetcher);
   }
 
-  handleViewChange = value => {
+  handleViewChange = (value) => {
     this.props.onChangeView(value);
     this.setFetcher(this.props.filters, value, this.props.calView, this.props.date);
   };
@@ -233,7 +232,7 @@ class BrowseEvents extends Component {
     this.setFetcher(this.props.filters, 'calendar', calView, date);
   };
 
-  handleCalendarView = calView => {
+  handleCalendarView = (calView) => {
     this.props.onChangeCalView(calView);
     this.setFetcher(this.props.filters, 'calendar', calView, this.props.date);
   };
@@ -287,8 +286,8 @@ class BrowseEvents extends Component {
     const eventComponent =
       view === 'list' ? (
         <React.Fragment>
-          <EventList events={events} />
-          {eventsLoading && <CircularProgress size={50} />}
+          <EventList events={events} loading={eventsLoading} />
+          <LoadingIndicator loading={eventsLoading} />
         </React.Fragment>
       ) : (
         <EventCalendar

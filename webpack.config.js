@@ -17,6 +17,9 @@ const entries = {
     'reserveRoom',
     'roomReservationList',
   ],
+  intercept_equipment: [
+    'reserveEquipment',
+  ],
 };
 
 const babelLoader = {

@@ -1,16 +1,19 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import map from 'lodash/map';
+
+// Intercept
+/* eslint-disable */
 import interceptClient from 'interceptClient';
 import EventTeaser from 'intercept/EventTeaser';
-// import ContentListInfinite from 'intercept/ContentList/ContentListInfinite';
 import ContentList from 'intercept/ContentList';
+/* eslint-enable */
 
 class EventList extends Component {
   state = {};
 
   render() {
-    const { events } = this.props;
+    const { events, loading } = this.props;
 
     const teasers = items =>
       items.map(id => ({
@@ -28,17 +31,20 @@ class EventList extends Component {
           />
         ))
       ) : (
-        <p key={0}>No events have been loaded.</p>
+        !loading && <p key={0}>No events have been loaded.</p>
       );
 
-    return <div className="events-list">
-      {list}
-    </div>;
+    return <div className="events-list">{list}</div>;
   }
 }
 
 EventList.propTypes = {
   events: PropTypes.arrayOf(Object).isRequired,
+  loading: PropTypes.bool,
+};
+
+EventList.defaultProps = {
+  loading: false,
 };
 
 export default EventList;

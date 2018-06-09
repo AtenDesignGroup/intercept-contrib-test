@@ -2,28 +2,88 @@
 
 namespace Drupal\intercept_event;
 
+use Drupal\Core\Cache\Cache;
+use Drupal\Core\Cache\CacheableDependencyInterface;
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\intercept_core\Plugin\Field\FieldType\ComputedItemList;
 use Drupal\node\NodeStorageInterface;
 use Drupal\user\UserInterface;
 
-class EventRegistrationField extends ComputedItemList {
+class EventRegistrationField extends ComputedItemList implements CacheableDependencyInterface {
 
-  /**
-   *
-   */
   private $registrationManager;
 
+  /**
+   * {@inheritdoc}
+   */
   protected function computeValue() {
-    $this->setValue([
+    $this->getEntity()->addCacheableDependency($this->setValue([
       'total' => $this->getTotal(),
       'total_waitlist' => $this->getTotalWaitlist(),
       'status' => $this->getStatus(),
-      'status_user' => $this->getStatusUser(),
-    ]);
+    ]));
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function setValue($values, $notify = TRUE) {
+    parent::setValue($values, $notify);
+    return $this;
+  }
+
+  /**
+   * Get current event status machine name.
+   *
+   * @return string
+   */
+  protected function getStatus() {
+    $default_status = 'open';
+
+    if (!$this->eventDate()) {
+      // TODO: This might need to reflect an error.
+      return $default_status;
+    }
+
+    if (!$this->mustRegister()) {
+      // TODO: This might need to reflect 'no registration required.'
+      return $this->eventEnded() ? 'expired' : $default_status;
+    }
+
+    if (!$this->regDate()) {
+      // TODO: This is also an error technically.
+      return $default_status;
+    }
+
+    // We work backwards now, starting with if it has ended.
+    if ($this->eventEnded()) {
+      return 'expired';
+    }
+    // Registration date has ended.
+    if ($this->regEnded()) {
+      return 'closed';
+    }
+    // Has a capacity and it's filled.
+    if ($this->regInProcess() && $this->capacityFull()) {
+      // Has a waiting list and it's not full.
+      if (!$this->waitlistFull()) {
+        return 'waitlist';
+      }
+      return 'full';
+    }
+    // Registration date has not started.
+    if ($this->regPending()) {
+      return 'open_pending';
+    }
+    return $default_status;
+  }
+
+  /**
+   * Get total related event_registration entities.
+   *
+   * @return int
+   */
   protected function getTotal() {
     $node = $this->getEntity();
 
@@ -40,51 +100,32 @@ class EventRegistrationField extends ComputedItemList {
     return $total;
   }
 
-  protected function getStatus() {
-    $default_status = 'open';
-
-    if (!$this->eventDate()) {
-      return $default_status;
-    }
-
-    if (!$this->regDate()) {
-      return $default_status;
-    }
-
-    // Event date has ended.
-    if ($this->eventEnded()) {
-      return 'expired';
-    }
-    // Registration date has ended.
-    if ($this->regEnded()) {
-      return 'closed';
-    }
-    // Registration date has not started.
-    if ($this->regPending()) {
-      return 'open_pending';
-    }
-    // Has a capacity and it's filled.
-    if ($this->capacityFull()) {
-      // Has a waiting list and it's not full.
-      if (!$this->waitlistFull()) {
-        return 'waitlist';
-      }
-      return 'full';
-    }
-    return $default_status;
-  }
-
+  /**
+   * Event has waitlist field is enabled.
+   *
+   * @return bool
+   */
   protected function hasWaitlist() {
     $field = $this->getEntity()->get('field_has_waitlist');
     return !empty($field->getString());
   }
 
+  /**
+   * Number of waitlisted registrations is more than the limit.
+   *
+   * @return bool
+   */
   protected function waitlistFull() {
     $has_waitlist = $this->hasWaitlist();
     $waitlist_max = $this->getEntity()->get('field_waitlist_max')->getString();
     return $has_waitlist && !is_null($waitlist_max) && $waitlist_max <= $this->getTotalWaitlist();
   }
 
+  /**
+   * Number of registrations is more than limit.
+   *
+   * @return bool
+   */
   protected function capacityFull() {
     $capacity_max = $this->getEntity()->get('field_capacity_max')->value;
     if (is_null($capacity_max)) {
@@ -93,6 +134,11 @@ class EventRegistrationField extends ComputedItemList {
     return $capacity_max <= $this->getTotal();
   }
 
+  /**
+   * Get event date value and end_value array.
+   *
+   * @return bool|object
+   */
   protected function eventDate() {
     $date = $this->getEntity()->get('field_date_time');
     if (!$date->start_date || !$date->end_date) {
@@ -104,6 +150,11 @@ class EventRegistrationField extends ComputedItemList {
     ];
   }
 
+  /**
+   * Get event registration date value and end_value array.
+   *
+   * @return bool|object
+   */
   protected function regDate() {
     $date = $this->getEntity()->get('field_event_register_period');
     if (!$date->start_date || !$date->end_date) {
@@ -115,6 +166,11 @@ class EventRegistrationField extends ComputedItemList {
     ];
   }
 
+  /**
+   * Event end date is later than current date.
+   *
+   * @return bool|int
+   */
   protected function eventEnded() {
     if ($this->eventDate()) {
       $date = new DrupalDateTime();
@@ -123,6 +179,20 @@ class EventRegistrationField extends ComputedItemList {
     return FALSE;
   }
 
+  /**
+   * Current date is between registration start and end dates.
+   *
+   * @return bool
+   */
+  protected function regInProcess() {
+    return !$this->regPending() && !$this->regEnded();
+  }
+
+  /**
+   * Current date is after registration end date.
+   *
+   * @return bool|int
+   */
   protected function regEnded() {
     if ($this->regDate()) {
       $date = new DrupalDateTime();
@@ -131,6 +201,11 @@ class EventRegistrationField extends ComputedItemList {
     return FALSE;
   }
 
+  /**
+   * Current date is before registration start date.
+   *
+   * @return bool
+   */
   protected function regPending() {
     if ($this->regDate()) {
       $date = new DrupalDateTime();
@@ -139,31 +214,11 @@ class EventRegistrationField extends ComputedItemList {
     return FALSE;
   }
 
-  protected function getStatusUser(UserInterface $user = NULL) {
-    $status = 'available';
-    if (!$user) {
-      $id = \Drupal::service('current_user')->id();
-      // $id = 353;
-      $user = \Drupal\user\Entity\User::load($id);
-    }
-    $ids = $this->getStorage()->getQuery()
-      ->condition('field_event', $this->getEntity()->id(), '=')
-      ->condition('field_user', $id, '=')
-      ->execute();
-    if (empty($ids)) {
-      return $status;
-    }
-    $registration_id = reset($ids);
-    $registration = $this->getStorage()->load($registration_id);
-    if ($registration->status->value == 'active') {
-      return 'registered';
-    }
-    if ($registration->status->value == 'waitlist') {
-      return 'waitlisted';
-    }
-    return $status;
-  }
-
+  /**
+   * Number of related waitlisted event registration entities.
+   *
+   * @return int
+   */
   protected function getTotalWaitlist() {
     $node = $this->getEntity();
 
@@ -180,19 +235,74 @@ class EventRegistrationField extends ComputedItemList {
     return $waitlist;
   }
 
+  /**
+   * Field must register is enabled.
+   *
+   * @return bool
+   */
   private function mustRegister() {
     return !empty($this->getEntity()->get('field_must_register')->value);
   }
 
-    /**
-     * Entity type manager helper function.
-     *
-     * @return NodeStorageInterface
-     */
+  /**
+   * Entity type manager helper function.
+   *
+   * @return NodeStorageInterface
+   */
   private function getStorage() {
     if (!isset($this->registrationManager)) {
       $this->registrationManager = \Drupal::service('entity_type.manager')->getStorage('event_registration');
     }
     return $this->registrationManager;
   }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getCacheContexts() {
+    return [];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getCacheTags() {
+    return [];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getCacheMaxAge() {
+    // Do not cache if there is an invalid event date.
+    if (!$this->eventDate()) {
+      return 0;
+    }
+    $date = new DrupalDateTime();
+
+    // First if they don't have to register and the event hasn't happened.
+    if (!$this->mustRegister()) {
+      return $this->eventEnded() ? Cache::PERMANENT : $this->eventDate()->end->format('U') - $date->format('U');
+    }
+
+    // Do not cache if registration is required but for some reason there is no date.
+    if (!$this->regDate()) {
+      return 0;
+    }
+
+    // Amount of seconds until the registration opens.
+    if ($this->regPending()) {
+      return $this->regDate()->start->format('U') - $date->format('U');
+    }
+    // Amount of seconds until the registration closes.
+    if ($this->regInProcess()) {
+      return $this->regDate()->end->format('U') - $date->format('U');
+    }
+
+    if (!$this->eventEnded()) {
+      return $this->eventDate()->end->format('U') - $date->format('U');
+    }
+    return Cache::PERMANENT;
+  }
+
 }

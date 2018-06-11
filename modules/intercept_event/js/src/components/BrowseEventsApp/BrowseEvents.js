@@ -29,18 +29,23 @@ const eventIncludes = ['image_primary', 'image_primary.field_media_image', 'fiel
 
 const viewOptions = [{ key: 'list', value: 'List' }, { key: 'calendar', value: 'Calendar' }];
 
-function getDateSpan(value, view = 'day') {
-  const start = moment(value).startOf(view);
-  const end = moment(value).endOf(view);
+function getDate(value, view = 'day', boundary = 'start') {
+  const method = boundary === 'start' ? 'startOf' : 'endOf';
+  const date = moment(value)[method](view);
 
   // The calendar view may include date from the previous or next month
   // so we make sure to include the beginning of the first week and
   // end of the last week.
   if (view === 'month') {
-    start.startOf('week');
-    end.endOf('week');
+    date[method]('week');
   }
-  return [start.toISOString(), end.toISOString()];
+  return date.toISOString();
+}
+
+function getDateSpan(value, view = 'day') {
+  const start = getDate(value, view, 'start');
+  const end = getDate(value, view, 'end');
+  return [start, end];
 }
 
 function getPublishedFilters(value = true) {
@@ -67,9 +72,20 @@ function getDateFilters(values, view = 'list', calView = 'day', date = new Date(
     value = getDateSpan(date, calView);
     operator = 'BETWEEN';
   }
-  else if (values.date) {
-    value = getDateSpan(values.date, 'day');
+  else if (values[c.DATE_START] && values[c.DATE_END]) {
+    value = [
+      getDate(values[c.DATE_START], 'day', 'start'),
+      getDate(values[c.DATE_END], 'day', 'end'),
+    ];
     operator = 'BETWEEN';
+  }
+  else if (values[c.DATE_START]) {
+    value = getDate(values[c.DATE_START], 'day', 'start');
+    operator = '>';
+  }
+  else if (values[c.DATE_END]) {
+    value = getDate(values[c.DATE_END], 'day', 'end');
+    operator = '<';
   }
 
   return {
@@ -163,6 +179,14 @@ function getFilters(values, view = 'list', calView = 'day', date = new Date()) {
   return filter;
 }
 
+function getSortDirection(view, values) {
+  let dir = 'ASC';
+  if (view === 'list' && values[c.DATE_END] && !values[c.DATE_START]) {
+    dir = 'DESC';
+  }
+  return dir;
+}
+
 class BrowseEvents extends Component {
   constructor(props) {
     super(props);
@@ -205,10 +229,10 @@ class BrowseEvents extends Component {
       sort: {
         date: {
           path: 'field_date_time.value',
-          dir: 'ASC',
+          direction: getSortDirection(view, values),
         },
       },
-      count: 10,
+      count: view === 'list' ? 10 : 0,
       headers: {
         'X-Consumer-ID': interceptClient.consumer,
       },
@@ -243,6 +267,11 @@ class BrowseEvents extends Component {
   }
 
   handleScroll() {
+    // The calendar view should fetch all visible events so no need to load on scroll.
+    if (this.props.view === 'calendar') {
+      return;
+    }
+
     const windowHeight =
       'innerHeight' in window ? window.innerHeight : document.documentElement.offsetHeight;
     const body = document.body;
@@ -268,6 +297,7 @@ class BrowseEvents extends Component {
 
   doFetchMoreEvents() {
     const { fetchEvents, eventsLoading } = this.props;
+
     if (!eventsLoading && !this.state.fetcher.isDone()) {
       fetchEvents(this.state.fetcher);
     }
@@ -282,7 +312,6 @@ class BrowseEvents extends Component {
       handleFilterChange,
     } = this;
     const { calendarEvents, events, eventsLoading, filters, view, date, calView } = props;
-
     const eventComponent =
       view === 'list' ? (
         <React.Fragment>
@@ -320,14 +349,21 @@ class BrowseEvents extends Component {
   }
 }
 
-const mapStateToProps = state => ({
-  events: select.eventsByDateAscending(state),
-  eventsLoading: select.recordsAreLoading(c.TYPE_EVENT)(state),
-  calendarEvents: select.calendarEvents(state),
-});
+const mapStateToProps = (state, ownProps) => {
+  const dir = getSortDirection(ownProps.view, ownProps.filters);
+  return {
+    events: select[
+      dir === 'DESC'
+        ? 'eventsByDateAscending'
+        : 'eventsByDateDescending'
+    ](state),
+    eventsLoading: select.recordsAreLoading(c.TYPE_EVENT)(state),
+    calendarEvents: select.calendarEvents(state),
+  };
+};
 
 const mapDispatchToProps = dispatch => ({
-  fetchEvents: fetcher => {
+  fetchEvents: (fetcher) => {
     dispatch(fetcher.next());
   },
 });

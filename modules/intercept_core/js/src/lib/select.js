@@ -187,7 +187,7 @@ export const calendarEvents = createSelector(events, items => map(items, item =>
 export const eventTeasers = createSelector(events, items => map(items, item => item));
 
 export const eventsAscending = createSelector(eventsArray, items =>
-  items.sort((a, b) => getEventStartDate(a) - getEventStartDate(b)),
+  items.sort((a, b) => getEventStartDate(b) - getEventStartDate(a)),
 );
 
 export const eventsDecending = createSelector(eventsAscending, items => items.reverse());
@@ -201,7 +201,7 @@ export const eventsByDateAscending = createSelector(eventsByDate, items =>
     key,
     date: new Date(parseInt(key, 10)),
     items: item.map(a => a.data.id),
-  })).sort((a, b) => a.key - b.key),
+  })).sort((a, b) => b.key - a.key),
 );
 
 export const eventsByDateDescending = createSelector(eventsByDateAscending, items =>

@@ -41,18 +41,9 @@ class EventRegistrationField extends ComputedItemList implements CacheableDepend
   protected function getStatus() {
     $default_status = 'open';
 
+    // If there is no date set, skip further checks.
     if (!$this->eventDate()) {
       // TODO: This might need to reflect an error.
-      return $default_status;
-    }
-
-    if (!$this->mustRegister()) {
-      // TODO: This might need to reflect 'no registration required.'
-      return $this->eventEnded() ? 'expired' : $default_status;
-    }
-
-    if (!$this->regDate()) {
-      // TODO: This is also an error technically.
       return $default_status;
     }
 
@@ -60,6 +51,12 @@ class EventRegistrationField extends ComputedItemList implements CacheableDepend
     if ($this->eventEnded()) {
       return 'expired';
     }
+
+    // Skip further dates if there is no registration date, or if it's not required.
+    if (!$this->mustRegister() || !$this->regDate()) {
+      return $default_status;
+    }
+
     // Registration date has ended.
     if ($this->regEnded()) {
       return 'closed';

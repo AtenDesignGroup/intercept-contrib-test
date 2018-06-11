@@ -33,7 +33,8 @@
     "drupal/paragraphs": "^1.2",
     "drupal/date_recur": "^1.0.alpha5",
     "drupal/simple_oauth": "^3.5",
-    "drupal/focal_point": "1.0-beta6"
+    "drupal/focal_point": "1.0-beta6",
+    "drupal/flag": "^4.0@alpha"
   },
   "require-dev": {
     "bower-asset/dropzone": "^5.1"

@@ -23,3 +23,18 @@ The production build will use an extenal production build of React hosted on a C
 `npm run build:js`
 
 *The production build should be committed to the repository. Currently this is a manual process.*
+
+## Events
+
+### Event status logic
+- default status: open
+- check if there is no event date, if true return default status
+- check if event has expired, if true return 'expired'
+- check if reg is not required, or if there is no reg date, return default status
+- check if reg end date has passed, if so return 'closed'
+- check if reg is in process and if the capacity is full
+  - if there is a waiting list, check if that is full
+    - if it's full return 'full'
+    - if it's not return 'waitlist'
+- check if reg start date has not happened, if true return 'open_pending'
+- return default status

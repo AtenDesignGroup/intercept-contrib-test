@@ -34,16 +34,18 @@ function getRegistrationOpenDate(event) {
   return utils.getDateDisplay(utils.dateFromDrupal(openDate));
 }
 
-function getText(event) {
+function getText(event, registrations) {
   const mustRegister = getMustRegister(event);
   const status = getStatus(event);
-  const userStatus = getStatusUser(event);
+  const userStatus = registrations.length > 0
+    ? get(registrations[0], 'data.attributes.status')
+    : null;
 
   if (!status || !mustRegister) {
     return null;
   }
 
-  if (userStatus === 'registered') {
+  if (userStatus === 'active') {
     return 'You are Registered!';
   }
 
@@ -61,21 +63,26 @@ function getText(event) {
     case 'closed':
       return 'Registration is closed';
     case 'expired':
-      return 'This event has expired';
+      return 'This event has ended';
     default:
       return null;
   }
 }
 
 function RegistrationStatus(props) {
-  const { event } = props;
-  const text = getText(event);
+  const { event, registrations } = props;
+  const text = getText(event, registrations);
 
   return text ? <p className="action-button__message">{text}</p> : null;
 }
 
 RegistrationStatus.propTypes = {
   event: PropTypes.object.isRequired,
+  registrations: PropTypes.array,
+};
+
+RegistrationStatus.defaultProps = {
+  registrations: [],
 };
 
 export default RegistrationStatus;

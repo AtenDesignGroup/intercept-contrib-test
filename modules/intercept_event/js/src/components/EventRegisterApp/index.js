@@ -64,7 +64,7 @@ EventRegisterApp.defaultProps = {
 };
 
 const mapStateToProps = (state, ownProps) => ({
-  registrations: select.eventRegistrationsByEvent(ownProps.eventId)(state),
+  registrations: select.eventRegistrationsByEventByUser(ownProps.eventId, ownProps.user.uuid)(state),
   registrationsLoading: select.recordsAreLoading(c.TYPE_EVENT_REGISTRATION)(state),
   event: select.record(select.getIdentifier(c.TYPE_EVENT, ownProps.eventId))(state),
   eventsLoading: select.recordsAreLoading(c.TYPE_EVENT)(state),
@@ -103,7 +103,7 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
             path: 'field_event.uuid',
           },
           user: {
-            value: ownProps.user.uid,
+            value: ownProps.user.id,
             path: 'field_user.uid',
           },
         },

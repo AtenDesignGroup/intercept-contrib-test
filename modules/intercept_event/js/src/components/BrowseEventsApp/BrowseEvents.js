@@ -8,6 +8,7 @@ import { connect } from 'react-redux';
 // Lodash
 import debounce from 'lodash/debounce';
 import throttle from 'lodash/throttle';
+import mapValues from 'lodash/mapValues';
 
 // Moment
 import moment from 'moment';
@@ -187,6 +188,20 @@ function getSortDirection(view, values) {
   return dir;
 }
 
+function getRegistrationFilters(eventFilters) {
+  return {
+    ...mapValues(eventFilters, filter => ({
+      ...filter,
+      path: `field_event.${filter.path}`,
+    })),
+    status: {
+      path: 'status',
+      value: ['active', 'waitlist'],
+      operator: 'IN',
+    },
+  };
+}
+
 class BrowseEvents extends Component {
   constructor(props) {
     super(props);
@@ -201,14 +216,14 @@ class BrowseEvents extends Component {
     this.handleCalendarView = this.handleCalendarView.bind(this);
     this.handleFilterChange = this.handleFilterChange.bind(this);
     this.handleViewChange = this.handleViewChange.bind(this);
-    this.setFetcher = this.setFetcher.bind(this);
-    this.doFetchEvents = debounce(this.doFetchEvents, 500).bind(this);
-    this.doFetchMoreEvents = this.doFetchMoreEvents.bind(this);
+    this.setFetchers = this.setFetchers.bind(this);
+    this.doFetch = debounce(this.doFetch, 500).bind(this);
+    this.doFetchMore = this.doFetchMore.bind(this);
     this.handleScroll = throttle(this.handleScroll, 30, { leading: true }).bind(this);
   }
 
   componentDidMount() {
-    this.setFetcher(this.props.filters, this.props.view, this.props.calView, this.props.date);
+    this.setFetchers(this.props.filters, this.props.view, this.props.calView, this.props.date);
     window.addEventListener('scroll', this.handleScroll);
   }
 
@@ -216,7 +231,7 @@ class BrowseEvents extends Component {
     window.removeEventListener('scroll', this.handleScroll);
   }
 
-  setFetcher(
+  setFetchers(
     values = this.props.filters,
     view = this.props.view,
     calView = this.props.calView,
@@ -239,31 +254,44 @@ class BrowseEvents extends Component {
       limit: 10,
     };
 
-    const fetcher = api[c.TYPE_EVENT].fetcher(options);
+    const fetcher = {
+      [c.TYPE_EVENT]: api[c.TYPE_EVENT].fetcher(options),
+      [c.TYPE_EVENT_REGISTRATION]: api[c.TYPE_EVENT_REGISTRATION].fetcher({
+        ...options,
+        filters: getRegistrationFilters(options.filters),
+        include: null,
+        fields: {
+          [c.TYPE_EVENT_REGISTRATION]: ['field_event', 'field_user', 'status'],
+        },
+        sort: null,
+      }),
+    };
+
     this.setState({
       fetcher,
     });
-    this.doFetchEvents(fetcher);
+
+    this.doFetch(fetcher);
   }
 
   handleViewChange = (value) => {
     this.props.onChangeView(value);
-    this.setFetcher(this.props.filters, value, this.props.calView, this.props.date);
+    this.setFetchers(this.props.filters, value, this.props.calView, this.props.date);
   };
 
   handleCalendarNavigate = (date, calView) => {
     this.props.onChangeDate(date);
-    this.setFetcher(this.props.filters, 'calendar', calView, date);
+    this.setFetchers(this.props.filters, 'calendar', calView, date);
   };
 
   handleCalendarView = (calView) => {
     this.props.onChangeCalView(calView);
-    this.setFetcher(this.props.filters, 'calendar', calView, this.props.date);
+    this.setFetchers(this.props.filters, 'calendar', calView, this.props.date);
   };
 
   handleFilterChange(values) {
     this.props.onChangeFilters(values);
-    this.setFetcher(values);
+    this.setFetchers(values);
   }
 
   handleScroll() {
@@ -286,20 +314,21 @@ class BrowseEvents extends Component {
     const windowBottom = windowHeight + window.pageYOffset;
 
     if (windowBottom >= docHeight - 1500) {
-      this.doFetchMoreEvents();
+      this.doFetchMore(c.TYPE_EVENT);
+      this.doFetchMore(c.TYPE_EVENT_REGISTRATION);
     }
   }
 
-  doFetchEvents(fetcher) {
-    const { fetchEvents } = this.props;
-    fetchEvents(fetcher);
+  doFetch(fetcher) {
+    const { fetchEntities } = this.props;
+    fetchEntities(fetcher[c.TYPE_EVENT]);
+    fetchEntities(fetcher[c.TYPE_EVENT_REGISTRATION]);
   }
 
-  doFetchMoreEvents() {
-    const { fetchEvents, eventsLoading } = this.props;
-
-    if (!eventsLoading && !this.state.fetcher.isDone()) {
-      fetchEvents(this.state.fetcher);
+  doFetchMore(type) {
+    const { fetchEntities, loading } = this.props;
+    if (!loading[type] && !this.state.fetcher[type].isDone()) {
+      fetchEntities(this.state.fetcher[type]);
     }
   }
 
@@ -311,7 +340,8 @@ class BrowseEvents extends Component {
       handleCalendarView,
       handleFilterChange,
     } = this;
-    const { calendarEvents, events, eventsLoading, filters, view, date, calView } = props;
+    const { calendarEvents, events, loading, filters, view, date, calView } = props;
+    const eventsLoading = loading[c.TYPE_EVENT];
     const eventComponent =
       view === 'list' ? (
         <React.Fragment>
@@ -352,18 +382,17 @@ class BrowseEvents extends Component {
 const mapStateToProps = (state, ownProps) => {
   const dir = getSortDirection(ownProps.view, ownProps.filters);
   return {
-    events: select[
-      dir === 'DESC'
-        ? 'eventsByDateAscending'
-        : 'eventsByDateDescending'
-    ](state),
-    eventsLoading: select.recordsAreLoading(c.TYPE_EVENT)(state),
+    events: select[dir === 'DESC' ? 'eventsByDateAscending' : 'eventsByDateDescending'](state),
+    loading: {
+      [c.TYPE_EVENT]: select.recordsAreLoading(c.TYPE_EVENT)(state),
+      [c.TYPE_EVENT_REGISTRATION]: select.recordsAreLoading(c.TYPE_EVENT_REGISTRATION)(state),
+    },
     calendarEvents: select.calendarEvents(state),
   };
 };
 
 const mapDispatchToProps = dispatch => ({
-  fetchEvents: (fetcher) => {
+  fetchEntities: (fetcher) => {
     dispatch(fetcher.next());
   },
 });
@@ -371,8 +400,8 @@ const mapDispatchToProps = dispatch => ({
 BrowseEvents.propTypes = {
   calendarEvents: PropTypes.arrayOf(Object).isRequired,
   events: PropTypes.arrayOf(Object).isRequired,
-  eventsLoading: PropTypes.bool.isRequired,
-  fetchEvents: PropTypes.func.isRequired,
+  loading: PropTypes.object.isRequired,
+  fetchEntities: PropTypes.func.isRequired,
   calView: PropTypes.string,
   date: PropTypes.instanceOf(Date),
   view: PropTypes.string,

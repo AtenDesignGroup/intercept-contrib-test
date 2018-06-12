@@ -12,6 +12,7 @@ const c = interceptClient.constants;
 class EventRegisterButtonApp extends React.Component {
   componentDidMount() {
     this.props.fetchEvent(this.props.eventId);
+    this.props.fetchRegistration(this.props.eventId, this.props.user);
   }
 
   render() {
@@ -26,17 +27,21 @@ class EventRegisterButtonApp extends React.Component {
 
 EventRegisterButtonApp.propTypes = {
   event: PropTypes.object,
-  user: PropTypes.object,
   eventId: PropTypes.string.isRequired,
+  registrations: PropTypes.array,
   fetchEvent: PropTypes.func.isRequired,
+  fetchRegistration: PropTypes.func.isRequired,
+  user: PropTypes.object,
 };
 
 EventRegisterButtonApp.defaultProps = {
   event: null,
+  registrations: [],
 };
 
 const mapStateToProps = (state, ownProps) => ({
   event: select.record(select.getIdentifier(c.TYPE_EVENT, ownProps.eventId))(state),
+  registrations: select.eventRegistrationsByEventByUser(ownProps.eventId, ownProps.user.uuid)(state),
 });
 
 const mapDispatchToProps = dispatch => ({
@@ -53,6 +58,26 @@ const mapDispatchToProps = dispatch => ({
       }),
     );
   },
+  fetchRegistration: (id, user) => {
+    dispatch(
+      // @todo: Add support for fetching a single entity rather than fetching all filtered by uuid.
+      api[c.TYPE_EVENT_REGISTRATION].fetchAll({
+        filters: {
+          uuid: {
+            value: id,
+            path: 'field_event.uuid',
+          },
+          user: {
+            value: user.id,
+            path: 'field_user.uid',
+          },
+        },
+      }),
+    );
+  },
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(EventRegisterButtonApp);
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(EventRegisterButtonApp);

@@ -7,8 +7,9 @@ import { connect } from 'react-redux';
 
 // Lodash
 import debounce from 'lodash/debounce';
-import throttle from 'lodash/throttle';
 import mapValues from 'lodash/mapValues';
+import pick from 'lodash/pick';
+import throttle from 'lodash/throttle';
 
 // Moment
 import moment from 'moment';
@@ -29,6 +30,51 @@ const c = constants;
 const eventIncludes = ['image_primary', 'image_primary.field_media_image', 'field_room'];
 
 const viewOptions = [{ key: 'list', value: 'List' }, { key: 'calendar', value: 'Calendar' }];
+
+const sparseFieldsets = {
+  [c.TYPE_EVENT]: [
+    'nid',
+    'uuid',
+    'status',
+    'title',
+    'path',
+    'field_date_time',
+    'field_must_register',
+    'field_text_teaser',
+    'registration',
+    'field_event_audience',
+    'field_event_type',
+    'field_event_tags',
+    'field_location',
+    'field_room',
+    'image_primary',
+  ],
+  [c.TYPE_EVENT_REGISTRATION]: [
+    'uuid',
+    'field_event',
+    'field_user',
+    'status',
+  ],
+  [c.TYPE_ROOM]: [
+    'nid',
+    'uuid',
+    'title',
+    'field_location',
+  ],
+  [c.TYPE_MEDIA_IMAGE]: [
+    'mid',
+    'uuid',
+    'field_media_caption',
+    'field_media_credit',
+    'field_media_image',
+  ],
+  [c.TYPE_FILE]: [
+    'fid',
+    'uuid',
+    'uri',
+    'url',
+  ],
+};
 
 function getDate(value, view = 'day', boundary = 'start') {
   const method = boundary === 'start' ? 'startOf' : 'endOf';
@@ -241,6 +287,12 @@ class BrowseEvents extends Component {
       filters: getFilters(values, view, calView, date),
       include: eventIncludes,
       replace: true,
+      fields: pick(sparseFieldsets, [
+        c.TYPE_EVENT,
+        c.TYPE_MEDIA_IMAGE,
+        c.TYPE_FILE,
+        c.TYPE_ROOM,
+      ]),
       sort: {
         date: {
           path: 'field_date_time.value',
@@ -260,9 +312,7 @@ class BrowseEvents extends Component {
         ...options,
         filters: getRegistrationFilters(options.filters),
         include: null,
-        fields: {
-          [c.TYPE_EVENT_REGISTRATION]: ['field_event', 'field_user', 'status'],
-        },
+        fields: pick(sparseFieldsets, [c.TYPE_EVENT_REGISTRATION]),
         sort: null,
       }),
     };

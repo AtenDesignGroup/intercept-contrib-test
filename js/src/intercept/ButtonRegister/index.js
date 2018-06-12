@@ -60,11 +60,18 @@ function getRegisterUrl(event) {
   return `/event/${event.attributes.nid}/register`;
 }
 
-function registrationAllowed(event) {
+function registrationAllowed(event, registrations) {
   const mustRegister = getMustRegister(event);
-  const userStatus = getStatusUser(event);
+  // const userStatus = getStatusUser(event);
+  const userStatus = registrations.length > 0
+    ? get(registrations[0], 'data.attributes.status')
+    : null;
 
-  if (userStatus !== 'available') {
+  // @todo: Reinstate this once we can reliably determine whether or not a user can register.
+  // if (userStatus !== 'available') {
+  //   return false;
+  // }
+  if (['active', 'waitlist'].indexOf(userStatus) >= 0) {
     return false;
   }
 
@@ -83,7 +90,7 @@ function registrationAllowed(event) {
 }
 
 function ButtonRegister(props) {
-  const { classes, event } = props;
+  const { classes, event, registrations } = props;
   const text = getText(event);
 
   return getMustRegister(event) ? (
@@ -93,7 +100,7 @@ function ButtonRegister(props) {
       size="small"
       color="primary"
       className={[classes.button, 'action-button__button'].join(' ')}
-      disabled={!registrationAllowed(event)}
+      disabled={!registrationAllowed(event, registrations)}
     >
       {text}
     </Button>
@@ -103,6 +110,11 @@ function ButtonRegister(props) {
 ButtonRegister.propTypes = {
   classes: PropTypes.object.isRequired,
   event: PropTypes.object.isRequired,
+  registrations: PropTypes.array,
+};
+
+ButtonRegister.defaultProps = {
+  registrations: [],
 };
 
 export default withStyles(styles)(ButtonRegister);

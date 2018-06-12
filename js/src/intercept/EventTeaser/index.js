@@ -4,7 +4,12 @@ import { connect } from 'react-redux';
 import moment from 'moment-timezone';
 // import momentTimezone from 'moment-timezone';
 import get from 'lodash/get';
+
+/* eslint-disable */
+import drupalSettings from 'drupalSettings';
 import interceptClient from 'interceptClient';
+/* eslint-enable */
+
 import FieldInline from './../FieldInline';
 import Teaser from './../Teaser';
 import ButtonRegister from './../ButtonRegister';
@@ -13,9 +18,11 @@ import RegistrationStatus from './../RegistrationStatus';
 
 const { select, constants, utils } = interceptClient;
 const c = constants;
+const userId = get(drupalSettings, 'intercept.user.uuid');
+
 class EventTeaser extends PureComponent {
   render() {
-    const { id, event, image } = this.props;
+    const { id, event, image, registrations } = this.props;
 
     const termMap = item => ({
       id: item.id,
@@ -50,9 +57,11 @@ class EventTeaser extends PureComponent {
         }}
         description={event.attributes['field_text_teaser'].value}
         tags={[audiences]}
-        footer={props => (<React.Fragment>
-            <ButtonRegister event={props.event} />
-            <RegistrationStatus event={props.event} />
+        registrations={registrations}
+        footer={props => (
+          <React.Fragment>
+            <ButtonRegister event={props.event} registrations={props.registrations} />
+            <RegistrationStatus event={props.event} registrations={props.registrations} />
           </React.Fragment>
         )}
         event={event}
@@ -65,18 +74,21 @@ EventTeaser.propTypes = {
   id: PropTypes.string.isRequired,
   event: PropTypes.object.isRequired,
   image: PropTypes.string,
+  registrations: PropTypes.array,
 };
 
 EventTeaser.defaultProps = {
   image: null,
+  registrations: [],
 };
 
 const mapStateToProps = (state, ownProps) => {
   const identifier = select.getIdentifier(c.TYPE_EVENT, ownProps.id);
-
+  const registrations = select.eventRegistrationsByEventByUser(ownProps.id, userId)(state);
   return {
     event: select.bundle(identifier)(state),
     image: select.resourceImageStyle(identifier, '4to3_740x556')(state),
+    registrations,
   };
 };
 

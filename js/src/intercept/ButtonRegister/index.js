@@ -99,7 +99,7 @@ function ButtonRegister(props) {
       variant="raised"
       size="small"
       color="primary"
-      className={[classes.button, 'action-button__button'].join(' ')}
+      className={'action-button__button'}
       disabled={!registrationAllowed(event, registrations)}
     >
       {text}

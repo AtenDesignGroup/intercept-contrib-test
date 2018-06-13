@@ -8,16 +8,20 @@ import { connect } from 'react-redux';
 // Components
 import Button from '@material-ui/core/Button';
 
+// Lodash
+import get from 'lodash/get';
+
 // Intercept
 import DialogConfirm from 'intercept/Dialog/DialogConfirm';
 import interceptClient from 'interceptClient';
 
-const { constants, api, select } = interceptClient;
-const c = constants;
 
 // Local Components
 import EventRegisterConfirmation from '../EventRegisterApp/EventRegisterConfirmation';
 import EventRegistrationStatus from '../EventRegisterApp/EventRegistrationStatus';
+
+const { constants, api, select } = interceptClient;
+const c = constants;
 
 const actionProperties = {
   default: {
@@ -75,22 +79,32 @@ class EventRegistrationActions extends PureComponent {
   }
 
   render() {
-    const { actions, id } = this.props;
+    const { id, entity } = this.props;
+    const status = get(entity, 'data.attributes.status');
+    let actions = [];
+
+    switch (status) {
+      case 'active':
+        actions = ['cancel'];
+        break;
+      case 'canceled':
+        actions = [];
+        break;
+      case 'waitlist':
+        actions = ['cancel'];
+        break;
+      default:
+        break;
+    }
 
     return (
       <div>
-        {actions.length > 0 && (
+        {actions.length > 0 &&
           actions.map(action => (
-            <Button
-              key={action}
-              onClick={this.onClick(action)}
-              variant="raised"
-              color="primary"
-            >
+            <Button key={action} onClick={this.onClick(action)} variant="raised" color="primary">
               {action}
             </Button>
-          ))
-        )}
+          ))}
         <EventRegisterConfirmation
           open={this.state.open}
           onClose={this.onClose}
@@ -131,4 +145,7 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
   },
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(EventRegistrationActions);
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(EventRegistrationActions);

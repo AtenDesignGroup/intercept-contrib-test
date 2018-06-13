@@ -32,7 +32,7 @@ class RegistrationTeaser extends React.PureComponent {
     if (!event.attributes) {
       return <TeaserStub />;
     }
-    const status = get(registration, 'attributes.status');;
+    const status = get(registration, 'attributes.status');
     const date = moment(utils.dateFromDrupal(event.attributes['field_date_time'].value));
     let actions = [];
     let statusMessage;

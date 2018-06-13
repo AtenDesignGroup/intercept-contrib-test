@@ -7,7 +7,7 @@ import interceptClient from 'interceptClient';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
 import EventRegisterForm from './EventRegisterForm';
-import EventRegistrationList from './../EventRegistrationList';
+import EventRegistrationTable from './../EventRegistrationTable';
 
 const { api, select } = interceptClient;
 const c = interceptClient.constants;
@@ -22,18 +22,23 @@ class EventRegisterApp extends React.Component {
   componentDidMount() {
     this.props.fetchSegments();
     this.props.fetchEvent(this.props.eventId);
+    this.props.fetchUser(this.props.user.uuid);
     this.props.fetchRegistrations(this.props.eventId);
   }
 
   render() {
-    const { registrations, registrationsLoading } = this.props;
+    const { registrations, registrationsLoading, user, users, event } = this.props;
 
     let content = <CircularProgress size={50} />;
 
     if (!registrationsLoading) {
       content =
         onlyActiveOrWaitlist(registrations).length > 0 ? (
-          <EventRegistrationList items={registrations.map(r => r.data.id)} />
+          <EventRegistrationTable
+            registrations={registrations}
+            users={[users]}
+            event={event}
+          />
         ) : (
           <EventRegisterForm {...this.props} />
         );
@@ -46,10 +51,11 @@ class EventRegisterApp extends React.Component {
 EventRegisterApp.propTypes = {
   registrations: PropTypes.array,
   event: PropTypes.object,
-  user: PropTypes.object,
+  user: PropTypes.object.isRequired,
   segments: PropTypes.arrayOf(PropTypes.object),
   eventId: PropTypes.string.isRequired,
   fetchEvent: PropTypes.func.isRequired,
+  fetchUser: PropTypes.func.isRequired,
   fetchRegistrations: PropTypes.func.isRequired,
   fetchSegments: PropTypes.func.isRequired,
   registrationsLoading: PropTypes.bool.isRequired,
@@ -67,6 +73,7 @@ const mapStateToProps = (state, ownProps) => ({
   registrations: select.eventRegistrationsByEventByUser(ownProps.eventId, ownProps.user.uuid)(state),
   registrationsLoading: select.recordsAreLoading(c.TYPE_EVENT_REGISTRATION)(state),
   event: select.record(select.getIdentifier(c.TYPE_EVENT, ownProps.eventId))(state),
+  users: select.record(select.getIdentifier(c.TYPE_USER, ownProps.user.uuid))(state),
   eventsLoading: select.recordsAreLoading(c.TYPE_EVENT)(state),
   segments: select.recordOptions(c.TYPE_POPULATION_SEGMENT)(state),
   segmentsLoading: select.recordsAreLoading(c.TYPE_POPULATION_SEGMENT)(state),
@@ -76,6 +83,18 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
   fetchEvent: (id) => {
     dispatch(
       api[c.TYPE_EVENT].fetchAll({
+        filters: {
+          uuid: {
+            value: id,
+            path: 'uuid',
+          },
+        },
+      }),
+    );
+  },
+  fetchUser: (id) => {
+    dispatch(
+      api[c.TYPE_USER].fetchAll({
         filters: {
           uuid: {
             value: id,

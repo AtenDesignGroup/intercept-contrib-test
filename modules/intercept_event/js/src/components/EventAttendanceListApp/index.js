@@ -76,6 +76,11 @@ class EventAttendanceListApp extends Component {
           path: 'field_event.uuid',
           value: this.props.event.uuid,
         },
+        status: {
+          path: 'status',
+          value: ['active', 'waitlist'],
+          operator: 'IN',
+        },
       },
       include: ['field_user'],
       headers: {

@@ -11,18 +11,22 @@ import get from 'lodash/get';
 // Moment
 import moment from 'moment';
 
+/* eslint-disable */
 // Intercept
 import interceptClient from 'interceptClient';
+import drupalSettings from 'drupalSettings';
 
 // Intercept Components
-import FieldInline from 'intercept/FieldInline';
 import Teaser from 'intercept/Teaser';
 import TeaserStub from 'intercept/Teaser/TeaserStub';
-import EventRegistrationActions from './../EventRegistrationActions';
 import RegistrationStatus from 'intercept/RegistrationStatus';
+import ButtonRegister from 'intercept/ButtonRegister';
+/* eslint-enable */
 
 const { select, constants, utils } = interceptClient;
 const c = constants;
+
+const userId = get(drupalSettings, 'intercept.user.uuid');
 
 class RegistrationTeaser extends React.PureComponent {
   render() {
@@ -34,25 +38,6 @@ class RegistrationTeaser extends React.PureComponent {
     }
     const status = get(registration, 'attributes.status');
     const date = moment(utils.dateFromDrupal(event.attributes['field_date_time'].value));
-    let actions = [];
-    let statusMessage;
-
-    switch (status) {
-      case 'active':
-        actions = ['cancel'];
-        statusMessage = 'Registeration Confirmed';
-        break;
-      case 'canceled':
-        actions = [];
-        statusMessage = ['Canceled'];
-        break;
-      case 'waitlist':
-        actions = ['cancel'];
-        statusMessage = 'Added to Waitlist';
-        break;
-      default:
-        break;
-    }
 
     return (
       <Teaser
@@ -71,7 +56,8 @@ class RegistrationTeaser extends React.PureComponent {
         }}
         footer={() => (
           <React.Fragment>
-            <EventRegistrationActions id={id} actions={actions} />
+            {/* <ButtonRegister event={event} registrations={[registration]} /> */}
+            <ButtonRegister eventId={event.id} userId={userId} />
             <RegistrationStatus event={event} />
           </React.Fragment>
         )}

@@ -60,8 +60,8 @@ class EventTeaser extends PureComponent {
         registrations={registrations}
         footer={props => (
           <React.Fragment>
-            <ButtonRegister event={props.event} registrations={props.registrations} />
-            <RegistrationStatus event={props.event} registrations={props.registrations} />
+            <ButtonRegister eventId={props.event.id} />
+            <RegistrationStatus eventId={props.event.id} />
           </React.Fragment>
         )}
         event={event}

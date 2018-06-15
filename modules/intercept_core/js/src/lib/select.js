@@ -193,7 +193,9 @@ export const eventsAscending = createSelector(eventsArray, items =>
 export const eventsDecending = createSelector(eventsAscending, items => items.reverse());
 
 export const eventsByDate = createSelector(eventsAscending, items =>
-  groupBy(items, item => utils.getDayTimeStamp(`${get(item, 'data.attributes.field_date_time.value')}Z`)),
+  groupBy(items, item =>
+    utils.getDayTimeStamp(`${get(item, 'data.attributes.field_date_time.value')}Z`),
+  ),
 );
 
 export const eventsByDateAscending = createSelector(eventsByDate, items =>
@@ -208,9 +210,55 @@ export const eventsByDateDescending = createSelector(eventsByDateAscending, item
   items.reverse(),
 );
 
+export const mustRegisterForEvent = id =>
+  createSelector(record(getIdentifier(c.TYPE_EVENT, id)), item =>
+    get(item, 'data.attributes.field_must_register'),
+  );
+
+// open_pending: registration is not yet open
+// open: registration is open and not full
+// waitlist: registration is full and there is a waitlist that is not full
+// full: registration is open and full and there is no waitlist or the waitlist is full
+// closed: registration is closed but not expired
+// expired: event has ended
+export const eventRegistrationStatus = id =>
+  createSelector(record(getIdentifier(c.TYPE_EVENT, id)), item =>
+    get(item, 'data.attributes.registration.status'),
+  );
+
+/**
+ * Gets the formatted date string of the registration period's opening day
+ *
+ * @param {Object} eventRecord
+ *  JSON API representation of an event
+ * @returns {String}
+ */
+function getEventRegistrationOpenDate(eventRecord) {
+  const openDate = get(eventRecord, 'data.attributes.field_event_register_period.value');
+
+  if (!openDate) {
+    return 'soon';
+  }
+
+  return utils.getDateDisplay(utils.dateFromDrupal(openDate));
+}
+
+/**
+ * select.getEventRegistrationOpenDate
+ */
+export const eventRegistrationDate = id =>
+  createSelector(record(getIdentifier(c.TYPE_EVENT, id)), getEventRegistrationOpenDate);
+
+export const registerUrl = id =>
+  createSelector(
+    record(getIdentifier(c.TYPE_EVENT, id)),
+    item => `/event/${get(item, 'data.attributes.nid')}/register`,
+  );
+
 //
 // Event Registrations
 //
+
 export const eventRegistration = id => records(c.TYPE_EVENT_REGISTRATION, id);
 export const eventRegistrations = records(c.TYPE_EVENT_REGISTRATION);
 export const eventRegistrationsByEvent = id =>
@@ -240,6 +288,14 @@ export const eventRegistrationsByEventByUser = (eventId, userId) =>
     items.filter(item => get(item, 'data.relationships.field_user.data.id') === userId),
   );
 
+// active: registration is confirmed
+// canceled: registration has been canceled
+// waitlist: on the waitlist
+export const registrationStatus = id =>
+  createSelector(record(getIdentifier(c.TYPE_EVENT_REGISTRATION, id)), item =>
+    get(item, 'data.attributes.status'),
+  );
+
 // Saved Event Flag
 export const savedEventsByUser = id =>
   createSelector(recordsList(c.TYPE_SAVED_EVENT), items =>
@@ -254,6 +310,138 @@ export const eventsFromSavedEventsByUser = id => state =>
       type: c.TYPE_EVENT,
       id: get(item, 'data.relationships.flagged_entity.data.id'),
     })(state),
+  );
+
+function getUserEventRegistrationStatus(registrations) {
+  if (registrations.length < 0) {
+    return null;
+  }
+
+  const statuses = registrations.map(r => get(r, 'data.attributes.status'));
+
+  if (statuses.indexOf('active') >= 0) {
+    return 'active';
+  }
+
+  if (statuses.indexOf('waitlist') >= 0) {
+    return 'waitlist';
+  }
+
+  if (statuses.indexOf('canceled') >= 0) {
+    return 'canceled';
+  }
+
+  return null;
+}
+
+export const userEventRegistrationStatus = (eventId, userId) =>
+  createSelector(eventRegistrationsByEventByUser(eventId, userId), getUserEventRegistrationStatus);
+
+function canCancel(statusEvent, statusUser) {
+  return ['active', 'waitlist'].indexOf(statusUser) >= 0;
+}
+
+export const registrationCancelAllowed = (eventId, userId) =>
+  createSelector(
+    eventRegistrationStatus(eventId),
+    userEventRegistrationStatus(eventId, userId),
+    canCancel,
+  );
+
+function getRegisterButtonText(mustRegister, statusEvent, cancelAllowed) {
+  if (!statusEvent || !mustRegister) {
+    return '';
+  }
+
+  if (cancelAllowed) {
+    return 'Cancel';
+  }
+
+  switch (statusEvent) {
+    case 'waitlist':
+      return 'Join Waitlist';
+    default:
+      return 'register';
+  }
+}
+
+export const registrationButtonText = (eventId, userId) =>
+  createSelector(
+    mustRegisterForEvent(eventId),
+    eventRegistrationStatus(eventId),
+    registrationCancelAllowed(eventId, userId),
+    getRegisterButtonText,
+  );
+
+function getRegisterStatusText(mustRegister, statusEvent, statusUser) {
+  if (!statusEvent || !mustRegister) {
+    return null;
+  }
+
+  if (statusEvent === 'expired') {
+    return 'This event has ended';
+  }
+
+  if (statusUser === 'active') {
+    return 'You are Registered!';
+  }
+
+  if (statusUser === 'waitlist') {
+    return 'You are on the waitlist';
+  }
+
+  switch (statusEvent) {
+    case 'open_pending':
+      return `Registration Opens ${getRegistrationOpenDate(event)}`;
+    case 'waitlist':
+      return 'On a Waitlist';
+    case 'full':
+      return 'Registration is Full';
+    case 'closed':
+      return 'Registration is closed';
+    case 'expired':
+      return 'This event has ended';
+    default:
+      return null;
+  }
+}
+
+export const registrationStatusText = (eventId, userId) =>
+  createSelector(
+    mustRegisterForEvent(eventId),
+    eventRegistrationStatus(eventId),
+    userEventRegistrationStatus(eventId, userId),
+    getRegisterStatusText,
+  );
+
+function canRegister(mustRegister, statusEvent, cancelAllowed) {
+  if (statusEvent === 'expired') {
+    return false;
+  }
+
+  if (cancelAllowed) {
+    return true;
+  }
+
+  if (!mustRegister) {
+    return false;
+  }
+
+  switch (statusEvent) {
+    case 'open':
+    case 'waitlist':
+      return true;
+    default:
+      return false;
+  }
+}
+
+export const registrationAllowed = (eventId, userId) =>
+  createSelector(
+    mustRegisterForEvent(eventId),
+    eventRegistrationStatus(eventId),
+    registrationCancelAllowed(eventId, userId),
+    canRegister,
   );
 
 //
@@ -318,11 +506,7 @@ export const usersEvents = userId => (state) => {
 };
 
 export const usersPastEvents = userId =>
-  createSelector(usersEvents(userId), items =>
-    onlyPastEvents(items).reverse()
-  );
+  createSelector(usersEvents(userId), items => onlyPastEvents(items).reverse());
 
 export const usersUpcomingEvents = userId =>
-  createSelector(usersEvents(userId), items =>
-    onlyUpcomingEvents(items)
-  );
+  createSelector(usersEvents(userId), items => onlyUpcomingEvents(items));

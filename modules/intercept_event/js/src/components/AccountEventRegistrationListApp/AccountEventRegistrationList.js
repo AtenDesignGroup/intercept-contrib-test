@@ -21,14 +21,13 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import interceptClient from 'interceptClient';
 
 // Intercept Components
-import DialogConfirm from 'intercept/Dialog/DialogConfirm';
+import ContentList from 'intercept/ContentList';
+import EventTeaser from 'intercept/EventTeaser';
+import LoadingIndicator from 'intercept/LoadingIndicator';
 import ViewSwitcher from 'intercept/ViewSwitcher';
 
 // Local Components
-import ContentList from 'intercept/ContentList';
-import EventRegistrationActions from '../EventRegistrationActions';
 import EventList from '../EventList';
-import EventTeaser from 'intercept/EventTeaser';
 
 const { constants, api, select } = interceptClient;
 const c = constants;
@@ -63,6 +62,11 @@ class AccountEventList extends Component {
   }
 
   componentDidMount() {
+    this.props.fetchAudiences({
+      fields: {
+        [c.TYPE_AUDIENCE]: ['uuid', 'name'],
+      },
+    });
     this.doFetch(this.props.view);
   }
 
@@ -141,14 +145,14 @@ class AccountEventList extends Component {
         node: <EventTeaser id={item.data.id} className="event-teaser" />,
       }));
 
-    const list = events.length > 0
-      ? <ContentList
-          heading={null}
-          items={teasers(events)}
-        />
-      : isLoading
-      ? <CircularProgress size={50} />
-      : <p>No events available.</p>;
+    const list =
+      events.length > 0 ? (
+        <ContentList heading={null} items={teasers(events)} />
+      ) : isLoading ? (
+        <LoadingIndicator loading={isLoading} />
+      ) : (
+        <p>No events available.</p>
+      );
 
     return (
       <div className="l--main">
@@ -164,6 +168,7 @@ class AccountEventList extends Component {
 AccountEventList.propTypes = {
   events: PropTypes.array,
   onChangeView: PropTypes.func.isRequired,
+  fetchAudiences: PropTypes.func.isRequired,
   fetchRegistrations: PropTypes.func.isRequired,
   fetchSavedEvents: PropTypes.func.isRequired,
   view: PropTypes.string,
@@ -179,22 +184,17 @@ AccountEventList.defaultProps = {
 };
 
 const mapStateToProps = (state, ownProps) => {
-  let selector = ownProps.view === 'past'
-    ? 'usersPastEvents'
-    : 'usersUpcomingEvents';
+  let selector = ownProps.view === 'past' ? 'usersPastEvents' : 'usersUpcomingEvents';
 
   // Only show registrations if we are not showing saves.
   if (ownProps.showSaves === false) {
-    selector = ownProps.view === 'past'
-      ? 'usersPastRegisteredEvents'
-      : 'usersUpcomingRegisteredEvents';
+    selector =
+      ownProps.view === 'past' ? 'usersPastRegisteredEvents' : 'usersUpcomingRegisteredEvents';
   }
 
   // Only show saved events if we are not showing registrations.
   if (ownProps.showRegistrations === false) {
-    selector = ownProps.view === 'past'
-      ? 'usersPastSavedEvents'
-      : 'usersUpcomingSavedEvents';
+    selector = ownProps.view === 'past' ? 'usersPastSavedEvents' : 'usersUpcomingSavedEvents';
   }
 
   return {
@@ -207,6 +207,9 @@ const mapStateToProps = (state, ownProps) => {
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
+  fetchAudiences: (options) => {
+    dispatch(api[c.TYPE_AUDIENCE].fetchAll(options));
+  },
   fetchRegistrations: (options) => {
     dispatch(api[c.TYPE_EVENT_REGISTRATION].fetchAll(options));
   },
@@ -215,4 +218,7 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
   },
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(AccountEventList);
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(AccountEventList);

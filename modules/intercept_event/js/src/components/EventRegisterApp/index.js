@@ -1,13 +1,16 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import interceptClient from 'interceptClient';
 
-// Material UI
-import CircularProgress from '@material-ui/core/CircularProgress';
+
+// Intercept
+/* eslint-disable */
+import interceptClient from 'interceptClient';
+import LoadingIndicator from 'intercept/LoadingIndicator';
+/* eslint-enable */
 
 import EventRegisterForm from './EventRegisterForm';
-import EventRegistrationTable from './../EventRegistrationTable';
+import EventRegistrationTable from './EventRegistrationTable';
 
 const { api, select } = interceptClient;
 const c = interceptClient.constants;
@@ -27,24 +30,21 @@ class EventRegisterApp extends React.Component {
   }
 
   render() {
-    const { registrations, registrationsLoading, user, users, event } = this.props;
+    const { registrations, registrationsLoading, eventId } = this.props;
 
-    let content = <CircularProgress size={50} />;
-
-    if (!registrationsLoading) {
-      content =
-        onlyActiveOrWaitlist(registrations).length > 0 ? (
-          <EventRegistrationTable
-            registrations={registrations}
-            users={[users]}
-            event={event}
-          />
-        ) : (
-          <EventRegisterForm {...this.props} />
-        );
+    if (registrationsLoading) {
+      return <LoadingIndicator loading />;
     }
 
-    return <div className="l--offset">{content}</div>;
+    const form = onlyActiveOrWaitlist(registrations).length <= 0
+      ? <EventRegisterForm {...this.props} />
+      : null;
+    const table = registrations.length > 0 ? <EventRegistrationTable eventId={eventId} /> : null;
+
+    return (<div className="l--offset">
+      {form}
+      {table}
+    </div>);
   }
 }
 

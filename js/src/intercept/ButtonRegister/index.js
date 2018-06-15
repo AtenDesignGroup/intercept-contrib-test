@@ -1,106 +1,36 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { withStyles } from '@material-ui/core/styles';
+
+// Redux
+import { connect } from 'react-redux';
+
+// Lodash
 import get from 'lodash/get';
+
+// Material UI
 import Button from '@material-ui/core/Button';
+
+/* eslint-disable */
 import interceptClient from 'interceptClient';
+import drupalSettings from 'drupalSettings';
+/* eslint-enable */
 
-const { utils } = interceptClient;
+const { select } = interceptClient;
 
-const styles = theme => ({
-  button: {},
-});
-
-// open_pending: registration is not yet open
-// open: registration is open and not full
-// waitlist: registration is full and there is a waitlist that is not full
-// full: registration is open and full and there is no waitlist or the waitlist is full
-// closed: registration is closed but not expired
-// expired: registration is expired
-
-function getMustRegister(event) {
-  return get(event, 'attributes.field_must_register');
-}
-
-function getStatus(event) {
-  return get(event, 'attributes.registration.status');
-}
-
-function getStatusUser(event) {
-  return get(event, 'attributes.registration.status_user');
-}
-
-function getRegistrationOpenDate(event) {
-  const openDate = get(event, 'attributes.field_event_register_period.value');
-
-  if (!openDate) {
-    return 'soon';
-  }
-
-  return utils.getDateDisplay(utils.dateFromDrupal(openDate));
-}
-
-function getText(event) {
-  const mustRegister = getMustRegister(event);
-  const status = getStatus(event);
-
-  if (!status || !mustRegister) {
-    return null;
-  }
-
-  switch (status) {
-    case 'waitlist':
-      return 'Join Waitlist';
-    default:
-      return 'register';
-  }
-}
-
-function getRegisterUrl(event) {
-  return `/event/${event.attributes.nid}/register`;
-}
-
-function registrationAllowed(event, registrations) {
-  const mustRegister = getMustRegister(event);
-  // const userStatus = getStatusUser(event);
-  const userStatus = registrations.length > 0
-    ? get(registrations[0], 'data.attributes.status')
-    : null;
-
-  // @todo: Reinstate this once we can reliably determine whether or not a user can register.
-  // if (userStatus !== 'available') {
-  //   return false;
-  // }
-  if (['active', 'waitlist'].indexOf(userStatus) >= 0) {
-    return false;
-  }
-
-  if (!mustRegister) {
-    return false;
-  }
-
-  const status = getStatus(event);
-  switch (status) {
-    case 'open':
-    case 'waitlist':
-      return true;
-    default:
-      return false;
-  }
-}
+const defaultUserId = get(drupalSettings, 'intercept.user.uuid');
 
 function ButtonRegister(props) {
-  const { classes, event, registrations } = props;
-  const text = getText(event);
+  const { onClick, mustRegister, registerUrl, text, registrationAllowed } = props;
 
-  return getMustRegister(event) ? (
+  return mustRegister ? (
     <Button
-      href={getRegisterUrl(event)}
-      variant="raised"
+      href={onClick ? null : registerUrl}
+      variant={text === 'Cancel' ? 'outlined' : 'raised'}
       size="small"
       color="primary"
       className={'action-button__button'}
-      disabled={!registrationAllowed(event, registrations)}
+      disabled={!registrationAllowed}
+      onClick={onClick}
     >
       {text}
     </Button>
@@ -108,13 +38,46 @@ function ButtonRegister(props) {
 }
 
 ButtonRegister.propTypes = {
-  classes: PropTypes.object.isRequired,
-  event: PropTypes.object.isRequired,
-  registrations: PropTypes.array,
+  // Passed Props
+  eventId: PropTypes.string.isRequired, // eslint-disable-line react/no-unused-prop-types
+  userId: PropTypes.string, // eslint-disable-line react/no-unused-prop-types
+  onClick: PropTypes.func,
+  // connect
+  mustRegister: PropTypes.bool,
+  registrationAllowed: PropTypes.bool,
+  registerUrl: PropTypes.string,
+  text: PropTypes.string,
 };
 
 ButtonRegister.defaultProps = {
-  registrations: [],
+  onClick: null,
+  userId: defaultUserId,
+  mustRegister: false,
+  registrationAllowed: false,
+  registerUrl: null,
+  text: '',
 };
 
-export default withStyles(styles)(ButtonRegister);
+const mapStateToProps = (state, ownProps) => {
+  const { eventId } = ownProps;
+
+  // Event
+  const mustRegister = select.mustRegisterForEvent(eventId)(state);
+  const registerUrl = select.registerUrl(eventId)(state);
+
+  // User
+  const userId = ownProps.userId || defaultUserId;
+
+  // Registrations
+  const text = select.registrationButtonText(eventId, userId)(state);
+  const registrationAllowed = select.registrationAllowed(eventId, userId)(state);
+
+  return {
+    mustRegister,
+    registerUrl,
+    text,
+    registrationAllowed,
+  };
+};
+
+export default connect(mapStateToProps)(ButtonRegister);

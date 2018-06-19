@@ -5,9 +5,9 @@ namespace Drupal\intercept_equipment\Controller;
 use Drupal\Core\Controller\ControllerBase;
 
 /**
- * Class EquipmentReserveController.
+ * Class EquipmentReservationController.
  */
-class EquipmentReserveController extends ControllerBase {
+class EquipmentReservationController extends ControllerBase {
 
   /**
    * Hello.

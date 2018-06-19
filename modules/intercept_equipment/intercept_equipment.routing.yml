@@ -10,7 +10,7 @@ intercept_equipment.manage_equipment:
 intercept_equipment.reserve_room:
   path: '/equipment/reserve'
   defaults:
-    _controller: '\Drupal\intercept_equipment\Controller\EquipmentReserveController::reserveEquipment'
+    _controller: '\Drupal\intercept_equipment\Controller\EquipmentReservationController::reserveEquipment'
     _title: 'Reserve Equipment'
   requirements:
     _permission: 'access content'

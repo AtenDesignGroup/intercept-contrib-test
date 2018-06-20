@@ -8,6 +8,7 @@ import { connect } from 'react-redux';
 // Lodash
 import debounce from 'lodash/debounce';
 import mapValues from 'lodash/mapValues';
+import get from 'lodash/get';
 import pick from 'lodash/pick';
 import throttle from 'lodash/throttle';
 
@@ -15,6 +16,7 @@ import throttle from 'lodash/throttle';
 import moment from 'moment';
 
 /* eslint-disable */
+import drupalSettings from 'drupalSettings';
 import interceptClient from 'interceptClient';
 import ViewSwitcher from 'intercept/ViewSwitcher';
 import LoadingIndicator from 'intercept/LoadingIndicator';
@@ -30,6 +32,7 @@ const c = constants;
 const eventIncludes = ['image_primary', 'image_primary.field_media_image', 'field_room'];
 
 const viewOptions = [{ key: 'list', value: 'List' }, { key: 'calendar', value: 'Calendar' }];
+const userId = get(drupalSettings, 'intercept.user.uuid');
 
 const sparseFieldsets = {
   [c.TYPE_EVENT]: [
@@ -244,6 +247,10 @@ function getRegistrationFilters(eventFilters) {
       path: 'status',
       value: ['active', 'waitlist'],
       operator: 'IN',
+    },
+    user: {
+      path: 'field_user.uuid',
+      value: userId,
     },
   };
 }

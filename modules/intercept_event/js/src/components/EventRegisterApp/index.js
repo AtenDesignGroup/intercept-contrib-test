@@ -122,8 +122,8 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
             path: 'field_event.uuid',
           },
           user: {
-            value: ownProps.user.id,
-            path: 'field_user.uid',
+            value: ownProps.user.uuid,
+            path: 'field_user.uuid',
           },
         },
       }),

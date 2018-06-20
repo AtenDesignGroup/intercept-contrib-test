@@ -29,6 +29,7 @@ function intercept_core_page_attachments(array &$attachments) {
     'utc_offset' => $user_utc_offset,
   ];
   $attachments['#cache']['contexts'][] = 'user';
+  $attachments['#cache']['tags'][] = 'user:' . $current_user->id();
 }
 
 /**

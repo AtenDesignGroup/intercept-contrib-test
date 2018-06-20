@@ -52,4 +52,67 @@ class EventManager implements EventManagerInterface {
     $form = \Drupal::service('entity.form_builder')->getForm($new_node);
     return $form;
   }
+
+  public function load($id) {
+    // First try to see if the id provided is a uuid.
+    if ($entities = $this->entityTypeManager->getStorage('node')->loadByProperties(['uuid' => $id])) {
+      return reset($entities);
+    }
+    return \Drupal\node\Entity\Node::load($id);
+  }
+
+  public function updateAttendance(\Drupal\user\UserInterface $user = NULL, Request $request) {
+    $response = NULL;
+    $event_id = $this->getRequestData($request, 'event');
+    if ($event = $this->load($event_id)) {
+      $data = $this->getRequestData($request, 'attendance');
+      array_walk($data, function(&$v, $k) {
+        $v = [
+          'target_id' => (string) $k,
+          'count' => (int) $v,
+        ];
+      });
+      $data = array_values($data);
+      $event->field_attendees->setValue($data);
+      $event->save();
+      $jsonapi = \Drupal::service('jsonapi.entity.to_jsonapi');
+      $response = $jsonapi->normalize($event);
+    }
+    return $this->jsonResponse(['response' => $response]);
+  }
+
+  public function createAttendee(\Drupal\user\UserInterface $user = NULL, Request $request) {
+    $response = NULL;
+    if ($barcode = $this->getRequestData($request, 'barcode')) {
+      $user = \Drupal::service('intercept_ils.mapping_manager')->loadByBarcode($barcode);
+      if ($user) {
+        $jsonapi = \Drupal::service('jsonapi.entity.to_jsonapi');
+        $response = $jsonapi->normalize($user);
+      }
+    }
+    return $this->jsonResponse(['response' => $response]);
+  }
+
+  private function getRequestData(Request $request, $key) {
+    $data = $request->getContent();
+    if (!empty($data) && ($data = Json::decode($data))) {
+      return !empty($data[$key]) ? $data[$key] : NULL;
+    }
+    return $request->get($key);
+  }
+
+  /**
+   *
+   * respond with json, check the response for errors and return 400
+   * otherwise return response with 200
+   * @param array $data
+   *   ['errors' => [], 'response' => []]
+   */
+  protected function jsonResponse($data) {
+    if (isset($data['errors']) && !empty($data['errors'])) {
+      return JsonResponse::create($data['errors'], 400);
+    }
+
+    return JsonResponse::create($data['response'], 200);
+  }
 }

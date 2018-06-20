@@ -72,6 +72,29 @@ class MappingManager {
     };
   }
 
+  public function loadByBarcode($barcode) {
+    // First load from mapping.
+    $user = \Drupal::service('polaris.client')->patron->getUserByBarcode($barcode);
+
+    /** @var UserStorage $storage */
+    $storage = \Drupal::service('entity_type.manager')->getStorage('user');
+    if (!$user && ($users = $storage->loadByProperties(['name' => $barcode]))) {
+      $user = reset($users);
+    }
+    if (!$user && ($patron = \Drupal::service('polaris.client')->patron->validate($barcode))) {
+      // @see Auth::authenticate()
+      $data = $patron->basicData();
+      $account_data = [
+        'name' => $patron->barcode(),
+        'mail' => $data->EmailAddress,
+        'init' => $data->EmailAddress,
+      ];
+      // Create a Drupal user automatically and return the new user_id.
+      $user = \Drupal::service('externalauth.externalauth')->register($patron->barcode(), 'polaris', $account_data, $data);
+    }
+    return $user;
+  }
+
   public function data() {
   }
 

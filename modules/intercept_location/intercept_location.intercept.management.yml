@@ -4,3 +4,4 @@ intercept_location:
     admin:
       locations_rooms:
         title: 'Locations & Rooms '
+        menu_link: FALSE

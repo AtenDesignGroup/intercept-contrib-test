@@ -8,8 +8,17 @@ use Drupal\intercept_location\RoomListBuilder;
 use Symfony\Component\HttpFoundation\Request;
 
 class ManagementController extends ManagementControllerBase {
+
+  public function alter(array &$build, $page_name) {
+    if ($page_name == 'admin_system_configuration') {
+      $build['links']['location_rooms'] = $this->getManagementButton('Locations & Rooms', 'admin_locations_rooms');
+      $build['links']['location_rooms']['#weight'] = -25;
+    }
+  }
+
   public function viewAdminLocationsRooms(AccountInterface $user, Request $request) {
     return [
+      'title' => $this->title('Locations & Rooms'),
       'taxonomies' => $this->getTaxonomyVocabularyTable(['room_type']),
       'content_types' => [
         'title' => $this->h2('Content Types'),

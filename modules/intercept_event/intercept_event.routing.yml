@@ -81,3 +81,19 @@ entity.node.analysis:
     _controller: '\Drupal\intercept_event\Controller\EventsController::analysis'
   requirements:
     _entity_access: 'node.analysis'
+
+intercept_event.api.attendance_update:
+  path: '/api/attendance/update'
+  methods: [POST]
+  defaults:
+      _controller: 'intercept_event.manager:updateAttendance'
+  requirements:
+      _role: 'intercept_staff + intercept_system_admin + administrator'
+
+intercept_event.api.attendee_create:
+  path: '/api/attendee/create'
+  methods: [POST]
+  defaults:
+      _controller: 'intercept_event.manager:createAttendee'
+  requirements:
+      _role: 'intercept_staff + intercept_system_admin + administrator'

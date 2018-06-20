@@ -4,15 +4,15 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
- * Implements hook_preprocess_page.
+ * Implements hook_page_attachments.
  */
-function intercept_core_preprocess_page(array &$variables) {
+function intercept_core_page_attachments(array &$attachments) {
   // Add the intercept_client consumer id.
   $consumer_id = Drupal::state()->get('intercept_client.id');
   $consumer = Drupal::service('entity_type.manager')->getStorage('consumer')->load($consumer_id);
   if ($consumer) {
     $consumer_token = $consumer ? $consumer->uuid() : NULL;
-    $variables['#attached']['drupalSettings']['intercept']['consumer'] = $consumer_token;
+    $attachments['#attached']['drupalSettings']['intercept']['consumer'] = $consumer_token;
   }
 
   // Add user info to drupalSettings.
@@ -21,14 +21,14 @@ function intercept_core_preprocess_page(array &$variables) {
   $user_timezone = new \DateTimeZone(drupal_get_user_timezone());
   $utc = new \DateTime('UTC');
   $user_utc_offset = $user_timezone->getOffset($utc) / 3600;
-  $variables['#attached']['drupalSettings']['intercept']['user'] = [
+  $attachments['#attached']['drupalSettings']['intercept']['user'] = [
     'id' => $current_user->id(),
     'uuid' => $user->uuid(),
     'roles' => $current_user->getRoles(),
     'timezone' => drupal_get_user_timezone(),
     'utc_offset' => $user_utc_offset,
   ];
-  $variables['#attached']['drupalSettings']['intercept']['#cache']['contexts'][] = 'user';
+  $attachments['#cache']['contexts'][] = 'user';
 }
 
 /**

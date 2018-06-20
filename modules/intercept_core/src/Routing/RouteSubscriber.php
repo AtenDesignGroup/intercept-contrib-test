@@ -27,7 +27,7 @@ class RouteSubscriber extends RouteSubscriberBase {
   }
 
   protected function createRoute($name) {
-    return new Route($name);
+    return new Route(strtr($name, '_', '-'));
   }
 
   /**

@@ -7,3 +7,6 @@ intercept_room_reservation:
     admin:
       room_reservations:
         title: 'Room Reservations'
+      room_reservation_configuration:
+        title: 'Room Reservations'
+        menu_link: FALSE

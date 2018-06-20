@@ -10,3 +10,9 @@ intercept_event:
     admin:
       events:
         title: 'Events'
+      event_templates:
+        title: 'Create an Event'
+        menu_link: FALSE
+      event_configuration:
+        title: 'Event configuration'
+        menu_link: FALSE

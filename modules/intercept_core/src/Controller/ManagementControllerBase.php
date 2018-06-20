@@ -50,7 +50,8 @@ class ManagementControllerBase extends ControllerBase {
    */
   public function view(AccountInterface $user, Request $request) {
     if ($method = $this->getMethodName()) {
-      return $this->{$method}($user, $request);
+      $build = $this->{$method}($user, $request);
+      return $this->doAlter($build);
     }
     return [
       '#type' => 'markup',
@@ -58,16 +59,43 @@ class ManagementControllerBase extends ControllerBase {
     ];
   }
 
-    /**
-     * @return bool|null|string|string[]
-     */
+  protected function doAlter(array $build) {
+    $definitions = \Drupal::service('plugin.manager.intercept_management')->getDefinitions();
+    $machine_name = $this->getMachineName();
+    foreach ($definitions as $module => $definition) {
+      list($callable, $method) = \Drupal::service('controller_resolver')->getControllerFromDefinition($definition['controller']);
+      $callable->alter($build, $machine_name);
+    }
+    return $build;
+  }
+
+  protected function getMachineName() {
+    if ($name = $this->routeMatch->getRouteObject()->getOption('_page_name')) {
+      return $name;
+    }
+    return FALSE;
+  }
+
+  public function alter(array &$build, $page_name) {}
+
+  /**
+   * @return bool|null|string|string[]
+   */
   protected function getMethodName() {
     $method = '';
     if ($name = $this->routeMatch->getRouteObject()->getOption('_page_name')) {
-      $converter = new CamelCaseToSnakeCaseNameConverter();
-      $method = $converter->denormalize('view_' . $name);
+      $method = $this->convertToSnakeCase('view_' . $name);
     }
     return method_exists($this, $method) ? $method : FALSE;
+  }
+
+  protected function convertToSnakeCase($name) {
+    $converter = new CamelCaseToSnakeCaseNameConverter();
+    return $converter->denormalize($name);
+  }
+
+  protected function getModuleName() {
+    return explode('\\', get_class($this))[1];
   }
 
   protected function getTaxonomyVocabularyTable($ids = [], $title = 'Taxonomies') {
@@ -96,13 +124,17 @@ class ManagementControllerBase extends ControllerBase {
     return $output;
   }
 
+  protected function getManagementButton($title, $name, $params = []) {
+    $route = "{$this->getModuleName()}.management.$name";
+    return $this->getButton($title, $route, [
+      'user' => $this->currentUser()->id(),
+    ]);
+  }
+
   protected function getButton($title, $route, $params = []) {
     $button = \Drupal\Core\Link::createFromRoute($title, $route, $params)->toRenderable();
-    $button['#attributes']['class'][] = 'button';
+    $button['#attributes']['class'][] = 'btn-block';
     return $button;
-
-    $add_event_series = \Drupal\Core\Link::createFromRoute('Add Event Series', 'node.add', ['node_type' => 'event_series'])->toRenderable();
-    $add_event_series['#attributes']['class'][] = 'button';
   }
 
   protected function getList($class, $entity_type = 'node') {
@@ -111,12 +143,59 @@ class ManagementControllerBase extends ControllerBase {
       ->createHandlerInstance($class, $entity_type)
       ->render();
   }
-  
-  protected function h2($text) {
+
+  protected function table() {
+    return new class {
+      private $table = [
+        '#type' => 'table',
+        '#rows' => [],
+      ];
+      public function row($link, $description) {
+        $row = [];
+        $row[] = [
+          'data' => $link,
+        ];
+        $row[] = [
+          'data' => $description,
+        ];
+        $this->table['#rows'][] = $row;
+      }
+      public function toArray() {
+        return $this->table;
+      }
+    };
+  }
+
+  protected function hideElements(&$form, $keep = []) {
+    $keep = array_merge([
+      'actions',
+      'form_build_id',
+      'form_token',
+      'form_id',
+    ], $keep);
+    $children = \Drupal\Core\Render\Element::children($form);
+    foreach ($children as $name) {
+      if (in_array($name, $keep)) {
+        continue;
+      }
+      $form[$name]['#access'] = FALSE;
+    }
+  }
+
+  protected function title($text, $replacements = []) {
+    return [
+      '#type' => 'html_tag',
+      '#tag' => 'h1',
+      '#value' => $this->t($text, $replacements),
+      '#attributes' => ['class' => ['title']],
+    ];
+  }
+
+  protected function h2($text, $replacements = []) {
     return [
       '#type' => 'html_tag',
       '#tag' => 'h2',
-      '#value' => $this->t($text),
+      '#value' => $this->t($text, $replacements),
     ];
   }
 }

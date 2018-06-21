@@ -20,6 +20,16 @@ class ManagementController extends ManagementControllerBase {
   }
 
   public function viewAdminEventConfiguration(AccountInterface $user, Request $request) {
+    $lists = $this->table();
+    $link = $this->getButton('Event Series', 'system.admin_content', [
+          'type' => 'event_series',
+    ]);
+    $lists->row($link, $this->t('List of all Event Series, a method for grouping events together (e.g. Summer Reading Challenge).'));
+    $link = $this->getButton('Events Templates', 'system.admin_content', [
+          'type' => 'event',
+    ]);
+    $lists->row($link, $this->t('List of all events categorized as a template. Only System Admins can categorize an event as a template.'));
+
     return [
       'title' => $this->title('Events'),
       'taxonomies' => $this->getTaxonomyVocabularyTable(['audience', 'evaluation_criteria', 'event_type', 'tag']),
@@ -31,6 +41,7 @@ class ManagementController extends ManagementControllerBase {
         'event_series' => $this->getButton('Add Event Series', 'node.add', [
           'node_type' => 'event_series'
         ]),
+        'lists' => $lists->toArray(),
       ],
     ];
   }

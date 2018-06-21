@@ -12,7 +12,7 @@ class ManagementController extends ManagementControllerBase {
 
   public function alter(array &$build, $page_name) {
     if ($page_name == 'admin_default') {
-      $build['links']['configuration'] = $this->getManagementButton('System Configuration', 'admin_settings');
+      $build['links']['configuration'] = $this->getManagementButton('System Configuration', 'admin_system_configuration');
     }
   }
 

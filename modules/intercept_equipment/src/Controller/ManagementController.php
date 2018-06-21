@@ -33,8 +33,13 @@ class ManagementController extends ManagementControllerBase {
       'taxonomies' => $this->getTaxonomyVocabularyTable(['equipment_type']),
       'content_types' => [
         'title' => $this->h2('Content Types'),
-        'event_template' => $this->getButton('Add Equipment', 'node.add', [
+        'equipment_add' => $this->getButton('Add Equipment', 'node.add', [
           'node_type' => 'equipment'
+        ]),
+        'equipment_list' => $this->getButton('Equipment list', 'system.admin_content', [
+          'status' => 'All',
+          'type' => 'equipment',
+          'langcode' => 'All',
         ]),
       ],
     ];

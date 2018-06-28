@@ -44,11 +44,7 @@ class EquipmentReservationSettingsForm extends ConfigFormBase {
   public function buildForm(array $form, FormStateInterface $form_state) {
     $form = parent::buildForm($form, $form_state);
     $config = $this->config('intercept_core.equipment_reservations');
-    $form['reservation_limit'] = [
-      '#title' => $this->t('Equipment reservation limit'),
-      '#type' => 'number',
-      '#default_value' => $config->get('reservation_limit'),
-    ];
+
     $form['email'] = [
       '#type' => 'vertical_tabs',
       '#title' => $this->t('Emails'),
@@ -56,9 +52,7 @@ class EquipmentReservationSettingsForm extends ConfigFormBase {
     ];
 
     $emails = [
-      'reservation_accepted' => $this->t('Reservation accepted (by staff)'),
-      'reservation_rejected' => $this->t('Reservation rejected (by staff)'),
-      'reservation_canceled' => $this->t('Reservation canceled (by staff)'),
+      'reservation_accepted' => $this->t('Reservation accepted'),
     ];
 
     foreach ($emails as $key => $title) {

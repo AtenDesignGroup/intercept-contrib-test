@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\intercept_equipment_reservation\Entity;
+namespace Drupal\intercept_equipment\Entity;
 
 use Drupal\views\EntityViewsData;
 

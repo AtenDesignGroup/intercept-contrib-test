@@ -9,6 +9,9 @@ use Drupal\Core\Entity\RevisionableInterface;
 use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\intercept_equipment\Field\Computed\EntityReferenceFieldItemList;
+use Drupal\intercept_equipment\Field\Computed\FileFieldItemList;
+use Drupal\intercept_equipment\Field\Computed\MethodItemList;
 use Drupal\user\UserInterface;
 
 /**

@@ -63,7 +63,7 @@ class EquipmentReservationController extends ControllerBase implements Container
   /**
    * Generates an overview table of older revisions of a Equipment reservation .
    *
-   * @param \Drupal\intercept_equipment_reservation\Entity\EquipmentReservationInterface $equipment_reservation
+   * @param \Drupal\intercept_equipment\Entity\EquipmentReservationInterface $equipment_reservation
    *   A Equipment reservation object.
    *
    * @return array
@@ -90,7 +90,7 @@ class EquipmentReservationController extends ControllerBase implements Container
     $latest_revision = TRUE;
 
     foreach (array_reverse($vids) as $vid) {
-      /** @var \Drupal\intercept_equipment_reservation\EquipmentReservationInterface $revision */
+      /** @var \Drupal\intercept_equipment\EquipmentReservationInterface $revision */
       $revision = $equipment_reservation_storage->loadRevision($vid);
       // Only show revisions that are affected by the language that is being
       // displayed.

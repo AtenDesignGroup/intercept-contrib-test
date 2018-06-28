@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\intercept_equipment_reservation\Plugin\views\field;
+namespace Drupal\intercept_equipment\Plugin\views\field;
 
 use Drupal\system\Plugin\views\field\BulkForm;
 

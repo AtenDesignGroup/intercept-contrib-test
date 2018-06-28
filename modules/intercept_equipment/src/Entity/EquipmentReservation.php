@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\intercept_equipment_reservation\Entity;
+namespace Drupal\intercept_equipment\Entity;
 
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
@@ -9,9 +9,6 @@ use Drupal\Core\Entity\RevisionableInterface;
 use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
-use Drupal\intercept_equipment_reservation\Field\Computed\EntityReferenceFieldItemList;
-use Drupal\intercept_equipment_reservation\Field\Computed\FileFieldItemList;
-use Drupal\intercept_equipment_reservation\Field\Computed\MethodItemList;
 use Drupal\user\UserInterface;
 
 /**
@@ -23,27 +20,27 @@ use Drupal\user\UserInterface;
  *   id = "equipment_reservation",
  *   label = @Translation("Equipment reservation"),
  *   handlers = {
- *     "storage" = "Drupal\intercept_equipment_reservation\EquipmentReservationStorage",
+ *     "storage" = "Drupal\intercept_equipment\EquipmentReservationStorage",
  *     "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",
- *     "list_builder" = "Drupal\intercept_equipment_reservation\EquipmentReservationListBuilder",
- *     "views_data" = "Drupal\intercept_equipment_reservation\Entity\EquipmentReservationViewsData",
- *     "translation" = "Drupal\intercept_equipment_reservation\EquipmentReservationTranslationHandler",
+ *     "list_builder" = "Drupal\intercept_equipment\EquipmentReservationListBuilder",
+ *     "views_data" = "Drupal\intercept_equipment\Entity\EquipmentReservationViewsData",
+ *     "translation" = "Drupal\intercept_equipment\EquipmentReservationTranslationHandler",
  *
  *     "form" = {
- *       "default" = "Drupal\intercept_equipment_reservation\Form\EquipmentReservationForm",
- *       "reserve" = "Drupal\intercept_equipment_reservation\Form\EquipmentReservationReserveForm",
- *       "add" = "Drupal\intercept_equipment_reservation\Form\EquipmentReservationForm",
- *       "edit" = "Drupal\intercept_equipment_reservation\Form\EquipmentReservationForm",
- *       "delete" = "Drupal\intercept_equipment_reservation\Form\EquipmentReservationDeleteForm",
- *       "cancel" = "Drupal\intercept_equipment_reservation\Form\EquipmentReservationUpdateStatusForm",
- *       "approve" = "Drupal\intercept_equipment_reservation\Form\EquipmentReservationUpdateStatusForm",
- *       "decline" = "Drupal\intercept_equipment_reservation\Form\EquipmentReservationUpdateStatusForm",
+ *       "default" = "Drupal\intercept_equipment\Form\EquipmentReservationForm",
+ *       "reserve" = "Drupal\intercept_equipment\Form\EquipmentReservationReserveForm",
+ *       "add" = "Drupal\intercept_equipment\Form\EquipmentReservationForm",
+ *       "edit" = "Drupal\intercept_equipment\Form\EquipmentReservationForm",
+ *       "delete" = "Drupal\intercept_equipment\Form\EquipmentReservationDeleteForm",
+ *       "cancel" = "Drupal\intercept_equipment\Form\EquipmentReservationUpdateStatusForm",
+ *       "approve" = "Drupal\intercept_equipment\Form\EquipmentReservationUpdateStatusForm",
+ *       "decline" = "Drupal\intercept_equipment\Form\EquipmentReservationUpdateStatusForm",
  *     },
- *     "access" = "Drupal\intercept_equipment_reservation\EquipmentReservationAccessControlHandler",
- *     "permission_provider" = "Drupal\intercept_equipment_reservation\EquipmentReservationPermissionsProvider",
+ *     "access" = "Drupal\intercept_equipment\EquipmentReservationAccessControlHandler",
+ *     "permission_provider" = "Drupal\intercept_equipment\EquipmentReservationPermissionsProvider",
  *     "route_provider" = {
- *       "html" = "Drupal\intercept_equipment_reservation\EquipmentReservationHtmlRouteProvider",
- *       "revision" = "Drupal\intercept_equipment_reservation\EquipmentReservationRevisionRouteProvider",
+ *       "html" = "Drupal\intercept_equipment\EquipmentReservationHtmlRouteProvider",
+ *       "revision" = "Drupal\intercept_equipment\EquipmentReservationRevisionRouteProvider",
  *       "delete-multiple" = "Drupal\entity\Routing\DeleteMultipleRouteProvider",
  *     },
  *   },

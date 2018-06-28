@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\intercept_equipment_reservation\Entity;
+namespace Drupal\intercept_equipment\Entity;
 
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\RevisionLogInterface;
@@ -28,7 +28,7 @@ interface EquipmentReservationInterface extends ContentEntityInterface, Revision
    * @param int $timestamp
    *   The Equipment reservation creation timestamp.
    *
-   * @return \Drupal\intercept_equipment_reservation\Entity\EquipmentReservationInterface
+   * @return \Drupal\intercept_equipment\Entity\EquipmentReservationInterface
    *   The called Equipment reservation entity.
    */
   public function setCreatedTime($timestamp);
@@ -49,7 +49,7 @@ interface EquipmentReservationInterface extends ContentEntityInterface, Revision
    * @param bool $published
    *   TRUE to set this Equipment reservation to published, FALSE to set it to unpublished.
    *
-   * @return \Drupal\intercept_equipment_reservation\Entity\EquipmentReservationInterface
+   * @return \Drupal\intercept_equipment\Entity\EquipmentReservationInterface
    *   The called Equipment reservation entity.
    */
   public function setPublished($published);
@@ -68,7 +68,7 @@ interface EquipmentReservationInterface extends ContentEntityInterface, Revision
    * @param int $timestamp
    *   The UNIX timestamp of when this revision was created.
    *
-   * @return \Drupal\intercept_equipment_reservation\Entity\EquipmentReservationInterface
+   * @return \Drupal\intercept_equipment\Entity\EquipmentReservationInterface
    *   The called Equipment reservation entity.
    */
   public function setRevisionCreationTime($timestamp);
@@ -87,7 +87,7 @@ interface EquipmentReservationInterface extends ContentEntityInterface, Revision
    * @param int $uid
    *   The user ID of the revision author.
    *
-   * @return \Drupal\intercept_equipment_reservation\Entity\EquipmentReservationInterface
+   * @return \Drupal\intercept_equipment\Entity\EquipmentReservationInterface
    *   The called Equipment reservation entity.
    */
   public function setRevisionUserId($uid);

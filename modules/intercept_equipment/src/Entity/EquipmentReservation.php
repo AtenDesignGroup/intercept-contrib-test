@@ -271,13 +271,6 @@ class EquipmentReservation extends RevisionableContentEntityBase implements Equi
       ->setSetting('method', 'label')
       ->setReadOnly(TRUE);
 
-    $fields['location'] = BaseFieldDefinition::create('string')
-      ->setLabel(t('Title'))
-      ->setComputed(TRUE)
-      ->setClass(MethodItemList::class)
-      ->setSetting('method', 'location')
-      ->setReadOnly(TRUE);
-
     $fields['author'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Authored by'))
       ->setDescription(t('The user ID of author of the equipment reservation entity.'))
@@ -311,17 +304,6 @@ class EquipmentReservation extends RevisionableContentEntityBase implements Equi
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE)
       ->setSetting('target_fields', ['field_equipment', 'image_primary', 'field_media_image'])
-      ->setReadOnly(TRUE);
-
-    $fields['equipment_location'] = BaseFieldDefinition::create('entity_reference')
-      ->setLabel(t('Location'))
-      ->setDescription(t('The related equipment\'s location entity.'))
-      ->setComputed(TRUE)
-      ->setClass(EntityReferenceFieldItemList::class)
-      ->setDisplayConfigurable('form', TRUE)
-      ->setDisplayConfigurable('view', TRUE)
-      ->setTargetEntityTypeId('node')->setTargetBundle('location')
-      ->setSetting('target_fields', ['field_equipment', 'field_location'])
       ->setReadOnly(TRUE);
 
     $fields['status'] = BaseFieldDefinition::create('boolean')

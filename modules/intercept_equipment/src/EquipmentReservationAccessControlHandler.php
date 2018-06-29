@@ -31,15 +31,6 @@ class EquipmentReservationAccessControlHandler extends EntityAccessControlHandle
 
       case 'delete':
         return AccessResult::allowedIfHasPermission($account, 'delete equipment reservation entities');
-
-      case 'cancel':
-        return AccessResult::allowedIfHasPermission($account, 'cancel equipment reservation entities');
-
-      case 'approve':
-        return AccessResult::allowedIfHasPermission($account, 'approve equipment reservation entities');
-
-      case 'decline':
-        return AccessResult::allowedIfHasPermission($account, 'decline equipment reservation entities');
     }
 
     // Unknown operation, no opinion.

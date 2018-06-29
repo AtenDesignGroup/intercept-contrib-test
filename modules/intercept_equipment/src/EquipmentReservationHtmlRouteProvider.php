@@ -31,12 +31,6 @@ class EquipmentReservationHtmlRouteProvider extends AdminHtmlRouteProvider {
       $collection->add("$entity_type_id.settings", $settings_form_route);
     }
 
-    foreach (['cancel', 'approve', 'decline'] as $action) {
-      if ($settings_form_route = $this->getUpdateStatusFormRoutes($entity_type, $action)) {
-        $collection->add("entity.$entity_type_id.{$action}_form", $settings_form_route);
-      }
-    }
-
     return $collection;
   }
 

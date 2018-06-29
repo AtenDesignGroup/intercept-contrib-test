@@ -35,12 +35,8 @@ use Drupal\user\UserInterface;
  *       "add" = "Drupal\intercept_equipment\Form\EquipmentReservationForm",
  *       "edit" = "Drupal\intercept_equipment\Form\EquipmentReservationForm",
  *       "delete" = "Drupal\intercept_equipment\Form\EquipmentReservationDeleteForm",
- *       "cancel" = "Drupal\intercept_equipment\Form\EquipmentReservationUpdateStatusForm",
- *       "approve" = "Drupal\intercept_equipment\Form\EquipmentReservationUpdateStatusForm",
- *       "decline" = "Drupal\intercept_equipment\Form\EquipmentReservationUpdateStatusForm",
  *     },
  *     "access" = "Drupal\intercept_equipment\EquipmentReservationAccessControlHandler",
- *     "permission_provider" = "Drupal\intercept_equipment\EquipmentReservationPermissionsProvider",
  *     "route_provider" = {
  *       "html" = "Drupal\intercept_equipment\EquipmentReservationHtmlRouteProvider",
  *       "revision" = "Drupal\intercept_equipment\EquipmentReservationRevisionRouteProvider",
@@ -62,13 +58,10 @@ use Drupal\user\UserInterface;
  *     "status" = "status",
  *   },
  *   links = {
- *     "approve-form" = "/equipment-reservation/{equipment_reservation}/approve",
  *     "add-form" = "/equipment-reservation/add",
  *     "collection" = "/admin/content/equipment-reservations",
- *     "cancel-form" = "/equipment-reservation/{equipment_reservation}/cancel",
  *     "canonical" = "/equipment-reservation/{equipment_reservation}",
  *     "edit-form" = "/equipment-reservation/{equipment_reservation}/edit",
- *     "decline-form" = "/equipment-reservation/{equipment_reservation}/decline",
  *     "delete-form" = "/equipment-reservation/{equipment_reservation}/delete",
  *     "delete-multiple-form" = "/equipment-reservation/delete",
  *     "version-history" = "/equipment-reservation/{equipment_reservation}/revisions",
@@ -134,25 +127,6 @@ class EquipmentReservation extends RevisionableContentEntityBase implements Equi
     }
 
     return $uri_route_parameters;
-  }
-
-  public function cancel() {
-    $this->set('field_status', 'canceled');
-    return $this;
-  }
-
-  public function approve() {
-    $this->set('field_status', 'approved');
-    return $this;
-  }
-
-  public function deny() {
-    return $this->decline();
-  }
-
-  public function decline() {
-    $this->set('field_status', 'denied');
-    return $this;
   }
 
 

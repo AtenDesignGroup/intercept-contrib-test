@@ -7,10 +7,19 @@ intercept_equipment.manage_equipment:
   requirements:
     _permission: 'access content'
 
-intercept_equipment.reserve_room:
+intercept_equipment.reserve_equipment:
   path: '/equipment/reserve'
   defaults:
     _controller: '\Drupal\intercept_equipment\Controller\EquipmentReservationController::reserveEquipment'
     _title: 'Reserve Equipment'
   requirements:
     _permission: 'access content'
+
+intercept_equipment.account.equipment_reservations:
+  path: '/account/equipment-reservations'
+  defaults:
+    _controller: '\Drupal\intercept_core\Controller\UserAccount::userRedirect'
+    _title: 'Equipment Reservations'
+    route_name: 'entity.user.equipment_reservations'
+  requirements:
+    _user_is_logged_in: 'TRUE'

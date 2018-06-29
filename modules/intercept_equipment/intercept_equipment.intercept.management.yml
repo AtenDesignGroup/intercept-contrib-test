@@ -1,0 +1,12 @@
+intercept_equipment:
+  controller: 'Drupal\intercept_equipment\Controller\ManagementController::view'
+  pages:
+    staff:
+      equipment:
+        title: 'Equipment Reservations'
+    admin:
+      equipment:
+        title: 'Equipment Reservations'
+      equipment_configuration:
+        title: 'Equipment'
+        menu_link: FALSE

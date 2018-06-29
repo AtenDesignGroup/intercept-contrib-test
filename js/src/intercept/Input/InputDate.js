@@ -26,7 +26,7 @@ const InputLabelProps = value => ({
 
 class InputDate extends React.Component {
   render() {
-    const { handleChange, clearable, required } = this.props;
+    const { handleChange, clearable, required, label } = this.props;
     const value = this.props.getValue();
     const onChange = (date) => {
       const d = date.toDate();
@@ -42,7 +42,7 @@ class InputDate extends React.Component {
           onChange={onChange}
           onClear={onClear}
           clearable={clearable}
-          label={'Date'}
+          label={label}
           required={required}
           InputLabelProps={InputLabelProps(inputValue)}
           value={inputValue}
@@ -60,6 +60,7 @@ InputDate.propTypes = {
   value: PropTypes.instanceOf(Date),
   handleChange: PropTypes.func.isRequired,
   clearable: PropTypes.bool,
+  label: PropTypes.string,
 };
 // Specifies the default values for props:
 InputDate.defaultProps = {

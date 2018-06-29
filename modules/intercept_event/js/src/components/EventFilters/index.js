@@ -8,6 +8,7 @@ import Formsy from 'formsy-react';
 // Lodash
 import map from 'lodash/map';
 
+/* eslint-disable */
 // Intercept
 import interceptClient from 'interceptClient';
 
@@ -16,6 +17,7 @@ import CurrentFilters from 'intercept/CurrentFilters';
 import DateFilter from 'intercept/DateFilter';
 import KeywordFilter from 'intercept/KeywordFilter';
 import SelectResource from 'intercept/SelectResource';
+/* eslint-enable */
 
 const { constants } = interceptClient;
 const c = constants;
@@ -24,7 +26,8 @@ const labels = {
   [c.TYPE_EVENT_TYPE]: 'Event Type',
   [c.TYPE_LOCATION]: 'Location',
   [c.TYPE_AUDIENCE]: 'Audience',
-  [c.DATE]: 'Date',
+  [c.DATE_START]: 'After Date',
+  [c.DATE_END]: 'Before Date',
   [c.KEYWORD]: 'Keyword',
 };
 
@@ -41,7 +44,8 @@ class EventFilters extends PureComponent {
     super(props);
 
     this.onFilterChange = this.onFilterChange.bind(this);
-    this.onDateChange = this.onDateChange.bind(this);
+    this.onDateStartChange = this.onDateStartChange.bind(this);
+    this.onDateEndChange = this.onDateEndChange.bind(this);
     this.onInputChange = this.onInputChange.bind(this);
   }
 
@@ -56,15 +60,19 @@ class EventFilters extends PureComponent {
     };
   }
 
-  onDateChange(value) {
-    this.onFilterChange(c.DATE, value);
+  onDateStartChange(value) {
+    this.onFilterChange(c.DATE_START, value);
+  }
+
+  onDateEndChange(value) {
+    this.onFilterChange(c.DATE_END, value);
   }
 
   render() {
     const { showDate, filters } = this.props;
     let currentFilters = currentFiltersConfig(filters);
     if (!showDate) {
-      currentFilters = currentFilters.filter(f => f.key !== c.DATE);
+      currentFilters = currentFilters.filter(f => [c.DATE_START, c.DATE_END].indexOf(f.key) < 0);
     }
 
     return (
@@ -102,7 +110,23 @@ class EventFilters extends PureComponent {
             label={labels[c.TYPE_AUDIENCE]}
           />
           {showDate && (
-            <DateFilter handleChange={this.onDateChange} defaultValue={null} value={filters.date} name="date" />
+            <DateFilter
+              handleChange={this.onDateStartChange}
+              defaultValue={null}
+              value={filters[c.DATE_START]}
+              name={c.DATE_START}
+              label={labels[c.DATE_START]}
+            />
+          )}
+          {showDate && (
+            <DateFilter
+              handleChange={this.onDateEndChange}
+              defaultValue={null}
+              value={filters[c.DATE_END]}
+              name={c.DATE_END}
+              minDate={filters[c.DATE_START]}
+              label={labels[c.DATE_END]}
+            />
           )}
         </Formsy>
         <div className="filters__current">

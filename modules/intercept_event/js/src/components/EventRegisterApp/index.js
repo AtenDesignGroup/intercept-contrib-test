@@ -1,13 +1,16 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import interceptClient from 'interceptClient';
 
-// Material UI
-import CircularProgress from '@material-ui/core/CircularProgress';
+
+// Intercept
+/* eslint-disable */
+import interceptClient from 'interceptClient';
+import LoadingIndicator from 'intercept/LoadingIndicator';
+/* eslint-enable */
 
 import EventRegisterForm from './EventRegisterForm';
-import EventRegistrationList from './../EventRegistrationList';
+import EventRegistrationTable from './EventRegistrationTable';
 
 const { api, select } = interceptClient;
 const c = interceptClient.constants;
@@ -22,34 +25,37 @@ class EventRegisterApp extends React.Component {
   componentDidMount() {
     this.props.fetchSegments();
     this.props.fetchEvent(this.props.eventId);
+    this.props.fetchUser(this.props.user.uuid);
     this.props.fetchRegistrations(this.props.eventId);
   }
 
   render() {
-    const { registrations, registrationsLoading } = this.props;
+    const { registrations, registrationsLoading, eventId } = this.props;
 
-    let content = <CircularProgress size={50} />;
-
-    if (!registrationsLoading) {
-      content =
-        onlyActiveOrWaitlist(registrations).length > 0 ? (
-          <EventRegistrationList items={registrations.map(r => r.data.id)} />
-        ) : (
-          <EventRegisterForm {...this.props} />
-        );
+    if (registrationsLoading) {
+      return <LoadingIndicator loading />;
     }
 
-    return <div className="l--offset">{content}</div>;
+    const form = onlyActiveOrWaitlist(registrations).length <= 0
+      ? <EventRegisterForm {...this.props} />
+      : null;
+    const table = registrations.length > 0 ? <EventRegistrationTable eventId={eventId} /> : null;
+
+    return (<div className="l--offset">
+      {form}
+      {table}
+    </div>);
   }
 }
 
 EventRegisterApp.propTypes = {
   registrations: PropTypes.array,
   event: PropTypes.object,
-  user: PropTypes.object,
+  user: PropTypes.object.isRequired,
   segments: PropTypes.arrayOf(PropTypes.object),
   eventId: PropTypes.string.isRequired,
   fetchEvent: PropTypes.func.isRequired,
+  fetchUser: PropTypes.func.isRequired,
   fetchRegistrations: PropTypes.func.isRequired,
   fetchSegments: PropTypes.func.isRequired,
   registrationsLoading: PropTypes.bool.isRequired,
@@ -64,9 +70,10 @@ EventRegisterApp.defaultProps = {
 };
 
 const mapStateToProps = (state, ownProps) => ({
-  registrations: select.eventRegistrationsByEvent(ownProps.eventId)(state),
+  registrations: select.eventRegistrationsByEventByUser(ownProps.eventId, ownProps.user.uuid)(state),
   registrationsLoading: select.recordsAreLoading(c.TYPE_EVENT_REGISTRATION)(state),
   event: select.record(select.getIdentifier(c.TYPE_EVENT, ownProps.eventId))(state),
+  users: select.record(select.getIdentifier(c.TYPE_USER, ownProps.user.uuid))(state),
   eventsLoading: select.recordsAreLoading(c.TYPE_EVENT)(state),
   segments: select.recordOptions(c.TYPE_POPULATION_SEGMENT)(state),
   segmentsLoading: select.recordsAreLoading(c.TYPE_POPULATION_SEGMENT)(state),
@@ -76,6 +83,18 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
   fetchEvent: (id) => {
     dispatch(
       api[c.TYPE_EVENT].fetchAll({
+        filters: {
+          uuid: {
+            value: id,
+            path: 'uuid',
+          },
+        },
+      }),
+    );
+  },
+  fetchUser: (id) => {
+    dispatch(
+      api[c.TYPE_USER].fetchAll({
         filters: {
           uuid: {
             value: id,
@@ -103,8 +122,8 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
             path: 'field_event.uuid',
           },
           user: {
-            value: ownProps.user.uid,
-            path: 'field_user.uid',
+            value: ownProps.user.uuid,
+            path: 'field_user.uuid',
           },
         },
       }),

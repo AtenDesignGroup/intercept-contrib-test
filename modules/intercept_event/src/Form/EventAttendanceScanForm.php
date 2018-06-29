@@ -71,27 +71,13 @@ class EventAttendanceScanForm extends EventAttendanceScanFormBase {
 
   public function validateForm(array &$form, FormStateInterface $form_state) {
     $barcode = $form_state->getValue('barcode');
-    // First load from mapping.
-    $user = \Drupal::service('polaris.client')->patron->getUserByBarcode($barcode);
+    $user = \Drupal::service('intercept_ils.mapping_manager')->loadByBarcode($barcode);
 
-    /** @var UserStorage $storage */
-    $storage = \Drupal::service('entity_type.manager')->getStorage('user');
-    if (!$user && ($users = $storage->loadByProperties(['name' => $barcode]))) {
-      $user = reset($users);
-    }
-    if (!$user && ($patron = \Drupal::service('polaris.client')->patron->validate($barcode))) {
-      // @see Auth::authenticate()
-      $data = $patron->basicData();
-      $account_data = [
-        'name' => $patron->barcode(),
-        'mail' => $data->EmailAddress,
-        'init' => $data->EmailAddress,
-      ];
-      // Create a Drupal user automatically and return the new user_id.
-      $user = $this->externalAuth->register($patron->barcode(), 'polaris', $account_data, $data);
-    }
     if (!$user) {
       $form_state->setErrorByName('barcode', $this->t('Invalid barcode or username.'));
+      // Reset completely so it can be re-scanned.
+      $form['barcode']['#value'] = '';
+      $form_state->setValue('barcode', '');
     }
     else {
       $form_state->setValue('field_user', $user->id());

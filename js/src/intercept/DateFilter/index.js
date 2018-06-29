@@ -24,7 +24,13 @@ const InputLabelProps = value => ({
 });
 
 function DateFilter(props) {
-  const { value, handleChange } = props;
+  const {
+    value,
+    handleChange,
+    label,
+    minDate,
+    maxDate,
+  } = props;
   const onChange = date => handleChange(date.toDate());
   const onClear = () => handleChange(null);
   const inputValue = value === '' ? null : value;
@@ -35,24 +41,26 @@ function DateFilter(props) {
         onChange={onChange}
         onClear={onClear}
         clearable
-        label={'Date'}
+        label={label}
         InputLabelProps={InputLabelProps(inputValue)}
         value={inputValue}
         className="date-filter"
+        minDate={minDate}
       />
     </MuiPickersUtilsProvider>
   );
 }
 
+DateFilter.propTypes = {
+  value: PropTypes.instanceOf(Date),
+  handleChange: PropTypes.func.isRequired,
+  label: PropTypes.string,
+};
+
 // Specifies the default values for props:
 DateFilter.defaultProps = {
   value: null,
   label: 'Date',
-};
-
-DateFilter.propTypes = {
-  value: PropTypes.instanceOf(Date),
-  handleChange: PropTypes.func.isRequired,
 };
 
 export default withStyles(styles)(DateFilter);

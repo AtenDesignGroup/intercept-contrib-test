@@ -4,3 +4,11 @@ services:
     arguments: ['@current_user', '@entity_type.manager', '@polaris.client']
     tags:
       - { name: event_subscriber }
+  intercept_core.route_subscriber:
+    class: Drupal\intercept_core\Routing\RouteSubscriber
+    arguments: ['@plugin.manager.intercept_management']
+    tags:
+      - { name: event_subscriber }
+  plugin.manager.intercept_management:
+    class: Drupal\intercept_core\ManagementManager
+    arguments: ['@module_handler', '@cache.discovery']

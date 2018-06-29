@@ -79,13 +79,6 @@ class EquipmentReservationRevisionRevertForm extends ConfirmFormBase {
   /**
    * {@inheritdoc}
    */
-  public function getCancelUrl() {
-    return new Url('entity.equipment_reservation.version_history', ['equipment_reservation' => $this->revision->id()]);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function getConfirmText() {
     return t('Revert');
   }

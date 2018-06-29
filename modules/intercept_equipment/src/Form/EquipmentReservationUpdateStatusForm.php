@@ -25,39 +25,12 @@ class EquipmentReservationUpdateStatusForm extends ContentEntityConfirmFormBase 
     ]);
   }
 
-  public function getCancelUrl() {
-    // This should be the redirect URL.
-    return Url::fromRoute('entity.equipment_reservation.canonical', [
-      'equipment_reservation' => $this->entity->id(),
-    ]);
-  }
-
   /**
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
     $form = parent::buildForm($form, $form_state);
     return $form;
-  }
-
-  protected function getStatus() {
-    $prefix = 'entity.equipment_reservation.';
-    $map = [
-      $prefix . 'cancel_form' => [
-        'action' => 'cancel',
-        'value' => 'canceled',
-      ],
-      $prefix . 'approve_form' => [
-        'action' => 'approve',
-        'value' => 'approved',
-      ],
-      $prefix . 'decline_form' => [
-        'action' => 'decline',
-        'value' => 'declined',
-      ],
-    ];
-    $route_name = $this->getRouteMatch()->getRouteName();
-    return !empty($map[$route_name]) ? (object) $map[$route_name] : [];
   }
 
   /**

@@ -37,6 +37,7 @@ use Drupal\user\UserInterface;
  *       "delete" = "Drupal\intercept_equipment\Form\EquipmentReservationDeleteForm",
  *     },
  *     "access" = "Drupal\intercept_equipment\EquipmentReservationAccessControlHandler",
+ *     "permission_provider" = "Drupal\intercept_core\ReservationPermissionsProvider",
  *     "route_provider" = {
  *       "html" = "Drupal\intercept_equipment\EquipmentReservationHtmlRouteProvider",
  *       "revision" = "Drupal\intercept_equipment\EquipmentReservationRevisionRouteProvider",

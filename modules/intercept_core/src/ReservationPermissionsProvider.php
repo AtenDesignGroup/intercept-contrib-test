@@ -1,12 +1,12 @@
 <?php
 
-namespace Drupal\intercept_room_reservation;
+namespace Drupal\intercept_core;
 
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\entity\EntityPermissionProvider;
 use Drupal\Component\Utility\Unicode;
 
-class RoomReservationPermissionsProvider extends EntityPermissionProvider {
+class ReservationPermissionsProvider extends EntityPermissionProvider {
 
   /**
   * {@inheritdoc}

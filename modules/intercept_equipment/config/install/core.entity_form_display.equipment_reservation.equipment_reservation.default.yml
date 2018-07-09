@@ -1,0 +1,62 @@
+uuid: 78706fe3-60ac-47d2-971d-5e821ff48ffa
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.equipment_reservation.equipment_reservation.field_dates
+    - field.field.equipment_reservation.equipment_reservation.field_equipment
+    - field.field.equipment_reservation.equipment_reservation.field_event
+    - field.field.equipment_reservation.equipment_reservation.field_location
+  module:
+    - datetime_range
+    - intercept_equipment
+id: equipment_reservation.equipment_reservation.default
+targetEntityType: equipment_reservation
+bundle: equipment_reservation
+mode: default
+content:
+  author:
+    type: entity_reference_autocomplete
+    weight: 4
+    settings:
+      match_operator: CONTAINS
+      size: 60
+      placeholder: ''
+    region: content
+    third_party_settings: {  }
+  field_dates:
+    weight: 1
+    settings: {  }
+    third_party_settings: {  }
+    type: daterange_default
+    region: content
+  field_equipment:
+    weight: 0
+    settings:
+      match_operator: CONTAINS
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: entity_reference_autocomplete
+    region: content
+  field_event:
+    weight: 3
+    settings:
+      match_operator: CONTAINS
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: entity_reference_autocomplete
+    region: content
+  field_location:
+    weight: 2
+    settings:
+      match_operator: CONTAINS
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: entity_reference_autocomplete
+    region: content
+hidden:
+  equipment_location: true
+  image: true

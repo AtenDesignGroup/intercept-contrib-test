@@ -9,6 +9,7 @@ use Drupal\Core\Entity\RevisionableContentEntityBase;
 use Drupal\Core\Entity\RevisionableInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\intercept_core\Field\Computed\FileFieldItemList;
 use Drupal\intercept_core\Field\Computed\MethodItemList;
 use Drupal\user\UserInterface;
 

@@ -25,7 +25,7 @@ class ManagementController extends ManagementControllerBase {
           'type' => 'event_series',
     ]);
     $lists->row($link, $this->t('List of all Event Series, a method for grouping events together (e.g. Summer Reading Challenge).'));
-    $link = $this->getButton('Events Templates', 'system.admin_content', [
+    $link = $this->getButton('Event Templates', 'system.admin_content', [
           'type' => 'event',
     ]);
     $lists->row($link, $this->t('List of all events categorized as a template. Only System Admins can categorize an event as a template.'));
@@ -36,7 +36,8 @@ class ManagementController extends ManagementControllerBase {
       'content_types' => [
         'title' => $this->h2('Content Types'),
         'event_template' => $this->getButton('Add Event Template', 'node.add', [
-          'node_type' => 'event_template'
+          'node_type' => 'event',
+          'template' => 1,
         ]),
         'event_series' => $this->getButton('Add Event Series', 'node.add', [
           'node_type' => 'event_series'

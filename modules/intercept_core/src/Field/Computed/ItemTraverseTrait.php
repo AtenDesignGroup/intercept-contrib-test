@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\intercept_room_reservation\Field\Computed;
+namespace Drupal\intercept_core\Field\Computed;
 
 use Drupal\Core\Entity\EntityInterface;
 

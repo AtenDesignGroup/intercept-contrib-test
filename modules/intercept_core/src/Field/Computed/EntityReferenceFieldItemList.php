@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\intercept_equipment\Field\Computed;
+namespace Drupal\intercept_core\Field\Computed;
 
 use Drupal\Core\Field\EntityReferenceFieldItemList as CoreEntityReferenceFieldItemList;
 use Drupal\Core\TypedData\ComputedItemListTrait;

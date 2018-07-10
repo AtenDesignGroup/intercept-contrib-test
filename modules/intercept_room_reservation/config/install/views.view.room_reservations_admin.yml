@@ -9,7 +9,7 @@ dependencies:
     - datetime_range
     - intercept_room_reservation
     - node
-id: room_reservations
+id: room_reservations_admin
 label: 'Room Reservations'
 module: views
 description: ''

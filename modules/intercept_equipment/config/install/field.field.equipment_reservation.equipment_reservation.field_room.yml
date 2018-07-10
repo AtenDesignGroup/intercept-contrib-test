@@ -1,19 +1,19 @@
-uuid: 85b82510-41c8-4df0-bf8f-88aebbd2a193
+uuid: 7326580f-53d1-41fb-ad8c-c92f1ebd24db
 langcode: en
 status: true
 dependencies:
   config:
-    - field.storage.equipment_reservation.field_equipment
-    - node.type.equipment
+    - field.storage.equipment_reservation.field_room
+    - node.type.room
   module:
     - intercept_equipment
 _core:
-  default_config_hash: l9KJ7iLx0XwNa_z0fXmFvVeKlLBsfJl9F9UdL54K-aI
-id: equipment_reservation.equipment_reservation.field_equipment
-field_name: field_equipment
+  default_config_hash: VCCcSKv8SdOUJQgBqLQ7VuY0Mtchi2sT5vZRBVpVocA
+id: equipment_reservation.equipment_reservation.field_room
+field_name: field_room
 entity_type: equipment_reservation
 bundle: equipment_reservation
-label: Equipment
+label: Room
 description: ''
 required: false
 translatable: false
@@ -23,7 +23,7 @@ settings:
   handler: 'default:node'
   handler_settings:
     target_bundles:
-      equipment: equipment
+      room: room
     sort:
       field: _none
     auto_create: false

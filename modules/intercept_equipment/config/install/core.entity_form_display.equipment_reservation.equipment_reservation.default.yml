@@ -7,9 +7,12 @@ dependencies:
     - field.field.equipment_reservation.equipment_reservation.field_equipment
     - field.field.equipment_reservation.equipment_reservation.field_event
     - field.field.equipment_reservation.equipment_reservation.field_location
+    - field.field.equipment_reservation.equipment_reservation.field_room
   module:
     - datetime_range
     - intercept_equipment
+_core:
+  default_config_hash: I_wkPp9o6DbMtflHNw3mCzrnZoNbgR40ivq55U5lgCA
 id: equipment_reservation.equipment_reservation.default
 targetEntityType: equipment_reservation
 bundle: equipment_reservation
@@ -17,7 +20,7 @@ mode: default
 content:
   author:
     type: entity_reference_autocomplete
-    weight: 4
+    weight: 5
     settings:
       match_operator: CONTAINS
       size: 60
@@ -40,7 +43,7 @@ content:
     type: entity_reference_autocomplete
     region: content
   field_event:
-    weight: 3
+    weight: 4
     settings:
       match_operator: CONTAINS
       size: 60
@@ -50,13 +53,16 @@ content:
     region: content
   field_location:
     weight: 2
-    settings:
-      match_operator: CONTAINS
-      size: 60
-      placeholder: ''
+    settings: {  }
     third_party_settings: {  }
-    type: entity_reference_autocomplete
+    type: options_select
     region: content
+  field_room:
+    type: options_select
+    weight: 3
+    region: content
+    settings: {  }
+    third_party_settings: {  }
 hidden:
   equipment_location: true
   image: true

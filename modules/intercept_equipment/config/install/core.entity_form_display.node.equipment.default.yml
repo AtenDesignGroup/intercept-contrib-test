@@ -1,3 +1,4 @@
+uuid: 9cf8df39-f529-4700-b9db-a17dee5c7a20
 langcode: en
 status: true
 dependencies:
@@ -13,7 +14,10 @@ dependencies:
     - entity_browser_entity_form
     - inline_entity_form
     - path
+    - scheduler
     - text
+_core:
+  default_config_hash: JPVwVxZRPUIvk_nLoDp2vEHIJBjB9L_VV8uBHTOdsDE
 id: node.equipment.default
 targetEntityType: node
 bundle: equipment
@@ -74,6 +78,12 @@ content:
     weight: 7
     region: content
     third_party_settings: {  }
+  publish_on:
+    type: datetime_timestamp_no_default
+    weight: 30
+    region: content
+    settings: {  }
+    third_party_settings: {  }
   status:
     type: boolean_checkbox
     settings:
@@ -105,4 +115,13 @@ content:
       placeholder: ''
     region: content
     third_party_settings: {  }
+  unpublish_on:
+    type: datetime_timestamp_no_default
+    weight: 30
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  url_redirects:
+    weight: 50
+    region: content
 hidden: {  }

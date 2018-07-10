@@ -7,6 +7,8 @@ dependencies:
     - node.type.location
   module:
     - intercept_equipment
+_core:
+  default_config_hash: D-kukC_ugE96VcODVyL1mU0ycd2krCWKvEGg-dd6jko
 id: equipment_reservation.equipment_reservation.field_location
 field_name: field_location
 entity_type: equipment_reservation

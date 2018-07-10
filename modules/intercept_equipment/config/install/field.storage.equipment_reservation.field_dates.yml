@@ -5,6 +5,8 @@ dependencies:
   module:
     - datetime_range
     - intercept_equipment
+_core:
+  default_config_hash: uruxjj2w66Xrti8I_Dzl1-5S35w87yyUfu8yaO0WfBQ
 id: equipment_reservation.field_dates
 field_name: field_dates
 entity_type: equipment_reservation

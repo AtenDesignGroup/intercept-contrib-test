@@ -62,10 +62,18 @@ abstract class ReservationBase extends RevisionableContentEntityBase {
    */
   public function location() {
     $type = $this->reservationType();
-    return $this->t('At @location @reservation_type', [
-      '@location' => $this->get("{$type}_location")->entity ? $this->get("{$type}_location")->entity->label() : '',
-      '@reservation_type' => $this->get("field_{$type}")->entity ? $this->get("field_{$type}")->entity->label() : '',
-    ]);
+    if ($type == 'room') {
+      return $this->t('At @location @reservation_type', [
+        '@location' => $this->get("{$type}_location")->entity ? $this->get("{$type}_location")->entity->label() : '',
+        '@reservation_type' => $this->get("field_{$type}")->entity ? $this->get("field_{$type}")->entity->label() : '',
+      ]);
+    }
+    else if ($type == 'equipment') {
+      return $this->t('At @location @reservation_type', [
+        '@location' => $this->get("field_location")->entity ? $this->get("field_location")->entity->label() : '',
+        '@reservation_type' => $this->get("field_{$type}")->entity ? $this->get("field_{$type}")->entity->label() : '',
+      ]);
+    }
   }
 
   /**

@@ -7,6 +7,8 @@ dependencies:
     - node.type.event
   module:
     - intercept_equipment
+_core:
+  default_config_hash: FMllHEAebPuZ5InlmyXir5Fri_WTL7LFC3_j83WwifQ
 id: equipment_reservation.equipment_reservation.field_event
 field_name: field_event
 entity_type: equipment_reservation

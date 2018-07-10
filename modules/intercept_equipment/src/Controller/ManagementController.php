@@ -19,7 +19,9 @@ class ManagementController extends ManagementControllerBase {
 
   public function viewStaffEquipment(AccountInterface $user, Request $request) {
     return [
-      'title' => $this->title('Equipment'),
+      '#type' => 'view',
+      '#name' => 'equipment_reservations',
+      '#display_id' => 'embed', 
     ];
   }
 

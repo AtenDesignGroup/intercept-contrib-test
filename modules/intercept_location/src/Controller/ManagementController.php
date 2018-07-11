@@ -23,10 +23,10 @@ class ManagementController extends ManagementControllerBase {
       'content_types' => [
         'title' => $this->h2('Content Types'),
         'event_template' => $this->getButton('Add Location', 'node.add', [
-          'node_type' => 'room'
+          'node_type' => 'location'
         ]),
         'event_series' => $this->getButton('Add Room', 'node.add', [
-          'node_type' => 'location'
+          'node_type' => 'room'
         ]),
       ],
       'list' => $this->getList(RoomListBuilder::class),

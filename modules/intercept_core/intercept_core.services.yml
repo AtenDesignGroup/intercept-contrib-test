@@ -1,4 +1,9 @@
 services:
+  intercept_core.entity_bundle_access:
+    class: Drupal\intercept_core\Access\EntityBundleAccessCheck
+    arguments: ['@current_user']
+    tags:
+      - { name: access_check, applies_to: _entity_bundle }
   intercept_core.customer_event_subscriber:
     class: Drupal\intercept_core\EventSubscriber\Customer
     arguments: ['@current_user', '@entity_type.manager', '@polaris.client']

@@ -12,7 +12,7 @@ dependencies:
     - datetime_range
     - intercept_equipment
 _core:
-  default_config_hash: I_wkPp9o6DbMtflHNw3mCzrnZoNbgR40ivq55U5lgCA
+  default_config_hash: V5xraT-P5Hkjie1NNUE77u_GCkJYFIv2AWqkwBTIAj4
 id: equipment_reservation.equipment_reservation.default
 targetEntityType: equipment_reservation
 bundle: equipment_reservation

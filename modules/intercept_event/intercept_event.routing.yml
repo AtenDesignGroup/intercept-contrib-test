@@ -52,6 +52,7 @@ entity.node.scan:
     _title: 'Check-in'
   requirements:
     _entity_access: 'node.scan'
+    _entity_bundle: 'event'
 
 entity.node.template:
   path: '/node/add/event/{node}'
@@ -81,14 +82,15 @@ entity.node.analysis:
     _controller: '\Drupal\intercept_event\Controller\EventsController::analysis'
   requirements:
     _entity_access: 'node.analysis'
+    _entity_bundle: 'event'
 
 intercept_event.api.attendance_update:
   path: '/api/attendance/update'
   methods: [POST]
   defaults:
-      _controller: 'intercept_event.manager:updateAttendance'
+    _controller: 'intercept_event.manager:updateAttendance'
   requirements:
-      _role: 'intercept_staff + intercept_system_admin + administrator'
+    _role: 'intercept_staff + intercept_system_admin + administrator'
 
 intercept_event.api.attendee_create:
   path: '/api/attendee/create'

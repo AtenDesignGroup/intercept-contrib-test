@@ -1,4 +1,3 @@
-
 # Equipment reservation menu items definition
 entity.equipment_reservation.collection:
   title: 'Equipment reservations'

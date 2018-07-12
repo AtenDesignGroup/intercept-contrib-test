@@ -43,7 +43,13 @@ class ProfileForm extends CoreProfileForm {
       $patron->Password = $values['pin'];
       $patron->update();
     }
-    parent::save($form, $form_state);
+    switch ($this->entity->save()) {
+      case SAVED_NEW:
+      case SAVED_UPDATED:
+        drupal_set_message($this->t('Your account settings have been updated.'));
+        break;
+    }
+
     $form_state->setRedirect('<current>');
   }
 

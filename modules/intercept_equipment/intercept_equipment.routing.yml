@@ -1,11 +1,10 @@
-
 intercept_equipment.reserve_equipment:
   path: '/equipment/reserve'
   defaults:
     _controller: '\Drupal\intercept_equipment\Controller\EquipmentReservationController::reserveEquipment'
     _title: 'Reserve Equipment'
   requirements:
-    _permission: 'access content'
+    _permission: 'create equipment reservation entities'
 
 intercept_equipment.account.equipment_reservations:
   path: '/account/equipment-reservations'

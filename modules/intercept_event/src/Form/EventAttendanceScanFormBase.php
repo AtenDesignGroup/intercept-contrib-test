@@ -8,6 +8,7 @@ use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\externalauth\ExternalAuth;
+use Drupal\intercept_event\Entity\EventAttendanceInterface;
 use Drupal\user\UserStorage;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -69,5 +70,38 @@ class EventAttendanceScanFormBase extends ContentEntityForm {
     $actions = parent::actions($form, $form_state);
     $actions['submit']['#value'] = $this->t('enter');
     return $actions;
+  }
+
+  /**
+   * Check if the attendance exists by field_event and field_user.
+   *
+   * @param $uid
+   *   User id derived from the barcode.
+   * @param $event_id
+   *   Node id for the current event being attended.
+   * @return bool|EventAttendanceInterface
+   */
+  protected function attendanceExists($uid, $event_id) {
+    $storage = \Drupal::service('entity_type.manager')->getStorage('event_attendance');
+    $result = $storage->loadByProperties([
+      'field_event' => $event_id,
+      'field_user' => $uid,
+    ]);
+    return !empty($result) ? reset($result) : FALSE;
+  }
+
+  /**
+   * Common function to set an error for the barcode and clear the form.
+   *
+   * @param $message
+   *   Text to display to the user.
+   * @param $form
+   * @param FormStateInterface $form_state
+   */
+  protected function setBarcodeError($message, &$form, FormStateInterface $form_state) {
+    $form_state->setErrorByName('barcode', $this->t($message));
+    // Reset completely so it can be re-scanned.
+    $form['barcode']['#value'] = '';
+    $form_state->setValue('barcode', '');
   }
 }

@@ -8,14 +8,14 @@ dependencies:
     - datetime_range
     - intercept_equipment
 _core:
-  default_config_hash: lJ0n_7mjr5U9vtWVFNBZ5grn1jvbQqZNrK8pT6nk_Gg
+  default_config_hash: wMQbal4O5QtoxEubK-YjHJhlvWAQoQ7PoRaqu25vCHo
 id: equipment_reservation.equipment_reservation.field_dates
 field_name: field_dates
 entity_type: equipment_reservation
 bundle: equipment_reservation
 label: Dates
 description: ''
-required: false
+required: true
 translatable: false
 default_value:
   -

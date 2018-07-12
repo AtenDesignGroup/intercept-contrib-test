@@ -13,7 +13,7 @@ dependencies:
     - intercept_equipment
     - user
 _core:
-  default_config_hash: K_ekVinnIkz4HzDdPsrNehoUHq4WYEtxeZfHGrS6QDI
+  default_config_hash: 86cfamOyz-xAHtH_1A8SKRe6nneEEAU_qjRE-Txf8D4
 id: equipment_reservation.equipment_reservation.default
 targetEntityType: equipment_reservation
 bundle: equipment_reservation

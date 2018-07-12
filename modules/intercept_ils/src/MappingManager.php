@@ -76,22 +76,30 @@ class MappingManager {
     // First load from mapping.
     $user = \Drupal::service('polaris.client')->patron->getUserByBarcode($barcode);
 
+    // Then try Drupal as a regular username.
     /** @var UserStorage $storage */
     $storage = \Drupal::service('entity_type.manager')->getStorage('user');
     if (!$user && ($users = $storage->loadByProperties(['name' => $barcode]))) {
       $user = reset($users);
     }
+    // Then try Polaris directly.
     if (!$user && ($patron = \Drupal::service('polaris.client')->patron->validate($barcode))) {
-      // @see Auth::authenticate()
-      $data = $patron->basicData();
-      $account_data = [
-        'name' => $patron->barcode(),
-        'mail' => $data->EmailAddress,
-        'init' => $data->EmailAddress,
-      ];
-      // Create a Drupal user automatically and return the new user_id.
-      $user = \Drupal::service('externalauth.externalauth')->register($patron->barcode(), 'polaris', $account_data, $data);
+      // Try again with the 'actual' barcode, because the original value could have been a username.
+      $user = \Drupal::service('polaris.client')->patron->getUserByBarcode($patron->barcode);
+      // Finally go through registration process.
+      if (!$user) {
+        // @see Auth::authenticate()
+        $data = $patron->basicData();
+        $account_data = [
+          'name' => $patron->barcode(),
+          'mail' => $data->EmailAddress,
+          'init' => $data->EmailAddress,
+        ];
+        // Create a Drupal user automatically and return the new user_id.
+        $user = \Drupal::service('externalauth.externalauth')->register($patron->barcode(), 'polaris', $account_data, $data);
+      }
     }
+
     return $user;
   }
 

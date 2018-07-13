@@ -63,6 +63,14 @@ class ManagementManager extends DefaultPluginManager implements ManagementManage
     }
   }
 
+  public function getPagesByType() {
+    $data = [];
+    foreach ($this->getPages() as $id => $values) {
+      $data[$values['type']][$id] = $values;
+    }
+    return $data;
+  }
+
   public function getPages() {
     $return = [];
     foreach ($this->getDefinitions() as $definition) {

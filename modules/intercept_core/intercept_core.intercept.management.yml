@@ -4,11 +4,14 @@ intercept_core:
     staff:
       default:
         title: 'Dashboard'
+        menu_weight: -50
     admin:
       default:
         title: 'Dashboard'
+        menu_weight: -50
       settings:
         title: 'Settings'
         menu_link: FALSE
       system_configuration:
         title: 'System Configuration'
+        menu_weight: 50

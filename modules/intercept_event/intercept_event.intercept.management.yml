@@ -4,12 +4,14 @@ intercept_event:
     staff:
       events:
         title: 'Events'
+        menu_weight: 5
       event_templates:
         title: 'Create an Event'
         menu_link: FALSE
     admin:
       events:
         title: 'Events'
+        menu_weight: 5
       event_templates:
         title: 'Create an Event'
         menu_link: FALSE

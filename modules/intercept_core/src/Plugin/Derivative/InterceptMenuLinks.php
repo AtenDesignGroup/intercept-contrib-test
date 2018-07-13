@@ -42,7 +42,7 @@ class InterceptMenuLinks extends DeriverBase implements ContainerDeriverInterfac
 
       $this->derivatives[$id] = [
         'title' => $page->title,
-        'weight' => -5,
+        'weight' => isset($page->menu_weight) ? $page->menu_weight : 0,
         'route_name' => "{$id}.redirect",
         'menu_name' => $page->type == 'staff' ? 'intercept-staff' : 'intercept-system-admin',
       ];

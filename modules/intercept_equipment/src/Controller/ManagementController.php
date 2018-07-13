@@ -17,14 +17,14 @@ class ManagementController extends ManagementControllerBase {
     }
   }
 
-  public function viewStaffEquipment(AccountInterface $user, Request $request) {
+  public function viewStaffEquipmentReservations(AccountInterface $user, Request $request) {
     return [
       'title' => $this->title('Equipment'),
     ];
   }
 
-  public function viewAdminEquipment(AccountInterface $user, Request $request) {
-    return $this->viewStaffEquipment($user, $request);
+  public function viewAdminEquipmentReservations(AccountInterface $user, Request $request) {
+    return $this->viewStaffEquipmentReservations($user, $request);
   }
 
   public function viewAdminEquipmentConfiguration(AccountInterface $user, Request $request) {

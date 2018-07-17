@@ -53,6 +53,10 @@ class EquipmentReservationForm extends ContentEntityForm {
       '#markup' => '<h2 id="edit-output"></h2>',
     ];
 
+    // Pre-fill the user field with the current user's information.
+    $current_user = \Drupal\user\Entity\User::load(\Drupal::currentUser()->id());
+    $form['field_user']['widget'][0]['target_id']['#default_value'] = $current_user;
+
     $entity = $this->entity;
 
     return $form;
@@ -99,6 +103,9 @@ class EquipmentReservationForm extends ContentEntityForm {
     }
     // @TODO: Items in the cart must be available during the reservation period
     // @TODO: Get other reservations at same time. No two people can have the same thing checked out at the same time.
+    if ($this->conflictCheck($reservation_start, $reservation_end, $equipment_node)) {
+      $form_state->setErrorByName('field_dates', t('This piece of equipment is reserved during the chosen period. Please check availability and select another date/time.'));
+    }
     // Location must be selected - DONE (by virtue of required field)
     // Make sure reservation isn't in the past.
     if (new DrupalDateTime() > $reservation_start) {
@@ -154,7 +161,8 @@ class EquipmentReservationForm extends ContentEntityForm {
     Start time: 6:00 PM
     End time: 7:00 PM*/
 
-    
+    drupal_set_message('Your equipment was successfully reserved.');
+    // @TODO: redirect to the staff member's reservation screen on the site.
 
 
     // Save as a new revision if requested to do so.
@@ -237,6 +245,18 @@ class EquipmentReservationForm extends ContentEntityForm {
       return TRUE;
     }
     return FALSE;
+  }
+
+  /**
+   * Check for conflicting reservations.
+   */
+  public function conflictCheck($reservation_start, $reservation_end, $equipment_node) {
+    // @TODO: For this node...
+    $nid = $equipment_node->id();
+    //dump($nid);
+    // Find all of the reservations.
+
+    return TRUE;
   }
 
 }

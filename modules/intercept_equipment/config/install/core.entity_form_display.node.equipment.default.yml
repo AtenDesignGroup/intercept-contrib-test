@@ -17,7 +17,7 @@ dependencies:
     - scheduler
     - text
 _core:
-  default_config_hash: 9Y7yBKHWam2aVvfl1f-5AEoFotCH_g4XG2RQTpMGQ4A
+  default_config_hash: wvS4njcjeaqM8Y7DPlwVQ6P-hdy5ZaWygFzgF4O51xA
 id: node.equipment.default
 targetEntityType: node
 bundle: equipment

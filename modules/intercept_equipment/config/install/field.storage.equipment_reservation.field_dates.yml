@@ -6,7 +6,7 @@ dependencies:
     - datetime_range
     - intercept_equipment
 _core:
-  default_config_hash: ScrnKw4AHUki56RJHBUzAvaT6sP5dyGzh7lHLFH50XQ
+  default_config_hash: MUaRAoCtv1o_ibyNu-UHP_YugmLSgoxzajGv6QNrwSM
 id: equipment_reservation.field_dates
 field_name: field_dates
 entity_type: equipment_reservation

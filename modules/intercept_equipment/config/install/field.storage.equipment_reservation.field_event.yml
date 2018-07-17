@@ -6,7 +6,7 @@ dependencies:
     - intercept_equipment
     - node
 _core:
-  default_config_hash: UgeQDMZrBFpv4QqvFNyU5f2HjlpEgK4DWXk-p6mKqwQ
+  default_config_hash: oazU5kqixLqY82ICIv-8sechwFMcJnVXMHZkgDjOkuc
 id: equipment_reservation.field_event
 field_name: field_event
 entity_type: equipment_reservation

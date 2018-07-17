@@ -8,7 +8,7 @@ dependencies:
   module:
     - intercept_equipment
 _core:
-  default_config_hash: ikpM3uYb4zE7uS6FDKMdyLS-IFK52zyqFu4Uoh1CWWY
+  default_config_hash: qMvqqMXf6i7eQC6Tno1foVWI2fnV2NBxKd3cHfh0ci0
 id: equipment_reservation.equipment_reservation.field_equipment
 field_name: field_equipment
 entity_type: equipment_reservation

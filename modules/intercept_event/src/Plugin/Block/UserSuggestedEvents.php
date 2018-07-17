@@ -131,13 +131,13 @@ class UserSuggestedEvents extends BlockBase implements ContainerFactoryPluginInt
       ->condition('field_date_time', $this->currentDate()->format('c'), '>=')
       ->range(0, $this->configuration['results']);
 
-    if ($audiences = $this->simplifyValues($customer->field_audiences->getValue())) {
+    if ($customer && $audiences = $this->simplifyValues($customer->field_audiences->getValue())) {
       $query->sortExpression('field_event_audience', $audiences);
     }
-    if ($locations = $this->simplifyValues($customer->field_preferred_location->getValue())) {
+    if ($customer && $locations = $this->simplifyValues($customer->field_preferred_location->getValue())) {
       $query->sortExpression('field_location', $locations);
     }
-    if ($event_types = $this->simplifyValues($customer->field_event_types->getValue())) {
+    if ($customer && $event_types = $this->simplifyValues($customer->field_event_types->getValue())) {
       $query->sortExpression('field_event_type', $event_types);
     }
     // Add the default of featured events to sort to the top.

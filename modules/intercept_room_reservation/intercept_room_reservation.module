@@ -45,7 +45,7 @@ function intercept_room_reservation_node_access(\Drupal\node\NodeInterface $node
  * Implements hook_preprocess_page.
  */
 function intercept_room_reservation_preprocess_page(array &$variables) {
-  $limit = \Drupal::config('intercept_core.room_reservations')->get('reservation_limit', 0);
+  $limit = \Drupal::config('intercept_room_reservation.settings')->get('reservation_limit', 0);
   $variables['#attached']['drupalSettings']['intercept']['room_reservations']['customer_limit'] = $limit;
 }
 

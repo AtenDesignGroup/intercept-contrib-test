@@ -4,9 +4,11 @@ intercept_room_reservation:
     staff:
       room_reservations:
         title: 'Room Reservations'
+        menu_weight: 10
     admin:
       room_reservations:
         title: 'Room Reservations'
+        menu_weight: 10
       room_reservation_configuration:
         title: 'Room Reservations'
         menu_link: FALSE

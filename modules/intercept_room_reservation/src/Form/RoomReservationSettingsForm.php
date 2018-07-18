@@ -13,11 +13,13 @@ use Drupal\Core\Form\FormStateInterface;
  */
 class RoomReservationSettingsForm extends ConfigFormBase {
 
+  protected const CONFIG_NAME = 'intercept_room_reservation.settings';
+
   /**
    * {@inheritdoc}
    */
   protected function getEditableConfigNames() {
-    return ['intercept_core.room_reservations'];
+    return [self::CONFIG_NAME];
   }
 
   /**
@@ -43,11 +45,11 @@ class RoomReservationSettingsForm extends ConfigFormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
     $form = parent::buildForm($form, $form_state);
-    $config = $this->config('intercept_core.room_reservations');
+    $config = $this->config(self::CONFIG_NAME);
     $form['reservation_limit'] = [
       '#title' => $this->t('Room reservation limit'),
       '#type' => 'number',
-      '#default_value' => $config->get('reservation_limit'),
+      '#default_value' => $this->getReservationLimit(),
     ];
     $form['email'] = [
       '#type' => 'vertical_tabs',
@@ -84,6 +86,15 @@ class RoomReservationSettingsForm extends ConfigFormBase {
     return $form;
   }
 
+  /**
+   * Helper function to get reservation limit or a default 0.
+   */
+  private function getReservationLimit() {
+    $config = $this->config(self::CONFIG_NAME);
+    $reservation_limit = $config->get('reservation_limit');
+    return isset($reservation_limit) ? $reservation_limit : 0;
+  }
+
   private function getEmailConfig($key) {
     return $this->config('intercept_core.room_reservations')->get("email.$key");
   }
@@ -105,7 +116,7 @@ class RoomReservationSettingsForm extends ConfigFormBase {
    *   The current state of the form.
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    $config = $this->config('intercept_core.room_reservations');
+    $config = $this->config(self::CONFIG_NAME);
     $values = $form_state->cleanValues()->getValues();
     foreach ($values as $key => $info) {
       if (!empty($info["{$key}__active_tab"])) {

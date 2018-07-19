@@ -70,6 +70,13 @@ entity.node.scan_lookup:
   requirements:
     _entity_access: 'node.scan'
 
+entity.node.template_preview:
+  path: '/node/preview/event/{node}'
+  defaults:
+    _controller: 'intercept_event.manager:previewFromTemplate'
+  requirements:
+    _entity_access: 'node.template'
+
 entity.node.template:
   path: '/node/add/event/{node}'
   defaults:

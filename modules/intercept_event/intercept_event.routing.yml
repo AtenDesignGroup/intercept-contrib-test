@@ -54,6 +54,22 @@ entity.node.scan:
     _entity_access: 'node.scan'
     _entity_bundle: 'event'
 
+entity.node.scan_guest:
+  path: '/event/{node}/checkin/guest'
+  defaults:
+    _controller: '\Drupal\intercept_event\Controller\EventAttendanceController::scanGuestForm'
+    _title: 'Check-in'
+  requirements:
+    _entity_access: 'node.scan'
+
+entity.node.scan_lookup:
+  path: '/event/{node}/checkin/lookup'
+  defaults:
+    _controller: '\Drupal\intercept_event\Controller\EventAttendanceController::scanLookupForm'
+    _title: 'Lookup'
+  requirements:
+    _entity_access: 'node.scan'
+
 entity.node.template:
   path: '/node/add/event/{node}'
   defaults:
@@ -65,14 +81,6 @@ entity.node.template_form:
   path: '/event/{node}/template'
   defaults:
     _entity_form: 'node.template'
-  requirements:
-    _entity_access: 'node.scan'
-
-entity.node.scan_guest:
-  path: '/event/{node}/checkin/guest'
-  defaults:
-    _controller: '\Drupal\intercept_event\Controller\EventAttendanceController::scanGuestForm'
-    _title: 'Check-in'
   requirements:
     _entity_access: 'node.scan'
 

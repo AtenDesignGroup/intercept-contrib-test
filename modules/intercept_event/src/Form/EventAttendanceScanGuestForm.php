@@ -21,38 +21,34 @@ class EventAttendanceScanGuestForm extends EventAttendanceScanFormBase {
   /**
    * {@inheritdoc}
    */
+  protected function instructionsHeaderText() {
+    return $this->t('Enter your zip code to mark your attendance');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function instructionsText() {
+    return '';
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    /* @var $entity \Drupal\intercept_event\Entity\EventAttendance */
     $form = parent::buildForm($form, $form_state);
-
-    $form['#theme'] = 'event_attendance_scan_form';
-    $entity = $this->entity;
-
     $event = $this->entity->field_event->entity;
-    $node_view = \Drupal::service('entity_type.manager')->getHandler('node', 'view_builder');
-    $form['event'] = $node_view->view($event, 'summary');
-    $form['instructions_header'] = [
-      '#type' => 'html_tag',
-      '#tag' => 'h4',
-      '#attributes' => ['class' => ['instructions-header']],
-      '#value' => $this->t('Enter your zip code to mark your attendance'),
-    ];
     $form['field_guest_zip_code']['widget'][0]['value']['#title_display'] = 'attribute';
-    $form['cancel'] = [
-      '#type' => 'link',
-      '#title' => $this->t('Cancel'),
-      '#url' => \Drupal\Core\Url::fromRoute('entity.node.scan', [
-        'node' => $event->id(),
-      ]),
-    ];
+    $form['cancel'] = $this->cancelButton();
 
     return $form;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     parent::submitForm($form, $form_state);
-    $form_state->setRedirect('entity.node.scan', [
-      'node' => $this->entity->field_event->entity->id(),
-    ]);
+    $this->redirectToBaseForm($form_state);
   }
 }

@@ -58,6 +58,10 @@ class EventAttendanceController extends ControllerBase {
     return $this->entityFormBuilder->getForm($event_attendance, $type);
   }
 
+  public function scanLookupForm(NodeInterface $node) {
+    return $this->buildScanForm($node, 'scan_lookup');
+  }
+
   public function scanGuestForm(NodeInterface $node) {
     return $this->buildScanForm($node, 'scan_guest');
   }

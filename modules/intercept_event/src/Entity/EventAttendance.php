@@ -29,6 +29,7 @@ use Drupal\user\UserInterface;
  *       "add" = "Drupal\intercept_event\Form\EventAttendanceForm",
  *       "scan" = "Drupal\intercept_event\Form\EventAttendanceScanForm",
  *       "scan_guest" = "Drupal\intercept_event\Form\EventAttendanceScanGuestForm",
+ *       "scan_lookup" = "Drupal\intercept_event\Form\EventAttendanceScanLookupForm",
  *       "edit" = "Drupal\intercept_event\Form\EventAttendanceForm",
  *       "delete" = "Drupal\intercept_event\Form\EventAttendanceDeleteForm",
  *     },

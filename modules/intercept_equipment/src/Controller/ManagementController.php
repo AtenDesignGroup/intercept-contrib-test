@@ -14,6 +14,8 @@ class ManagementController extends ManagementControllerBase {
     }
     if ($page_name == 'staff_default' || $page_name == 'admin_default') {
       $build['links']['equipment'] = $this->getButton('Reserve equipment', '<current>');
+      //$build['links']['equipment']['#weight'] = '10';
+      $build['links']['equipment']['#access'] = $this->currentUser->hasPermission('add equipment reservation entities');
     }
   }
 

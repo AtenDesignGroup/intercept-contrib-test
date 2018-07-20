@@ -20,7 +20,7 @@ class ManagementController extends ManagementControllerBase {
   public function viewStaffRoomReservations(AccountInterface $user, Request $request) {
     return [
       '#type' => 'view',
-      '#name' => 'room_reservations_admin',
+      '#name' => 'intercept_room_reservations',
       '#display_id' => 'embed', 
     ];
   }

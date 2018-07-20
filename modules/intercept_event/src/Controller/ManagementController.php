@@ -50,7 +50,7 @@ class ManagementController extends ManagementControllerBase {
   public function viewStaffEvents(AccountInterface $user, Request $request) {
     return [
       '#type' => 'view',
-      '#name' => 'events',
+      '#name' => 'intercept_events',
       '#display_id' => 'embed',
     ];
   }
@@ -61,7 +61,7 @@ class ManagementController extends ManagementControllerBase {
   public function viewStaffEventTemplates(AccountInterface $user, Request $request) {
     return [
       '#type' => 'view',
-      '#name' => 'event_templates',
+      '#name' => 'intercept_event_templates',
       '#display_id' => 'embed',
     ];
   }

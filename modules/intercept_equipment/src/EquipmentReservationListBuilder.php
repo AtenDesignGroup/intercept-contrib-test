@@ -21,7 +21,6 @@ class EquipmentReservationListBuilder extends EntityListBuilder {
     $header['equipment'] = $this->t('Equipment');
     $header['location'] = $this->t('Location');
     $header['user'] = $this->t('User');
-    $header['status'] = $this->t('Status');
     return $header + parent::buildHeader();
   }
 
@@ -32,9 +31,8 @@ class EquipmentReservationListBuilder extends EntityListBuilder {
     /* @var $entity \Drupal\intercept_equipment\Entity\EquipmentReservation */
     $row['name'] = $entity->link();
     $row['equipment'] = $this->getEntityLabel($entity->field_equipment->entity, $this->t('No equipment'));
-    $row['location'] = $entity->get('location')->entity ? $entity->get('location')->entity->label() : '';
+    $row['location'] = $entity->get('field_location')->entity ? $entity->get('field_location')->entity->label() : '';
     $row['user'] = $this->getEntityLabel($entity->field_user->entity, $this->t('No user'));
-    $row['status'] = $entity->field_status->getString();
     return $row + parent::buildRow($entity);
   }
 

@@ -103,7 +103,7 @@ class EquipmentReservationForm extends ContentEntityForm {
     }
     // @TODO: Items in the cart must be available during the reservation period
     // @TODO: Get other reservations at same time. No two people can have the same thing checked out at the same time.
-    if ($this->conflictCheck($reservation_start, $reservation_end, $equipment_node)) {
+    if ($this->conflictCheck($reservation_dates[0]['value'], $reservation_dates[0]['end_value'], $equipment_node)) {
       $form_state->setErrorByName('field_dates', t('This piece of equipment is reserved during the chosen period. Please check availability and select another date/time.'));
     }
     // Location must be selected - DONE (by virtue of required field)
@@ -161,9 +161,6 @@ class EquipmentReservationForm extends ContentEntityForm {
     Start time: 6:00 PM
     End time: 7:00 PM*/
 
-    drupal_set_message('Your equipment was successfully reserved.');
-    // @TODO: redirect to the staff member's reservation screen on the site.
-
 
     // Save as a new revision if requested to do so.
     if (!$form_state->isValueEmpty('new_revision') && $form_state->getValue('new_revision') != FALSE) {
@@ -191,7 +188,11 @@ class EquipmentReservationForm extends ContentEntityForm {
           '%label' => $entity->label(),
         ]));
     }
-    $form_state->setRedirect('entity.equipment_reservation.canonical', ['equipment_reservation' => $entity->id()]);
+
+    drupal_set_message('Your equipment was successfully reserved.');
+    // Redirect to the staff member's reservation screen on the site. (e.g., /user/6/room-reservations)
+    //$form_state->setRedirect('entity.equipment_reservation.canonical', ['equipment_reservation' => $entity->id()]);
+    $form_state->setRedirect('entity.user.equipment_reservations');
   }
 
   // Gets the title of a specified node id.
@@ -220,7 +221,7 @@ class EquipmentReservationForm extends ContentEntityForm {
     }
 
     // Display the view embed with the node id of the piece of equipment.
-    $availability_view = views_embed_view('equipment_reservations', 'embed', $nid);
+    $availability_view = views_embed_view('intercept_equipment_reservations', 'embed', $nid);
     $output = '<div id="edit-output">';
     $output .= '<h2>Upcoming Reservations</h2>';
     $output .= \Drupal::service('renderer')->render($availability_view);
@@ -251,12 +252,41 @@ class EquipmentReservationForm extends ContentEntityForm {
    * Check for conflicting reservations.
    */
   public function conflictCheck($reservation_start, $reservation_end, $equipment_node) {
-    // @TODO: For this node...
+    // Check for this particular equipment node.
     $nid = $equipment_node->id();
-    //dump($nid);
     // Find all of the reservations.
+    $query = \Drupal::entityQuery('equipment_reservation')
+      ->condition('status', 1)
+      ->condition('field_equipment', $nid);
+    $er_ids = $query->execute();
 
-    return TRUE;
+    // Requested reservation timestamps
+    $dateTime = new DrupalDateTime($reservation_start);
+    $reservation_start = $dateTime->getTimestamp();
+    $dateTime = new DrupalDateTime($reservation_end);
+    $reservation_end = $dateTime->getTimestamp();
+    // Get existing reservation timestamps
+    foreach ($er_ids as $er_id) {
+      // Get the reservation dates.
+      $entity_manager = \Drupal::entityTypeManager();
+      $equipment_reservation = $entity_manager->getStorage('equipment_reservation')->load($er_id);
+      $dates = $equipment_reservation->get('field_dates')->getValue();
+      $existing_reservation_start = $dates[0]['value'];
+      $existing_reservation_end = $dates[0]['end_value'];
+      // Change everything to timestamps.
+      $dateTime = new DrupalDateTime($existing_reservation_start, 'UTC');
+      $existing_reservation_start = $dateTime->getTimestamp();
+      $dateTime = new DrupalDateTime($existing_reservation_end, 'UTC');
+      $existing_reservation_end = $dateTime->getTimestamp();
+
+      // Setup is done. Check for actual overlap.
+      //if ((StartDate1 <= EndDate2) and (EndDate1 >= StartDate2)) {
+      if (($reservation_start <= $existing_reservation_end) and ($reservation_end >= $existing_reservation_start)) {
+        return TRUE;
+      }
+    }
+
+    return FALSE;
   }
 
 }

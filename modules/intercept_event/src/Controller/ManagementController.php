@@ -16,6 +16,7 @@ class ManagementController extends ManagementControllerBase {
       $build['links']['event'] = $this->getButton('Create an event', 'intercept_event.management.staff_event_templates', [
         'user' => $this->currentUser()->id(),
       ]);
+      $build['links']['events_all'] = $this->getButton('View All Events', 'intercept_event.events_all');
     }
   }
 
@@ -54,6 +55,7 @@ class ManagementController extends ManagementControllerBase {
       '#display_id' => 'embed',
     ];
   }
+
   public function viewAdminEvents(AccountInterface $user, Request $request) {
     return $this->viewStaffEvents($user, $request);
   }

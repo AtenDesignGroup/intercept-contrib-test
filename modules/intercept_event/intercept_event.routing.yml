@@ -91,6 +91,8 @@ entity.node.template:
     _controller: 'intercept_event.manager:addFromTemplate'
   requirements:
     _entity_access: 'node.template'
+  options:
+    _admin_route: TRUE
 
 entity.node.template_form:
   path: '/event/{node}/template'

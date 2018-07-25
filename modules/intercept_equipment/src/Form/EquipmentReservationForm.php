@@ -115,11 +115,6 @@ class EquipmentReservationForm extends ContentEntityForm {
       $form_state->setErrorByName('field_dates', t('The reservation end date/time must be after the start date/time.'));
     }
 
-    // Get current user's email address
-    $user = \Drupal::currentUser();
-    $email = $user->getEmail();
-    //dump($email);
-
     // Also do normal validation.
     parent::validateForm($form, $form_state);
   }
@@ -129,38 +124,6 @@ class EquipmentReservationForm extends ContentEntityForm {
    */
   public function save(array $form, FormStateInterface $form_state) {
     $entity = $this->entity;
-
-    // Get current user's email address
-    $user = \Drupal::currentUser();
-    $email = $user->getEmail();
-
-    // @TODO: Get the equipment node's taxonomy term
-    // (e.g., Technology, Operations, etc.)
-    // Get the term which has an email field attached to it.
-    // Email the appropriate email address(es) as specified on the term.
-    /*From: richlandlibrary@EvancedRooms.com <richlandlibrary@EvancedRooms.com>
-    Sent: Thursday, July 12, 2018 9:09 AM
-    To: Reed, Amanda
-    Subject: Equipment Request Confirmation
-    
-    The request is complete for:
-
-    Staff Member: Amanda Reed
-    Purpopse: AReed going to BA to cover staff meeting
-    Equipment: Van 37
-    Quantity: 1
-    Date(s): Wednesday, July 25, 2018
-    Time: 1:00 PM to 5:00 PM
-
-    Please note the status of the request is:Equipment is Reserved*/
-    /*Contact: Diana Keane, Programs & Partnerships
-    Branch/Room: Main library
-    Equipment: Cubetto Kit
-    Quantity: 1
-    Date(s): Thursday, July 12, 2018
-    Start time: 6:00 PM
-    End time: 7:00 PM*/
-
 
     // Save as a new revision if requested to do so.
     if (!$form_state->isValueEmpty('new_revision') && $form_state->getValue('new_revision') != FALSE) {
@@ -192,7 +155,7 @@ class EquipmentReservationForm extends ContentEntityForm {
     drupal_set_message('Your equipment was successfully reserved.');
     // Redirect to the staff member's reservation screen on the site. (e.g., /user/6/room-reservations)
     //$form_state->setRedirect('entity.equipment_reservation.canonical', ['equipment_reservation' => $entity->id()]);
-    $form_state->setRedirect('entity.user.equipment_reservations');
+    $form_state->setRedirect('intercept_equipment.account.equipment_reservations');
   }
 
   // Gets the title of a specified node id.
@@ -259,6 +222,9 @@ class EquipmentReservationForm extends ContentEntityForm {
       ->condition('status', 1)
       ->condition('field_equipment', $nid);
     $er_ids = $query->execute();
+    if (empty($er_ids)) {
+      return FALSE;
+    }
 
     // Requested reservation timestamps
     $dateTime = new DrupalDateTime($reservation_start);

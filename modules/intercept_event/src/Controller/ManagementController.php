@@ -13,7 +13,9 @@ class ManagementController extends ManagementControllerBase {
       $build['links']['events'] = $this->getManagementButton('Events', 'admin_event_configuration');
     }
     if ($page_name == 'staff_default' || $page_name == 'admin_default') {
-      $build['links']['event'] = $this->getButton('Create an event', 'intercept_event.management.staff_event_templates', [
+      $type = $page_name == 'staff_default' ? 'staff' : 'admin';
+      $route = "intercept_event.management.{$type}_event_templates";
+      $build['links']['event'] = $this->getButton('Create an event', $route, [
         'user' => $this->currentUser()->id(),
       ]);
       $build['links']['events_all'] = $this->getButton('View All Events', 'intercept_event.events_all');

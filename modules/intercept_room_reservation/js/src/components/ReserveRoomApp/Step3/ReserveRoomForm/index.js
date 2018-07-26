@@ -38,8 +38,6 @@ import Formsy, { addValidationRule } from 'formsy-react';
 
 // Local Components
 import ReserveRoomConfirmation from './ReserveRoomConfirmation';
-import FindARoom from './../FindARoom';
-
 const { constants, select } = interceptClient;
 const c = constants;
 
@@ -233,77 +231,7 @@ class ReserveRoomForm extends PureComponent {
           onValid={this.enableButton}
           onInvalid={this.disableButton}
         >
-          <div className="l--subsection input-group--find-room">
-            <h4 className="">Choose a Room</h4>
 
-            <SelectResource
-              multiple={false}
-              type={c.TYPE_ROOM}
-              handleChange={this.onInputChange(c.TYPE_ROOM)}
-              value={values[c.TYPE_ROOM]}
-              label={'Room'}
-              required
-              name={c.TYPE_ROOM}
-            />
-            <Button
-              variant="raised"
-              color="secondary"
-              size="small"
-              onClick={this.expand('findRoom')}
-            >
-              Browse Rooms
-            </Button>
-          </div>
-
-          <div className="l--subsection">
-            <h4 className="">Choose a Time</h4>
-            <div className="input-group--date-time">
-              <InputDate
-                handleChange={this.onDateChange}
-                defaultValue={null}
-                value={values[c.DATE]}
-                name={c.DATE}
-                required
-                clearable={false}
-                validations="isFutureDate"
-                validationError="Date must be in the future"
-              />
-              <InputTime
-                clearable
-                label="Start Time"
-                value={values.start}
-                onChange={this.onValueChange('start')}
-                name="start"
-                required
-                validations="isFutureTime"
-                validationError="Must be in the future"
-              />
-              <InputTime
-                clearable
-                label="End Time"
-                value={values.end}
-                onChange={this.onValueChange('end')}
-                name="end"
-                required
-                validations={{
-                  isFutureTime: true,
-                  isAfterStart: true,
-                }}
-                validationErrors={{
-                  isFutureTime: 'Must be in the future',
-                  isAfterStart: 'Must be after start time',
-                }}
-              />
-            </div>
-            <Button
-              variant="raised"
-              color="secondary"
-              size="small"
-              onClick={this.expand('findRoom')}
-            >
-              Find a Time
-            </Button>
-          </div>
           <div className="l--subsection--tight">
             <h4 className="">Groups</h4>
             <ExpansionPanel
@@ -327,44 +255,7 @@ class ReserveRoomForm extends PureComponent {
                 />
               </ExpansionPanelSummary>
               <ExpansionPanelDetails className={'input-group__details'}>
-                <div className="input-group--date-time">
-                  <InputTime
-                    clearable
-                    label="Meeting Start Time"
-                    value={values.meetingStart}
-                    onChange={this.onValueChange('meetingStart')}
-                    name="meetingStart"
-                    required={values.meeting}
-                    validations={{
-                      isFutureTime: true,
-                      isOnOrAfterStart: true,
-                      isOnOrBeforeEnd: true,
-                    }}
-                    validationErrors={{
-                      isFutureTime: 'Must be in the future',
-                      isOnOrAfterStart: 'Must be on or after reservation start time',
-                      isOnOrBeforeEnd: 'Must be on or before reservation end time',
-                    }}
-                  />
-                  <InputTime
-                    clearable
-                    label="Meeting End Time"
-                    value={values.meetingEnd}
-                    onChange={this.onValueChange('meetingEnd')}
-                    name="meetingEnd"
-                    required={values.meeting}
-                    validations={{
-                      isFutureTime: true,
-                      isOnOrBeforeEnd: true,
-                      isAfterMeetingStart: true,
-                    }}
-                    validationErrors={{
-                      isFutureTime: 'Must be in the future',
-                      isOnOrBeforeEnd: 'Must be on or before reservation end time',
-                      isAfterMeetingStart: 'Must be after meeting start time',
-                    }}
-                  />
-                </div>
+
                 <InputNumber
                   label="Number of Attendees"
                   value={values.attendees}
@@ -444,7 +335,7 @@ class ReserveRoomForm extends PureComponent {
           <div className="form__actions">
             <Button
               variant="raised"
-              size="small"
+              size="large"
               color="primary"
               type="submit"
               className="button button--primary"
@@ -480,9 +371,6 @@ class ReserveRoomForm extends PureComponent {
               </Typography>
             </Toolbar>
           </AppBar>
-          <div className="dialog__panel">
-            <FindARoom onSelect={this.onRoomSelect} />
-          </div>
         </Dialog>
       </div>
     );

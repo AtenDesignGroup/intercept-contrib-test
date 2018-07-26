@@ -15,18 +15,19 @@ import CurrentFilters from 'intercept/CurrentFilters';
 import DateFilter from 'intercept/DateFilter';
 import KeywordFilter from 'intercept/KeywordFilter';
 import SelectResource from 'intercept/SelectResource';
-import SelectSingle from 'intercept/Select/SelectSingle';
+import InputNumber from 'intercept/Input/InputNumber';
 
 const { constants } = interceptClient;
 const c = constants;
+const ATTENDEES = 'attendees';
 
 const labels = {
   [c.TYPE_LOCATION]: 'Location',
   [c.TYPE_ROOM_TYPE]: 'Room Type',
-  capacity: 'Room Capacity',
+  [ATTENDEES]: 'Number of Attendees',
 };
 
-const capacityOptions = [
+const attendeesOptions = [
   { key: '0', value: 'none' },
   { key: '5', value: '5+' },
   { key: '10', value: '10+' },
@@ -44,27 +45,23 @@ const currentFiltersConfig = filters =>
   }));
 
 class EventFilters extends PureComponent {
-  constructor(props) {
-    super(props);
-
-    this.onFilterChange = this.onFilterChange.bind(this);
-    this.onDateChange = this.onDateChange.bind(this);
-    this.onInputChange = this.onInputChange.bind(this);
-  }
-
-  onFilterChange(key, value) {
+  onFilterChange = (key, value) => {
     const newFilters = { ...this.props.filters, [key]: value };
     this.props.onChange(newFilters);
   }
 
-  onInputChange(key) {
+  onInputChange = (key) => {
     return (event) => {
       this.onFilterChange(key, event.target.value);
     };
   }
 
-  onDateChange(value) {
+  onDateChange = (value) => {
     this.onFilterChange(c.DATE, value);
+  }
+
+  onAttendeesChange = (value) => {
+    this.onFilterChange(ATTENDEES, value);
   }
 
   render() {
@@ -75,9 +72,9 @@ class EventFilters extends PureComponent {
     }
 
     return (
-      <div className="filters">
-        <h3 className="filters__heading">Filter</h3>
-        <Formsy className="filters__inputs">
+      <div className="">
+        <h3 className="">Filter Rooms</h3>
+        <Formsy className="">
           <SelectResource
             multiple
             type={c.TYPE_LOCATION}
@@ -94,17 +91,17 @@ class EventFilters extends PureComponent {
             value={filters[c.TYPE_ROOM_TYPE]}
             label={labels[c.TYPE_ROOM_TYPE]}
           />
-          <SelectSingle
-            options={capacityOptions}
-            handleChange={this.onInputChange('capacity')}
-            value={filters.capacity}
-            label={labels.capacity}
-            name={'capacity'}
+          <InputNumber
+            label={labels[ATTENDEES]}
+            value={filters[ATTENDEES]}
+            onChange={this.onAttendeesChange}
+            name={'attendees'}
+            min={0}
+            int
+            // validations="isPositive"
+            // validationError="Attendees must be a positive number"
           />
         </Formsy>
-        <div className="filters__current">
-          <CurrentFilters filters={currentFilters} onChange={this.onFilterChange} />
-        </div>
       </div>
     );
   }

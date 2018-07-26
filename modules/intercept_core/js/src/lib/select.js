@@ -19,6 +19,14 @@ export const getIdentifier = (type, id) => ({
   id,
 });
 
+export const normalizeIdentifier = (options) => {
+  if (arguments.length === 2) {
+    return getIdentifier(arguments);
+  }
+
+  return options;
+};
+
 //
 // Date Functions
 //
@@ -447,7 +455,7 @@ export const registrationAllowed = (eventId, userId) =>
 //
 // Event Types
 //
-export const eventType = id => record('taxonomy_term--event_type', id);
+export const eventType = id => record(getIdentifier('taxonomy_term--event_type', id));
 export const eventTypes = records('taxonomy_term--event_type');
 export const eventTypesOptions = keyValues(eventTypes, 'data.attributes.name');
 export const eventTypesLabels = peek(eventTypes, 'data.attributes.name');
@@ -455,22 +463,33 @@ export const eventTypesLabels = peek(eventTypes, 'data.attributes.name');
 //
 // Locations
 //
-export const location = id => state => state['node--location'].items[id];
-export const locations = state => state['node--location'].items;
+export const location = id => state => state[c.TYPE_LOCATION].items[id];
+export const locations = state => state[c.TYPE_LOCATION].items;
 export const locationsOptions = keyValues(locations, 'data.attributes.title');
 export const locationsLabels = peek(locations, 'data.attributes.title');
 
 //
 // Rooms
 //
-export const room = id => record(c.TYPE_ROOM, id);
+export const room = id => record(getIdentifier(c.TYPE_ROOM, id));
 export const rooms = records(c.TYPE_ROOM);
 export const roomsArray = state => map(state[c.TYPE_ROOM].items, item => item);
-export const roomsOptions = keyValues(rooms, 'data.attributes.name');
-export const roomsLabels = peek(rooms, 'data.attributes.name');
+export const roomsOptions = keyValues(rooms, 'data.attributes.title');
+export const roomsLabels = peek(rooms, 'data.attributes.title');
 export const roomsAscending = createSelector(roomsArray, items =>
   items.sort((a, b) => recordLabel(a) - recordLabel(b)),
 );
+
+// Get the room's title
+export const roomLabel = id => createSelector(room(id), item => get(item, 'data.attributes.title') || '');
+
+export const roomLocation = id =>
+  createSelector(room(id), item => get(item, 'data.relationships.field_location.data.id'));
+
+export const roomLocationLabel = id => (state) => {
+  const loc = location(roomLocation(id)(state))(state);
+  return get(loc, 'data.attributes.title') || '';
+};
 
 export const roomReservation = id => records(c.TYPE_ROOM_RESERVATION, id);
 export const roomReservations = records(c.TYPE_ROOM_RESERVATION);
@@ -478,7 +497,7 @@ export const roomReservations = records(c.TYPE_ROOM_RESERVATION);
 //
 // Tag
 //
-export const tag = id => record('taxonomy_term--tag', id);
+export const tag = id => record(getIdentifier('taxonomy_term--tag', id));
 export const tags = records('taxonomy_term--tag');
 export const tagsOptions = keyValues(tags, 'data.attributes.name');
 export const tagsLabels = peek(tags, 'data.attributes.name');

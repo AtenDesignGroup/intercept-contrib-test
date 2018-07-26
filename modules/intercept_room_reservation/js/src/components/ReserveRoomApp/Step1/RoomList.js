@@ -10,7 +10,7 @@ class RoomList extends React.PureComponent {
     const teasers = items =>
       items.map(item => ({
         key: item.data.id,
-        node: <TeaserComponent uuid={item.data.id} id={item.data.id}className="room-teaser" {...teaserProps} />,
+        node: <TeaserComponent uuid={item.data.id} id={item.data.id} className="room-teaser" {...teaserProps} />,
       }));
 
     const list =

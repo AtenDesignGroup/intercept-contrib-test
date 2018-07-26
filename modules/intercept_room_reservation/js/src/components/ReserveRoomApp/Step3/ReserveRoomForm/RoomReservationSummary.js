@@ -3,15 +3,17 @@ import PropTypes from 'prop-types';
 import interceptClient from 'interceptClient';
 import { connect } from 'react-redux';
 
-const { constants, select } = interceptClient;
+const { constants, select, utils } = interceptClient;
 const c = constants;
 
 const RoomReservationSummary = props => (
   <article className="room-res-summary">
     <p className="room-res-summary__location">{props.location}</p>
     <h3 className="room-res-summary__room">{props.room}</h3>
-    <span className="room-res-summary__date">{select.getDayDisplay(props.start)}</span>
-    <span className="room-res-summary__time">{`${select.getTimeDisplay(props.start)} to ${select.getTimeDisplay(props.end)}`}</span>
+    <span className="room-res-summary__date">{utils.getDayDisplay(props.start)}&nbsp;</span>
+    <span className="room-res-summary__time">{`${utils.getTimeDisplay(
+      props.start,
+    )} to ${utils.getTimeDisplay(props.end)}`}</span>
   </article>
 );
 
@@ -23,12 +25,11 @@ RoomReservationSummary.propTypes = {
 };
 
 const mapStateToProps = (state, ownProps) => {
-  const roomId = select.getIdentifier(c.TYPE_ROOM, ownProps[c.TYPE_ROOM]);
-  const room = select.record(roomId)(state);
+  const roomId = ownProps[c.TYPE_ROOM];
 
   return {
-    room: select.recordLabel(roomId)(state),
-    location: select.recordLabel(room.data.relationships.field_location.data)(state),
+    room: select.roomLabel(roomId)(state),
+    location: select.roomLocationLabel(roomId)(state),
   };
 };
 

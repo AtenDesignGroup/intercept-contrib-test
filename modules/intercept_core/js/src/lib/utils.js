@@ -60,13 +60,23 @@ export const getDateDisplay = (date) => {
     .format('M/D/YYYY');
 };
 
-// Get a formatted time string.
+// Get a formatted time string
+//   Example: 2p.m.
 export const getTimeDisplay = date =>
   // 2p.m.
   moment(date)
     .tz(getUserTimezone())
     .format('h:mm a')
     .replace('m', '.m.');
+
+// Get a formatted time string
+//   Example: 2p.m.
+export const getDateTimespanDisplay = ({ date, start, end }) => {
+  // const { date, start, end } = this.props.values;
+  return `${getDateDisplay(date)} ${getTimeDisplay(start)} to ${getTimeDisplay(
+    end,
+  )}`;
+};
 
 // Converts a Date object to a Drupal compatible string.
 //   Trims `.000Z` off the end.
@@ -76,6 +86,4 @@ export const dateToDrupal = date =>
     .replace('.000Z', '');
 
 // Converts a Drupal compatible string to a Date object.
-export const dateFromDrupal = date =>
-  moment(`${date}Z`, moment.ISO_8601)
-    .toDate();
+export const dateFromDrupal = date => moment(`${date}Z`, moment.ISO_8601).toDate();

@@ -7,6 +7,9 @@
 
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Database\Database;
+use Drupal\Core\Datetime\DrupalDateTime;
+use Drupal\node\Entity\Node;
+use Drupal\taxonomy\Entity\Term;
 
 /**
  * Implements hook_node_access().
@@ -50,4 +53,99 @@ function intercept_equipment_update_8001() {
   if ($schema->tableExists('equipment_reservation') == FALSE) {
     $schema->createTable('equipment_reservation', $spec);
   }
+}
+
+/**
+ * Implements hook_mail().
+ */
+function intercept_equipment_mail($key, &$message, $params) {
+  $options = array(
+    'langcode' => $message['langcode'],
+  );
+  switch ($key) {
+    case 'created':
+      $message['from'] = \Drupal::config('system.site')->get('mail');
+      $message['subject'] = t('Equipment Request - @equipment_title for @username', array('@username' => $params['username'], '@equipment_title' => $params['equipment_title']), $options);
+      $message['body'] = [];
+      $message['body'][] = t("The following request was submitted:\n\nContact: @email_address\n Location: @location_title\n Room: @room_title\n Event: @event_title\n Equipment: @equipment_title\n Start: @reservation_start_date\n End: @reservation_end_date", array('@email_address' => $params['email_address'], '@username' => $params['username'], '@equipment_title' => $params['equipment_title'], '@reservation_start_date' => $params['reservation_start_date'], '@reservation_end_date' => $params['reservation_end_date'], '@location_title' => $params['location_title'], '@room_title' => $params['room_title'], '@event_title' => $params['event_title']), $options);
+      // Do we need a notification for the requestor? Legacy system did it but
+      // ...we also have an equipment reservations listing page. Let's not do
+      // ...this for launch. -MJ
+      break;
+  }
+  //https://valuebound.com/resources/blog/how-to-send-mail-programmatically-drupal-8
+  //https://valuebound.com/resources/blog/how-to-send-custom-formatted-html-mail-drupal-8-using-hook-mail-alter
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_insert().
+ */
+function intercept_equipment_equipment_reservation_insert(Drupal\Core\Entity\EntityInterface $entity) {
+  // NOTIFICATIONS
+
+  // Get the "to" email address.
+  $equipment_nid = $entity->get('field_equipment')->getValue();
+  $equipment_node = Node::load($equipment_nid[0]['target_id']);
+
+  // Get the equipment node's taxonomy term
+  // (e.g., Technology, Operations, etc.)
+  $equipment_type = $equipment_node->get('field_equipment_type')->getValue();
+  $equipment_type = $equipment_type[0]['target_id'];
+  $equipment_term = Term::load($equipment_type);
+  // Email the appropriate email address(es) as specified on the term.
+  $email_addresses = $equipment_term->get('field_email')->getValue();
+  $email_addresses = $email_addresses[0];
+
+  if (!empty($email_addresses)) {
+    // Set up variables used in the subject/body of the emails.
+    // Get requestor/current user's email address.
+    $user = \Drupal::currentUser();
+    $email = $user->getEmail();
+    // Username of requestor
+    $username = $user->getUsername();
+    // Equipment title
+    $equipment_title = $equipment_node->getTitle();
+    // Dates/times of reservation
+    $reservation_dates = $entity->get('field_dates')->getValue();
+    $config = \Drupal::config('system.date');
+    $timezone = $config->get('timezone.default');
+    $dateTime = new DrupalDateTime($reservation_dates[0]['value'], 'UTC');
+    $reservation_start_date = date('m-d-Y g:i A', $dateTime->getTimestamp());
+    $dateTime = new DrupalDateTime($reservation_dates[0]['end_value'], 'UTC');
+    $reservation_end_date = date('m-d-Y g:i A', $dateTime->getTimestamp());
+    // Location
+    $location_nid = $entity->get('field_location')->getValue();
+    $location_node = Node::load($location_nid[0]['target_id']);
+    $location_title = $location_node->getTitle();
+    // Room
+    $room_nid = $entity->get('field_room')->getValue();
+    $room_node = Node::load($room_nid[0]['target_id']);
+    $room_title = $room_node->getTitle();
+    // Event
+    $event_nid = $entity->get('field_event')->getValue();
+    $event_node = Node::load($event_nid[0]['target_id']);
+    $event_title = $event_node->getTitle();
+
+    // Send it!
+    $mailManager = \Drupal::service('plugin.manager.mail');
+    $module = 'intercept_equipment';
+    $key = 'created';
+    $langcode = \Drupal::languageManager()->getCurrentLanguage()->getId();
+    $params = [
+      'email_address' => $email,
+      'username' => $username,
+      'equipment_title' => $equipment_title,
+      'reservation_start_date' => $reservation_start_date,
+      'reservation_end_date' => $reservation_end_date,
+      'location_title' => $location_title,
+      'room_title' => $room_title,
+      'event_title' => $event_title,
+    ];
+    $send = true;
+    foreach($email_addresses as $email_address) {
+      $to = $email_address;
+      $result = $mailManager->mail($module, $key, $to, $langcode, $params, NULL, $send);
+    }
+  }
+
 }

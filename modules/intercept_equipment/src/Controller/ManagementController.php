@@ -18,16 +18,13 @@ class ManagementController extends ManagementControllerBase {
       //$build['links']['equipment'] = $this->getButton('Reserve equipment', 'intercept_equipment.reserve_equipment');
       $build['links']['equipment']['#access'] = $this->currentUser->hasPermission('add equipment reservation entities');
     }
-    /*if ($page_name == 'staff_default' || $page_name == 'admin_default') {
-      $build['links']['equipment'] = $this->getButton('Reserve equipment', 'intercept_equipment.add_form');
-    }*/
   }
 
   public function viewStaffEquipmentReservations(AccountInterface $user, Request $request) {
     return [
       '#type' => 'view',
       '#name' => 'intercept_equipment_reservations',
-      '#display_id' => 'embed', 
+      '#display_id' => 'embed',
     ];
   }
 

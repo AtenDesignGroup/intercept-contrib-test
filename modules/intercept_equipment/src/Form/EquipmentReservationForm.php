@@ -101,8 +101,8 @@ class EquipmentReservationForm extends ContentEntityForm {
       $explodies = explode(':', $minimum_reservation);
       $form_state->setErrorByName('field_dates', t('The minimum reservation on this piece of equipment is ' . $explodies[0] . ' day(s) and ' . $explodies[1] . ' hour(s). Please make a reservation for at least that long.'));
     }
-    // @TODO: Items in the cart must be available during the reservation period
-    // @TODO: Get other reservations at same time. No two people can have the same thing checked out at the same time.
+    // Items in the cart must be available during the reservation period
+    // Get other reservations at same time. No two people can have the same thing checked out at the same time.
     if ($this->conflictCheck($reservation_dates[0]['value'], $reservation_dates[0]['end_value'], $equipment_node)) {
       $form_state->setErrorByName('field_dates', t('This piece of equipment is reserved during the chosen period. Please check availability and select another date/time.'));
     }

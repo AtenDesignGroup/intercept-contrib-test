@@ -1,11 +1,17 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
 import { withStyles } from '@material-ui/core/styles';
 import Stepper from '@material-ui/core/Stepper';
 import Step from '@material-ui/core/Step';
 import StepButton from '@material-ui/core/StepButton';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
+
+/* eslint-disable */
+import interceptClient from 'interceptClient';
+/* eslint-enable */
+const { select, utils } = interceptClient;
 
 const styles = theme => ({
   root: {
@@ -25,37 +31,14 @@ const styles = theme => ({
     textTransform: 'none',
     textAlign: 'left',
     letterSpacing: 0,
+    paddingBottom: theme.spacing.unit,
+    paddingTop: theme.spacing.unit,
+
   },
 });
 
 function getSteps() {
   return ['Choose a Room', 'Choose a Time', 'Confirm Reservation'];
-}
-
-function getStepContent(step) {
-  switch (step) {
-    case 0:
-      return 'Step 1: Select campaign settings...';
-    case 1:
-      return 'Step 2: What is an ad group anyways?';
-    case 2:
-      return 'Step 3: This is the bit I really care about!';
-    default:
-      return 'Unknown step';
-  }
-}
-
-function getStepCaption(step) {
-  switch (step) {
-    case 0:
-      return 'Cooper: Maker Space #1';
-    case 1:
-      return 'April 3, 2018 10a.m. to 2p.m.';
-    case 2:
-      return '';
-    default:
-      return 'Unknown step';
-  }
 }
 
 class HorizontalNonLinearStepper extends React.Component {
@@ -103,9 +86,7 @@ class HorizontalNonLinearStepper extends React.Component {
   };
 
   handleStep = step => () => {
-    this.setState({
-      activeStep: step,
-    });
+    this.props.onChangeStep(step);
   };
 
   handleComplete = () => {
@@ -124,14 +105,32 @@ class HorizontalNonLinearStepper extends React.Component {
     });
   };
 
+  getDateLabel = () => {
+    const { date, start, end } = this.props.values;
+    return utils.getDateTimespanDisplay({ date, start, end });
+  };
+
+  getStepCaption = (step) => {
+    switch (step) {
+      case 0:
+        return this.props.roomLabel;
+      case 1:
+        // return props.dateLabel;
+        return this.getDateLabel();
+      case 2:
+        return '';
+      default:
+        return 'Unknown step';
+    }
+  }
+
   render() {
-    const { classes } = this.props;
+    const { classes, step } = this.props;
     const steps = getSteps();
-    const { activeStep } = this.state;
 
     return (
       <div className={classes.root}>
-        <Stepper nonLinear activeStep={activeStep}>
+        <Stepper nonLinear activeStep={step}>
           {steps.map((label, index) => (
             <Step key={label}>
               <StepButton
@@ -140,7 +139,7 @@ class HorizontalNonLinearStepper extends React.Component {
                 completed={this.state.completed[index]}
               >
                 {label}
-                {<Typography variant="caption">{getStepCaption(index)}</Typography>}
+                {<Typography variant="caption">{this.getStepCaption(index, this.props)}</Typography>}
               </StepButton>
             </Step>
           ))}
@@ -192,7 +191,31 @@ class HorizontalNonLinearStepper extends React.Component {
 }
 
 HorizontalNonLinearStepper.propTypes = {
+  step: PropTypes.number,
   classes: PropTypes.object.isRequired,
+  onChangeStep: PropTypes.func.isRequired,
+  values: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(HorizontalNonLinearStepper);
+HorizontalNonLinearStepper.defaultProps = {
+  step: 0,
+};
+
+const mapStateToProps = (state, ownProps) => {
+  if (!ownProps.room) {
+    return {};
+  }
+
+  const roomLabel = select.roomLabel(ownProps.room)(state);
+  const locationLabel = select.roomLocationLabel(ownProps.room)(state);
+
+  if (!roomLabel && !locationLabel) {
+    return {};
+  }
+
+  return {
+    roomLabel: locationLabel ? `${locationLabel}: ${roomLabel}` : roomLabel,
+  };
+};
+
+export default connect(mapStateToProps)(withStyles(styles)(HorizontalNonLinearStepper));

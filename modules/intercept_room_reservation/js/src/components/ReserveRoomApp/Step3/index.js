@@ -7,16 +7,14 @@ import interceptClient from 'interceptClient';
 import drupalSettings from 'drupalSettings';
 
 // Material UI
-import Slide from '@material-ui/core/Slide';
 
 // Intercept Components
-import PageSpinner from 'intercept/PageSpinner';
+import SelectResource from 'intercept/SelectResource';
 
 // Local Components
-import ReserveRoomStepper from './ReserveRoomStepper';
-import ReserveRoomStep1 from './Step1';
-import ReserveRoomStep2 from './Step2';
-import ReserveRoomStep3 from './Step3';
+import ReserveRoomForm from './ReserveRoomForm';
+import DateSummary from './DateSummary';
+import RoomSummary from './RoomSummary';
 
 const { constants, api, select } = interceptClient;
 const c = constants;
@@ -119,7 +117,7 @@ function getFilters(values, view = 'list', calView = 'day', date = new Date()) {
   return filter;
 }
 
-class ReserveRoom extends React.Component {
+class ReserveRoomStep3 extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -163,30 +161,14 @@ class ReserveRoom extends React.Component {
     };
     this.handleCalendarNavigate = this.handleCalendarNavigate.bind(this);
     this.handleCalendarView = this.handleCalendarView.bind(this);
-    this.handleFilterChange = this.handleFilterChange.bind(this);
     this.handleViewChange = this.handleViewChange.bind(this);
-    this.onExited = this.onExited.bind(this);
+    this.handleFormChange = this.handleFormChange.bind(this);
     this.doFetchRooms = debounce(this.doFetchRooms, 500).bind(this);
   }
 
   componentDidMount() {
     // this.doFetchRooms(this.props.filters, this.props.view, this.props.calView, this.props.date);
     // this.props.fetchLocations();
-    if (this.props.room) {
-      const filters = {
-        uuid: {
-          path: 'uuid',
-          value: this.props.room,
-        },
-      };
-      this.props.fetchRooms({
-        filters,
-        include: [...roomIncludes, 'field_location'],
-        headers: {
-          'X-Consumer-ID': interceptClient.consumer,
-        },
-      });
-    }
   }
 
   handleViewChange = (value) => {
@@ -204,34 +186,39 @@ class ReserveRoom extends React.Component {
     this.doFetchRooms(this.props.filters, 'calendar', calView, this.props.date);
   };
 
-  handleFilterChange(values) {
+  handleFilterChange = (values) => {
     this.props.onChangeFilters(values);
     this.doFetchRooms(values);
-  }
-
-  handleFormChange = (formValues) => {
-    let room = this.state.room;
-    if (formValues[c.TYPE_ROOM] !== this.state.formValues[c.TYPE_ROOM]) {
-      room = {
-        current: formValues[c.TYPE_ROOM],
-        previous: this.state.room.current,
-        exiting: this.state.room.current !== this.state.room.previous,
-      };
-    }
-    this.setState({
-      room,
-      formValues,
-    });
   };
 
-  onExited() {
+  handleFormChange(formValues) {
+    // let room = this.state.room;
+    // if (formValues[c.TYPE_ROOM] !== this.state.formValues[c.TYPE_ROOM]) {
+    //   room = {
+    //     current: formValues[c.TYPE_ROOM],
+    //     previous: this.state.room.current,
+    //     exiting: this.state.room.current !== this.state.room.previous,
+    //   };
+    // }
+    console.log(formValues);
     this.setState({
-      room: {
-        ...this.state.room,
-        exiting: false,
+      // room,
+      formValues: {
+        ...this.state.formValues,
+        ...formValues,
       },
     });
   }
+
+  // onExited() {
+  //   console.log('exited');
+  //   this.setState({
+  //     room: {
+  //       ...this.state.room,
+  //       exiting: false,
+  //     },
+  //   });
+  // }
 
   doFetchRooms(
     values = this.props.filters,
@@ -242,9 +229,9 @@ class ReserveRoom extends React.Component {
     const { fetchRooms } = this.props;
 
     fetchRooms({
-      // filters: getFilters(values, view, calView, date),
+      filters: getFilters(values, view, calView, date),
       include: roomIncludes,
-      // replace: true,
+      replace: true,
       headers: {
         'X-Consumer-ID': interceptClient.consumer,
       },
@@ -266,68 +253,30 @@ class ReserveRoom extends React.Component {
       roomsLoading,
       filters,
       view,
-      date,
       calView,
-      step,
+      room,
       onChangeStep,
     } = props;
-
-    const steps = [
-      <ReserveRoomStep1 {...props} />,
-      <ReserveRoomStep2 {...props} onChange={this.handleFormChange} />,
-      <ReserveRoomStep3 {...props} onChange={this.handleFormChange} />,
-    ];
-
+    const { date, start, end } = this.state.formValues;
     return (
-      <div className="l--offset">
-        <header className="l__header l--section">
-          <h1 className="page-title">Reserve a Room</h1>
-          <ReserveRoomStepper
-            {...props}
-            step={step}
-            onChangeStep={onChangeStep}
-            values={this.state.formValues}
-          />
-        </header>
+      <div className="l--default">
+        <div className="l__header">
+          <div className="value-summary__wrapper">
+            <RoomSummary value={room} onClickChange={() => onChangeStep(0)} />
+            <DateSummary value={{ date, start, end }} onClickChange={() => onChangeStep(1)} />
+          </div>
+        </div>
         <div className="l__main">
-          <div className="l__primary">{steps[step]}</div>
+          <div className="l__primary">
+            <div className="l--subsection--tight">
+              <ReserveRoomForm values={this.state.formValues} onChange={handleFormChange} />
+            </div>
+          </div>
         </div>
       </div>
     );
   }
 }
-
-ReserveRoom.propTypes = {
-  // calendarRooms: PropTypes.arrayOf(Object).isRequired,
-  rooms: PropTypes.arrayOf(Object).isRequired,
-  roomsLoading: PropTypes.bool.isRequired,
-  fetchLocations: PropTypes.func.isRequired,
-  fetchRooms: PropTypes.func.isRequired,
-  fetchUser: PropTypes.func.isRequired,
-  // Props from URL
-  onChangeStep: PropTypes.func.isRequired,
-  step: PropTypes.number,
-  onChangeRoom: PropTypes.func.isRequired,
-  room: PropTypes.string,
-  event: PropTypes.string,
-  // date: PropTypes.instanceOf(Date),
-  // view: PropTypes.string,
-  filters: PropTypes.object,
-  // onChangeCalView: PropTypes.func.isRequired,
-  // onChangeView: PropTypes.func.isRequired,
-  // onChangeFilters: PropTypes.func.isRequired,
-  // onChangeDate: PropTypes.func.isRequired,
-};
-
-ReserveRoom.defaultProps = {
-  view: 'list',
-  calView: 'month',
-  date: new Date(),
-  filters: {},
-  step: 0,
-  room: null,
-  event: null,
-};
 
 const mapStateToProps = state => ({
   rooms: select.roomsAscending(state),
@@ -336,18 +285,35 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-  fetchRooms: (options) => {
-    dispatch(api[c.TYPE_ROOM].fetchAll(options));
-  },
-  fetchLocations: (options) => {
-    dispatch(api[c.TYPE_LOCATION].fetchAll(options));
-  },
-  fetchUser: (options) => {
-    dispatch(api[c.TYPE_USER].fetchAll(options));
-  },
+  // fetchRooms: (options) => {
+  //   dispatch(api[c.TYPE_ROOM].fetchAll(options));
+  // },
+  // fetchLocations: (options) => {
+  //   dispatch(api[c.TYPE_LOCATION].fetchAll(options));
+  // },
+  // fetchUser: (options) => {
+  //   dispatch(api[c.TYPE_USER].fetchAll(options));
+  // },
 });
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps,
-)(ReserveRoom);
+ReserveRoomStep3.propTypes = {
+  // calendarRooms: PropTypes.arrayOf(Object).isRequired,
+  // rooms: PropTypes.arrayOf(Object).isRequired,
+  // roomsLoading: PropTypes.bool.isRequired,
+  // fetchLocations: PropTypes.func.isRequired,
+  // fetchRooms: PropTypes.func.isRequired,
+  fetchUser: PropTypes.func.isRequired,
+  // calView: PropTypes.string,
+  // date: PropTypes.instanceOf(Date),
+  // view: PropTypes.string,
+  // filters: PropTypes.object,
+  // onChangeCalView: PropTypes.func.isRequired,
+  // onChangeView: PropTypes.func.isRequired,
+  // onChangeFilters: PropTypes.func.isRequired,
+  // onChangeDate: PropTypes.func.isRequired,
+};
+
+ReserveRoomStep3.defaultProps = {
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(ReserveRoomStep3);

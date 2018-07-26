@@ -139,7 +139,7 @@ class EquipmentReservationForm extends ContentEntityForm {
 
     $status = parent::save($form, $form_state);
 
-    switch ($status) {
+    /*switch ($status) {
       case SAVED_NEW:
         drupal_set_message($this->t('Created the %label Equipment reservation.', [
           '%label' => $entity->label(),
@@ -150,7 +150,7 @@ class EquipmentReservationForm extends ContentEntityForm {
         drupal_set_message($this->t('Saved the %label Equipment reservation.', [
           '%label' => $entity->label(),
         ]));
-    }
+    }*/
 
     drupal_set_message('Your equipment was successfully reserved.');
     // Redirect to the staff member's reservation screen on the site. (e.g., /user/6/room-reservations)

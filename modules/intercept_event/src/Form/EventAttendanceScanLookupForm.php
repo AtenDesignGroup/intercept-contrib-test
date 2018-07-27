@@ -57,7 +57,7 @@ class EventAttendanceScanLookupForm extends EventAttendanceScanFormBase {
    * {@inheritdoc}
    */
   protected function instructionsText() {
-    return $this->t('Enter your first name, last name and email to find your library card.');
+    return $this->t('Enter your last name or email to find your library card.');
   }
 
   /**

@@ -10,6 +10,12 @@ intercept_core.general:
   route_name: intercept_core.general
   parent: intercept_core.settings
 
+intercept_core.permissions:
+  title: 'InterCEPT Permissions'
+  description: 'InterCEPT specific permissions.'
+  route_name: intercept_core.admin_permissions
+  parent: intercept_core.settings
+
 intercept_core.account.settings:
   title: 'Settings'
   weight: 15

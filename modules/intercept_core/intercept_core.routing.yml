@@ -29,3 +29,11 @@ intercept_core.account.settings:
     route_name: 'entity.profile.type.user_profile_form'
   requirements:
     _user_is_logged_in: 'TRUE'
+
+intercept_core.admin_permissions:
+  path: '/admin/config/intercept/permissions'
+  defaults:
+    _form: '\Drupal\intercept_core\Form\UserPermissionsForm'
+    _title: 'Permissions'
+  requirements:
+    _permission: 'administer permissions'

@@ -12,3 +12,9 @@ analyze events:
 
 create event content from template:
   title: 'Event: Create new content from template'
+
+access event attendance tab:
+  title: 'Access the node/{node}/attendance menu task'
+
+access event registrations tab:
+  title: 'Access the node/{node}/registrations menu task'

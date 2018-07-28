@@ -134,6 +134,7 @@ class ManagementControllerBase extends ControllerBase {
   protected function getButton($title, $route, $params = []) {
     $button = \Drupal\Core\Link::createFromRoute($title, $route, $params)->toRenderable();
     $button['#attributes']['class'][] = 'btn-block';
+    $button['#access'] = $button['#url']->access($this->currentUser());
     return $button;
   }
 

@@ -24,7 +24,7 @@ class ManagementController extends ManagementControllerBase {
    */
   private function getCreateEventButton() {
     $route = "intercept_event.management.event_templates";
-    return $this->getButton('Create an Event', $route, [
+    return $this->getButton('Create an event', $route, [
       'user' => $this->currentUser()->id(),
     ]);
   }

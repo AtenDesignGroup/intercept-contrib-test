@@ -83,7 +83,7 @@ class EventsController extends ControllerBase {
    * Check bundle access and permissions.
    */
   public function registrationsAccess(NodeInterface $node) {
-    $has_permission = $this->currentUser()->hasPermission('administer event_registration');
+    $has_permission = $this->currentUser()->hasPermission('access event registrations tab');
     return AccessResult::allowedIf($this->isEventBundle($node) && $has_permission);
   }
 
@@ -91,7 +91,7 @@ class EventsController extends ControllerBase {
    * Check bundle access and permissions.
    */
   public function attendanceAccess(NodeInterface $node) {
-    $has_permission = $this->currentUser()->hasPermission('administer event_attendance');
+    $has_permission = $this->currentUser()->hasPermission('access event attendance tab');
     return AccessResult::allowedIf($this->isEventBundle($node) && $has_permission);
   }
 

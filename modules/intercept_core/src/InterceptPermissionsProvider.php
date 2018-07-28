@@ -34,21 +34,27 @@ class InterceptPermissionsProvider implements ContainerInjectionInterface {
    */
   public function managementPermissions() {
     $permissions = [];
-    foreach ($this->managementManager->getPagesByType() as $type => $pages) {
-      $permissions["access $type management"] = [
-        'title' => t("Access @type management", ['@type' => Unicode::ucwords($type)]),
-      ];
-      $permissions["access all $type management pages"] = [
-        'title' => t("Access ALL @type management pages", ['@type' => Unicode::ucwords($type)]),
-      ];
-      foreach ($pages as $key => $page) {
-        $permissions["access $type management page {$page['key']}"] = [
-          'title' => t('Access @type management page @key', [
-            '@type' => $type,
-            '@key' => $page['key'],
-          ]),
-        ];
+    $permissions["access management"] = [
+      'title' => t("Access management"),
+      'description' => t('Allow access to the @link_name item in the @menu_name menu.', [
+        '@link_name' => 'Manage',
+        '@menu_name' => 'My Account',
+      ]),
+    ];
+    $permissions["access all management pages"] = [
+      'title' => t("Access ALL management pages"),
+      'restrict access' => TRUE,
+    ];
+    foreach ($this->managementManager->getPages() as $key => $page) {
+      // For the default page we use the simple "access management" permission.
+      if ($key == 'default') {
+        continue;
       }
+      $permissions["access management page {$page['key']}"] = [
+        'title' => t('Access management page @key', [
+          '@key' => $page['key'],
+        ]),
+      ];
     }
     return $permissions;
   }

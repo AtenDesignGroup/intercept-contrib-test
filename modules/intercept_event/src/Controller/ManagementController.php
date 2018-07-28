@@ -9,13 +9,12 @@ use Symfony\Component\HttpFoundation\Request;
 class ManagementController extends ManagementControllerBase {
 
   public function alter(array &$build, $page_name) {
-    if ($page_name == 'admin_system_configuration') {
-      $build['links']['events'] = $this->getManagementButton('Events', 'admin_event_configuration');
+    if ($page_name == 'system_configuration') {
+      $build['links']['events'] = $this->getManagementButton('Events', 'event_configuration');
     }
-    if ($page_name == 'staff_default' || $page_name == 'admin_default') {
-      $type = $page_name == 'staff_default' ? 'staff' : 'admin';
-      $route = "intercept_event.management.{$type}_event_templates";
-      $build['links']['event'] = $this->getCreateEventButton($type);
+    if ($page_name == 'default') {
+      $route = "intercept_event.management.event_templates";
+      $build['links']['event'] = $this->getCreateEventButton();
       $build['links']['events_all'] = $this->getButton('View All Events', 'intercept_event.events_all');
     }
   }
@@ -23,14 +22,26 @@ class ManagementController extends ManagementControllerBase {
   /**
    * Helper function to create a link to the template page for creating events.
    */
-  private function getCreateEventButton($type = 'staff') {
-    $route = "intercept_event.management.{$type}_event_templates";
+  private function getCreateEventButton() {
+    $route = "intercept_event.management.event_templates";
     return $this->getButton('Create an Event', $route, [
       'user' => $this->currentUser()->id(),
     ]);
   }
 
-  public function viewAdminEventConfiguration(AccountInterface $user, Request $request) {
+  public function viewEvents(AccountInterface $user, Request $request, $is_admin = FALSE) {
+    return [
+      'title' => $this->title('Events'),
+      'event_create' => $this->getCreateEventButton(),
+      'content' => [
+        '#type' => 'view',
+        '#name' => 'intercept_events',
+        '#display_id' => 'embed',
+      ],
+    ];
+  }
+
+  public function viewEventConfiguration(AccountInterface $user, Request $request) {
     $lists = $this->table();
     $link = $this->getButton('Event Series', 'system.admin_content', [
           'type' => 'event_series',
@@ -58,31 +69,11 @@ class ManagementController extends ManagementControllerBase {
     ];
   }
 
-  public function viewStaffEvents(AccountInterface $user, Request $request, $is_admin = FALSE) {
-    return [
-      'title' => $this->title('Events'),
-      'event_create' => $this->getCreateEventButton($is_admin ? 'admin' : 'staff'),
-      'content' => [
-        '#type' => 'view',
-        '#name' => 'intercept_events',
-        '#display_id' => 'embed',
-      ],
-    ];
-  }
-
-  public function viewAdminEvents(AccountInterface $user, Request $request) {
-    return $this->viewStaffEvents($user, $request, TRUE);
-  }
-
-  public function viewStaffEventTemplates(AccountInterface $user, Request $request) {
+  public function viewEventTemplates(AccountInterface $user, Request $request) {
     return [
       '#type' => 'view',
       '#name' => 'intercept_event_templates',
       '#display_id' => 'embed',
     ];
-  }
-
-  public function viewAdminEventTemplates(AccountInterface $user, Request $request) {
-    return $this->viewStaffEventTemplates($user, $request);
   }
 }

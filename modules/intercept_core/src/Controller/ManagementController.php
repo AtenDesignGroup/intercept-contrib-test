@@ -43,6 +43,7 @@ class ManagementController extends ManagementControllerBase {
         });
       }
       $this->hideElements($build['form'], ['site_information']);
+      $build['form']['site_information']['site_slogan']['#access'] = FALSE;
     }
     if (empty($view)) {
       $table = $this->table();

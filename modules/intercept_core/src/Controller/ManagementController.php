@@ -11,26 +11,19 @@ use Symfony\Component\HttpFoundation\Request;
 class ManagementController extends ManagementControllerBase {
 
   public function alter(array &$build, $page_name) {
-    if ($page_name == 'admin_default') {
-      $build['links']['configuration'] = $this->getManagementButton('System Configuration', 'admin_system_configuration');
+    if ($page_name == 'default') {
+      $build['links']['configuration'] = $this->getManagementButton('System Configuration', 'system_configuration');
     }
   }
 
-  public function viewStaffDefault(AccountInterface $user, Request $request) {
+  public function viewDefault(AccountInterface $user, Request $request) {
     return [
       'title' => $this->title('Welcome, @name', ['@name' => $user->getDisplayName()]),
       'links' => [],
     ];
   }
 
-  public function viewAdminDefault(AccountInterface $user, Request $request) {
-    return [
-      'title' => $this->title('Welcome, @name', ['@name' => $user->getDisplayName()]),
-      'links' => [],
-    ];
-  }
-
-  public function viewAdminSettings(AccountInterface $user, Request $request) {
+  public function viewSettings(AccountInterface $user, Request $request) {
     $view = $request->query->get('view');
 
     $build = [
@@ -66,11 +59,11 @@ class ManagementController extends ManagementControllerBase {
     return $build;
   }
 
-  public function viewAdminSystemConfiguration(AccountInterface $user, Request $request) {
+  public function viewSystemConfiguration(AccountInterface $user, Request $request) {
     $build = [
       'title' => $this->title('System Configuration'),
       'links' => [
-        'settings' => $this->getManagementButton('Settings', 'admin_settings'),
+        'settings' => $this->getManagementButton('Settings', 'settings'),
       ],
     ];
     $build['links']['settings']['#weight'] = 25;

@@ -63,14 +63,6 @@ class ManagementManager extends DefaultPluginManager implements ManagementManage
     }
   }
 
-  public function getPagesByType() {
-    $data = [];
-    foreach ($this->getPages() as $id => $values) {
-      $data[$values['type']][$id] = $values;
-    }
-    return $data;
-  }
-
   public function getPages() {
     $return = [];
     foreach ($this->getDefinitions() as $definition) {
@@ -78,15 +70,12 @@ class ManagementManager extends DefaultPluginManager implements ManagementManage
       if (empty($definition->pages)) {
         continue;
       }
-      foreach ($definition->pages as $type => $pages) {
-        foreach ($pages as $id => $page) {
-          $return["{$definition->id}.management.{$type}_{$id}"] = $page + [
-            'title' => $page['title'],
-            'key' => $id,
-            'controller' => $definition->controller,
-            'type' => $type,
-          ];
-        }
+      foreach ($definition->pages as $key => $page) {
+        $return["{$definition->id}.management.{$key}"] = $page + [
+          'title' => $page['title'],
+          'key' => $key,
+          'controller' => $definition->controller,
+        ];
       }
     }
     return $return;

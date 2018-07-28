@@ -44,7 +44,7 @@ class InterceptMenuLinks extends DeriverBase implements ContainerDeriverInterfac
         'title' => $page->title,
         'weight' => isset($page->menu_weight) ? $page->menu_weight : 0,
         'route_name' => "{$id}.redirect",
-        'menu_name' => $page->type == 'staff' ? 'intercept-staff' : 'intercept-system-admin',
+        'menu_name' => 'intercept-manage',
       ];
     }
 

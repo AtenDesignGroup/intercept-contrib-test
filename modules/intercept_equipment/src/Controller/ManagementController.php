@@ -9,10 +9,10 @@ use Symfony\Component\HttpFoundation\Request;
 class ManagementController extends ManagementControllerBase {
 
   public function alter(array &$build, $page_name) {
-    if ($page_name == 'admin_system_configuration') {
-      $build['links']['equipment'] = $this->getManagementButton('Equipment', 'admin_equipment_configuration');
+    if ($page_name == 'system_configuration') {
+      $build['links']['equipment'] = $this->getManagementButton('Equipment', 'equipment_configuration');
     }
-    if ($page_name == 'staff_default' || $page_name == 'admin_default') {
+    if ($page_name == 'default') {
       $build['links']['equipment'] = $this->getButton('Reserve equipment', 'entity.equipment_reservation.add_form');
       // @TODO: Decoupled version:
       //$build['links']['equipment'] = $this->getButton('Reserve equipment', 'intercept_equipment.reserve_equipment');
@@ -20,7 +20,7 @@ class ManagementController extends ManagementControllerBase {
     }
   }
 
-  public function viewStaffEquipmentReservations(AccountInterface $user, Request $request) {
+  public function viewEquipmentReservations(AccountInterface $user, Request $request) {
     return [
       '#type' => 'view',
       '#name' => 'intercept_equipment_reservations',
@@ -28,11 +28,7 @@ class ManagementController extends ManagementControllerBase {
     ];
   }
 
-  public function viewAdminEquipmentReservations(AccountInterface $user, Request $request) {
-    return $this->viewStaffEquipmentReservations($user, $request);
-  }
-
-  public function viewAdminEquipmentConfiguration(AccountInterface $user, Request $request) {
+  public function viewEquipmentConfiguration(AccountInterface $user, Request $request) {
     return [
       'title' => $this->title('Equipment'),
       'taxonomies' => $this->getTaxonomyVocabularyTable(['equipment_type']),

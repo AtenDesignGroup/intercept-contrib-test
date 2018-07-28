@@ -119,12 +119,22 @@ function intercept_equipment_equipment_reservation_insert(Drupal\Core\Entity\Ent
     $location_title = $location_node->getTitle();
     // Room
     $room_nid = $entity->get('field_room')->getValue();
-    $room_node = Node::load($room_nid[0]['target_id']);
-    $room_title = $room_node->getTitle();
+    if ($room_nid) {
+      $room_node = Node::load($room_nid[0]['target_id']);
+      $room_title = $room_node->getTitle();
+    }
+    else {
+      $room_title = '';
+    }
     // Event
     $event_nid = $entity->get('field_event')->getValue();
-    $event_node = Node::load($event_nid[0]['target_id']);
-    $event_title = $event_node->getTitle();
+    if ($event_id) {
+      $event_node = Node::load($event_nid[0]['target_id']);
+      $event_title = $event_node->getTitle();
+    }
+    else {
+      $event_title = '';
+    }
 
     // Send it!
     $mailManager = \Drupal::service('plugin.manager.mail');

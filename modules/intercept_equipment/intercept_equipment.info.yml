@@ -1,4 +1,4 @@
-name: Equipment
+name: InterCEPT Equipment
 description: 'Provides Equipment content type and related configuration. Equipment for use.'
 type: module
 core: 8.x

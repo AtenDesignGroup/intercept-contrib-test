@@ -233,22 +233,25 @@ class EquipmentReservationForm extends ContentEntityForm {
     $reservation_end = $dateTime->getTimestamp();
     // Get existing reservation timestamps
     foreach ($er_ids as $er_id) {
-      // Get the reservation dates.
-      $entity_manager = \Drupal::entityTypeManager();
-      $equipment_reservation = $entity_manager->getStorage('equipment_reservation')->load($er_id);
-      $dates = $equipment_reservation->get('field_dates')->getValue();
-      $existing_reservation_start = $dates[0]['value'];
-      $existing_reservation_end = $dates[0]['end_value'];
-      // Change everything to timestamps.
-      $dateTime = new DrupalDateTime($existing_reservation_start, 'UTC');
-      $existing_reservation_start = $dateTime->getTimestamp();
-      $dateTime = new DrupalDateTime($existing_reservation_end, 'UTC');
-      $existing_reservation_end = $dateTime->getTimestamp();
+      // Don't check it against itself for conflicts.
+      if ($er_id != $this->entity->id()) {
+        // Get the reservation dates.
+        $entity_manager = \Drupal::entityTypeManager();
+        $equipment_reservation = $entity_manager->getStorage('equipment_reservation')->load($er_id);
+        $dates = $equipment_reservation->get('field_dates')->getValue();
+        $existing_reservation_start = $dates[0]['value'];
+        $existing_reservation_end = $dates[0]['end_value'];
+        // Change everything to timestamps.
+        $dateTime = new DrupalDateTime($existing_reservation_start, 'UTC');
+        $existing_reservation_start = $dateTime->getTimestamp();
+        $dateTime = new DrupalDateTime($existing_reservation_end, 'UTC');
+        $existing_reservation_end = $dateTime->getTimestamp();
 
-      // Setup is done. Check for actual overlap.
-      //if ((StartDate1 <= EndDate2) and (EndDate1 >= StartDate2)) {
-      if (($reservation_start <= $existing_reservation_end) and ($reservation_end >= $existing_reservation_start)) {
-        return TRUE;
+        // Setup is done. Check for actual overlap.
+        //if ((StartDate1 <= EndDate2) and (EndDate1 >= StartDate2)) {
+        if ($reservation_start <= $existing_reservation_end && $reservation_end >= $existing_reservation_start) {
+          return TRUE;
+        }
       }
     }
 

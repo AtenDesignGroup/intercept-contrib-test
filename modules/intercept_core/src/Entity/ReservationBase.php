@@ -96,7 +96,10 @@ abstract class ReservationBase extends RevisionableContentEntityBase {
    * {@inheritdoc}
    */
   public function preSave(EntityStorageInterface $storage) {
-    if (!empty($this->original) && !$this->original->get('field_status')->equals($this->get('field_status'))){
+    if (!empty($this->original) && !isset($this->original->values['field_status'])) {
+      $this->setNewRevision(TRUE); // Equipment reservations dont' have status.
+    }
+    else if (!empty($this->original) && !$this->original->get('field_status')->equals($this->get('field_status'))){
       $this->setNewRevision(TRUE);
     }
     parent::preSave($storage);

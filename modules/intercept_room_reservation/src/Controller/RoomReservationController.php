@@ -3,11 +3,13 @@
 namespace Drupal\intercept_room_reservation\Controller;
 
 use Drupal\Component\Utility\Xss;
+use Drupal\Component\Serialization\Json;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Url;
 use Drupal\intercept_room_reservation\Entity\RoomReservationInterface;
 use Drupal\user\UserInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 /**
  * Class RoomReservationController.
@@ -176,4 +178,50 @@ class RoomReservationController extends ControllerBase implements ContainerInjec
     return $build;
   }
 
+  public function reservations(\Drupal\node\NodeInterface $node, \Symfony\Component\HttpFoundation\Request $request) {
+      $output['title'] = [
+          '#type' => 'html_tag',
+          '#tag' => 'h2',
+          '#value' => $node->uuid(),
+      ];
+    $output['table'] = [
+        '#title' => $node->uuid(),
+      '#type' => 'table',
+      '#rows' => [],
+    ];
+    $manager = \Drupal::service('intercept_core.reservation.manager');
+    ksm($manager->availability([
+      'start' => '2018-08-01T15:30:00',
+      'end' => '2018-08-01T19:00:00',
+      'duration' => '60',
+    ]));
+    $reservations = $manager->reservations('room', function($query) use ($node) {
+      $query->condition('field_room', $node->id(), '=');
+      $query->sort('field_dates.value', 'ASC');
+    });
+    foreach ($reservations as $reservation) {
+      $col = [
+        $reservation->id(),
+        $reservation->label(),
+      ];
+      $output['table']['#rows'][] = $col;
+    }
+    return $output;
+  }
+
+  public function availability(\Symfony\Component\HttpFoundation\Request $request) {
+    $query = $request->query->all();
+    $manager = \Drupal::service('intercept_core.reservation.manager');
+    if (!empty($query['filter']['rooms'])) {
+      $rooms = $manager->convertIds($query['filter']['rooms']);
+    }
+    $result = $manager->availability([
+      'start' => $query['filter']['start'],
+      'end' => $query['filter']['end'],
+      'duration' => $query['filter']['duration'],
+      'rooms' => $rooms,
+    ]);
+
+    return JsonResponse::create($result, 200);
+  }
 }

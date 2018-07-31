@@ -45,14 +45,25 @@ abstract class ReservationBase extends RevisionableContentEntityBase {
       return '';
     }
     $values = [];
-    if ($from_date = $dates->get('value')->getDateTime()) {
-      $values['@date'] = $from_date->format('F n, Y');
-      $values['@time_start'] = $from_date->format('h:i A');
+    $timezone = drupal_get_user_timezone();
+    if ($from_date = $dates->get('start_date')->getValue()) {
+      $values['@date'] = $from_date->format('F j, Y', ['timezone' => $timezone]);
+      $values['@time_start'] = $from_date->format('h:i A', ['timezone' => $timezone]);
     }
-    if ($to_date = $dates->get('end_value')->getDateTime()) {
-      $values['@time_end'] = $to_date->format('h:i A');
+    if ($to_date = $dates->get('end_date')->getValue()) {
+      $values['@time_end'] = $to_date->format('h:i A', ['timezone' => $timezone]);
     }
     return !empty($values) ? $this->t('@date from @time_start to @time_end', $values) : '';
+  }
+
+  public function getStartDate() {
+    $dates = $this->get('field_dates')->first();
+    return $dates->get('start_date')->getValue();
+  }
+
+  public function getEndDate() {
+    $dates = $this->get('field_dates')->first();
+    return $dates->get('end_date')->getValue();
   }
 
   /**

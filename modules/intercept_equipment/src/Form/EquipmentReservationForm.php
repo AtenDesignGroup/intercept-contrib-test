@@ -250,7 +250,10 @@ class EquipmentReservationForm extends ContentEntityForm {
         // Setup is done. Check for actual overlap.
         //if ((StartDate1 <= EndDate2) and (EndDate1 >= StartDate2)) {
         if ($reservation_start <= $existing_reservation_end && $reservation_end >= $existing_reservation_start) {
-          return TRUE;
+          // Allow "start touching" and "end touching" type reservations.
+          if ($reservation_start != $existing_reservation_end && $reservation_end != $existing_reservation_start) {
+            return TRUE;
+          }
         }
       }
     }

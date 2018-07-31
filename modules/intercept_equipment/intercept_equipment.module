@@ -126,7 +126,7 @@ function intercept_equipment_equipment_reservation_insert(Drupal\Core\Entity\Ent
     }
     // Event
     $event_nid = $entity->get('field_event')->getValue();
-    if ($event_id) {
+    if ($event_nid) {
       $event_node = Node::load($event_nid[0]['target_id']);
       $event_title = $event_node->getTitle();
     }

@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import moment from 'moment';
 import debounce from 'lodash/debounce';
+import get from 'lodash/get';
 import interceptClient from 'interceptClient';
 import drupalSettings from 'drupalSettings';
 
@@ -19,12 +20,20 @@ import SelectResource from 'intercept/SelectResource';
 // Local Components
 import RoomFilters from './RoomFilters';
 import RoomList from './RoomList';
-import { get } from 'https';
+// import { get } from 'https';
 
 const { constants, api, select, utils } = interceptClient;
 const c = constants;
 const ATTENDEES = 'attendees';
 const roomIncludes = ['image_primary', 'image_primary.field_media_image'];
+const roomStaffRoles = [
+  'administrator',
+  'intercept_event_manager',
+  'intercept_event_organizer',
+  'intercept_staff',
+  'intercept_system_admin',
+  'intercept_room_reservation_approver',
+];
 
 function getDateSpan(value, view = 'day') {
   const start = moment(value).startOf(view);
@@ -57,14 +66,7 @@ function getRoleBasedFilters() {
     },
   };
 
-  if (utils.userHasRole([
-    'administrator',
-    'intercept_event_manager',
-    'intercept_event_organizer',
-    'intercept_staff',
-    'intercept_system_admin',
-    'intercept_room_reservation_approver',
-  ])) {
+  if (utils.userHasRole(roomStaffRoles)) {
     filter = {};
   }
 
@@ -128,7 +130,6 @@ function getFilters(values, view = 'list', calView = 'day', date = new Date()) {
   const types = [
     { id: c.TYPE_ROOM_TYPE, path: 'field_room_type.uuid', conjunction: 'OR' },
     { id: c.TYPE_LOCATION, path: 'field_location.uuid', conjunction: 'OR' },
-    // { id: c.TYPE_AUDIENCE, path: 'field_event_audience.uuid', conjunction: 'OR' },
   ];
 
   types.forEach((type) => {
@@ -283,17 +284,33 @@ class ReserveRoomStep1 extends React.Component {
     const { rooms, roomsLoading, filters } = props;
 
     const roomToShow = this.state.room[this.state.room.exiting ? 'previous' : 'current'];
-    const roomFooter = roomProps => (
-      <Button
+    const roomFooter = (roomProps) => {
+      const reservable = get(roomProps, 'room.attributes.field_reservable_online');
+      const phoneNumber = get(roomProps, 'room.attributes.field_reservation_phone_number');
+
+      if (!reservable && !utils.userHasRole(roomStaffRoles)) {
+        const phoneLink = phoneNumber
+          ? (<a href={`tel:${phoneNumber}`} className="call-prompt__link" >{phoneNumber}</a>)
+          : null;
+
+        return (
+          <p className="call-prompt">
+            <span className="call-prompt__text">Call to Reserve</span> {phoneLink}
+          </p>
+        );
+      }
+
+      return (<Button
         variant={'raised'}
         size="small"
         color="primary"
         className={'action-button__button'}
         onClick={() => handleRoomSelect(roomProps.uuid)}
-      >
-        {'Reserve'}
-      </Button>
-    );
+        >
+          {'Reserve'}
+        </Button>
+      );
+    };
 
     return (
       <div className="l--sidebar-before">

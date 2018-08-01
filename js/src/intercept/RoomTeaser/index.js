@@ -51,6 +51,7 @@ class RoomTeaser extends PureComponent {
         title={room.attributes.title}
         description={get(room, 'attributes.field_text_teaser.value')}
         tags={[roomTypes, capicity, staffUse]}
+        room={room}
       />
     );
   }

@@ -7,7 +7,14 @@ import DialogConfirm from 'intercept/Dialog/DialogConfirm';
 import RoomReservationSummary from './RoomReservationSummary';
 import RoomReservationStatus from './RoomReservationStatus';
 
-const { actions, api, constants, select, utils } = interceptClient;
+const {
+  actions,
+  api,
+  constants,
+  select,
+  utils,
+  session,
+} = interceptClient;
 const c = constants;
 
 const buildRoomReservation = (values) => {
@@ -69,6 +76,7 @@ class ReserveRoomConfirmation extends React.PureComponent {
 
     this.state = {
       uuid: null,
+      saved: false,
     };
 
     this.handleConfirm = this.handleConfirm.bind(this);
@@ -78,17 +86,18 @@ class ReserveRoomConfirmation extends React.PureComponent {
     const { onConfirm, values, save } = this.props;
     const entity = buildRoomReservation(values);
     this.setState({
+      saved: true,
       uuid: entity.id,
     });
     save(entity);
-    // onConfirm();
+    onConfirm();
   }
 
   render() {
     const { open, onCancel, values } = this.props;
-    const { uuid } = this.state;
+    const { uuid, saved } = this.state;
 
-    const content = uuid ? (
+    const content = uuid && saved ? (
       <RoomReservationStatus uuid={uuid} />
     ) : (
       <RoomReservationSummary {...values} />
@@ -137,9 +146,19 @@ ReserveRoomConfirmation.defaultProps = {
 const mapStateToProps = () => ({});
 
 const mapDispatchToProps = dispatch => ({
+
   save: (data) => {
     dispatch(actions.add(data, c.TYPE_ROOM_RESERVATION, data.id));
-    dispatch(api[c.TYPE_ROOM_RESERVATION].sync(data.id));
+    session
+      .getToken()
+      .then((token) => {
+        dispatch(
+          api[c.TYPE_ROOM_RESERVATION].sync(data.id, { headers: { 'X-CSRF-Token': token } })
+        );
+      })
+      .catch((e) => {
+        console.log('Unable to save Reservation', e);
+      });
   },
 });
 

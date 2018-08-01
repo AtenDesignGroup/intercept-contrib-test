@@ -5,6 +5,9 @@ import PropTypes from 'prop-types';
 // Redux
 import { connect } from 'react-redux';
 
+// Moment
+import moment from 'moment';
+
 // Intercept
 import interceptClient from 'interceptClient';
 import drupalSettings from 'drupalSettings';
@@ -28,13 +31,14 @@ import Collapse from '@material-ui/core/Collapse';
 // Intercept Components
 import InputDate from 'intercept/Input/InputDate';
 import InputTime from 'intercept/Input/InputTime';
+import SelectTime from 'intercept/Select/SelectTime';
 
 // Formsy
 import Formsy, { addValidationRule } from 'formsy-react';
 
 // Local Components
 
-const { constants, select } = interceptClient;
+const { constants, select, utils } = interceptClient;
 const c = constants;
 
 const matchTime = (original, ref) => {
@@ -61,13 +65,19 @@ addValidationRule(
   (values, value) => !values.refreshments || value !== '',
 );
 addValidationRule('isRequiredIfMeeting', (values, value) => !values.meeting || value !== '');
-addValidationRule('isFutureDate', (values, value) => value >= matchTime(new Date(), value));
-addValidationRule('isFutureTime', (values, value) => value > new Date());
-addValidationRule('isAfterStart', (values, value) => value > values.start);
-addValidationRule('isOnOrAfterStart', (values, value) => value >= values.start);
-addValidationRule('isBeforeEnd', (values, value) => value < values.end);
-addValidationRule('isOnOrBeforeEnd', (values, value) => value <= values.end);
-addValidationRule('isAfterMeetingStart', (values, value) => value > values.meetingStart);
+addValidationRule(
+  'isFutureDate',
+  (values, value) => value === null || value >= matchTime(new Date(), value),
+);
+addValidationRule('isFutureTime', (values, value) => value === null || value > new Date());
+addValidationRule('isAfterStart', (values, value) => value === null || value > values.start);
+addValidationRule('isOnOrAfterStart', (values, value) => value === null || value >= values.start);
+addValidationRule('isBeforeEnd', (values, value) => value === null || value < values.end);
+addValidationRule('isOnOrBeforeEnd', (values, value) => value === null || value <= values.end);
+addValidationRule(
+  'isAfterMeetingStart',
+  (values, value) => value === null || value > values.meetingStart,
+);
 
 function Transition(props) {
   return <Slide direction="up" {...props} />;
@@ -191,7 +201,9 @@ class ReserveRoomStep2 extends PureComponent {
   };
 
   render() {
-    const { values } = this.props;
+    const { values, min, max, step, onSubmit } = this.props;
+    const minValue = matchDate(min, values.date);
+    const maxValue = matchDate(max, values.date);
 
     return (
       <div className="form">
@@ -202,10 +214,9 @@ class ReserveRoomStep2 extends PureComponent {
           onValid={this.enableButton}
           onInvalid={this.disableButton}
         >
-
           <div className="l--subsection">
             <h4 className="">Choose a Time</h4>
-            <div className="input-group--date-time">
+            <div className="">
               <InputDate
                 handleChange={this.onDateChange}
                 defaultValue={null}
@@ -216,7 +227,7 @@ class ReserveRoomStep2 extends PureComponent {
                 validations="isFutureDate"
                 validationError="Date must be in the future"
               />
-              <InputTime
+              <SelectTime
                 clearable
                 label="Start Time"
                 value={values.start}
@@ -225,8 +236,52 @@ class ReserveRoomStep2 extends PureComponent {
                 required
                 validations="isFutureTime"
                 validationError="Must be in the future"
+                min={minValue}
+                max={maxValue}
+                step={step}
               />
-              <InputTime
+              <div className="input-group--subgroup">
+                <SelectTime
+                  clearable
+                  label="Meeting Start Time"
+                  value={values.meetingStart}
+                  onChange={this.onValueChange('meetingStart')}
+                  name="meetingStart"
+                  validations={{
+                    isFutureTime: false,
+                    isOnOrAfterStart: true,
+                    isOnOrBeforeEnd: true,
+                  }}
+                  validationErrors={{
+                    isFutureTime: 'Must be in the future',
+                    isOnOrAfterStart: 'Must be on or after reservation start time',
+                    isOnOrBeforeEnd: 'Must be on or before reservation end time',
+                  }}
+                  min={values.start}
+                  max={values.end}
+                  step={step}
+                />
+                <SelectTime
+                  label="Meeting End Time"
+                  value={values.meetingEnd}
+                  onChange={this.onValueChange('meetingEnd')}
+                  name="meetingEnd"
+                  validations={{
+                    isFutureTime: true,
+                    isOnOrBeforeEnd: true,
+                    isAfterMeetingStart: true,
+                  }}
+                  validationErrors={{
+                    isFutureTime: 'Must be in the future',
+                    isOnOrBeforeEnd: 'Must be on or before reservation end time',
+                    isAfterMeetingStart: 'Must be after meeting start time',
+                  }}
+                  min={values.start}
+                  max={values.end}
+                  step={step}
+                />
+              </div>
+              <SelectTime
                 clearable
                 label="End Time"
                 value={values.end}
@@ -241,9 +296,38 @@ class ReserveRoomStep2 extends PureComponent {
                   isFutureTime: 'Must be in the future',
                   isAfterStart: 'Must be after start time',
                 }}
+                min={minValue}
+                max={maxValue}
+                step={step}
               />
+              {/* <InputTime
+                clearable
+                label="Start Time"
+                value={values.start}
+                onChange={this.onValueChange('start')}
+                name="start"
+                required
+                validations="isFutureTime"
+                validationError="Must be in the future"
+              /> */}
+              {/* <InputTime
+                clearable
+                label="End Time"
+                value={values.end}
+                onChange={this.onValueChange('end')}
+                name="end"
+                required
+                validations={{
+                  isFutureTime: true,
+                  isAfterStart: true,
+                }}
+                validationErrors={{
+                  isFutureTime: 'Must be in the future',
+                  isAfterStart: 'Must be after start time',
+                }}
+              /> */}
             </div>
-            <div className="input-group--date-time">
+            {/* <div className="input-group--date-time">
               <InputTime
                 clearable
                 label="Meeting Start Time"
@@ -280,7 +364,7 @@ class ReserveRoomStep2 extends PureComponent {
                   isAfterMeetingStart: 'Must be after meeting start time',
                 }}
               />
-            </div>
+            </div> */}
           </div>
 
           <div className="form__actions">
@@ -291,6 +375,7 @@ class ReserveRoomStep2 extends PureComponent {
               type="submit"
               className="button button--primary"
               disabled={!this.state.canSubmit}
+              onClick={onSubmit}
             >
               Next
             </Button>
@@ -306,7 +391,6 @@ ReserveRoomStep2.propTypes = {
     date: PropTypes.instanceOf(Date),
     start: PropTypes.instanceOf(Date),
     end: PropTypes.instanceOf(Date),
-    meetings: PropTypes.bool,
     meetingStart: PropTypes.instanceOf(Date),
     meetingEnd: PropTypes.instanceOf(Date),
   }),
@@ -315,13 +399,29 @@ ReserveRoomStep2.propTypes = {
 
 ReserveRoomStep2.defaultProps = {
   values: {
-    date: new Date(),
-    start: new Date(),
-    end: new Date(),
-    meetingStart: new Date(),
-    meetingEnd: new Date(),
+    date: utils.roundTo(new Date()).toDate(),
+    start: utils.roundTo(new Date()).toDate(),
+    end: utils
+      .roundTo(new Date())
+      .add(30, 'minutes')
+      .toDate(),
+    meetingStart: utils.roundTo(new Date()).toDate(),
+    meetingEnd: utils
+      .roundTo(new Date())
+      .add(30, 'minutes')
+      .toDate(),
   },
-  meetingPurpose: null,
+  step: 15,
+  min: moment(new Date())
+    .tz(utils.getUserTimezone())
+    .startOf('hour')
+    .hour(8)
+    .toDate(),
+  max: moment(new Date())
+    .tz(utils.getUserTimezone())
+    .startOf('hour')
+    .hour(21)
+    .toDate(),
 };
 
 const mapStateToProps = (state, ownProps) => ({});

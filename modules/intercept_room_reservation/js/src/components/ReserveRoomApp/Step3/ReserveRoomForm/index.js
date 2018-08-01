@@ -38,7 +38,7 @@ import Formsy, { addValidationRule } from 'formsy-react';
 
 // Local Components
 import ReserveRoomConfirmation from './ReserveRoomConfirmation';
-const { constants, select } = interceptClient;
+const { constants, select, utils } = interceptClient;
 const c = constants;
 
 const matchTime = (original, ref) => {
@@ -65,13 +65,13 @@ addValidationRule(
   (values, value) => !values.refreshments || value !== '',
 );
 addValidationRule('isRequiredIfMeeting', (values, value) => !values.meeting || value !== '');
-addValidationRule('isFutureDate', (values, value) => value >= matchTime(new Date(), value));
-addValidationRule('isFutureTime', (values, value) => value > new Date());
-addValidationRule('isAfterStart', (values, value) => value > values.start);
-addValidationRule('isOnOrAfterStart', (values, value) => value >= values.start);
-addValidationRule('isBeforeEnd', (values, value) => value < values.end);
-addValidationRule('isOnOrBeforeEnd', (values, value) => value <= values.end);
-addValidationRule('isAfterMeetingStart', (values, value) => value > values.meetingStart);
+// addValidationRule('isFutureDate', (values, value) => value >= matchTime(new Date(), value));
+// // addValidationRule('isFutureTime', (values, value) => value > new Date());
+// addValidationRule('isAfterStart', (values, value) => value > values.start);
+// addValidationRule('isOnOrAfterStart', (values, value) => value >= values.start);
+// addValidationRule('isBeforeEnd', (values, value) => value < values.end);
+// addValidationRule('isOnOrBeforeEnd', (values, value) => value <= values.end);
+// addValidationRule('isAfterMeetingStart', (values, value) => value > values.meetingStart);
 
 function Transition(props) {
   return <Slide direction="up" {...props} />;
@@ -104,7 +104,7 @@ class ReserveRoomForm extends PureComponent {
     this.onOpenDialog = this.onOpenDialog.bind(this);
     this.onSwitchChange = this.onSwitchChange.bind(this);
     this.onValueChange = this.onValueChange.bind(this);
-    this.onRoomSelect = this.onRoomSelect.bind(this);
+    // this.onRoomSelect = this.onRoomSelect.bind(this);
 
     this.disableButton = this.disableButton.bind(this);
     this.enableButton = this.enableButton.bind(this);
@@ -154,10 +154,10 @@ class ReserveRoomForm extends PureComponent {
     };
   }
 
-  onRoomSelect = (id) => {
-    this.collapse('findRoom')();
-    this.onValueChange(c.TYPE_ROOM)(id);
-  };
+  // onRoomSelect = (id) => {
+  //   this.collapse('findRoom')();
+  //   this.onValueChange(c.TYPE_ROOM)(id);
+  // };
 
   onOpenDialog = () => {
     this.setState({ openDialog: true });
@@ -219,7 +219,7 @@ class ReserveRoomForm extends PureComponent {
   }
 
   render() {
-    const { values, meetingPurpose } = this.props;
+    const { values, meetingPurpose, room } = this.props;
     const showMeetingPurposeExplanation = !!purposeRequiresExplanation(meetingPurpose);
 
     return (
@@ -351,7 +351,10 @@ class ReserveRoomForm extends PureComponent {
           onConfirm={() => {
             this.onCloseDialog();
           }}
-          values={values}
+          values={{
+            ...values,
+            [c.TYPE_ROOM]: room,
+          }}
         />
 
         <Dialog
@@ -396,19 +399,20 @@ ReserveRoomForm.propTypes = {
   }),
   onChange: PropTypes.func.isRequired,
   meetingPurpose: PropTypes.object,
+  room: PropTypes.string,
 };
 
 ReserveRoomForm.defaultProps = {
   values: {
     [c.TYPE_ROOM]: '',
-    date: new Date(),
+    date: utils.newUserDate(),
     start: new Date(),
-    end: new Date(),
+    end: utils.newUserDate(),
     attendees: 1,
     groupName: '',
     meetings: false,
-    meetingStart: new Date(),
-    meetingEnd: new Date(),
+    meetingStart: utils.newUserDate(),
+    meetingEnd: utils.newUserDate(),
     meetingPurpose: '',
     meetingDetails: '',
     refreshments: false,
@@ -416,6 +420,7 @@ ReserveRoomForm.defaultProps = {
     user: drupalSettings.intercept.user.uuid,
   },
   meetingPurpose: null,
+  room: '',
 };
 
 const mapStateToProps = (state, ownProps) => ({

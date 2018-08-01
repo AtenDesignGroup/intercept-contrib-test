@@ -269,7 +269,11 @@ class ReserveRoomStep3 extends React.Component {
         <div className="l__main">
           <div className="l__primary">
             <div className="l--subsection--tight">
-              <ReserveRoomForm values={this.state.formValues} onChange={handleFormChange} />
+              <ReserveRoomForm
+                values={this.state.formValues}
+                onChange={handleFormChange}
+                room={room}
+              />
             </div>
           </div>
         </div>

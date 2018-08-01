@@ -18,7 +18,7 @@ import ReserveRoomStep1 from './Step1';
 import ReserveRoomStep2 from './Step2';
 import ReserveRoomStep3 from './Step3';
 
-const { constants, api, select } = interceptClient;
+const { constants, api, select, utils } = interceptClient;
 const c = constants;
 const roomIncludes = ['image_primary', 'image_primary.field_media_image'];
 
@@ -122,32 +122,36 @@ function getFilters(values, view = 'list', calView = 'day', date = new Date()) {
 class ReserveRoom extends React.Component {
   constructor(props) {
     super(props);
+    const now = new Date();
+
     this.state = {
       calView: props.calView,
       date: props.date,
       filters: props.filters,
       formValues: {
-        [c.TYPE_ROOM]: null,
-        date: new Date(),
-        start: moment()
-          .startOf('hour')
-          .add(1, 'h')
+        [c.TYPE_ROOM]: props.room || null,
+        date: utils
+          .roundTo(now)
           .toDate(),
-        end: moment()
-          .startOf('hour')
-          .add(2, 'h')
+        start: utils
+          .roundTo(now)
+          .toDate(),
+        end: utils
+          .roundTo(now)
+          .add(30, 'minutes')
           .toDate(),
         attendees: 1,
         groupName: '',
         meeting: false,
-        meetingStart: moment()
-          .startOf('hour')
-          .add(1, 'h')
-          .toDate(),
-        meetingEnd: moment()
-          .startOf('hour')
-          .add(2, 'h')
-          .toDate(),
+        // meetingStart: utils
+        //   .roundTo(now)
+        //   .toDate(),
+        // meetingEnd: utils
+        //   .roundTo(now)
+        //   .add(30, 'minutes')
+        //   .toDate(),
+        meetingStart: null,
+        meetingEnd: null,
         [c.TYPE_MEETING_PURPOSE]: null,
         meetingDetails: '',
         refreshments: false,
@@ -189,6 +193,10 @@ class ReserveRoom extends React.Component {
     }
   }
 
+  componentWillUpdate() {
+
+  }
+
   handleViewChange = (value) => {
     // this.props.onChangeView(value);
     // this.doFetchRooms(this.props.filters, value, this.props.calView, this.props.date);
@@ -220,7 +228,10 @@ class ReserveRoom extends React.Component {
     }
     this.setState({
       room,
-      formValues,
+      formValues: {
+        ...formValues,
+        [c.TYPE_ROOM]: room,
+      },
     });
   };
 
@@ -273,8 +284,8 @@ class ReserveRoom extends React.Component {
     } = props;
 
     const steps = [
-      <ReserveRoomStep1 {...props} />,
-      <ReserveRoomStep2 {...props} onChange={this.handleFormChange} />,
+      <ReserveRoomStep1 {...props} onChange={this.handleFormChange} />,
+      <ReserveRoomStep2 {...props} onChange={this.handleFormChange} formValues={this.state.formValues}/>,
       <ReserveRoomStep3 {...props} onChange={this.handleFormChange} />,
     ];
 

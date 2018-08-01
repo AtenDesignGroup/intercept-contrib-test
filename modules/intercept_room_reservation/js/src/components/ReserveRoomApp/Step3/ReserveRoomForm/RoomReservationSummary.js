@@ -7,11 +7,11 @@ const { constants, select, utils } = interceptClient;
 const c = constants;
 
 const RoomReservationSummary = props => (
-  <article className="room-res-summary">
-    <p className="room-res-summary__location">{props.location}</p>
-    <h3 className="room-res-summary__room">{props.room}</h3>
-    <span className="room-res-summary__date">{utils.getDayDisplay(props.start)}&nbsp;</span>
-    <span className="room-res-summary__time">{`${utils.getTimeDisplay(
+  <article className="reservation-summary">
+    <p className="reservation-summary__location">{props.location}</p>
+    <h3 className="reservation-summary__room">{props.room}</h3>
+    <span className="reservation-summary__date">{utils.getDayDisplay(props.start)}&nbsp;</span>
+    <span className="reservation-summary__time">{`${utils.getTimeDisplay(
       props.start,
     )} to ${utils.getTimeDisplay(props.end)}`}</span>
   </article>

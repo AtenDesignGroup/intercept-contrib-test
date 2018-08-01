@@ -5,6 +5,9 @@ import moment from 'moment';
 import { withFormsy } from 'formsy-react';
 import { propTypes, defaultProps } from 'formsy-react';
 
+import interceptClient from 'interceptClient';
+const { utils } = interceptClient;
+
 class InputTime extends React.Component {
   render() {
     const { step, label, onChange, required } = this.props;
@@ -22,7 +25,7 @@ class InputTime extends React.Component {
         label={label}
         type="time"
         onChange={handleChange}
-        value={moment(value).format('HH:mm')}
+        value={moment(value).tz(utils.getUserTimezone()).format('HH:mm')}
         className="input input--time"
         required={required}
         InputLabelProps={{

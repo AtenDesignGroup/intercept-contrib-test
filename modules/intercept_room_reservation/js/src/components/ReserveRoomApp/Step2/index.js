@@ -2,7 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import moment from 'moment';
-import debounce from 'lodash/debounce';
+import pick from 'lodash/pick';
+
 import interceptClient from 'interceptClient';
 import drupalSettings from 'drupalSettings';
 
@@ -200,7 +201,26 @@ class ReserveRoomStep2 extends React.Component {
       handleFilterChange,
       // handleFormChange,
     } = this;
-    const { calendarRooms, rooms, roomsLoading, filters, view, date, calView, onChange } = props;
+    const {
+      calendarRooms,
+      rooms,
+      roomsLoading,
+      filters,
+      view,
+      date,
+      calView,
+      onChange,
+      formValues,
+      onChangeStep
+    } = props;
+
+    const values = pick(formValues, [
+      'date',
+      'start',
+      'end',
+      'meetingStart',
+      'meetingEnd',
+    ]);
 
     return (
       <div className="">
@@ -208,7 +228,11 @@ class ReserveRoomStep2 extends React.Component {
           <div className="l__secondary">
           </div>
           <div className="l__primary">
-            <ReserveRoomDateForm values={this.props.formValues} onChange={onChange} />
+            <ReserveRoomDateForm
+              values={values}
+              onChange={onChange}
+              onSubmit={() => onChangeStep(2)}
+            />
           </div>
         </div>
       </div>

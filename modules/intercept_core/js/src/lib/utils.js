@@ -1,12 +1,19 @@
 import moment from 'moment';
 import drupalSettings from 'drupalSettings';
 import get from 'lodash/get';
+
 //
 // Date Functions
 //
-
 export const getUserUtcOffset = () => get(drupalSettings, 'intercept.user.utc_offset');
 export const getUserTimezone = () => get(drupalSettings, 'intercept.user.timezone');
+
+export const newUserDate = (date = new Date()) =>
+  moment(date)
+    .utc()
+    .utcOffset((moment().utcOffset() / 60) - getUserUtcOffset(), true)
+    .toDate();
+
 // Make sure the current value is a valid date object.
 export const ensureDate = (date) => {
   if (date instanceof Date) {
@@ -61,7 +68,7 @@ export const getDateDisplay = (date) => {
 };
 
 // Get a formatted time string
-//   Example: 2p.m.
+//   Example: '2p.m.'
 export const getTimeDisplay = date =>
   // 2p.m.
   moment(date)
@@ -70,13 +77,10 @@ export const getTimeDisplay = date =>
     .replace('m', '.m.');
 
 // Get a formatted time string
-//   Example: 2p.m.
-export const getDateTimespanDisplay = ({ date, start, end }) => {
+//   Example: '07/13/79 2p.m. to 4p.m.'
+export const getDateTimespanDisplay = ({ date, start, end }) =>
   // const { date, start, end } = this.props.values;
-  return `${getDateDisplay(date)} ${getTimeDisplay(start)} to ${getTimeDisplay(
-    end,
-  )}`;
-};
+  `${getDateDisplay(date)} ${getTimeDisplay(start)} to ${getTimeDisplay(end)}`;
 
 // Converts a Date object to a Drupal compatible string.
 //   Trims `.000Z` off the end.
@@ -87,3 +91,8 @@ export const dateToDrupal = date =>
 
 // Converts a Drupal compatible string to a Date object.
 export const dateFromDrupal = date => moment(`${date}Z`, moment.ISO_8601).toDate();
+
+export const roundTo = (date, value = 15, units = 'minutes', method = 'ceil') => {
+  const duration = moment.duration(value, units);
+  return moment(Math[method](+date / +duration) * +duration);
+};

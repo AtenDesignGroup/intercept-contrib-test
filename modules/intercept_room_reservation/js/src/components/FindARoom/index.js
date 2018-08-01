@@ -18,8 +18,8 @@ import interceptClient from 'interceptClient';
 import Button from '@material-ui/core/Button';
 
 // Local Components
-import RoomFilters from './../RoomFilters';
-import RoomList from './../RoomList';
+import RoomFilters from '../RoomFilters';
+import RoomList from '../RoomList';
 
 const { constants, select } = interceptClient;
 const c = constants;

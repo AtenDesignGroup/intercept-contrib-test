@@ -19,8 +19,9 @@ import SelectResource from 'intercept/SelectResource';
 // Local Components
 import RoomFilters from './RoomFilters';
 import RoomList from './RoomList';
+import { get } from 'https';
 
-const { constants, api, select } = interceptClient;
+const { constants, api, select, utils } = interceptClient;
 const c = constants;
 const ATTENDEES = 'attendees';
 const roomIncludes = ['image_primary', 'image_primary.field_media_image'];
@@ -46,6 +47,28 @@ function getPublishedFilters(value = true) {
       value: value ? '1' : '0',
     },
   };
+}
+
+function getRoleBasedFilters() {
+  let filter = {
+    staffOnly: {
+      path: 'field_staff_use_only',
+      value: false,
+    },
+  };
+
+  if (utils.userHasRole([
+    'administrator',
+    'intercept_event_manager',
+    'intercept_event_organizer',
+    'intercept_staff',
+    'intercept_system_admin',
+    'intercept_room_reservation_approver',
+  ])) {
+    filter = {};
+  }
+
+  return filter;
 }
 
 function getAttendeesFilters(values = {}) {
@@ -95,6 +118,7 @@ function getFilters(values, view = 'list', calView = 'day', date = new Date()) {
   const filter = {
     ...getPublishedFilters(true),
     ...getAttendeesFilters(values),
+    ...getRoleBasedFilters(),
   };
 
   if (!values) {

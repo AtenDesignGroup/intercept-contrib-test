@@ -32,6 +32,14 @@ class RoomTeaser extends PureComponent {
       />
     ) : null;
 
+    const staffUseValue = get(room, 'attributes.field_staff_use_only');
+    const staffUse = staffUseValue ? (
+      <FieldInline
+        label="Staff Use Only"
+        key="staffUse"
+      />
+    ) : null;
+
     return (
       <Teaser
         key={id}
@@ -42,7 +50,7 @@ class RoomTeaser extends PureComponent {
         supertitle={get(room, 'relationships.field_location.attributes.title')}
         title={room.attributes.title}
         description={get(room, 'attributes.field_text_teaser.value')}
-        tags={[roomTypes, capicity]}
+        tags={[roomTypes, capicity, staffUse]}
       />
     );
   }

@@ -143,13 +143,6 @@ class ReserveRoom extends React.Component {
         attendees: 1,
         groupName: '',
         meeting: false,
-        // meetingStart: utils
-        //   .roundTo(now)
-        //   .toDate(),
-        // meetingEnd: utils
-        //   .roundTo(now)
-        //   .add(30, 'minutes')
-        //   .toDate(),
         meetingStart: null,
         meetingEnd: null,
         [c.TYPE_MEETING_PURPOSE]: null,

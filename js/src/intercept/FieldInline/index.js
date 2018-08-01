@@ -3,6 +3,15 @@ import PropTypes from 'prop-types';
 
 const FieldInline = (props) => {
   const { label, values, onClick } = props;
+
+  if (values === null) {
+    return (
+      <div className="field field--inline">
+        <strong className="field__label">{label}</strong>
+      </div>
+    );
+  }
+
   const valueList = [].concat(values).map(
     value =>
       (value.href ? (
@@ -15,6 +24,7 @@ const FieldInline = (props) => {
         </span>
       )),
   );
+
   return (
     <div className="field field--inline">
       <strong className="field__label">{label}: </strong>
@@ -27,8 +37,13 @@ const FieldInline = (props) => {
 
 FieldInline.propTypes = {
   label: PropTypes.string.isRequired,
-  values: PropTypes.oneOfType([PropTypes.arrayOf(Object), PropTypes.object]).isRequired,
+  values: PropTypes.oneOfType([PropTypes.arrayOf(Object), PropTypes.object]),
   onClick: PropTypes.func,
+};
+
+FieldInline.defaultProps = {
+  values: null,
+  onClick: null,
 };
 
 export default FieldInline;

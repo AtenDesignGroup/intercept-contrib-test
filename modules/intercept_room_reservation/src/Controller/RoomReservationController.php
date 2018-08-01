@@ -6,9 +6,12 @@ use Drupal\Component\Utility\Xss;
 use Drupal\Component\Serialization\Json;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Url;
+use Drupal\intercept_core\ReservationManagerInterface;
 use Drupal\intercept_room_reservation\Entity\RoomReservationInterface;
 use Drupal\user\UserInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 /**
@@ -17,6 +20,24 @@ use Symfony\Component\HttpFoundation\JsonResponse;
  *  Returns responses for Room reservation routes.
  */
 class RoomReservationController extends ControllerBase implements ContainerInjectionInterface {
+
+  protected $reservationManager;
+
+  /**
+   * Create a new RoomReservationController.
+   */
+  public function __construct(ReservationManagerInterface $reservation_manager) {
+    $this->reservationManager = $reservation_manager;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('intercept_core.reservation.manager')
+    );
+  }
 
   /**
    * Hello.
@@ -179,34 +200,14 @@ class RoomReservationController extends ControllerBase implements ContainerInjec
   }
 
   public function reservations(\Drupal\node\NodeInterface $node, \Symfony\Component\HttpFoundation\Request $request) {
-      $output['title'] = [
-          '#type' => 'html_tag',
-          '#tag' => 'h2',
-          '#value' => $node->uuid(),
-      ];
-    $output['table'] = [
-        '#title' => $node->uuid(),
-      '#type' => 'table',
-      '#rows' => [],
-    ];
-    $manager = \Drupal::service('intercept_core.reservation.manager');
-    ksm($manager->availability([
-      'start' => '2018-08-01T15:30:00',
-      'end' => '2018-08-01T19:00:00',
-      'duration' => '60',
-    ]));
-    $reservations = $manager->reservations('room', function($query) use ($node) {
+    $reservations = $this->reservationManager->reservations('room', function($query) use ($node) {
       $query->condition('field_room', $node->id(), '=');
       $query->sort('field_dates.value', 'ASC');
     });
-    foreach ($reservations as $reservation) {
-      $col = [
-        $reservation->id(),
-        $reservation->label(),
-      ];
-      $output['table']['#rows'][] = $col;
-    }
-    return $output;
+    $list = $this->entityTypeManager()->getListBuilder('room_reservation');
+
+    $list->setEntityIds(array_keys($reservations));
+    return $list->render();
   }
 
   public function availability(\Symfony\Component\HttpFoundation\Request $request) {

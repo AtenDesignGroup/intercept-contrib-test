@@ -6,6 +6,18 @@ entity.user.room_reservations:
     node: \d+
     _entity_access: 'user.update'
 
+entity.node.reservations:
+  path: '/node/{node}/reservations'
+  defaults:
+    _controller: '\Drupal\intercept_room_reservation\Controller\RoomReservationController::reservations'
+  requirements:
+    node: \d+
+    _entity_access: 'node.update'
+    _entity_bundle: 'room'
+    _permission: 'administer nodes'
+  options:
+    _admin_route: TRUE
+
 intercept_room_reservation.reserve_room:
   path: '/reserve-room'
   defaults:
@@ -29,5 +41,4 @@ intercept_room_reservation.api.availability:
   defaults:
     _controller: 'Drupal\intercept_room_reservation\Controller\RoomReservationController::availability'
   requirements:
-    _access: 'TRUE'
-    #_role: 'intercept_staff + intercept_system_admin + administrator'
+    _permission: 'create room reservation entities'

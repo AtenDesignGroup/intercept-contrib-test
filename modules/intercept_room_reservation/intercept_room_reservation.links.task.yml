@@ -25,3 +25,8 @@ entity.room_reservation.collection:
   route_name: entity.room_reservation.collection
   base_route: system.admin_content
   weight: 15
+
+entity.node.reservations:
+  title: 'Reservations'
+  route_name: entity.node.reservations
+  base_route: entity.node.canonical

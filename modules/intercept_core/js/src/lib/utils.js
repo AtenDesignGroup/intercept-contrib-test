@@ -1,17 +1,24 @@
 import moment from 'moment';
 import drupalSettings from 'drupalSettings';
 import get from 'lodash/get';
+import intersection from 'lodash/intersection';
+
+//
+// User getters
+//
+export const getUserUtcOffset = () => get(drupalSettings, 'intercept.user.utc_offset');
+export const getUserTimezone = () => get(drupalSettings, 'intercept.user.timezone');
+export const getUserUid = () => get(drupalSettings, 'intercept.user.id');
+export const getUserUuid = () => get(drupalSettings, 'intercept.user.uuid');
+export const getUserRoles = () => get(drupalSettings, 'intercept.user.roles');
 
 //
 // Date Functions
 //
-export const getUserUtcOffset = () => get(drupalSettings, 'intercept.user.utc_offset');
-export const getUserTimezone = () => get(drupalSettings, 'intercept.user.timezone');
-
 export const newUserDate = (date = new Date()) =>
   moment(date)
     .utc()
-    .utcOffset((moment().utcOffset() / 60) - getUserUtcOffset(), true)
+    .utcOffset(moment().utcOffset() / 60 - getUserUtcOffset(), true)
     .toDate();
 
 // Make sure the current value is a valid date object.
@@ -96,3 +103,30 @@ export const roundTo = (date, value = 15, units = 'minutes', method = 'ceil') =>
   const duration = moment.duration(value, units);
   return moment(Math[method](+date / +duration) * +duration);
 };
+
+//
+// User Functions
+//
+
+/**
+ * Check if the current user is the super admin.
+ * This is useful for doing permission checks agains roles because the super admin
+ * has no assigned roles and only appears as 'authenticated', despite having permission
+ * to do anything.
+ *
+ * @return {Boolean}
+ *   True if the user is super admin.
+ */
+export const userIsSuperAdmin = () => getUserUid() === '1';
+
+/**
+ * Check if the current user has at least one of the provided roles.
+ *
+ * @param roles {Array}
+ *   An array of one or more roles to check against.
+ * @return {Boolean}
+ *   True if the user has at least one of the provided roles or is a superadmin,
+ *   otherwise False.
+ */
+export const userHasRole = roles => userIsSuperAdmin()
+  || intersection(roles, getUserRoles()).length >= 1;

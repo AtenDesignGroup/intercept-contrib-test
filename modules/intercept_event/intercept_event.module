@@ -15,6 +15,10 @@ function intercept_event_theme() {
     'event_attendance_scan_form' => [
       'render element' => 'form',
     ],
+    'events_recommended' => [
+      'variables' => ['content' => NULL],
+      'template' => 'events-recommended',
+    ],
   ];
 }
 
@@ -81,7 +85,7 @@ function intercept_event_entity_field_access($operation, \Drupal\Core\Field\Fiel
  */
 function intercept_event_pathauto_alias_alter(&$alias, array &$context) {
   if ($context['module'] == 'node' && $context['bundle'] == 'event') {
-    \Drupal::service('intercept_event.manager')->addRegisterAlias($context['data']['node'], $alias); 
+    \Drupal::service('intercept_event.manager')->addRegisterAlias($context['data']['node'], $alias);
   }
 }
 
@@ -93,7 +97,7 @@ function intercept_event_node_update(\Drupal\node\NodeInterface $node) {
     if ($node->path->pathauto) {
       return;
     }
-    \Drupal::service('intercept_event.manager')->addRegisterAlias($node); 
+    \Drupal::service('intercept_event.manager')->addRegisterAlias($node);
   }
 }
 
@@ -105,7 +109,7 @@ function intercept_event_node_insert(Drupal\node\NodeInterface $node) {
     if ($node->path->pathauto) {
       return;
     }
-    \Drupal::service('intercept_event.manager')->addRegisterAlias($node); 
+    \Drupal::service('intercept_event.manager')->addRegisterAlias($node);
   }
 }
 
@@ -114,7 +118,7 @@ function intercept_event_node_insert(Drupal\node\NodeInterface $node) {
  */
 function intercept_event_node_delete(Drupal\node\NodeInterface $node) {
   if ($node->bundle() == 'event') {
-    \Drupal::service('intercept_event.manager')->deleteRegisterAlias($node); 
+    \Drupal::service('intercept_event.manager')->deleteRegisterAlias($node);
     return;
   }
 }

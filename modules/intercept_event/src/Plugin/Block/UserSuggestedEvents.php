@@ -145,7 +145,10 @@ class UserSuggestedEvents extends BlockBase implements ContainerFactoryPluginInt
 
     $result = $query->execute();
     $nodes = $storage->loadMultiple($result);
-    $build['results'] = $view->viewMultiple($nodes, $this->configuration['view_mode']);
+    $build['results'] = [
+      '#theme' => 'events_recommended',
+      '#content' => $view->viewMultiple($nodes, $this->configuration['view_mode']),
+    ];
 
     return $build;
   }

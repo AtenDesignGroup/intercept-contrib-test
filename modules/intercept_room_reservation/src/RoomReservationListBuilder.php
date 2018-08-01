@@ -6,6 +6,7 @@ use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityListBuilder;
 use Drupal\Core\Link;
+use Drupal\intercept_core\SettableListBuilderTrait;
 
 /**
  * Defines a class to build a listing of Room reservation entities.
@@ -13,6 +14,8 @@ use Drupal\Core\Link;
  * @ingroup intercept_room_reservation
  */
 class RoomReservationListBuilder extends EntityListBuilder {
+
+  use SettableListBuilderTrait;
 
   /**
    * {@inheritdoc}

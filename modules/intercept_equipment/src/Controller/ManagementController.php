@@ -35,7 +35,8 @@ class ManagementController extends ManagementControllerBase {
       'content_types' => [
         'title' => $this->h2('Content Types'),
         'equipment_add' => $this->getButton('Add Equipment', 'node.add', [
-          'node_type' => 'equipment'
+          'node_type' => 'equipment',
+          'destination' => \Drupal\Core\Url::fromRoute('<current>')->toString(),
         ]),
         'equipment_list' => $this->getButton('Equipment list', 'system.admin_content', [
           'status' => 'All',

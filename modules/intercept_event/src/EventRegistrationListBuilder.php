@@ -24,6 +24,7 @@ class EventRegistrationListBuilder extends EntityListBuilder {
     $this->addEventHeader($header);
     $header['name'] = $this->t('Name');
     $header['count'] = $this->t('Total');
+    $header['status'] = $this->t('Status');
     $header['user'] = $this->t('User');
     return $header + parent::buildHeader();
   }
@@ -36,6 +37,7 @@ class EventRegistrationListBuilder extends EntityListBuilder {
     $this->addEventRow($row, $entity);
     $row['name'] = $entity->link();
     $row['count'] = $entity->total();
+    $row['status'] = $entity->status->getString();
     $row['user'] = $this->getUserLink($entity);
     return $row + parent::buildRow($entity);
   }

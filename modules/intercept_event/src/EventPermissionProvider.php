@@ -23,6 +23,14 @@ class EventPermissionProvider extends EntityPermissionProvider {
     $permissions["update referenced user {$entity_type_id}"] = [
       'title' => $this->t('Update referenced user\'s @type', ['@type' => $plural_label]),
     ];
+    if ($entity_type_id == 'event_registration') {
+      $permissions["cancel {$entity_type_id} entities"] = [
+        'title' => $this->t('Cancel @type', [
+          '@action' => \Drupal\Component\Utility\Unicode::ucwords($action),
+          '@type' => $plural_label,
+        ]),
+      ];
+    }
 
     return $this->processPermissions($permissions, $entity_type);
   }

@@ -63,9 +63,19 @@ function intercept_room_reservation_entity_operation(\Drupal\Core\Entity\EntityI
         ]),
       ];
     };
-    return [
-      'cancel' => $operation('cancel'), 'approve' => $operation('approve'), 'decline' => $operation('decline'),
-    ];
+
+    $operation_types = ['cancel', 'approve', 'decline'];
+
+    $operations = [];
+
+    foreach ($operation_types as $type) {
+      if (!$entity->access($type)) {
+        continue;
+      }
+      $operations[$type] = $operation($type);
+    }
+
+    return $operations;
   }
   return [];
 }

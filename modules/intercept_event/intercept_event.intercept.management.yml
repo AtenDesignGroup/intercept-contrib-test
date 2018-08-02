@@ -10,3 +10,5 @@ intercept_event:
     event_configuration:
       title: 'Event configuration'
       menu_link: FALSE
+    event_attendance_export:
+      title: 'Export data'

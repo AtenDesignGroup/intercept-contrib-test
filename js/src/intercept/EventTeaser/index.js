@@ -55,7 +55,7 @@ class EventTeaser extends PureComponent {
           date: date.utcOffset(utils.getUserUtcOffset()).format('D'),
           time: utils.getTimeDisplay(date),
         }}
-        description={event.attributes['field_text_teaser'].value}
+        description={get(event, 'attributes.field_text_teaser.value')}
         tags={[audiences]}
         registrations={registrations}
         footer={props => (

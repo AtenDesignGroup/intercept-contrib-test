@@ -46,24 +46,15 @@ const sparseFieldsets = {
     'field_text_teaser',
     'registration',
     'field_event_audience',
+    'field_event_register_period',
     'field_event_type',
     'field_event_tags',
     'field_location',
     'field_room',
     'image_primary',
   ],
-  [c.TYPE_EVENT_REGISTRATION]: [
-    'uuid',
-    'field_event',
-    'field_user',
-    'status',
-  ],
-  [c.TYPE_ROOM]: [
-    'nid',
-    'uuid',
-    'title',
-    'field_location',
-  ],
+  [c.TYPE_EVENT_REGISTRATION]: ['uuid', 'field_event', 'field_user', 'status'],
+  [c.TYPE_ROOM]: ['nid', 'uuid', 'title', 'field_location'],
   [c.TYPE_MEDIA_IMAGE]: [
     'mid',
     'uuid',
@@ -71,12 +62,7 @@ const sparseFieldsets = {
     'field_media_credit',
     'field_media_image',
   ],
-  [c.TYPE_FILE]: [
-    'fid',
-    'uuid',
-    'uri',
-    'url',
-  ],
+  [c.TYPE_FILE]: ['fid', 'uuid', 'uri', 'url'],
 };
 
 function getDate(value, view = 'day', boundary = 'start') {
@@ -294,12 +280,7 @@ class BrowseEvents extends Component {
       filters: getFilters(values, view, calView, date),
       include: eventIncludes,
       replace: true,
-      fields: pick(sparseFieldsets, [
-        c.TYPE_EVENT,
-        c.TYPE_MEDIA_IMAGE,
-        c.TYPE_FILE,
-        c.TYPE_ROOM,
-      ]),
+      fields: pick(sparseFieldsets, [c.TYPE_EVENT, c.TYPE_MEDIA_IMAGE, c.TYPE_FILE, c.TYPE_ROOM]),
       sort: {
         date: {
           path: 'field_date_time.value',

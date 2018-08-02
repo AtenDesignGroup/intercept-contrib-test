@@ -19,7 +19,7 @@ class ReservationPermissionsProvider extends EntityPermissionProvider {
 
     foreach (['cancel', 'approve', 'decline'] as $action) {
       // View permissions are the same for both granularities.
-      $permissions["{$action} {$entity_type_id}"] = [
+      $permissions["{$action} {$entity_type_id} entities"] = [
         'title' => $this->t('@action @type', [
           '@action' => Unicode::ucwords($action),
           '@type' => $plural_label,

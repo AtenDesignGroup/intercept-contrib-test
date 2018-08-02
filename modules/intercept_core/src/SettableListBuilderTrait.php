@@ -2,6 +2,9 @@
 
 namespace Drupal\intercept_core;
 
+/**
+ * @TODO: combine this with EventListBuilderTrait.
+ */
 trait SettableListBuilderTrait {
 
   /**

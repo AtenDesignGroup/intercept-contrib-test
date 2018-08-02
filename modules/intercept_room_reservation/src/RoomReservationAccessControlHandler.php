@@ -27,19 +27,19 @@ class RoomReservationAccessControlHandler extends EntityAccessControlHandler {
         return AccessResult::allowedIfHasPermission($account, 'view published room reservation entities');
 
       case 'update':
-        return AccessResult::allowedIfHasPermission($account, 'edit room reservation entities');
+        return AccessResult::allowedIfHasPermission($account, 'edit room_reservation entities');
 
       case 'delete':
-        return AccessResult::allowedIfHasPermission($account, 'delete room reservation entities');
+        return AccessResult::allowedIfHasPermission($account, 'delete room_reservation entities');
 
       case 'cancel':
-        return AccessResult::allowedIfHasPermission($account, 'cancel room reservation entities');
+        return AccessResult::allowedIfHasPermission($account, 'cancel room_reservation entities');
 
       case 'approve':
-        return AccessResult::allowedIfHasPermission($account, 'approve room reservation entities');
+        return AccessResult::allowedIfHasPermission($account, 'approve room_reservation entities');
 
       case 'decline':
-        return AccessResult::allowedIfHasPermission($account, 'decline room reservation entities');
+        return AccessResult::allowedIfHasPermission($account, 'decline room_reservation entities');
     }
 
     // Unknown operation, no opinion.

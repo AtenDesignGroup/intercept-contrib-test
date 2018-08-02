@@ -3,7 +3,7 @@
 namespace Drupal\intercept_event;
 
 use Drupal\Core\Entity\EntityTypeInterface;
-use Drupal\Core\Entity\Routing\AdminHtmlRouteProvider;
+use Drupal\intercept_core\InterceptHtmlRouteProvider;
 use Symfony\Component\Routing\Route;
 
 /**
@@ -12,7 +12,7 @@ use Symfony\Component\Routing\Route;
  * @see \Drupal\Core\Entity\Routing\AdminHtmlRouteProvider
  * @see \Drupal\Core\Entity\Routing\DefaultHtmlRouteProvider
  */
-class EventRegistrationHtmlRouteProvider extends AdminHtmlRouteProvider {
+class EventRegistrationHtmlRouteProvider extends InterceptHtmlRouteProvider {
 
   /**
    * {@inheritdoc}
@@ -24,6 +24,10 @@ class EventRegistrationHtmlRouteProvider extends AdminHtmlRouteProvider {
 
     if ($settings_form_route = $this->getSettingsFormRoute($entity_type)) {
       $collection->add("$entity_type_id.settings", $settings_form_route);
+    }
+
+    if ($cancel_form_route = $this->getUpdateStatusFormRoutes($entity_type, 'cancel')) {
+      $collection->add("entity.$entity_type_id.cancel_form", $cancel_form_route);
     }
 
     return $collection;

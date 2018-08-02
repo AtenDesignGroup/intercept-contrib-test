@@ -21,6 +21,13 @@ class EventAccessControlHandler extends EntityAccessControlHandler {
    * {@inheritdoc}
    */
   protected function checkAccess(EntityInterface $entity, $operation, AccountInterface $account) {
+    if ($entity->getEntityTypeId() == 'event_registration' && $operation == 'cancel') {
+      // Create a new base class for this.
+      // @see RoomReservationAccessControlHandler
+      $result = AccessResult::allowedIfHasPermission($account, 'cancel event_registration entities');
+      // Ensure that access is evaluated again when the entity changes.
+      return $result->addCacheableDependency($entity);
+    }
     $account = $this->prepareUser($account);
     /** @var \Drupal\Core\Access\AccessResult $result */
     $result = parent::checkAccess($entity, $operation, $account);

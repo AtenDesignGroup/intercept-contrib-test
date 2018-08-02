@@ -2,8 +2,11 @@
 
 namespace Drupal\intercept_event\Controller;
 
+use Drupal\Core\Url;
 use Drupal\intercept_core\Controller\ManagementControllerBase;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\views\Element\View;
+use Drupal\views\Views;
 use Symfony\Component\HttpFoundation\Request;
 
 class ManagementController extends ManagementControllerBase {
@@ -27,6 +30,32 @@ class ManagementController extends ManagementControllerBase {
     return $this->getButton('Create an event', $route, [
       'user' => $this->currentUser()->id(),
     ]);
+  }
+
+  public function viewEventAttendanceExport(AccountInterface $user, Request $request) {
+    return [
+      'title' => $this->title('Event attendance'),
+      'download_link' => $this->getButton('Download CSV',
+        'view.intercept_event_attendance.rest_export',
+        ['_format' => 'csv'] + $request->query->all()
+      ),
+      'view' => [
+        '#type' => 'view',
+        '#pre_render' => [
+            [$this, 'preRenderEventAttendance'],
+            [View::class, 'preRenderViewElement'],
+        ],
+        '#name' => 'intercept_event_attendance',
+        '#display_id' => 'embed',
+      ],
+    ];
+  }
+  public static function preRenderEventAttendance($element) {
+    $view = !isset($element['#view']) ? Views::getView($element['#name']) : $element['#view'];
+    $view->override_path = 'test';
+    $view->override_url = Url::fromRoute('<current>');
+    $element['#view'] = $view;
+    return $element;
   }
 
   public function viewEvents(AccountInterface $user, Request $request, $is_admin = FALSE) {

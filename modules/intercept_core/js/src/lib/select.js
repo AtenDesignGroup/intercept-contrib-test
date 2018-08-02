@@ -373,6 +373,11 @@ function getRegisterButtonText(mustRegister, statusEvent, cancelAllowed) {
   }
 }
 
+function getRegistrationOpenDate(eventResource) {
+  const value = get(eventResource, 'data.attributes.field_event_register_period.value');
+  return utils.getDateDisplay(value);
+}
+
 export const registrationButtonText = (eventId, userId) =>
   createSelector(
     mustRegisterForEvent(eventId),
@@ -381,7 +386,7 @@ export const registrationButtonText = (eventId, userId) =>
     getRegisterButtonText,
   );
 
-function getRegisterStatusText(mustRegister, statusEvent, statusUser) {
+function getRegisterStatusText(mustRegister, statusEvent, statusUser, eventResource) {
   if (!statusEvent || !mustRegister) {
     return null;
   }
@@ -400,7 +405,7 @@ function getRegisterStatusText(mustRegister, statusEvent, statusUser) {
 
   switch (statusEvent) {
     case 'open_pending':
-      return `Registration Opens ${getRegistrationOpenDate(event)}`;
+      return `Registration Opens ${getRegistrationOpenDate(eventResource)}`;
     case 'waitlist':
       return 'On a Waitlist';
     case 'full':
@@ -419,6 +424,7 @@ export const registrationStatusText = (eventId, userId) =>
     mustRegisterForEvent(eventId),
     eventRegistrationStatus(eventId),
     userEventRegistrationStatus(eventId, userId),
+    event(eventId),
     getRegisterStatusText,
   );
 
@@ -481,7 +487,8 @@ export const roomsAscending = createSelector(roomsArray, items =>
 );
 
 // Get the room's title
-export const roomLabel = id => createSelector(room(id), item => get(item, 'data.attributes.title') || '');
+export const roomLabel = id =>
+  createSelector(room(id), item => get(item, 'data.attributes.title') || '');
 
 export const roomLocation = id =>
   createSelector(room(id), item => get(item, 'data.relationships.field_location.data.id'));

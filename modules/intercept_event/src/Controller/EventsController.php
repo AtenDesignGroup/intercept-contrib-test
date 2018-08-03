@@ -15,44 +15,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * Class EventsController.
  */
 class EventsController extends ControllerBase {
-  /**
-   * @var EntityTypeManagerInterface
-   */
-  protected $entityTypeManager;
-
-  /**
-   * @var EntityFormBuilderInterface
-   */
-  protected $entityFormBuilder;
-
-  /**
-   * @var FormBuilderInterface
-   */
-  protected $formBuilder;
-
-  /**
-   * EventsController constructor.
-   *
-   * @param EntityTypeManagerInterface $entity_type_manager
-   * @param EntityFormBuilderInterface $entity_form_builder
-   * @param FormBuilderInterface $form_builder
-   */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, EntityFormBuilderInterface $entity_form_builder, FormBuilderInterface $form_builder) {
-    $this->entityTypeManager = $entity_type_manager;
-    $this->entityFormBuilder = $entity_form_builder;
-    $this->formBuilder = $form_builder;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container) {
-    return new static(
-      $container->get('entity_type.manager'),
-      $container->get('entity.form_builder'),
-      $container->get('form_builder')
-    );
-  }
 
   /**
    * List.
@@ -100,7 +62,7 @@ class EventsController extends ControllerBase {
   }
 
   protected function getListBuilder($entity_type_id, NodeInterface $node = NULL) {
-    $list_builder = \Drupal::service('entity_type.manager')->getHandler($entity_type_id, 'list_builder');
+    $list_builder = $this->entityTypeManager()->getListBuilder($entity_type_id);
     if ($node) {
       $list_builder->setEvent($node);
     }

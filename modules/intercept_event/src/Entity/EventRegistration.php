@@ -27,6 +27,7 @@ use Drupal\user\UserInterface;
  *     "form" = {
  *       "default" = "Drupal\intercept_event\Form\EventRegistrationForm",
  *       "add" = "Drupal\intercept_event\Form\EventRegistrationForm",
+ *       "event" = "Drupal\intercept_event\Form\EventRegistrationEventForm",
  *       "cancel" = "Drupal\intercept_event\Form\EventRegistrationCancelForm",
  *       "edit" = "Drupal\intercept_event\Form\EventRegistrationForm",
  *       "delete" = "Drupal\intercept_event\Form\EventRegistrationDeleteForm",
@@ -49,6 +50,7 @@ use Drupal\user\UserInterface;
  *   links = {
  *     "canonical" = "/event-registration/{event_registration}",
  *     "add-form" = "/event-registration/add",
+ *     "event-form" = "/event/{node}/registrations/add",
  *     "cancel-form" = "/event-registration/{event_registration}/cancel",
  *     "edit-form" = "/event-registration/{event_registration}/edit",
  *     "delete-form" = "/event-registration/{event_registration}/delete",

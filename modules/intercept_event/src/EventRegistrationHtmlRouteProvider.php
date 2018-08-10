@@ -30,6 +30,11 @@ class EventRegistrationHtmlRouteProvider extends InterceptHtmlRouteProvider {
       $collection->add("entity.$entity_type_id.cancel_form", $cancel_form_route);
     }
 
+    // TODO: Use this for other event related entities.
+    if ($event_form_route = $this->getEventFormRoutes($entity_type)) {
+      $collection->add("entity.$entity_type_id.event_form", $event_form_route);
+    }
+
     return $collection;
   }
 
@@ -57,4 +62,36 @@ class EventRegistrationHtmlRouteProvider extends InterceptHtmlRouteProvider {
     }
   }
 
+  /**
+   * Builds a new route to modify the status of an entity.
+   *
+   * @param $entity_type
+   * @return Route
+   */
+  protected function getEventFormRoutes($entity_type) {
+    /** @var $entity_type EntityTypeInterface */
+    if ($entity_type->hasLinkTemplate("event-form")) {
+      $entity_type_id = $entity_type->id();
+      $route = new Route($entity_type->getLinkTemplate("event-form"));
+      // Use the edit form handler, if available, otherwise default.
+      $route
+        ->setDefaults([
+          '_entity_form' => "{$entity_type_id}.event",
+          '_title' => "Event {$entity_type->getLabel()}",
+        ])
+        ->setRequirement('_entity_create_access', "{$entity_type_id}")
+        ->setOption('parameters', [
+            $entity_type_id => ['type' => 'entity:' . $entity_type_id],
+            'node' => ['type' => 'entity:node'],
+            'admin_route' => FALSE,
+        ]);
+
+      // Entity types with serial IDs can specify this in their route
+      // requirements, improving the matching process.
+      if ($this->getEntityTypeIdKeyType($entity_type) === 'integer') {
+        $route->setRequirement($entity_type_id, '\d+');
+      }
+      return $route;
+    }
+  }
 }

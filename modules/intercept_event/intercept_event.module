@@ -11,6 +11,9 @@ function intercept_event_theme() {
     'event_attendance_scan_form' => [
       'render element' => 'form',
     ],
+    'event_registration_event_form' => [
+      'render element' => 'form',
+    ],
     'events_recommended' => [
       'variables' => ['content' => NULL],
       'template' => 'events-recommended',

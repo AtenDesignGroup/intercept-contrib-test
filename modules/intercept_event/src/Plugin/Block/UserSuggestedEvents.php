@@ -126,9 +126,10 @@ class UserSuggestedEvents extends BlockBase implements ContainerFactoryPluginInt
     $customer = $this->entityTypeManager->getStorage('profile')->loadByUser($this->currentUser, 'customer');
     $query = new SuggestedEventsQuery($node, 'AND', \Drupal::service('database'), ['Drupal\Core\Entity\Query\Sql']);
 
+    $current_date = $this->currentDate()->setTimezone(new \DateTimeZone('UTC'));
     $query
       ->condition('type', 'event', '=')
-      ->condition('field_date_time', $this->currentDate()->format('c'), '>=')
+      ->condition('field_date_time', $current_date->format('c'), '>=')
       ->range(0, $this->configuration['results']);
 
     if ($customer && $audiences = $this->simplifyValues($customer->field_audiences->getValue())) {

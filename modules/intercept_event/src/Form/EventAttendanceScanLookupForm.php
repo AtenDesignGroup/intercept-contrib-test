@@ -8,6 +8,7 @@ use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\externalauth\ExternalAuth;
+use Drupal\intercept_event\CustomerSearchFormTrait;
 use Drupal\polaris\Client;
 use Drupal\user\UserInterface;
 use Drupal\user\UserStorage;
@@ -19,6 +20,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * @ingroup intercept_event
  */
 class EventAttendanceScanLookupForm extends EventAttendanceScanFormBase {
+
+  use CustomerSearchFormTrait;
 
   /**
    * @var Client
@@ -77,39 +80,6 @@ class EventAttendanceScanLookupForm extends EventAttendanceScanFormBase {
     return $form;
   }
 
-  protected function buildResultsForm(array &$form, FormStateInterface $form_state) {
-    $form['results'] = [
-      '#type' => 'tableselect',
-      '#multiple' => FALSE,
-      '#header' => [
-        'name' => $this->t('Name'),
-        'barcode' => $this->t('Barcode'),
-        'email' => $this->t('Email'),
-      ],
-      '#options' => [],
-      '#empty' => $this->t('No results found'),
-    ];
-    foreach ($form_state->getTemporaryValue('results') as $result) {
-      $patron = $this->client->patron->get($result->Barcode);
-      $form['results']['#options'][$result->Barcode] = [
-        'name' => $this->formatName($result->PatronFirstLastName),
-        'barcode' => $this->obfuscateBarcode($result->Barcode),
-        'email' => $this->obfuscateEmail($patron->data()->EmailAddress),
-      ];
-    }
-    $form['actions']['submit']['#value'] = $this->t('Sign me in');
-
-    $form['cancel'] = $this->cancelButton();
-
-    $form['retry'] = [
-      '#type' => 'link',
-      '#title' => $this->t('Try another search'),
-      '#url' => \Drupal\Core\Url::fromRoute('entity.node.scan_lookup', [
-        'node' => $this->event()->id(),
-      ]),
-    ];
-  }
-
   protected function buildSearchForm(array &$form, FormStateInterface $form_state) {
     $form['actions']['#access'] = FALSE;
 
@@ -147,18 +117,27 @@ class EventAttendanceScanLookupForm extends EventAttendanceScanFormBase {
       $form_state->setErrorByName('last_name', $this->t('Please provide either a last name or email.'));
       return;
     }
-    $query = [
-      'PATNF' => $values['first_name'] . '*',
-      'PATNL' => $values['last_name'] . '*'
-    ];
-    if (!empty($values['email'])) { 
-      $query['EM'] = 'mjarrell@richlandlibrary.com';
-    }
-    $results = $this->client->patron->searchAnd($query);
-    if (!empty($results->PatronSearchRows)) {
-      $form_state->setTemporaryValue('results', $results->PatronSearchRows);
+    if ($results = $this->searchQuery($values)) {
+      $form_state->setTemporaryValue('results', $results);
     }
     $form_state->setRebuild();
+  }
+
+  protected function buildResultsForm(array &$form, FormStateInterface $form_state) {
+    $results = $form_state->getTemporaryValue('results');
+    $form['results'] = $this->buildTableElement($results);
+
+    $form['actions']['submit']['#value'] = $this->t('Sign me in');
+
+    $form['cancel'] = $this->cancelButton();
+
+    $form['retry'] = [
+      '#type' => 'link',
+      '#title' => $this->t('Try another search'),
+      '#url' => \Drupal\Core\Url::fromRoute('entity.node.scan_lookup', [
+        'node' => $this->event()->id(),
+      ]),
+    ];
   }
 
   /**
@@ -190,28 +169,4 @@ class EventAttendanceScanLookupForm extends EventAttendanceScanFormBase {
     $this->redirectToBaseForm($form_state);
   }
 
-  protected function obfuscateEmail($email) {
-    if (empty($email)) {
-      return '';
-    }
-    $pos = strpos($email, '@');
-    return substr_replace($email, str_repeat('*', $pos - 1), 1, $pos - 1);
-  }
-
-  protected function obfuscateBarcode($barcode) {
-    if (empty($barcode)) {
-      return '';
-    }
-    $replace = str_repeat('*', strlen($barcode) - 4);
-    return substr_replace($barcode, $replace, 0, strlen($barcode) - 4);
-  } 
-
-  protected function formatName($name) {
-    if (empty($name)) {
-      return '';
-    }
-    $name = array_reverse(explode(',', $name));
-    $name = array_map('trim', $name);
-    return implode(' ', $name);
-  }
 }

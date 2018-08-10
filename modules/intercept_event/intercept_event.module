@@ -8,16 +8,16 @@ use Drupal\Core\TypedData\DataDefinition;
  */
 function intercept_event_theme() {
   return [
-    'event_analysis' => [
-      'variables' => ['content' => NULL],
-      'template' => 'event-analysis',
-    ],
     'event_attendance_scan_form' => [
       'render element' => 'form',
     ],
     'events_recommended' => [
       'variables' => ['content' => NULL],
       'template' => 'events-recommended',
+    ],
+    'node_event_analysis' => [
+      'variables' => ['content' => NULL],
+      'template' => 'node-event-analysis',
     ],
   ];
 }

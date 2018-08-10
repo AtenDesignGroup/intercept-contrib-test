@@ -130,6 +130,7 @@ class UserSuggestedEvents extends BlockBase implements ContainerFactoryPluginInt
     $query
       ->condition('type', 'event', '=')
       ->condition('field_date_time', $current_date->format('c'), '>=')
+      ->condition('status', 1, '=')
       ->range(0, $this->configuration['results']);
 
     if ($customer && $audiences = $this->simplifyValues($customer->field_audiences->getValue())) {
@@ -149,9 +150,17 @@ class UserSuggestedEvents extends BlockBase implements ContainerFactoryPluginInt
     $build['results'] = [
       '#theme' => 'events_recommended',
       '#content' => $view->viewMultiple($nodes, $this->configuration['view_mode']),
+      '#cache' => [
+        'tags' => $this->getUser()->getCacheTags(),
+      ],
     ];
+    $build['#cache']['tags'][] = 'flagging_list';
 
     return $build;
+  }
+
+  private function getUser() {
+    return $this->entityTypeManager->getStorage('user')->load($this->currentUser->id());
   }
 
   /**

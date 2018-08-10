@@ -19,6 +19,10 @@ function intercept_event_theme() {
       'variables' => ['content' => NULL],
       'template' => 'node-event-analysis',
     ],
+    'node_event_registrations' => [
+      'variables' => ['content' => NULL],
+      'template' => 'node-event-registrations',
+    ],
   ];
 }
 

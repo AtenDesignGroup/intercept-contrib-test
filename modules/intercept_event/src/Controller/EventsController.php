@@ -71,18 +71,31 @@ class EventsController extends ControllerBase {
 
   public function registrations(NodeInterface $node) {
     $build = [
-      'details' => [],
+      '#theme' => 'node_event_registrations',
+      '#content' => [],
+    ];
+    $content = &$build['#content'];
+    $content['add'] = [
+      '#title' => 'Add event registration',
+      '#type' => 'link',
+      '#url' => Url::fromRoute('entity.event_registration.event_form', [
+        'node' => $node->id(),
+        'destination' => Url::fromRoute('<current>')->toString(),
+      ]),
+      '#attributes' => [
+        'class' => ['button button-action']
+      ],
     ];
     $properties = $node->registration->getItemDefinition()->getSetting('properties');
     $field = $node->registration;
     foreach ($properties as $name => $property) {
-      $build['details'][$name] = [
+      $content['details'][$name] = [
         '#type' => 'item',
         '#title' => $property->getLabel(),
         '#markup' => $field->{$name},
       ];
     }
-    $build['list'] = $this->getListBuilder('event_registration', $node)->render();
+    $content['list'] = $this->getListBuilder('event_registration', $node)->render();
     return $build;
   }
 

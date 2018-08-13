@@ -23,4 +23,4 @@ dependencies:
   - telephone
   - text
   - user
-package: Intercept
+package: 'InterCEPT'

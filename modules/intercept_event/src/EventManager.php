@@ -36,6 +36,9 @@ class EventManager implements EventManagerInterface {
 
   public function addRegisterAlias(NodeInterface $node, $alias = NULL) {
     $alias = $alias ?: $node->path->alias;
+    if (empty($alias)) {
+      return;
+    }
     $alias .= '/register';
     $storage = \Drupal::service('path.alias_storage');
     $conditions = [

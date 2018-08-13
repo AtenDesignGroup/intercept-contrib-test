@@ -51,6 +51,12 @@ class RoomReservationController extends ControllerBase implements ContainerInjec
     $build['#markup'] = '';
     $build['intercept_room_reserve']['#markup'] = '<div id="roomReservationsRoot" />';
 
+    $build['upcoming_room_reservations'] = [
+      '#type' => 'view',
+      '#name' => 'intercept_room_reservations',
+      '#display_id' => 'upcoming',
+    ];
+
     return $build;
   }
 

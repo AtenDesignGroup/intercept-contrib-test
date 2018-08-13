@@ -34,4 +34,4 @@ dependencies:
   - text
   - user
   - views
-package: Intercept
+package: 'InterCEPT'

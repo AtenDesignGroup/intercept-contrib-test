@@ -21,4 +21,4 @@ dependencies:
   - taxonomy
   - text
   - user
-package: Intercept
+package: 'InterCEPT'

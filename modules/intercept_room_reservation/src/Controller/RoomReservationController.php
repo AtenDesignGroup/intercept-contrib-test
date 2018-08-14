@@ -219,8 +219,9 @@ class RoomReservationController extends ControllerBase implements ContainerInjec
   public function availability(\Symfony\Component\HttpFoundation\Request $request) {
     // Accept query sring params, and then also accept a post request.
     $params = $request->query->get('filter');
+
     if ($post = Json::decode($request->getContent())) {
-      $params = array_merge($params, $post);
+      $params = empty($params) ? $post : array_merge($params, $post);
     }
     $manager = \Drupal::service('intercept_core.reservation.manager');
     $rooms = !empty($params['rooms']) ? $manager->convertIds($params['rooms']) : [];

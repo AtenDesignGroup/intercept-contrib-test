@@ -160,7 +160,8 @@ function intercept_event_form_views_exposed_form_alter(&$form, \Drupal\Core\Form
       $query = \Drupal::request()->query->all();
       // 2 is upcoming dates combined filter.
       $query['date'] = $d;
-      $query['sort_order'] = $o;
+      $query['sort'] = $o;
+      $query['order'] = 'field_date_time';
       return [
         '#type' => 'link',
         '#title' => t($t),
@@ -172,12 +173,10 @@ function intercept_event_form_views_exposed_form_alter(&$form, \Drupal\Core\Form
     };
     $form['links'] = [
       '#weight' => -5,
-      'past' => $link(1, 'DESC', 'Past'),
-      'upcoming' => $link(2, 'ASC', 'Upcoming'),
+      'past' => $link(1, 'desc', 'Past'),
+      'upcoming' => $link(2, 'asc', 'Upcoming'),
     ];
     $form['date']['#type'] = 'hidden';
-    $form['sort_order']['#type'] = 'hidden';
-    $form['sort_by']['#type'] = 'hidden';
   }
 }
 /**

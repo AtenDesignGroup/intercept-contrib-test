@@ -18,7 +18,6 @@ class ManagementController extends ManagementControllerBase {
     if ($page_name == 'default') {
       $route = "intercept_event.management.event_templates";
       $build['links']['event'] = $this->getCreateEventButton();
-      $build['links']['events_all'] = $this->getButton('View All Events', 'intercept_event.events_all');
     }
   }
 

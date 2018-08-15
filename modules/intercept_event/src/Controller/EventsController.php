@@ -31,17 +31,6 @@ class EventsController extends ControllerBase {
   }
 
   /**
-   * All events view for staff.
-   */
-  public function viewStaffEventsAll() {
-    return [
-      '#type' => 'view',
-      '#name' => 'intercept_all_events',
-      '#display_id' => 'embed', 
-    ];
-  }
-
-  /**
    * Check bundle access and permissions.
    */
   public function registrationsAccess(NodeInterface $node) {

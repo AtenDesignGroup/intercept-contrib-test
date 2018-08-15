@@ -73,11 +73,11 @@ class ManagementController extends ManagementControllerBase {
   public function viewEventConfiguration(AccountInterface $user, Request $request) {
     $lists = $this->table();
     $link = $this->getButton('Event Series', 'system.admin_content', [
-          'type' => 'event_series',
+      'type' => 'event_series',
     ]);
     $lists->row($link, $this->t('List of all Event Series, a method for grouping events together (e.g. Summer Reading Challenge).'));
-    $link = $this->getButton('Event Templates', 'system.admin_content', [
-          'type' => 'event',
+    $link = $this->getButton('Event Templates', 'intercept_event.management.event_templates', [
+      'user' => $this->currentUser()->id(),
     ]);
     $lists->row($link, $this->t('List of all events categorized as a template. Only System Admins can categorize an event as a template.'));
 

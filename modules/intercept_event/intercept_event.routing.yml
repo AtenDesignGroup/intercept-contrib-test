@@ -16,14 +16,6 @@ intercept_event.account.events:
   requirements:
     _user_is_logged_in: 'TRUE'
 
-intercept_event.events_all:
-  path: '/events/all'
-  defaults:
-    _title: 'All Events'
-    _controller: '\Drupal\intercept_event\Controller\EventsController::viewStaffEventsAll'
-  requirements:
-    _permission: 'access content'
-
 entity.user.events:
   path: '/user/{user}/events'
   defaults:

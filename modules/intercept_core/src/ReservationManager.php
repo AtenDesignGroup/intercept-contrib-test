@@ -82,11 +82,17 @@ class ReservationManager implements ReservationManagerInterface {
     return $this->hasReservationConflict($reservations, $params);
   }
 
+  protected function getLocation($node) {
+    return !empty($node->field_location->entity) ? $node->field_location->entity : FALSE;
+  }
+
   protected function getHours($params, $node) {
+    if (!$location = $this->getLocation($node)) {
+      return FALSE;
+    }
     $start_date = $this->getDate($params['start']);
     $d = $start_date->format('w');
-    // TODO: Potentially add a warning that hours might not exist.
-    $hours = $node->field_location->entity->field_location_hours;
+    $hours = $location->field_location_hours;
     $values = $hours->getValue();
     return !empty($values[$d]) ? $values[$d] : FALSE;
   }
@@ -157,6 +163,7 @@ class ReservationManager implements ReservationManagerInterface {
       $return[$uuid]['has_open_hours_conflict'] = $this->hasOpeningHoursConflict($reservations, $params, $node);
       $return[$uuid]['has_reservation_conflict'] = $this->hasReservationConflict($reservations, $params);
       $return[$uuid]['is_closed'] = $this->isClosed($params, $node);
+      $return[$uuid]['has_location'] = !empty($this->getLocation($node));
       $return[$uuid]['dates'] = $this->getDates($reservations);
     }
     return $return;

@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import map from 'lodash/map';
+import moment from 'moment';
 
 // Intercept
 /* eslint-disable */
@@ -8,6 +9,8 @@ import interceptClient from 'interceptClient';
 import EventTeaser from 'intercept/EventTeaser';
 import ContentList from 'intercept/ContentList';
 /* eslint-enable */
+
+const { utils } = interceptClient;
 
 class EventList extends Component {
   state = {};
@@ -25,7 +28,7 @@ class EventList extends Component {
       events.length > 0 ? (
         map(events, group => (
           <ContentList
-            heading={interceptClient.utils.getDayDisplay(group.date)}
+            heading={utils.getDayDisplay(moment.tz(group.date, utils.getUserTimezone()))}
             items={teasers(group.items)}
             key={group.key}
           />

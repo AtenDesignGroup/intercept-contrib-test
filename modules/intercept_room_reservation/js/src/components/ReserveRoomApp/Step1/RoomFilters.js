@@ -15,25 +15,37 @@ import CurrentFilters from 'intercept/CurrentFilters';
 import DateFilter from 'intercept/DateFilter';
 import KeywordFilter from 'intercept/KeywordFilter';
 import SelectResource from 'intercept/SelectResource';
+import SelectSingle from 'intercept/Select/SelectSingle';
+import InputDate from 'intercept/Input/InputDate';
 import InputNumber from 'intercept/Input/InputNumber';
 
 const { constants } = interceptClient;
 const c = constants;
 const ATTENDEES = 'attendees';
+const TIME = 'time';
+const DURATION = 'duration';
 
 const labels = {
   [c.TYPE_LOCATION]: 'Location',
   [c.TYPE_ROOM_TYPE]: 'Room Type',
   [ATTENDEES]: 'Number of Attendees',
+  [DURATION]: 'Duration',
+  [TIME]: 'Time of Day',
 };
 
-const attendeesOptions = [
-  { key: '0', value: 'none' },
-  { key: '5', value: '5+' },
-  { key: '10', value: '10+' },
-  { key: '20', value: '20+' },
-  { key: '50', value: '50+' },
-  { key: '100', value: '100+' },
+const durationOptions = [
+  { key: '15', value: '15 min.' },
+  { key: '30', value: '30 min.' },
+  { key: '60', value: '1 hr.' },
+  { key: '120', value: '2 hrs.' },
+  { key: '240', value: '4 hrs.' },
+];
+
+const timeOptions = [
+  { key: '8:00-22:00', value: 'Any' },
+  { key: '8:00-12:00', value: 'Morning' },
+  { key: '12:00-5:00', value: 'Afternoon' },
+  { key: '5:00-10:00', value: 'Evening' },
 ];
 
 const currentFiltersConfig = filters =>
@@ -90,6 +102,32 @@ class EventFilters extends PureComponent {
             handleChange={this.onInputChange(c.TYPE_ROOM_TYPE)}
             value={filters[c.TYPE_ROOM_TYPE]}
             label={labels[c.TYPE_ROOM_TYPE]}
+          />
+          <InputDate
+            handleChange={this.onDateChange}
+            defaultValue={null}
+            value={filters[c.DATE]}
+            name={c.DATE}
+            required
+            clearable={false}
+            validations="isFutureDate"
+            validationError="Date must be in the future"
+          />
+          <SelectSingle
+            name={TIME}
+            handleChange={this.onInputChange(TIME)}
+            value={filters[TIME]}
+            label={labels[TIME]}
+            options={timeOptions}
+            clearable
+          />
+          <SelectSingle
+            name={DURATION}
+            handleChange={this.onInputChange(DURATION)}
+            value={filters[DURATION]}
+            label={labels[DURATION]}
+            options={durationOptions}
+            clearable
           />
           <InputNumber
             label={labels[ATTENDEES]}

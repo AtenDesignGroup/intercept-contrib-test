@@ -71,9 +71,10 @@ class SelectTime extends React.Component {
 
     // Abort if the min time is after the max time to avoid an infinite loop.
     if (min >= max) {
+      console.log('min >= max');
+      console.log(min, max, step);
       return options;
     }
-
     do {
       const value = utils.getTimeDisplay(i);
       options.push({
@@ -162,8 +163,14 @@ SelectTime.propTypes = {
   ...propTypes,
   label: PropTypes.string.isRequired,
   value: PropTypes.instanceOf(Date),
-  min: PropTypes.instanceOf(Date),
-  max: PropTypes.instanceOf(Date),
+  min: PropTypes.oneOfType([
+    PropTypes.instanceOf(Date),
+    PropTypes.instanceOf(moment),
+  ]),
+  max: PropTypes.oneOfType([
+    PropTypes.instanceOf(Date),
+    PropTypes.instanceOf(moment),
+  ]),
   step: PropTypes.number,
   onChange: PropTypes.func.isRequired,
 };

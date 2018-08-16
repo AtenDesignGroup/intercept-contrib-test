@@ -14,6 +14,7 @@ import Slide from '@material-ui/core/Slide';
 
 // Local Components
 import ReserveRoomDateForm from './ReserveRoomDateForm';
+import utils from '../../../../../../../node_modules/formsy-react/lib/utils';
 
 const { constants, api, select } = interceptClient;
 const c = constants;
@@ -211,27 +212,22 @@ class ReserveRoomStep2 extends React.Component {
       calView,
       onChange,
       formValues,
-      onChangeStep
+      onChangeStep,
     } = props;
 
-    const values = pick(formValues, [
-      'date',
-      'start',
-      'end',
-      'meetingStart',
-      'meetingEnd',
-    ]);
-
+    const values = pick(formValues, ['date', 'start', 'end', 'meetingStart', 'meetingEnd']);
+    const todayDate = moment.tz(interceptClient.utils.getUserTimezone()).format('YYYY-MM-DD');
     return (
       <div className="">
         <div className="l__main">
-          <div className="l__secondary">
-          </div>
+          <div className="l__secondary" />
           <div className="l__primary">
             <ReserveRoomDateForm
               values={values}
               onChange={onChange}
               onSubmit={() => onChangeStep(2)}
+              min={moment.tz(`${todayDate} 9:00 AM`, 'YYYY-MM-DD h:mm A', interceptClient.utils.getUserTimezone())}
+              max={moment.tz(`${todayDate} 10:00 PM`, 'YYYY-MM-DD h:mm A', interceptClient.utils.getUserTimezone())}
             />
           </div>
         </div>
@@ -283,4 +279,7 @@ ReserveRoomStep2.defaultProps = {
   filters: {},
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(ReserveRoomStep2);
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(ReserveRoomStep2);

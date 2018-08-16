@@ -18,20 +18,11 @@ class RoomReservationAccessControlHandler extends EntityAccessControlHandler {
    * {@inheritdoc}
    */
   protected function checkAccess(EntityInterface $entity, $operation, AccountInterface $account) {
-    /** @var \Drupal\intercept_room_reservation\Entity\RoomReservationInterface $entity */
+    $account = $this->prepareUser($account);
+    /** @var \Drupal\Core\Access\AccessResult $result */
+    $result = parent::checkAccess($entity, $operation, $account);
+
     switch ($operation) {
-      case 'view':
-        if (!$entity->isPublished()) {
-          return AccessResult::allowedIfHasPermission($account, 'view unpublished room_reservation');
-        }
-        return AccessResult::allowedIfHasPermission($account, 'view published room_reservation');
-
-      case 'update':
-        return AccessResult::allowedIfHasPermission($account, 'edit room_reservation');
-
-      case 'delete':
-        return AccessResult::allowedIfHasPermission($account, 'delete room_reservation');
-
       case 'cancel':
         return AccessResult::allowedIfHasPermission($account, 'cancel room_reservation');
 
@@ -42,8 +33,7 @@ class RoomReservationAccessControlHandler extends EntityAccessControlHandler {
         return AccessResult::allowedIfHasPermission($account, 'decline room_reservation');
     }
 
-    // Unknown operation, no opinion.
-    return AccessResult::neutral();
+    return $result->addCacheableDependency($entity);
   }
 
   /**

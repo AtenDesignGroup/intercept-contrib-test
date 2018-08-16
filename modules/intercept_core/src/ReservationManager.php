@@ -104,13 +104,16 @@ class ReservationManager implements ReservationManagerInterface {
   protected function getAdjustedDate($selected_time, $location_time, $date, $type = 'start') {
     $time = $this->getDate($selected_time)->format('Gi');
     // If the closing hours or open hours differ, we use them.
+    $convert_timezone = FALSE;
     if ($type == 'start') {
       if ($time < $location_time) {
+        $convert_timezone = TRUE;
         $time = $location_time;
       }
     }
     if ($type == 'end') {
       if ($time > $location_time) {
+        $convert_timezone = TRUE;
         $time = $location_time;
       }
     }
@@ -125,9 +128,27 @@ class ReservationManager implements ReservationManagerInterface {
       $min = substr($time, -2);
       $time = $hour . ':' . $min;
     }
-    return new DrupalDateTime($date->format('Y-m-d\T') . $time);
+    if ($convert_timezone) {
+      $config = \Drupal::config('system.date');
+      $config_data_default_timezone = $config->get('timezone.default');
+      $timezone = new \DateTimeZone($config_data_default_timezone);
+      $date = new DrupalDateTime($date->format('Y-m-d\T') . $time, $timezone);
+      $date->setTimezone(new \DateTimeZone('UTC'));
+    }
+    else {
+      $date = new DrupalDateTime($date->format('Y-m-d\T') . $time);
+    }
+    return $date;
   }
 
+  public function convertDate($string) {
+    $config = \Drupal::config('system.date');
+    $config_data_default_timezone = $config->get('timezone.default');
+    $timezone = new \DateTimeZone($config_data_default_timezone);
+    $date = new DrupalDateTime($string, $timezone);
+    $date->setTimezone(new \DateTimeZone('UTC'));
+    return $date;
+  }
 
   public function getDates($reservations) {
     $return = [];

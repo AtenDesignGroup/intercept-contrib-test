@@ -39,7 +39,7 @@ class RoomSummary extends React.PureComponent {
       );
     }
     return (
-      <div>
+      <div className="value-summary">
         <h4 className="value-summary__label">Room</h4>
         <Button
           className="value-summary__button"

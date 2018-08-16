@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import moment from 'moment';
 import debounce from 'lodash/debounce';
+import pick from 'lodash/pick';
 import interceptClient from 'interceptClient';
 import drupalSettings from 'drupalSettings';
 
@@ -124,34 +125,34 @@ class ReserveRoomStep3 extends React.Component {
       calView: props.calView,
       date: props.date,
       filters: props.filters,
-      formValues: {
-        [c.TYPE_ROOM]: null,
-        date: new Date(),
-        start: moment()
-          .startOf('hour')
-          .add(1, 'h')
-          .toDate(),
-        end: moment()
-          .startOf('hour')
-          .add(2, 'h')
-          .toDate(),
-        attendees: 1,
-        groupName: '',
-        meeting: false,
-        meetingStart: moment()
-          .startOf('hour')
-          .add(1, 'h')
-          .toDate(),
-        meetingEnd: moment()
-          .startOf('hour')
-          .add(2, 'h')
-          .toDate(),
-        [c.TYPE_MEETING_PURPOSE]: null,
-        meetingDetails: '',
-        refreshments: false,
-        refreshmentsDesc: '',
-        user: drupalSettings.intercept.user.uuid,
-      },
+      // formValues: {
+      //   [c.TYPE_ROOM]: null,
+      //   date: new Date(),
+      //   start: moment()
+      //     .startOf('hour')
+      //     .add(1, 'h')
+      //     .toDate(),
+      //   end: moment()
+      //     .startOf('hour')
+      //     .add(2, 'h')
+      //     .toDate(),
+      //   attendees: 1,
+      //   groupName: '',
+      //   meeting: false,
+      //   meetingStart: moment()
+      //     .startOf('hour')
+      //     .add(1, 'h')
+      //     .toDate(),
+      //   meetingEnd: moment()
+      //     .startOf('hour')
+      //     .add(2, 'h')
+      //     .toDate(),
+      //   [c.TYPE_MEETING_PURPOSE]: null,
+      //   meetingDetails: '',
+      //   refreshments: false,
+      //   refreshmentsDesc: '',
+      //   user: drupalSettings.intercept.user.uuid,
+      // },
       view: props.view,
       room: {
         current: null,
@@ -200,7 +201,7 @@ class ReserveRoomStep3 extends React.Component {
     //     exiting: this.state.room.current !== this.state.room.previous,
     //   };
     // }
-    console.log(formValues);
+
     this.setState({
       // room,
       formValues: {
@@ -255,25 +256,32 @@ class ReserveRoomStep3 extends React.Component {
       view,
       calView,
       room,
+      formValues,
+      onChange,
       onChangeStep,
     } = props;
-    const { date, start, end } = this.state.formValues;
+    const { date, start, end } = formValues;
+    const dateValues = pick(formValues, ['date', 'start', 'end']);
+    const values = pick(formValues, [
+      'attendees',
+      'meetingDetails',
+      'refreshments',
+      'refreshmentsDesc',
+      'groupName',
+      c.TYPE_MEETING_PURPOSE,
+    ]);
     return (
       <div className="l--default">
         <div className="l__header">
           <div className="value-summary__wrapper">
             <RoomSummary value={room} onClickChange={() => onChangeStep(0)} />
-            <DateSummary value={{ date, start, end }} onClickChange={() => onChangeStep(1)} />
+            <DateSummary value={dateValues} onClickChange={() => onChangeStep(1)} />
           </div>
         </div>
         <div className="l__main">
           <div className="l__primary">
             <div className="l--subsection--tight">
-              <ReserveRoomForm
-                values={this.state.formValues}
-                onChange={handleFormChange}
-                room={room}
-              />
+              <ReserveRoomForm values={values} combinedValues={formValues} onChange={onChange} room={room} />
             </div>
           </div>
         </div>
@@ -317,7 +325,9 @@ ReserveRoomStep3.propTypes = {
   // onChangeDate: PropTypes.func.isRequired,
 };
 
-ReserveRoomStep3.defaultProps = {
-};
+ReserveRoomStep3.defaultProps = {};
 
-export default connect(mapStateToProps, mapDispatchToProps)(ReserveRoomStep3);
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(ReserveRoomStep3);

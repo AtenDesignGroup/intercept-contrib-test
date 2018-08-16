@@ -222,6 +222,7 @@ class ReserveRoom extends React.Component {
     this.setState({
       room,
       formValues: {
+        ...this.state.formValues,
         ...formValues,
         [c.TYPE_ROOM]: room,
       },
@@ -278,8 +279,8 @@ class ReserveRoom extends React.Component {
 
     const steps = [
       <ReserveRoomStep1 {...props} onChange={this.handleFormChange} />,
-      <ReserveRoomStep2 {...props} onChange={this.handleFormChange} formValues={this.state.formValues}/>,
-      <ReserveRoomStep3 {...props} onChange={this.handleFormChange} />,
+      <ReserveRoomStep2 {...props} onChange={this.handleFormChange} formValues={this.state.formValues} />,
+      <ReserveRoomStep3 {...props} onChange={this.handleFormChange} formValues={this.state.formValues} />,
     ];
 
     return (

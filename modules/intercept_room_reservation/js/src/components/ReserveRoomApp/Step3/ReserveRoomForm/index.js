@@ -32,12 +32,14 @@ import InputDate from 'intercept/Input/InputDate';
 import InputTime from 'intercept/Input/InputTime';
 import InputNumber from 'intercept/Input/InputNumber';
 import InputText from 'intercept/Input/InputText';
+import InputCheckbox from 'intercept/Input/InputCheckbox';
 
 // Formsy
 import Formsy, { addValidationRule } from 'formsy-react';
 
 // Local Components
 import ReserveRoomConfirmation from './ReserveRoomConfirmation';
+
 const { constants, select, utils } = interceptClient;
 const c = constants;
 
@@ -98,11 +100,12 @@ class ReserveRoomForm extends PureComponent {
     this.toggleState = this.toggleState.bind(this);
     this.updateValue = this.updateValue.bind(this);
     this.updateValues = this.updateValues.bind(this);
+    this.toggleValue = this.toggleValue.bind(this);
     this.onCloseDialog = this.onCloseDialog.bind(this);
     this.onDateChange = this.onDateChange.bind(this);
     this.onInputChange = this.onInputChange.bind(this);
     this.onOpenDialog = this.onOpenDialog.bind(this);
-    this.onSwitchChange = this.onSwitchChange.bind(this);
+    // this.onSwitchChange = this.onSwitchChange.bind(this);
     this.onValueChange = this.onValueChange.bind(this);
     // this.onRoomSelect = this.onRoomSelect.bind(this);
 
@@ -142,17 +145,17 @@ class ReserveRoomForm extends PureComponent {
     });
   }
 
-  onSwitchChange(key) {
-    return (event) => {
-      this.updateValue(key, event.target.checked);
-      this.setState({
-        expand: {
-          ...this.state.expand,
-          [key]: event.target.checked,
-        },
-      });
-    };
-  }
+  // onSwitchChange(key) {
+  //   return (event) => {
+  //     this.updateValue(key, event.target.checked);
+  //     this.setState({
+  //       expand: {
+  //         ...this.state.expand,
+  //         [key]: event.target.checked,
+  //       },
+  //     });
+  //   };
+  // }
 
   // onRoomSelect = (id) => {
   //   this.collapse('findRoom')();
@@ -218,8 +221,12 @@ class ReserveRoomForm extends PureComponent {
     this.props.onChange(newValues);
   }
 
+  toggleValue(key) {
+    this.updateValue(key, !this.props.values[key]);
+  }
+
   render() {
-    const { values, meetingPurpose, room } = this.props;
+    const { values, combinedValues, meetingPurpose, room } = this.props;
     const showMeetingPurposeExplanation = !!purposeRequiresExplanation(meetingPurpose);
 
     return (
@@ -231,119 +238,76 @@ class ReserveRoomForm extends PureComponent {
           onValid={this.enableButton}
           onInvalid={this.disableButton}
         >
-
-          <div className="l--subsection--tight">
-            <h4 className="">Groups</h4>
-            <ExpansionPanel
-              elevation={0}
-              expanded={this.state.expand.meeting}
-              onChange={this.toggleState('meeting')}
-              className={'input-group input-group--expandable'}
-            >
-              <ExpansionPanelSummary expandIcon={null} className={'input-group__summary'}>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={values.meeting}
-                      onChange={this.onSwitchChange('meeting')}
-                      value="meeting"
-                      name="meeting"
-                    />
-                  }
-                  label="Hosting a group?"
-                  className={'input__label'}
-                />
-              </ExpansionPanelSummary>
-              <ExpansionPanelDetails className={'input-group__details'}>
-
-                <InputNumber
-                  label="Number of Attendees"
-                  value={values.attendees}
-                  onChange={this.onValueChange('attendees')}
-                  name={'attendees'}
-                  min={0}
-                  int
-                  required={values.meeting}
-                  validations="isPositive"
-                  validationError="Attendees must be a positive number"
-                />
-                <InputText
-                  label="Group Name"
-                  onChange={this.onValueChange('groupName')}
-                  value={values.groupName}
-                  name="groupName"
-                  required={values.meeting}
-                  validations={'isRequiredIfMeeting'}
-                  validationError={'This field is required if having a meeting'}
-                />
-                <SelectResource
-                  type={c.TYPE_MEETING_PURPOSE}
-                  name={c.TYPE_MEETING_PURPOSE}
-                  handleChange={this.onInputChange(c.TYPE_MEETING_PURPOSE)}
-                  value={values.meetingPurpose}
-                  label={'Meeting Purpose'}
-                  required={values.meeting}
-                />
-                <Collapse in={showMeetingPurposeExplanation}>
-                  <InputText
-                    label="Please Explain"
-                    onChange={this.onValueChange('meetingDetails')}
-                    value={values.meetingDetails}
-                    name="meetingDetails"
-                    required={showMeetingPurposeExplanation}
-                  />
-                </Collapse>
-              </ExpansionPanelDetails>
-            </ExpansionPanel>
+        <div className="l--2-col">
+          <div className="l__main">
+            <div className="l__primary">
+              <h4 className="section-title section-title--secondary">Reservation Details</h4>
+              <InputNumber
+                label="Number of Attendees"
+                value={values.attendees}
+                onChange={this.onValueChange('attendees')}
+                name={'attendees'}
+                min={0}
+                int
+                required={!utils.userIsStaff()}
+                validations="isPositive"
+                validationError="Attendees must be a positive number"
+              />
+              <InputText
+                label="Group Name"
+                onChange={this.onValueChange('groupName')}
+                value={values.groupName}
+                name="groupName"
+                helperText={'Help others find you by name.'}
+              />
+              <SelectResource
+                type={c.TYPE_MEETING_PURPOSE}
+                name={c.TYPE_MEETING_PURPOSE}
+                handleChange={this.onInputChange(c.TYPE_MEETING_PURPOSE)}
+                value={values.meetingPurpose}
+                label={'Purpose for using this room'}
+                required={!utils.userIsStaff()}
+              />
+              <InputText
+                label="Description"
+                onChange={this.onValueChange('meetingDetails')}
+                value={values.meetingDetails}
+                name="meetingDetails"
+                required={showMeetingPurposeExplanation}
+              />
+            </div>
+            <div className="l__secondary">
+              <h4 className="section-title section-title--secondary">Refreshments</h4>
+              <InputCheckbox
+                label="Serving light refreshments?"
+                checked={values.refreshments}
+                onChange={this.toggleValue}
+                value="refreshments"
+                name="refreshments"
+              />
+              <InputText
+                label="Please describe your light refreshments."
+                value={values.refreshmentsDesc}
+                onChange={this.onValueChange('refreshmentsDesc')}
+                name="refreshmentDesc"
+                required={values.refreshments}
+                disabled={!values.refreshments}
+              />
+            </div>
           </div>
-          <div className="l--subsection--tight">
-            <h4 className="">Refreshments</h4>
-            <ExpansionPanel
-              elevation={0}
-              expanded={this.state.expand.refreshments}
-              onChange={this.toggleState('refreshments')}
-              className={'input-group input-group--expandable'}
-            >
-              <ExpansionPanelSummary expandIcon={null} className={'input-group__summary'}>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={values.refreshments}
-                      onChange={this.onSwitchChange('refreshments')}
-                      value="refreshments"
-                      name="refreshments"
-                    />
-                  }
-                  label="Serving light refreshments?"
-                  className={'input__label'}
-                />
-              </ExpansionPanelSummary>
-              <ExpansionPanelDetails className={'input-group__details'}>
-                <InputText
-                  label="Please describe your light refreshments."
-                  value={values.refreshmentsDesc}
-                  onChange={this.onValueChange('refreshmentsDesc')}
-                  name="refreshmentDesc"
-                  required={values.refreshments}
-                  validations={'isRequiredIfServingRefreshments'}
-                  validationError={'This field is required if serving refreshments'}
-                />
-              </ExpansionPanelDetails>
-            </ExpansionPanel>
-          </div>
-
-          <div className="form__actions">
+          <div className="form__actions l__footer">
             <Button
               variant="raised"
               size="large"
               color="primary"
               type="submit"
               className="button button--primary"
-              disabled={!this.state.canSubmit}
+              disabled={!this.state.canSubmit || !room}
             >
               Reserve
             </Button>
           </div>
+        </div>
         </Formsy>
         <ReserveRoomConfirmation
           open={this.state.openDialog}
@@ -352,7 +316,7 @@ class ReserveRoomForm extends PureComponent {
             this.onCloseDialog();
           }}
           values={{
-            ...values,
+            ...combinedValues,
             [c.TYPE_ROOM]: room,
           }}
         />
@@ -382,15 +346,8 @@ class ReserveRoomForm extends PureComponent {
 
 ReserveRoomForm.propTypes = {
   values: PropTypes.shape({
-    [c.TYPE_ROOM]: PropTypes.string,
-    date: PropTypes.instanceOf(Date),
-    start: PropTypes.instanceOf(Date),
-    end: PropTypes.instanceOf(Date),
     attendees: PropTypes.number,
     groupName: PropTypes.string,
-    meetings: PropTypes.bool,
-    meetingStart: PropTypes.instanceOf(Date),
-    meetingEnd: PropTypes.instanceOf(Date),
     meetingDetails: PropTypes.string,
     [c.TYPE_MEETING_PURPOSE]: PropTypes.string,
     refreshments: PropTypes.bool,
@@ -399,20 +356,14 @@ ReserveRoomForm.propTypes = {
   }),
   onChange: PropTypes.func.isRequired,
   meetingPurpose: PropTypes.object,
+  combinedValues: PropTypes.object,
   room: PropTypes.string,
 };
 
 ReserveRoomForm.defaultProps = {
   values: {
-    [c.TYPE_ROOM]: '',
-    date: utils.newUserDate(),
-    start: new Date(),
-    end: utils.newUserDate(),
     attendees: 1,
     groupName: '',
-    meetings: false,
-    meetingStart: utils.newUserDate(),
-    meetingEnd: utils.newUserDate(),
     meetingPurpose: '',
     meetingDetails: '',
     refreshments: false,

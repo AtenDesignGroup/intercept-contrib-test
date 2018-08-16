@@ -206,13 +206,14 @@ export const eventsByDate = createSelector(eventsAscending, items =>
   ),
 );
 
-export const eventsByDateAscending = createSelector(eventsByDate, items =>
-  map(items, (item, key) => ({
+export const eventsByDateAscending = createSelector(eventsByDate, (items) => {
+  const output = map(items, (item, key) => ({
     key,
-    date: new Date(parseInt(key, 10)),
+    date: key,
     items: item.map(a => a.data.id),
-  })).sort((a, b) => b.key - a.key),
-);
+  })).sort((a, b) => (b.key === a.key ? 0 : b.key > a.key ? 1 : -1));
+  return output;
+});
 
 export const eventsByDateDescending = createSelector(eventsByDateAscending, items =>
   items.reverse(),

@@ -14,7 +14,7 @@ import interceptClient from 'interceptClient';
 
 // Components
 import CurrentFilters from 'intercept/CurrentFilters';
-import DateFilter from 'intercept/DateFilter';
+import InputDate from 'intercept/Input/InputDate';
 import KeywordFilter from 'intercept/KeywordFilter';
 import SelectResource from 'intercept/SelectResource';
 /* eslint-enable */
@@ -110,7 +110,7 @@ class EventFilters extends PureComponent {
             label={labels[c.TYPE_AUDIENCE]}
           />
           {showDate && (
-            <DateFilter
+            <InputDate
               handleChange={this.onDateStartChange}
               defaultValue={null}
               value={filters[c.DATE_START]}
@@ -119,7 +119,7 @@ class EventFilters extends PureComponent {
             />
           )}
           {showDate && (
-            <DateFilter
+            <InputDate
               handleChange={this.onDateEndChange}
               defaultValue={null}
               value={filters[c.DATE_END]}

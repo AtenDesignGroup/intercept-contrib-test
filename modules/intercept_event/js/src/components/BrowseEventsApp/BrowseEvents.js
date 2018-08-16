@@ -27,7 +27,7 @@ import EventFilters from './../EventFilters';
 import EventList from './../EventList';
 import EventCalendar from './../EventCalendar';
 
-const { constants, api, select } = interceptClient;
+const { constants, api, select, utils } = interceptClient;
 const c = constants;
 const eventIncludes = ['image_primary', 'image_primary.field_media_image', 'field_room'];
 
@@ -67,8 +67,8 @@ const sparseFieldsets = {
 
 function getDate(value, view = 'day', boundary = 'start') {
   const method = boundary === 'start' ? 'startOf' : 'endOf';
-  const date = moment(value)[method](view);
-
+  const date = moment.tz(value, utils.getUserTimezone())[method](view);
+console.log(value);
   // The calendar view may include date from the previous or next month
   // so we make sure to include the beginning of the first week and
   // end of the last week.
@@ -97,6 +97,7 @@ function getDateFilters(values, view = 'list', calView = 'day', date = new Date(
   const path = 'field_date_time.value';
   let operator = '>';
   let value = moment(new Date())
+    .tz(utils.getUserTimezone())
     .subtract(1, 'day')
     .endOf('day')
     .toISOString();

@@ -2,6 +2,7 @@ import moment from 'moment';
 import drupalSettings from 'drupalSettings';
 import get from 'lodash/get';
 import intersection from 'lodash/intersection';
+import utils from '../../../../../node_modules/formsy-react/lib/utils';
 
 //
 // User getters
@@ -11,6 +12,9 @@ export const getUserTimezone = () => get(drupalSettings, 'intercept.user.timezon
 export const getUserUid = () => get(drupalSettings, 'intercept.user.id');
 export const getUserUuid = () => get(drupalSettings, 'intercept.user.uuid');
 export const getUserRoles = () => get(drupalSettings, 'intercept.user.roles');
+
+// Set default moment timezone.
+moment.tz.setDefault(getUserTimezone());
 
 //
 // Date Functions
@@ -33,25 +37,35 @@ export const ensureDate = (date) => {
 };
 
 // Normalize a date object to a single day. Used to compare days for different dates.
-export const getDayTimeStamp = date => ensureDate(date).setHours(0, 0, 0, 0);
+// export const getDayTimeStamp = date => ensureDate(date).setHours(0, 0, 0, 0);
+export const getDayTimeStamp = date =>
+  moment(date)
+    .tz(getUserTimezone())
+    .startOf('day')
+    .format('YYYY-MM-DD');
+
 // Get a formatted date string.
 export const getDayDisplay = (date) => {
   const d = getDayTimeStamp(date);
+  const today = moment()
+    .tz(getUserTimezone())
+    .startOf('day');
+  const tomorrow = today.clone().add(1, 'days');
 
   // Today
-  if (d === getDayTimeStamp(new Date())) {
+  if (d === getDayTimeStamp(today)) {
     return 'Today';
   }
   // Tommorrow
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
   if (d === getDayTimeStamp(tomorrow)) {
     return 'Tomorrow';
   }
   // Friday, October 20, 2017
-  return moment(date)
-    .utcOffset(getUserUtcOffset())
-    .format('dddd, MMMM D, YYYY');
+  return (
+    moment(date)
+      .tz(getUserTimezone())
+      .format('dddd, MMMM D, YYYY')
+  );
 };
 
 // Get a formatted short date string.
@@ -128,5 +142,5 @@ export const userIsSuperAdmin = () => getUserUid() === '1';
  *   True if the user has at least one of the provided roles or is a superadmin,
  *   otherwise False.
  */
-export const userHasRole = roles => userIsSuperAdmin()
-  || intersection(roles, getUserRoles()).length >= 1;
+export const userHasRole = roles =>
+  userIsSuperAdmin() || intersection(roles, getUserRoles()).length >= 1;

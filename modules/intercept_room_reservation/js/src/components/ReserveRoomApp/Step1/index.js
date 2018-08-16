@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import moment from 'moment';
 import debounce from 'lodash/debounce';
 import get from 'lodash/get';
+import isEqual from 'lodash/isEqual';
 import interceptClient from 'interceptClient';
 import drupalSettings from 'drupalSettings';
 
@@ -203,6 +204,11 @@ class ReserveRoomStep1 extends React.Component {
         previous: null,
         exiting: false,
       },
+      availability: {
+        loading: false,
+        shouldUpdate: false,
+        rooms: [],
+      },
     };
     this.doFetchRooms = debounce(this.doFetchRooms, 500).bind(this);
   }
@@ -212,8 +218,27 @@ class ReserveRoomStep1 extends React.Component {
     this.props.fetchLocations();
   }
 
+  componentDidUpdate(prevProps) {
+    const { availability } = this.state;
+    const { filters } = this.props;
+    const didUpdate = prop => !isEqual(prevProps[prop], this.props[prop]);
+
+    if (filters[c.DATE] && (didUpdate('rooms') || didUpdate('filters'))) {
+      this.setState({
+        availability: {
+          ...this.state.availability,
+          shouldUpdate: true,
+        },
+      });
+    }
+
+    // Fetch room availabilty if necessary.
+    if (availability.shouldUpdate && !availability.loading) {
+      this.fetchAvailableRooms();
+    }
+  }
+
   onExited() {
-    console.log('exited');
     this.setState({
       room: {
         ...this.state.room,
@@ -221,6 +246,38 @@ class ReserveRoomStep1 extends React.Component {
       },
     });
   }
+
+  // Get query params based on current rooms and filters.
+  getRoomAvailabilityQuery = () => {
+    const options = {
+      rooms: this.props.rooms.map(i => i.data.id),
+    };
+
+    if (this.props.filters[c.DATE]) {
+      const date = moment.tz(this.props.filters[c.DATE], utils.getUserTimezone());
+      console.log(date.toDate());
+      options.start = utils.dateToDrupal(this.props.filters[c.DATE]);
+    }
+
+    return options;
+    return {
+      start: utils.dateToDrupal(this.props.filters[c.DATE]),
+      end: utils.dateToDrupal(this.props.filters[c.DATE]),
+      duration: 60,
+    };
+  };
+
+  // Requests available rooms
+  fetchAvailableRooms = () => {
+    console.log('fetching available rooms');
+    this.setState({
+      availability: {
+        ...this.state.availability,
+        loading: true,
+      },
+    });
+    console.log(this.getRoomAvailabilityQuery());
+  };
 
   handleRoomSelect = (value) => {
     this.props.onChangeRoom(value);
@@ -276,11 +333,7 @@ class ReserveRoomStep1 extends React.Component {
   }
 
   render() {
-    const {
-      props,
-      handleFilterChange,
-      handleRoomSelect,
-    } = this;
+    const { props, handleFilterChange, handleRoomSelect } = this;
     const { rooms, roomsLoading, filters } = props;
 
     const roomToShow = this.state.room[this.state.room.exiting ? 'previous' : 'current'];
@@ -289,9 +342,11 @@ class ReserveRoomStep1 extends React.Component {
       const phoneNumber = get(roomProps, 'room.attributes.field_reservation_phone_number');
 
       if (!reservable && !utils.userHasRole(roomStaffRoles)) {
-        const phoneLink = phoneNumber
-          ? (<a href={`tel:${phoneNumber}`} className="call-prompt__link" >{phoneNumber}</a>)
-          : null;
+        const phoneLink = phoneNumber ? (
+          <a href={`tel:${phoneNumber}`} className="call-prompt__link">
+            {phoneNumber}
+          </a>
+        ) : null;
 
         return (
           <p className="call-prompt">
@@ -300,12 +355,13 @@ class ReserveRoomStep1 extends React.Component {
         );
       }
 
-      return (<Button
-        variant={'raised'}
-        size="small"
-        color="primary"
-        className={'action-button__button'}
-        onClick={() => handleRoomSelect(roomProps.uuid)}
+      return (
+        <Button
+          variant={'raised'}
+          size="small"
+          color="primary"
+          className={'action-button__button'}
+          onClick={() => handleRoomSelect(roomProps.uuid)}
         >
           {'Reserve'}
         </Button>

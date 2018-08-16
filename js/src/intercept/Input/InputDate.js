@@ -6,6 +6,9 @@ import MomentUtils from 'material-ui-pickers/utils/moment-utils';
 import DatePicker from 'material-ui-pickers/DatePicker';
 import MuiPickersUtilsProvider from 'material-ui-pickers/utils/MuiPickersUtilsProvider';
 import { withFormsy, propTypes, defaultProps } from 'formsy-react';
+import interceptClient from 'interceptClient';
+
+const { utils } = interceptClient;
 
 const styles = theme => ({
   container: {
@@ -24,13 +27,20 @@ const InputLabelProps = value => ({
   className: 'date-filter__label',
 });
 
-class InputDate extends React.Component {
+class InputDate extends React.PureComponent {
   render() {
     const { handleChange, clearable, required, label } = this.props;
     const value = this.props.getValue();
     const onChange = (date) => {
-      const d = date.toDate();
-      handleChange(d)
+      console.log(date);
+      console.log(date.toDate());
+      const d = date
+        .tz(utils.getUserTimezone())
+        .startOf('day')
+        .toDate();
+      console.log(date);
+      console.log(date.toDate());
+      handleChange(d);
       this.props.setValue(d);
     };
     const onClear = () => handleChange(null);

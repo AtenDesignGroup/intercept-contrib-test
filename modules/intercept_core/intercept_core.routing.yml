@@ -37,3 +37,11 @@ intercept_core.admin_permissions:
     _title: 'Permissions'
   requirements:
     _permission: 'administer permissions'
+
+intercept_core.api.customer_search:
+  path: '/api/customer/search'
+  defaults:
+    _controller: '\Drupal\intercept_core\Controller\UserAccount::customerSearchApi'
+    _title: 'Customer Search'
+  requirements:
+    _permission: 'search customer'

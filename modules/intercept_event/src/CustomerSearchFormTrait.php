@@ -80,6 +80,11 @@ trait CustomerSearchFormTrait {
     return $element;
   }
 
+  /**
+   * Use \Drupal\intercept_core\Utility\Obfuscate
+   *
+   * @deprecated
+   */
   protected function obfuscateEmail($email) {
     if (empty($email)) {
       return '';
@@ -88,6 +93,11 @@ trait CustomerSearchFormTrait {
     return substr_replace($email, str_repeat('*', $pos - 1), 1, $pos - 1);
   }
 
+  /**
+   * Use \Drupal\intercept_core\Utility\Obfuscate
+   *
+   * @deprecated
+   */
   protected function obfuscateBarcode($barcode) {
     if (empty($barcode)) {
       return '';
@@ -96,6 +106,11 @@ trait CustomerSearchFormTrait {
     return substr_replace($barcode, $replace, 0, strlen($barcode) - 4);
   } 
 
+  /**
+   * Format Polaris returned name to readable.
+   *
+   * @deprecated
+   */
   protected function formatName($name) {
     if (empty($name)) {
       return '';

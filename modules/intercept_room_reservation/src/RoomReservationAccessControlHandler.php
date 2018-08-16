@@ -22,24 +22,24 @@ class RoomReservationAccessControlHandler extends EntityAccessControlHandler {
     switch ($operation) {
       case 'view':
         if (!$entity->isPublished()) {
-          return AccessResult::allowedIfHasPermission($account, 'view unpublished room reservation entities');
+          return AccessResult::allowedIfHasPermission($account, 'view unpublished room_reservation');
         }
-        return AccessResult::allowedIfHasPermission($account, 'view published room reservation entities');
+        return AccessResult::allowedIfHasPermission($account, 'view published room_reservation');
 
       case 'update':
-        return AccessResult::allowedIfHasPermission($account, 'edit room_reservation entities');
+        return AccessResult::allowedIfHasPermission($account, 'edit room_reservation');
 
       case 'delete':
-        return AccessResult::allowedIfHasPermission($account, 'delete room_reservation entities');
+        return AccessResult::allowedIfHasPermission($account, 'delete room_reservation');
 
       case 'cancel':
-        return AccessResult::allowedIfHasPermission($account, 'cancel room_reservation entities');
+        return AccessResult::allowedIfHasPermission($account, 'cancel room_reservation');
 
       case 'approve':
-        return AccessResult::allowedIfHasPermission($account, 'approve room_reservation entities');
+        return AccessResult::allowedIfHasPermission($account, 'approve room_reservation');
 
       case 'decline':
-        return AccessResult::allowedIfHasPermission($account, 'decline room_reservation entities');
+        return AccessResult::allowedIfHasPermission($account, 'decline room_reservation');
     }
 
     // Unknown operation, no opinion.
@@ -50,7 +50,7 @@ class RoomReservationAccessControlHandler extends EntityAccessControlHandler {
    * {@inheritdoc}
    */
   protected function checkCreateAccess(AccountInterface $account, array $context, $entity_bundle = NULL) {
-    return AccessResult::allowedIfHasPermission($account, 'add room reservation entities');
+    return AccessResult::allowedIfHasPermission($account, 'create room_reservation');
   }
 
 }

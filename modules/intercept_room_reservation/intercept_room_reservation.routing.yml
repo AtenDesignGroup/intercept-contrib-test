@@ -42,4 +42,4 @@ intercept_room_reservation.api.availability:
   defaults:
     _controller: 'Drupal\intercept_room_reservation\Controller\RoomReservationController::availability'
   requirements:
-    _permission: 'create room reservation entities'
+    _permission: 'create room_reservation'

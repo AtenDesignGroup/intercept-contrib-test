@@ -223,14 +223,18 @@ class RoomReservationController extends ControllerBase implements ContainerInjec
     if ($post = Json::decode($request->getContent())) {
       $params = empty($params) ? $post : array_merge($params, $post);
     }
-    $manager = \Drupal::service('intercept_core.reservation.manager');
-    $rooms = !empty($params['rooms']) ? $manager->convertIds($params['rooms']) : [];
-    $result = $manager->availability([
-      'start' => $params['start'],
-      'end' => $params['end'],
-      'duration' => $params['duration'],
-      'rooms' => $rooms,
-    ]);
+
+    $result = [];
+    if (!empty($params)) {
+      $manager = \Drupal::service('intercept_core.reservation.manager');
+      $rooms = !empty($params['rooms']) ? $manager->convertIds($params['rooms']) : [];
+      $result = $manager->availability([
+        'start' => $params['start'],
+        'end' => $params['end'],
+        'duration' => $params['duration'],
+        'rooms' => $rooms,
+      ]);
+    }
 
     return JsonResponse::create($result, 200);
   }

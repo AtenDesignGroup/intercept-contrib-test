@@ -120,10 +120,12 @@ function intercept_core_user_load(array $entities) {
 
     if ($profile = reset($profile)) {
       $full_name = join(' ', [
-        $profile->field_first_name->getString(),
-        $profile->field_last_name->getString(),
+        trim($profile->field_first_name->getString()),
+        trim($profile->field_last_name->getString()),
       ]);
-      $entity->full_name = $full_name;
+      if (!empty(trim($full_name))) {
+        $entity->full_name = $full_name;
+      }
       $entity->barcode = $profile->field_barcode->getString();
       $entity->addCacheTags($profile->getCacheTags());
     }

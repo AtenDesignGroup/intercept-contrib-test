@@ -7,14 +7,7 @@ import DialogConfirm from 'intercept/Dialog/DialogConfirm';
 import RoomReservationSummary from './RoomReservationSummary';
 import RoomReservationStatus from './RoomReservationStatus';
 
-const {
-  actions,
-  api,
-  constants,
-  select,
-  utils,
-  session,
-} = interceptClient;
+const { actions, api, constants, select, utils, session } = interceptClient;
 const c = constants;
 
 const buildRoomReservation = (values) => {
@@ -32,8 +25,8 @@ const buildRoomReservation = (values) => {
       },
       field_group_name: values.groupName,
       field_meeting_dates: {
-        value: utils.dateToDrupal(values.meetingStart),
-        end_value: utils.dateToDrupal(values.meetingEnd),
+        value: values.meetingStart ? utils.dateToDrupal(values.meetingStart) : null,
+        end_value: values.meetingEnd ? utils.dateToDrupal(values.meetingEnd) : null,
       },
       field_meeting_purpose_details: values.meetingDetails,
       field_refreshments: values.refreshments,
@@ -54,10 +47,12 @@ const buildRoomReservation = (values) => {
         },
       },
       field_meeting_purpose: {
-        data: values[c.TYPE_MEETING_PURPOSE] ? {
-          type: c.TYPE_MEETING_PURPOSE,
-          id: values[c.TYPE_MEETING_PURPOSE],
-        } : null,
+        data: values[c.TYPE_MEETING_PURPOSE]
+          ? {
+            type: c.TYPE_MEETING_PURPOSE,
+            id: values[c.TYPE_MEETING_PURPOSE],
+          }
+          : null,
       },
       field_user: {
         data: {
@@ -97,11 +92,12 @@ class ReserveRoomConfirmation extends React.PureComponent {
     const { open, onCancel, values } = this.props;
     const { uuid, saved } = this.state;
 
-    const content = uuid && saved ? (
-      <RoomReservationStatus uuid={uuid} />
-    ) : (
-      <RoomReservationSummary {...values} />
-    );
+    const content =
+      uuid && saved ? (
+        <RoomReservationStatus uuid={uuid} />
+      ) : (
+        <RoomReservationSummary {...values} />
+      );
 
     const dialogProps = uuid
       ? {
@@ -146,14 +142,13 @@ ReserveRoomConfirmation.defaultProps = {
 const mapStateToProps = () => ({});
 
 const mapDispatchToProps = dispatch => ({
-
   save: (data) => {
     dispatch(actions.add(data, c.TYPE_ROOM_RESERVATION, data.id));
     session
       .getToken()
       .then((token) => {
         dispatch(
-          api[c.TYPE_ROOM_RESERVATION].sync(data.id, { headers: { 'X-CSRF-Token': token } })
+          api[c.TYPE_ROOM_RESERVATION].sync(data.id, { headers: { 'X-CSRF-Token': token } }),
         );
       })
       .catch((e) => {
@@ -162,4 +157,7 @@ const mapDispatchToProps = dispatch => ({
   },
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(ReserveRoomConfirmation);
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(ReserveRoomConfirmation);

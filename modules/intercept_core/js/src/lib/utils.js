@@ -61,11 +61,9 @@ export const getDayDisplay = (date) => {
     return 'Tomorrow';
   }
   // Friday, October 20, 2017
-  return (
-    moment(date)
-      .tz(getUserTimezone())
-      .format('dddd, MMMM D, YYYY')
-  );
+  return moment(date)
+    .tz(getUserTimezone())
+    .format('dddd, MMMM D, YYYY');
 };
 
 // Get a formatted short date string.
@@ -144,3 +142,24 @@ export const userIsSuperAdmin = () => getUserUid() === '1';
  */
 export const userHasRole = roles =>
   userIsSuperAdmin() || intersection(roles, getUserRoles()).length >= 1;
+
+/**
+ * Check if the current user is considered a staff member.
+ * This is a shortcut for differenciating staff from customers.
+ *
+ * @return {Boolean}
+ *   True if the user has at least one of:
+ *     intercept_event_manager
+ *     intercept_event_organizer
+ *     intercept_staff
+ *     intercept_system_admin
+ *     intercept_room_reservation_approver
+ *   otherwise False.
+ */
+export const userIsStaff = () => userHasRole([
+  'intercept_event_manager',
+  'intercept_event_organizer',
+  'intercept_staff',
+  'intercept_system_admin',
+  'intercept_room_reservation_approver',
+]);

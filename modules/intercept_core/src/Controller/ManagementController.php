@@ -23,40 +23,49 @@ class ManagementController extends ManagementControllerBase {
     ];
   }
 
-  public function viewSettings(AccountInterface $user, Request $request) {
-    $view = $request->query->get('view');
-
+  /**
+   * Subpage of viewSettings.
+   */
+  public function viewSettingsSite(AccountInterface $user, Request $request) {
     $build = [
       'title' => $this->title('Settings'),
     ];
 
-    if ($view == 'logo') {
-      $default_theme = \Drupal::config('system.theme')->get('default');
-      $build['form'] = \Drupal::service('form_builder')->getForm('Drupal\system\Form\ThemeSettingsForm', $default_theme);
-      $this->hideElements($build['form'], ['logo']);
+    $build['form'] = $this->formBuilder()->getForm('Drupal\system\Form\SiteInformationForm');
+
+    if ($this->moduleHandler()->moduleExists('r4032login')) {
+      $build['form']['#validate'] = array_filter($build['form']['#validate'], function($value) {
+        return $value != 'r4032login_form_system_site_information_settings_validate';
+      });
     }
-    if ($view == 'site') {
-      $build['form'] = $this->formBuilder()->getForm('Drupal\system\Form\SiteInformationForm');
-      if ($this->moduleHandler()->moduleExists('r4032login')) {
-        $build['form']['#validate'] = array_filter($build['form']['#validate'], function($value) {
-          return $value != 'r4032login_form_system_site_information_settings_validate';
-        });
-      }
-      $this->hideElements($build['form'], ['site_information']);
-      $build['form']['site_information']['site_slogan']['#access'] = FALSE;
-    }
-    if (empty($view)) {
-      $table = $this->table();
-      $link = $this->getButton('Logo', '<current>', [
-        'view' => 'logo'
-      ]);
-      $table->row($link, $this->t('Change your site logo'));
-      $link = $this->getButton('Site information', '<current>', [
-        'view' => 'site',
-      ]);
-      $table->row($link, $this->t('Change basic site information'));
-      $build['links'] = $table->toArray();
-    }
+
+    $this->hideElements($build['form'], ['site_information']);
+    $build['form']['site_information']['site_slogan']['#access'] = FALSE;
+    return $build;
+  }
+
+  /**
+   * Subpage of viewSettings.
+   */
+  public function viewSettingsLogo(AccountInterface $user, Request $request) {
+    $build = [
+      'title' => $this->title('Settings'),
+    ];
+    $default_theme = \Drupal::config('system.theme')->get('default');
+    $build['form'] = \Drupal::service('form_builder')->getForm('Drupal\system\Form\ThemeSettingsForm', $default_theme);
+    $this->hideElements($build['form'], ['logo']);
+    return $build;
+  }
+
+  public function viewSettings(AccountInterface $user, Request $request) {
+    $build = [
+      'title' => $this->title('Settings'),
+    ];
+
+    $table = $this->table();
+    $table->row($this->getButtonSubpage('logo', 'Logo'), $this->t('Change your site logo'));
+    $table->row($this->getButtonSubpage('site', 'Site information'), $this->t('Change basic site information'));
+    $build['links'] = $table->toArray();
     return $build;
   }
 

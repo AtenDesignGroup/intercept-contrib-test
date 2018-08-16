@@ -49,7 +49,14 @@ class ManagementControllerBase extends ControllerBase {
    *   Rendered array for admin page. 
    */
   public function view(AccountInterface $user, Request $request) {
-    if ($method = $this->getMethodName()) {
+    $page_name = $this->routeMatch->getRouteObject()->getOption('_page_name');
+    $subpage = $request->query->get('view');
+    // First check if there is a subpage from the query string.
+    if (!$method = $this->getMethodName("{$page_name}_{$subpage}")) {
+      // Otherwise just check if there is a regular callback.
+      $method = $this->getMethodName($page_name);
+    }
+    if ($method) {
       $build = $this->{$method}($user, $request);
       return $this->doAlter($build);
     }
@@ -79,13 +86,12 @@ class ManagementControllerBase extends ControllerBase {
   public function alter(array &$build, $page_name) {}
 
   /**
-   * @return bool|null|string|string[]
+   * Convert snake case page name to camel case and return if exists.
+   *
+   * @return bool|string
    */
-  protected function getMethodName() {
-    $method = '';
-    if ($name = $this->routeMatch->getRouteObject()->getOption('_page_name')) {
-      $method = $this->convertToSnakeCase('view_' . $name);
-    }
+  protected function getMethodName($page_name) {
+    $method = $this->convertToSnakeCase("view_{$page_name}");
     return method_exists($this, $method) ? $method : FALSE;
   }
 
@@ -138,6 +144,15 @@ class ManagementControllerBase extends ControllerBase {
     return $button;
   }
 
+  protected function getButtonSubpage($query, $title) {
+    $current_route = $this->routeMatch->getRouteName();
+    $link = $this->getButton($title, $current_route, [
+      'view' => $query,
+      'user' => $this->currentUser()->id(),
+    ]);
+    return $link;
+  }
+
   protected function getList($class, $entity_type = 'node') {
     $entity_type = $this->entityTypeManager()->getDefinition($entity_type);
     return $this->entityTypeManager()
@@ -167,7 +182,15 @@ class ManagementControllerBase extends ControllerBase {
     };
   }
 
-  protected function hideElements(&$form, $keep = []) {
+  /**
+   * Hide all elements in a form except specified keys.
+   *
+   * @param array $form
+   *   Drupal form object
+   * @param array $keep
+   *   Array of form keys to keep visible
+   */
+  protected function hideElements(array &$form, array $keep = []) {
     $keep = array_merge([
       'actions',
       'form_build_id',

@@ -5,11 +5,14 @@ namespace Drupal\intercept_core;
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
+use Drupal\office_hours\OfficeHoursDateHelper;
 
 /**
  * Class ReservationManager.
  */
 class ReservationManager implements ReservationManagerInterface {
+
+  const FORMAT = 'Y-m-d\TH:i:s';
 
   /**
    * Drupal\Core\Entity\EntityTypeManagerInterface definition.
@@ -17,6 +20,9 @@ class ReservationManager implements ReservationManagerInterface {
    * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
   protected $entityTypeManager;
+
+  protected $idKey;
+
   /**
    * Constructs a new ReservationManager object.
    */
@@ -37,60 +43,121 @@ class ReservationManager implements ReservationManagerInterface {
     return DrupalDateTime::createFromDateTime($this->getDate($string));
   }
 
-  public function hasOpenings($reservations, $params) {
+  protected function hasReservationConflict(array $reservations, array $params) {
     $has_openings = FALSE;
-    array_reduce($reservations, function($carry, $item) use (&$has_openings, $params) {
-      $int = $carry->diff($item->getStartDate());
+    // Check if there is open space between existing reservations.
+    array_reduce($reservations, function($datetime, $reservation) use (&$has_openings, $params) {
+      // Diff between current res start time and (either start time param or end date of last reservation).
+      $int = $datetime->diff($reservation->getStartDate());
       $total = $int->h * 60 + $int->i;
       if ($total >= $params['duration']) {
         $has_openings = TRUE;
       }
-      return $item->getEndDate();
+      return $reservation->getEndDate();
     }, $this->getDrupalDate($params['start']));
-    $res = end($reservations);
-    $end_date = $this->getDrupalDate($params['end']);
-    $int = $res->getEndDate()->diff($end_date);
+
+    // Now check open space between (start time or last reservation) and end time.
+    $date = empty($reservations) ? $this->getDrupalDate($params['start']) : end($reservations)->getEndDate();
+    $int = $date->diff($this->getDrupalDate($params['end']));
     $total = $int->h * 60 + $int->i;
     if ($total >= $params['duration']) {
       $has_openings = TRUE;
     }
-    return $has_openings;
+    return !$has_openings;
   }
+
+  protected function hasOpeningHoursConflict($reservations, $params, $node) {
+    $start = $params['start'];
+    $end = $params['end'];
+    $start_date = $this->getDate($params['start']);
+    $end_date = $this->getDate($params['end']);
+    if (!$hours = $this->getHours($params, $node)) {
+      // Appears to be closed.
+      return TRUE;
+    }
+    $start_time = $this->getAdjustedDate($params['start'], $hours['starthours'], $start_date, 'start');
+    $end_time = $this->getAdjustedDate($params['end'], $hours['endhours'], $end_date, 'end');
+    $params['start'] = $start_time->format(self::FORMAT);
+    $params['end'] = $end_time->format(self::FORMAT);
+    return $this->hasReservationConflict($reservations, $params);
+  }
+
+  protected function getHours($params, $node) {
+    $start_date = $this->getDate($params['start']);
+    $d = $start_date->format('w');
+    // TODO: Potentially add a warning that hours might not exist.
+    $hours = $node->field_location->entity->field_location_hours;
+    $values = $hours->getValue();
+    return !empty($values[$d]) ? $values[$d] : FALSE;
+  }
+
+  protected function isClosed($params, $node) {
+    return empty($this->getHours($params, $node));
+  }
+
+  protected function getAdjustedDate($selected_time, $location_time, $date, $type = 'start') {
+    $time = $this->getDate($selected_time)->format('Gi');
+    // If the closing hours or open hours differ, we use them.
+    if ($type == 'start') {
+      if ($time < $location_time) {
+        $time = $location_time;
+      }
+    }
+    if ($type == 'end') {
+      if ($time > $location_time) {
+        $time = $location_time;
+      }
+    }
+
+    // Then just covert that time to a full date using the date part specified.
+    // Make sure it's 4 digits.
+    $time = \Drupal\office_hours\OfficeHoursDateHelper::datePad($time, 4);
+    // Parse to be in the format for a date format.
+    if (!strstr($time, ':')) {
+      $time = substr('0000' . $time, -4);
+      $hour = substr($time, 0, -2);
+      $min = substr($time, -2);
+      $time = $hour . ':' . $min;
+    }
+    return new DrupalDateTime($date->format('Y-m-d\T') . $time);
+  }
+
 
   public function getDates($reservations) {
     $return = [];
     foreach ($reservations as $reservation) {
       $return[$reservation->uuid()] = [
-        'start' => $reservation->getStartDate()->format(DATE_ISO8601),
-        'end' => $reservation->getEndDate()->format(DATE_ISO8601),
+        'start' => $reservation->getStartDate()->format(self::FORMAT),
+        'end' => $reservation->getEndDate()->format(self::FORMAT),
       ];
     }
     return $return;
   }
 
   public function availability($params = []) {
-    $rooms = isset($params['rooms']) ? $params['rooms'] : [];
     $data = $this->reservationsByNode('room', function($query) use ($params) {
       $start_date = $this->getDate($params['start']);
       $end_date = $this->getDate($params['end']);
+      // Add period to end to send to query.
+      $period = 'PT' . (int) $params['duration'] . 'M';
+      $end_date->add(new \DateInterval($period));
+      $params['end'] = $end_date->format(self::FORMAT);
       if (!empty($params['rooms'])) {
         $query->condition('field_room', $params['rooms'], 'IN');
       }
-      $query->condition('field_dates.value', $start_date->format(DATE_ISO8601), '>=');
-      $query->condition('field_dates.end_value', $end_date->format(DATE_ISO8601), '<=');
+      $query->condition('field_dates.value', $start_date->format(self::FORMAT), '>=');
+      $query->condition('field_dates.end_value', $end_date->format(self::FORMAT), '<=');
     });
+
+    $nodes = $this->nodes('room', isset($params['rooms']) ? $params['rooms'] : []);
     $return = [];
-    foreach ($data as $nid => $reservations) {
-      $return[$nid]['status'] = $this->hasOpenings($reservations, $params);
-      $return[$nid]['dates'] = $this->getDates($reservations);
-    }
-    foreach ($this->nodes('room', $rooms) as $node) {
-      if (isset($return[$node->uuid()])) {
-        continue;
-      }
-      $return[$node->uuid()] = [
-        'status' => TRUE,
-      ];
+    foreach ($nodes as $nid => $node) {
+      $uuid = $node->uuid();
+      $reservations = !empty($data[$node->uuid()]) ? $data[$node->uuid()] : [];
+      $return[$uuid]['has_open_hours_conflict'] = $this->hasOpeningHoursConflict($reservations, $params, $node);
+      $return[$uuid]['has_reservation_conflict'] = $this->hasReservationConflict($reservations, $params);
+      $return[$uuid]['is_closed'] = $this->isClosed($params, $node);
+      $return[$uuid]['dates'] = $this->getDates($reservations);
     }
     return $return;
   }

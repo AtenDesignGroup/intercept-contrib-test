@@ -14,17 +14,31 @@ class UserAccount extends ControllerBase {
     return $this->redirect($route_name, ['user' => $this->currentUser()->id()]);
   }
 
+  public function customerRegisterApi(\Symfony\Component\HttpFoundation\Request $request) {
+    $params = $this->getParams($request);
+    $user = FALSE;
+    if (!empty($params['barcode'])) {
+      $user = \Drupal::service('intercept_ils.mapping_manager')->loadByBarcode($params['barcode']);
+    }
+    return JsonResponse::create(!empty($user) ? ['uuid' => $user->uuid()] : [], 200);
+  }
+
   public function customerSearchApi(\Symfony\Component\HttpFoundation\Request $request) {
+    $params = $this->getParams($request);
+    $search = \Drupal::service('polaris.client')->patron->searchBasic($params);
+    foreach ($search as &$result) {
+      $result['email'] = Obfuscate::email($result['email']);
+    }
+    return JsonResponse::create($search, 200);
+  }
+
+  protected function getParams(\Symfony\Component\HttpFoundation\Request $request) {
     // Accept query sring params, and then also accept a post request.
     $params = $request->query->get('filter');
 
     if ($post = Json::decode($request->getContent())) {
       $params = empty($params) ? $post : array_merge($params, $post);
     }
-    $search = \Drupal::service('polaris.client')->patron->searchBasic($params);
-    foreach ($search as &$result) {
-      $result['email'] = Obfuscate::email($result['email']);
-    }
-    return JsonResponse::create($search, 200);
+    return $params;
   }
 }

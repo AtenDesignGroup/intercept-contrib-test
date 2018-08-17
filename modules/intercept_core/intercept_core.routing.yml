@@ -45,3 +45,11 @@ intercept_core.api.customer_search:
     _title: 'Customer Search'
   requirements:
     _permission: 'search customer'
+
+intercept_core.api.customer_register:
+  path: '/api/customer/register'
+  defaults:
+    _controller: '\Drupal\intercept_core\Controller\UserAccount::customerRegisterApi'
+    _title: 'Register customer'
+  requirements:
+    _permission: 'search customer'

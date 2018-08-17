@@ -27,30 +27,31 @@ const InputLabelProps = value => ({
   className: 'date-filter__label',
 });
 
-class InputDate extends React.PureComponent {
-  render() {
-    const { handleChange, clearable, required, label } = this.props;
-    const value = this.props.getValue();
-    const onChange = (date) => {
-      console.log(date);
-      console.log(date.toDate());
-      const d = date
+class InputDate extends React.Component {
+  onChange = (date) => {
+    const d = date
+      ? date
         .tz(utils.getUserTimezone())
         .startOf('day')
-        .toDate();
-      console.log(date);
-      console.log(date.toDate());
-      handleChange(d);
-      this.props.setValue(d);
-    };
-    const onClear = () => handleChange(null);
+        .toDate()
+      : null;
+    this.props.setValue(d);
+    this.props.handleChange(d);
+  };
+
+  onClear = () => this.onChange(null);
+
+  render() {
+    const { clearable, required, label } = this.props;
+
+    const value = this.props.getValue();
     const inputValue = value === '' ? null : value;
 
     return (
       <MuiPickersUtilsProvider utils={MomentUtils} moment={moment}>
         <DatePicker
-          onChange={onChange}
-          onClear={onClear}
+          onChange={this.onChange}
+          onClear={this.onClear}
           clearable={clearable}
           label={label}
           required={required}

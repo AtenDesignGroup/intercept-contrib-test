@@ -71,8 +71,6 @@ class SelectTime extends React.Component {
 
     // Abort if the min time is after the max time to avoid an infinite loop.
     if (min >= max) {
-      console.log('min >= max');
-      console.log(min, max, step);
       return options;
     }
     do {
@@ -126,7 +124,7 @@ class SelectTime extends React.Component {
             className="select-filter__label"
             htmlFor="select-multiple-chip"
             required={this.props.required}
-            // shrink={false}
+            shrink={value}
           >
             {label}
           </InputLabel>

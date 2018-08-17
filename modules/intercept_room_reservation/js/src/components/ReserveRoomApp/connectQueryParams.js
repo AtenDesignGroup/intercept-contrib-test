@@ -27,29 +27,19 @@ const DURATION = 'duration';
 
 const removeFalseyProps = obj => pickBy(obj, prop => prop);
 
-const decodeDate = value =>
-  // const date = decode(UrlQueryParamTypes.date, value) || null;
+const decodeDate = (value) => {
+  const date = decode(UrlQueryParamTypes.date, value) || null;
 
-  // if (date === null) {
-  //   return date;
-  // }
+  if (date === null) {
+    return date;
+  }
 
-  moment.tz(value, utils.getUserTimezone()).toDate() || null
-;
+  return moment.tz(value, utils.getUserTimezone()).toDate() || null;
+}
 
-const encodeDate = value =>
-  // const date = decode(UrlQueryParamTypes.date, value) || null;
-
-  // if (date === null) {
-  //   return date;
-  // }
-
-  (
-    moment(value)
-      .tz(utils.getUserTimezone())
-      .format('YYYY-MM-DD') || null
-  )
-;
+const encodeDate = value => moment(value)
+  .tz(utils.getUserTimezone())
+  .format('YYYY-MM-DD') || null;
 
 const encodeFilters = (value) => {
   const filters = removeFalseyProps({

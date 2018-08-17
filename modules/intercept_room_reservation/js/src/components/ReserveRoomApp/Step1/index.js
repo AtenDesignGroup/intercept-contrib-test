@@ -26,6 +26,8 @@ import RoomList from './RoomList';
 const { constants, api, select, utils } = interceptClient;
 const c = constants;
 const ATTENDEES = 'attendees';
+const TIME = 'time';
+const DURATION = 'duration';
 const roomIncludes = ['image_primary', 'image_primary.field_media_image'];
 const roomStaffRoles = [
   'administrator',
@@ -55,6 +57,16 @@ function getPublishedFilters(value = true) {
     published: {
       path: 'status',
       value: value ? '1' : '0',
+    },
+  };
+}
+
+function getRoomsWithLocationsFilters() {
+  return {
+    withLocation: {
+      path: 'field_location',
+      value: null,
+      operator: '<>',
     },
   };
 }
@@ -91,7 +103,7 @@ function getAttendeesFilters(values = {}) {
 function getDateFilters(values, view = 'list', calView = 'day', date = new Date()) {
   const path = 'field_date_time.value';
   let operator = '>';
-  let value = moment(new Date())
+  let value = moment()
     .subtract(1, 'day')
     .endOf('day')
     .toISOString();
@@ -117,11 +129,12 @@ function getDateFilters(values, view = 'list', calView = 'day', date = new Date(
   };
 }
 
-function getFilters(values, view = 'list', calView = 'day', date = new Date()) {
+function getFilters(values) {
   const filter = {
     ...getPublishedFilters(true),
     ...getAttendeesFilters(values),
     ...getRoleBasedFilters(),
+    ...getRoomsWithLocationsFilters(),
   };
 
   if (!values) {
@@ -172,7 +185,7 @@ class ReserveRoomStep1 extends React.Component {
       filters: props.filters,
       formValues: {
         [c.TYPE_ROOM]: null,
-        date: new Date(),
+        date: null,
         start: moment()
           .startOf('hour')
           .add(1, 'h')
@@ -211,6 +224,7 @@ class ReserveRoomStep1 extends React.Component {
       },
     };
     this.doFetchRooms = debounce(this.doFetchRooms, 500).bind(this);
+    this.fetchAvailableRooms = debounce(this.fetchAvailableRooms, 200).bind(this);
   }
 
   componentDidMount() {
@@ -220,7 +234,7 @@ class ReserveRoomStep1 extends React.Component {
 
   componentDidUpdate(prevProps) {
     const { availability } = this.state;
-    const { filters } = this.props;
+    const { filters, rooms } = this.props;
     const didUpdate = prop => !isEqual(prevProps[prop], this.props[prop]);
 
     if (filters[c.DATE] && (didUpdate('rooms') || didUpdate('filters'))) {
@@ -233,7 +247,7 @@ class ReserveRoomStep1 extends React.Component {
     }
 
     // Fetch room availabilty if necessary.
-    if (availability.shouldUpdate && !availability.loading) {
+    if (rooms.length > 0 && availability.shouldUpdate && !availability.loading) {
       this.fetchAvailableRooms();
     }
   }
@@ -253,31 +267,84 @@ class ReserveRoomStep1 extends React.Component {
       rooms: this.props.rooms.map(i => i.data.id),
     };
 
+    const tz = utils.getUserTimezone();
+
     if (this.props.filters[c.DATE]) {
-      const date = moment.tz(this.props.filters[c.DATE], utils.getUserTimezone());
-      console.log(date.toDate());
-      options.start = utils.dateToDrupal(this.props.filters[c.DATE]);
+      const date = moment.tz(this.props.filters[c.DATE], tz);
+      options.start = date.clone().hour(0);
+      options.end = date.clone().endOf('day');
+
+      switch (this.props.filters[TIME]) {
+        case 'morning':
+          options.end.hour(11);
+          break;
+        case 'afternoon':
+          options.start.hour(12);
+          options.end.hour(16);
+          break;
+        case 'evening':
+          options.start.hour(17);
+          options.end.hour(23);
+          break;
+        default:
+          break;
+      }
+
+      options.start = utils.dateToDrupal(options.start);
+      options.end = utils.dateToDrupal(options.end);
+    }
+
+    if (this.props.filters[DURATION]) {
+      options.duration = this.props.filters[DURATION];
     }
 
     return options;
-    return {
-      start: utils.dateToDrupal(this.props.filters[c.DATE]),
-      end: utils.dateToDrupal(this.props.filters[c.DATE]),
-      duration: 60,
-    };
   };
 
   // Requests available rooms
-  fetchAvailableRooms = () => {
+  fetchAvailableRooms() {
     console.log('fetching available rooms');
     this.setState({
       availability: {
         ...this.state.availability,
         loading: true,
+        shouldUpdate: false,
       },
     });
-    console.log(this.getRoomAvailabilityQuery());
-  };
+
+    fetch('/api/rooms/availability', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify(this.getRoomAvailabilityQuery()),
+    })
+      .then(res => res.text())
+      .then(this.handleAvailabiltyResponse)
+      .catch((e) => {
+        console.log(e);
+        this.setState({
+          availability: {
+            ...this.state.availability,
+            loading: false,
+            shouldUpdate: false,
+          },
+        });
+      });
+  }
+
+  handleAvailabiltyResponse = (res) => {
+    this.setState({
+      availability: {
+        ...this.state.availability,
+        loading: false,
+        rooms: res,
+        shouldUpdate: false,
+      },
+    });
+  }
 
   handleRoomSelect = (value) => {
     this.props.onChangeRoom(value);
@@ -296,7 +363,10 @@ class ReserveRoomStep1 extends React.Component {
 
   handleFilterChange = (values) => {
     this.props.onChangeFilters(values);
-    this.doFetchRooms(values);
+
+    if (this.shouldFetchRooms(this.props.filters, values)) {
+      this.doFetchRooms(values);
+    }
   };
 
   handleFormChange(formValues) {
@@ -313,6 +383,12 @@ class ReserveRoomStep1 extends React.Component {
       formValues,
     });
   }
+
+  // Only fetch rooms if relevant filters have changed.
+  shouldFetchRooms = (oldValues, newValues) =>
+    get(oldValues, `${c.TYPE_LOCATION}.length`) !== get(newValues, `${c.TYPE_LOCATION}.length`) ||
+    get(oldValues, `${c.TYPE_ROOM_TYPE}.length`) !== get(newValues, `${c.TYPE_ROOM_TYPE}.length`) ||
+    oldValues[ATTENDEES] !== newValues[ATTENDEES];
 
   doFetchRooms(
     values = this.props.filters,

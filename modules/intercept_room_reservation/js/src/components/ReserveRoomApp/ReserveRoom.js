@@ -9,6 +9,9 @@ import drupalSettings from 'drupalSettings';
 // Material UI
 import Slide from '@material-ui/core/Slide';
 
+// Formsy
+import { addValidationRule } from 'formsy-react';
+
 // Intercept Components
 import PageSpinner from 'intercept/PageSpinner';
 
@@ -21,6 +24,11 @@ import ReserveRoomStep3 from './Step3';
 const { constants, api, select, utils } = interceptClient;
 const c = constants;
 const roomIncludes = ['image_primary', 'image_primary.field_media_image'];
+
+addValidationRule('isFutureDate', (values, value) => {
+  // return true;
+  return !value || value >= utils.getUserStartOfDay();
+});
 
 function getDateSpan(value, view = 'day') {
   const start = moment(value).startOf(view);
@@ -122,20 +130,16 @@ function getFilters(values, view = 'list', calView = 'day', date = new Date()) {
 class ReserveRoom extends React.Component {
   constructor(props) {
     super(props);
-    const now = new Date();
+    const now = utils.getUserTimeNow();
 
     this.state = {
-      calView: props.calView,
-      date: props.date,
+      // date: props.date,
+      date: null,
       filters: props.filters,
       formValues: {
         [c.TYPE_ROOM]: props.room || null,
-        date: utils
-          .roundTo(now)
-          .toDate(),
-        start: utils
-          .roundTo(now)
-          .toDate(),
+        date: utils.roundTo(now).toDate(),
+        start: utils.roundTo(now).toDate(),
         end: utils
           .roundTo(now)
           .add(30, 'minutes')
@@ -151,24 +155,18 @@ class ReserveRoom extends React.Component {
         refreshmentsDesc: '',
         user: drupalSettings.intercept.user.uuid,
       },
-      view: props.view,
       room: {
         current: null,
         previous: null,
         exiting: false,
       },
     };
-    this.handleCalendarNavigate = this.handleCalendarNavigate.bind(this);
-    this.handleCalendarView = this.handleCalendarView.bind(this);
     this.handleFilterChange = this.handleFilterChange.bind(this);
-    this.handleViewChange = this.handleViewChange.bind(this);
     this.onExited = this.onExited.bind(this);
     this.doFetchRooms = debounce(this.doFetchRooms, 500).bind(this);
   }
 
   componentDidMount() {
-    // this.doFetchRooms(this.props.filters, this.props.view, this.props.calView, this.props.date);
-    // this.props.fetchLocations();
     if (this.props.room) {
       const filters = {
         uuid: {
@@ -185,25 +183,6 @@ class ReserveRoom extends React.Component {
       });
     }
   }
-
-  componentWillUpdate() {
-
-  }
-
-  handleViewChange = (value) => {
-    // this.props.onChangeView(value);
-    // this.doFetchRooms(this.props.filters, value, this.props.calView, this.props.date);
-  };
-
-  handleCalendarNavigate = (date, calView) => {
-    this.props.onChangeDate(date);
-    this.doFetchRooms(this.props.filters, 'calendar', calView, date);
-  };
-
-  handleCalendarView = (calView) => {
-    this.props.onChangeCalView(calView);
-    this.doFetchRooms(this.props.filters, 'calendar', calView, this.props.date);
-  };
 
   handleFilterChange(values) {
     this.props.onChangeFilters(values);
@@ -278,9 +257,17 @@ class ReserveRoom extends React.Component {
     } = props;
 
     const steps = [
-      <ReserveRoomStep1 {...props} onChange={this.handleFormChange} />,
-      <ReserveRoomStep2 {...props} onChange={this.handleFormChange} formValues={this.state.formValues} />,
-      <ReserveRoomStep3 {...props} onChange={this.handleFormChange} formValues={this.state.formValues} />,
+      <ReserveRoomStep1 {...props} />,
+      <ReserveRoomStep2
+        {...props}
+        onChange={this.handleFormChange}
+        formValues={this.state.formValues}
+      />,
+      <ReserveRoomStep3
+        {...props}
+        onChange={this.handleFormChange}
+        formValues={this.state.formValues}
+      />,
     ];
 
     return (

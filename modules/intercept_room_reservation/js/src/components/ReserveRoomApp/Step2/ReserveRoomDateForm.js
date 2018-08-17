@@ -38,7 +38,7 @@ import Formsy, { addValidationRule } from 'formsy-react';
 
 // Local Components
 
-const { constants, select, utils } = interceptClient;
+const { constants, utils } = interceptClient;
 const c = constants;
 
 const matchTime = (original, ref) => {
@@ -66,10 +66,9 @@ addValidationRule(
 );
 addValidationRule('isRequiredIfMeeting', (values, value) => !values.meeting || value !== '');
 addValidationRule(
-  'isFutureDate',
-  (values, value) => value === null || value >= matchTime(new Date(), value),
+  'isFutureTime',
+  (values, value) => value === null || value > moment.tz(utils.getUserTimezone()).toDate(),
 );
-addValidationRule('isFutureTime', (values, value) => value === null || value > new Date());
 addValidationRule('isAfterStart', (values, value) => value === null || value > values.start);
 addValidationRule('isOnOrAfterStart', (values, value) => value === null || value >= values.start);
 addValidationRule('isBeforeEnd', (values, value) => value === null || value < values.end);

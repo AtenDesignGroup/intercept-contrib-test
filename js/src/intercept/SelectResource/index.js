@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import SelectMultiple from './../Select/SelectMultiple';
 import SelectSingle from './../Select/SelectSingle';
+import ResourceChip from './../ResourceChip';
 import interceptClient from 'interceptClient';
 
 const { select, api } = interceptClient;
@@ -13,11 +14,38 @@ class SelectResource extends React.Component {
   }
 
   render() {
-    const { value, multiple } = this.props;
+    const { chips, value, multiple, type, handleChange } = this.props;
+
+    let renderValue = () => null;
+
+    if (chips) {
+      renderValue = selected => (
+        <div className="current-filter current-filter--embedded">
+          {selected.map(id => (<ResourceChip
+            key={id}
+            identifier={{ type, id }}
+            onDelete={item => handleChange({
+              target: {
+                value: value.filter(v => v !== item)
+              }
+            })}
+          />))}
+        </div>
+      );
+    }
+
     return multiple ? (
-      <SelectMultiple {...this.props} value={value === null ? [] : value} />
+      <SelectMultiple
+        {...this.props}
+        value={value === null ? [] : value}
+        renderValue={renderValue}
+      />
     ) : (
-      <SelectSingle {...this.props} options={[{ key: '', value: 'None' }, ...this.props.options] } value={value} />
+      <SelectSingle
+        {...this.props}
+        options={[{ key: '', value: 'None' }, ...this.props.options]}
+        value={value}
+      />
     );
   }
 }
@@ -33,18 +61,23 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
 });
 
 SelectResource.defaultProps = {
+  chips: false,
   multiple: false,
   value: null,
 };
 
 SelectResource.propTypes = {
-  options: PropTypes.arrayOf(Object).isRequired,
-  value: PropTypes.oneOfType([PropTypes.arrayOf(String), PropTypes.string]),
+  chips: PropTypes.bool,
   handleChange: PropTypes.func.isRequired,
   fetchAll: PropTypes.func.isRequired,
-  type: PropTypes.string.isRequired,
   label: PropTypes.string.isRequired,
   multiple: PropTypes.bool,
+  options: PropTypes.arrayOf(Object).isRequired,
+  value: PropTypes.oneOfType([PropTypes.arrayOf(String), PropTypes.string]),
+  type: PropTypes.string.isRequired,
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(SelectResource);
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(SelectResource);

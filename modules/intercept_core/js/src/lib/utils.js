@@ -12,6 +12,8 @@ export const getUserTimezone = () => get(drupalSettings, 'intercept.user.timezon
 export const getUserUid = () => get(drupalSettings, 'intercept.user.id');
 export const getUserUuid = () => get(drupalSettings, 'intercept.user.uuid');
 export const getUserRoles = () => get(drupalSettings, 'intercept.user.roles');
+export const getUserStartOfDay = () => moment().tz(getUserTimezone()).startOf('day').toDate();
+export const getUserTimeNow = () => moment().tz(getUserTimezone()).toDate();
 
 // Set default moment timezone.
 moment.tz.setDefault(getUserTimezone());
@@ -156,10 +158,11 @@ export const userHasRole = roles =>
  *     intercept_room_reservation_approver
  *   otherwise False.
  */
-export const userIsStaff = () => userHasRole([
-  'intercept_event_manager',
-  'intercept_event_organizer',
-  'intercept_staff',
-  'intercept_system_admin',
-  'intercept_room_reservation_approver',
-]);
+export const userIsStaff = () =>
+  userHasRole([
+    'intercept_event_manager',
+    'intercept_event_organizer',
+    'intercept_staff',
+    'intercept_system_admin',
+    'intercept_room_reservation_approver',
+  ]);

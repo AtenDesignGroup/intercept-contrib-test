@@ -55,22 +55,20 @@ class SelectMultiple extends React.Component {
   };
 
   render() {
-    const { options, label, multiple, name, required } = this.props;
+    const { chips, renderValue, options, label, multiple, name, required } = this.props;
     const value = this.props.getValue();
     const checkboxId = id => `select-filter--${id}`;
     const checkboxLabel = (text, id) => (
-      <label className="select-filter__checkbox-label">
-        {text}
-      </label>
+      <label className="select-filter__checkbox-label">{text}</label>
     );
 
     return (
-      <div className="select-filter">
+      <div className="select-filter input input--select">
         <FormControl className="select-filter__control">
           <InputLabel
             className="select-filter__label"
             htmlFor={name}
-            shrink={false}
+            shrink={chips && value.length >= 1}
             required={required}
           >
             {label}
@@ -81,7 +79,7 @@ class SelectMultiple extends React.Component {
             value={!value ? '' : value}
             onChange={this.handleChange}
             input={<Input id={name} />}
-            renderValue={() => null}
+            renderValue={renderValue}
             MenuProps={MenuProps}
             error={!this.props.isValid()}
             required={this.props.required}
@@ -112,13 +110,17 @@ SelectMultiple.propTypes = {
   label: PropTypes.string.isRequired,
   value: PropTypes.oneOfType([PropTypes.arrayOf(String), PropTypes.string]),
   options: PropTypes.arrayOf(Object).isRequired,
+  renderValue: PropTypes.func,
   handleChange: PropTypes.func.isRequired,
   multiple: PropTypes.bool,
+  chips: PropTypes.bool,
 };
 
 SelectMultiple.defaultProps = {
   value: null,
   multiple: false,
+  chips: false,
+  renderValue: () => null,
 };
 
 export default withStyles(styles, { withTheme: true })(withFormsy(SelectMultiple));

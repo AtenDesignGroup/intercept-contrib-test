@@ -22,12 +22,12 @@ class InputNumber extends React.PureComponent {
         required={required}
         type="number"
         onChange={handleChange}
-        value={value === null ? '' : value}
+        value={value || ''}
         error={!this.props.isValid()}
         helperText={this.props.getErrorMessage()}
         className="input input--number"
         InputLabelProps={{
-          shrink: true,
+          // shrink: value,
           className: 'input__label',
         }}
         inputProps={{

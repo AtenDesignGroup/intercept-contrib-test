@@ -34,6 +34,7 @@ const labels = {
 };
 
 const durationOptions = [
+  { key: 'null', value: 'Any' },
   { key: '15', value: '15 min.' },
   { key: '30', value: '30 min.' },
   { key: '60', value: '1 hr.' },
@@ -42,10 +43,10 @@ const durationOptions = [
 ];
 
 const timeOptions = [
-  { key: '8:00-22:00', value: 'Any' },
-  { key: '8:00-12:00', value: 'Morning' },
-  { key: '12:00-5:00', value: 'Afternoon' },
-  { key: '5:00-10:00', value: 'Evening' },
+  { key: null, value: 'Any' },
+  { key: 'morning', value: 'Morning' },
+  { key: 'afternoon', value: 'Afternoon' },
+  { key: 'evening', value: 'Evening' },
 ];
 
 const currentFiltersConfig = filters =>
@@ -60,21 +61,19 @@ class EventFilters extends PureComponent {
   onFilterChange = (key, value) => {
     const newFilters = { ...this.props.filters, [key]: value };
     this.props.onChange(newFilters);
-  }
+  };
 
-  onInputChange = (key) => {
-    return (event) => {
-      this.onFilterChange(key, event.target.value);
-    };
-  }
+  onInputChange = key => (event) => {
+    this.onFilterChange(key, event.target.value);
+  };
 
   onDateChange = (value) => {
     this.onFilterChange(c.DATE, value);
-  }
+  };
 
   onAttendeesChange = (value) => {
     this.onFilterChange(ATTENDEES, value);
-  }
+  };
 
   render() {
     const { showDate, filters } = this.props;
@@ -82,63 +81,70 @@ class EventFilters extends PureComponent {
     if (!showDate) {
       currentFilters = currentFilters.filter(f => f.key !== c.DATE);
     }
-
     return (
       <div className="">
-        <h3 className="">Filter Rooms</h3>
-        <Formsy className="">
-          <SelectResource
-            multiple
-            type={c.TYPE_LOCATION}
-            name={c.TYPE_LOCATION}
-            handleChange={this.onInputChange(c.TYPE_LOCATION)}
-            value={filters[c.TYPE_LOCATION]}
-            label={labels[c.TYPE_LOCATION]}
-          />
-          <SelectResource
-            multiple
-            type={c.TYPE_ROOM_TYPE}
-            name={c.TYPE_ROOM_TYPE}
-            handleChange={this.onInputChange(c.TYPE_ROOM_TYPE)}
-            value={filters[c.TYPE_ROOM_TYPE]}
-            label={labels[c.TYPE_ROOM_TYPE]}
-          />
-          <InputDate
-            handleChange={this.onDateChange}
-            defaultValue={null}
-            value={filters[c.DATE]}
-            name={c.DATE}
-            required
-            clearable={false}
-            validations="isFutureDate"
-            validationError="Date must be in the future"
-          />
-          <SelectSingle
-            name={TIME}
-            handleChange={this.onInputChange(TIME)}
-            value={filters[TIME]}
-            label={labels[TIME]}
-            options={timeOptions}
-            clearable
-          />
-          <SelectSingle
-            name={DURATION}
-            handleChange={this.onInputChange(DURATION)}
-            value={filters[DURATION]}
-            label={labels[DURATION]}
-            options={durationOptions}
-            clearable
-          />
-          <InputNumber
-            label={labels[ATTENDEES]}
-            value={filters[ATTENDEES]}
-            onChange={this.onAttendeesChange}
-            name={'attendees'}
-            min={0}
-            int
-            // validations="isPositive"
-            // validationError="Attendees must be a positive number"
-          />
+        <Formsy className="" onChange={console.log}>
+          <div className="l--subsection">
+            <h4 className="section-title--secondary">Filter Rooms By</h4>
+            <SelectResource
+              multiple
+              type={c.TYPE_LOCATION}
+              name={c.TYPE_LOCATION}
+              handleChange={this.onInputChange(c.TYPE_LOCATION)}
+              value={filters[c.TYPE_LOCATION]}
+              label={labels[c.TYPE_LOCATION]}
+              chips
+            />
+            <SelectResource
+              multiple
+              type={c.TYPE_ROOM_TYPE}
+              name={c.TYPE_ROOM_TYPE}
+              handleChange={this.onInputChange(c.TYPE_ROOM_TYPE)}
+              value={filters[c.TYPE_ROOM_TYPE]}
+              label={labels[c.TYPE_ROOM_TYPE]}
+              chips
+            />
+            <InputNumber
+              label={labels[ATTENDEES]}
+              value={filters[ATTENDEES]}
+              onChange={this.onAttendeesChange}
+              name={'attendees'}
+              min={0}
+              int
+              // validations="isPositive"
+              // validationError="Attendees must be a positive number"
+            />
+          </div>
+          <div className="l--subsection">
+            <h4 className="section-title--secondary">Show Rooms Available On</h4>
+            <InputDate
+              handleChange={this.onDateChange}
+              defaultValue={null}
+              value={filters[c.DATE] || null}
+              name={c.DATE}
+              clearable
+              validations="isFutureDate"
+              validationError="Date must be in the future"
+            />
+            <SelectSingle
+              name={TIME}
+              handleChange={this.onInputChange(TIME)}
+              value={filters[TIME]}
+              label={labels[TIME]}
+              disabled={!filters[c.DATE]}
+              options={timeOptions}
+              clearable
+            />
+            <SelectSingle
+              name={DURATION}
+              handleChange={this.onInputChange(DURATION)}
+              value={filters[DURATION]}
+              label={labels[DURATION]}
+              options={durationOptions}
+              disabled={!filters[c.DATE]}
+              clearable
+            />
+          </div>
         </Formsy>
       </div>
     );

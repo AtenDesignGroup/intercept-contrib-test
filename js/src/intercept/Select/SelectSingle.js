@@ -55,7 +55,7 @@ class SelectSingle extends React.Component {
   };
 
   render() {
-    const { options, label } = this.props;
+    const { options, label, disabled } = this.props;
     const value = this.props.getValue();
     const checkboxId = id => `select-filter--${id}`;
     const checkboxLabel = (text, id) => (
@@ -66,12 +66,12 @@ class SelectSingle extends React.Component {
 
     return (
       <div className="select-filter input input--select">
-        <FormControl className="select-filter__control">
+        <FormControl className="select-filter__control" disabled={disabled}>
           <InputLabel
             className="select-filter__label"
             htmlFor="select-multiple-chip"
             required={this.props.required}
-            // shrink={false}
+            shrink={!!value}
           >
             {label}
           </InputLabel>
@@ -107,12 +107,14 @@ SelectSingle.propTypes = {
   options: PropTypes.arrayOf(Object).isRequired,
   handleChange: PropTypes.func.isRequired,
   multiple: PropTypes.bool,
+  disabled: PropTypes.bool,
 };
 
 SelectSingle.defaultProps = {
   ...defaultProps,
   value: null,
   multiple: false,
+  disabled: false,
 };
 
 export default withStyles(styles, { withTheme: true })(withFormsy(SelectSingle));

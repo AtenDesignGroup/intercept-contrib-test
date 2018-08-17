@@ -6,22 +6,27 @@ import { connect } from 'react-redux';
 const { constants, select, utils } = interceptClient;
 const c = constants;
 
+const { getDayDisplay } = utils;
+const timeDisplay = (time, date) => utils.getTimeDisplay(utils.getDateFromTime(time, date));
+
 const RoomReservationSummary = props => (
   <article className="reservation-summary">
     <p className="reservation-summary__location">{props.location}</p>
     <h3 className="reservation-summary__room">{props.room}</h3>
-    <span className="reservation-summary__date">{utils.getDayDisplay(props.start)}&nbsp;</span>
-    <span className="reservation-summary__time">{`${utils.getTimeDisplay(
+    <span className="reservation-summary__date">{getDayDisplay(props.date)}&nbsp;</span>
+    <span className="reservation-summary__time">{`${timeDisplay(
       props.start,
-    )} to ${utils.getTimeDisplay(props.end)}`}</span>
+      props.date,
+    )} to ${timeDisplay(props.end, props.date)}`}</span>
   </article>
 );
 
 RoomReservationSummary.propTypes = {
   room: PropTypes.string.isRequired,
   location: PropTypes.string.isRequired,
-  start: PropTypes.instanceOf(Date).isRequired,
-  end: PropTypes.instanceOf(Date).isRequired,
+  date: PropTypes.instanceOf(Date).isRequired,
+  start: PropTypes.string.isRequired,
+  end: PropTypes.string.isRequired,
 };
 
 const mapStateToProps = (state, ownProps) => {

@@ -67,7 +67,9 @@ class SelectTime extends React.Component {
    */
   static getOptions(min, max, step) {
     const options = [];
-    const i = utils.roundTo(min, step).clone();
+    const minDate = moment.tz(min, 'HHmm', utils.getUserTimezone()).toDate();
+    const maxDate = moment.tz(max, 'HHmm', utils.getUserTimezone()).toDate();
+    const i = utils.roundTo(minDate, step).clone();
 
     // Abort if the min time is after the max time to avoid an infinite loop.
     if (min >= max) {
@@ -76,11 +78,11 @@ class SelectTime extends React.Component {
     do {
       const value = utils.getTimeDisplay(i);
       options.push({
-        key: i.format(),
+        key: i.format('HHmm'),
         value,
       });
       i.add(step, 'minutes');
-    } while (i.toDate() <= max);
+    } while (i.toDate() <= maxDate);
     return options;
   }
 
@@ -99,9 +101,9 @@ class SelectTime extends React.Component {
   }
 
   handleChange = (event) => {
-    const value = moment(event.target.value).toDate();
-    const proxy = event;
-    proxy.target.value = value;
+    const value = event.target.value;
+    // const proxy = event;
+    // proxy.target.value = value;
     this.props.setValue(value);
     this.props.onChange(value);
   };
@@ -124,16 +126,14 @@ class SelectTime extends React.Component {
             className="select-filter__label"
             htmlFor="select-multiple-chip"
             required={this.props.required}
-            shrink={value}
+            shrink={!!value}
           >
             {label}
           </InputLabel>
 
           <Select
-            value={value === null || !value ? '' : moment(value).format()}
+            value={value === null || !value ? '' : value}
             onChange={this.handleChange}
-            // input={<Input id="select-multiple-chip" />}
-            // renderValue={(value) => value}
             MenuProps={MenuProps}
             error={!this.props.isValid()}
             required={this.props.required}
@@ -160,15 +160,9 @@ class SelectTime extends React.Component {
 SelectTime.propTypes = {
   ...propTypes,
   label: PropTypes.string.isRequired,
-  value: PropTypes.instanceOf(Date),
-  min: PropTypes.oneOfType([
-    PropTypes.instanceOf(Date),
-    PropTypes.instanceOf(moment),
-  ]),
-  max: PropTypes.oneOfType([
-    PropTypes.instanceOf(Date),
-    PropTypes.instanceOf(moment),
-  ]),
+  value: PropTypes.string,
+  min: PropTypes.string,
+  max: PropTypes.string,
   step: PropTypes.number,
   onChange: PropTypes.func.isRequired,
 };
@@ -177,14 +171,8 @@ SelectTime.defaultProps = {
   ...defaultProps,
   value: null,
   multiple: false,
-  min: moment()
-    .tz(utils.getUserTimezone())
-    .startOf('day')
-    .toDate(),
-  max: moment()
-    .tz(utils.getUserTimezone())
-    .endOf('day')
-    .toDate(),
+  min: '0000',
+  max: '1159',
   step: 15,
 };
 

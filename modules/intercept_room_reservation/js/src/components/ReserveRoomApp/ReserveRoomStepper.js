@@ -107,7 +107,7 @@ class HorizontalNonLinearStepper extends React.Component {
 
   getDateLabel = () => {
     const { date, start, end } = this.props.values;
-    return utils.getDateTimespanDisplay({ date, start, end });
+    return (date && start && end) ? utils.getDateTimespanDisplay({ date, start, end }) : '';
   };
 
   getStepCaption = (step) => {

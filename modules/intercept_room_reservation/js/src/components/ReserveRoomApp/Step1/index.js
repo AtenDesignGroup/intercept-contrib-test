@@ -230,6 +230,7 @@ class ReserveRoomStep1 extends React.Component {
   componentDidMount() {
     this.doFetchRooms(this.props.filters, this.props.view, this.props.calView, this.props.date);
     this.props.fetchLocations();
+    this.mounted = true;
   }
 
   componentDidUpdate(prevProps) {
@@ -252,6 +253,10 @@ class ReserveRoomStep1 extends React.Component {
     }
   }
 
+  componentWillUnmount() {
+    this.mounted = false;
+  }
+
   onExited() {
     this.setState({
       room: {
@@ -265,6 +270,7 @@ class ReserveRoomStep1 extends React.Component {
   getRoomAvailabilityQuery = () => {
     const options = {
       rooms: this.props.rooms.map(i => i.data.id),
+      duration: 30,
     };
 
     const tz = utils.getUserTimezone();
@@ -325,25 +331,29 @@ class ReserveRoomStep1 extends React.Component {
       .then(this.handleAvailabiltyResponse)
       .catch((e) => {
         console.log(e);
-        this.setState({
-          availability: {
-            ...this.state.availability,
-            loading: false,
-            shouldUpdate: false,
-          },
-        });
+        if (this.mounted) {
+          this.setState({
+            availability: {
+              ...this.state.availability,
+              loading: false,
+              shouldUpdate: false,
+            },
+          });
+        }
       });
   }
 
   handleAvailabiltyResponse = (res) => {
-    this.setState({
-      availability: {
-        ...this.state.availability,
-        loading: false,
-        rooms: res,
-        shouldUpdate: false,
-      },
-    });
+    if (this.mounted) {
+      this.setState({
+        availability: {
+          ...this.state.availability,
+          loading: false,
+          rooms: res,
+          shouldUpdate: false,
+        },
+      });
+    }
   }
 
   handleRoomSelect = (value) => {

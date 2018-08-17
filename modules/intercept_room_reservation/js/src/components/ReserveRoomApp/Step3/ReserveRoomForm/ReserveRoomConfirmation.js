@@ -20,13 +20,13 @@ const buildRoomReservation = (values) => {
       uuid,
       field_attendee_count: values.attendees,
       field_dates: {
-        value: utils.dateToDrupal(values.start),
-        end_value: utils.dateToDrupal(values.end),
+        value: utils.dateToDrupal(utils.getDateFromTime(values.start, values.date)),
+        end_value: utils.dateToDrupal(utils.getDateFromTime(values.end, values.date)),
       },
       field_group_name: values.groupName,
       field_meeting_dates: {
-        value: values.meetingStart ? utils.dateToDrupal(values.meetingStart) : null,
-        end_value: values.meetingEnd ? utils.dateToDrupal(values.meetingEnd) : null,
+        value: values.meetingStart ? utils.dateToDrupal(utils.getDateFromTime(values.meetingStart, values.date)) : null,
+        end_value: values.meetingEnd ? utils.dateToDrupal(utils.getDateFromTime(values.meetingEnd, values.date)) : null,
       },
       field_meeting_purpose_details: values.meetingDetails,
       field_refreshments: values.refreshments,

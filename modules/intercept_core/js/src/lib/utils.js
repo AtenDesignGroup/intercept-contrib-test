@@ -12,8 +12,15 @@ export const getUserTimezone = () => get(drupalSettings, 'intercept.user.timezon
 export const getUserUid = () => get(drupalSettings, 'intercept.user.id');
 export const getUserUuid = () => get(drupalSettings, 'intercept.user.uuid');
 export const getUserRoles = () => get(drupalSettings, 'intercept.user.roles');
-export const getUserStartOfDay = () => moment().tz(getUserTimezone()).startOf('day').toDate();
-export const getUserTimeNow = () => moment().tz(getUserTimezone()).toDate();
+export const getUserStartOfDay = () =>
+  moment()
+    .tz(getUserTimezone())
+    .startOf('day')
+    .toDate();
+export const getUserTimeNow = () =>
+  moment()
+    .tz(getUserTimezone())
+    .toDate();
 
 // Set default moment timezone.
 moment.tz.setDefault(getUserTimezone());
@@ -37,6 +44,13 @@ export const ensureDate = (date) => {
   }
   return new Date(date);
 };
+
+export const getDateFromTime = (time, date) =>
+  moment
+    .tz(date, getUserTimezone())
+    .hour(time.slice(0, 2))
+    .minute(time.slice(2))
+    .toDate();
 
 // Normalize a date object to a single day. Used to compare days for different dates.
 // export const getDayTimeStamp = date => ensureDate(date).setHours(0, 0, 0, 0);
@@ -101,7 +115,9 @@ export const getTimeDisplay = date =>
 //   Example: '07/13/79 2p.m. to 4p.m.'
 export const getDateTimespanDisplay = ({ date, start, end }) =>
   // const { date, start, end } = this.props.values;
-  `${getDateDisplay(date)} ${getTimeDisplay(start)} to ${getTimeDisplay(end)}`;
+  `${getDateDisplay(date)} ${getTimeDisplay(getDateFromTime(start))} to ${getTimeDisplay(
+    getDateFromTime(end),
+  )}`;
 
 // Converts a Date object to a Drupal compatible string.
 //   Trims `.000Z` off the end.

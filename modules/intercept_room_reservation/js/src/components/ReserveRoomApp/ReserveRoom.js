@@ -138,12 +138,15 @@ class ReserveRoom extends React.Component {
       filters: props.filters,
       formValues: {
         [c.TYPE_ROOM]: props.room || null,
-        date: utils.roundTo(now).toDate(),
-        start: utils.roundTo(now).toDate(),
-        end: utils
-          .roundTo(now)
-          .add(30, 'minutes')
-          .toDate(),
+        date: null,
+        start: null,
+        end: null,
+        // date: utils.roundTo(now).toDate(),
+        // start: utils.roundTo(now).toDate(),
+        // end: utils
+        //   .roundTo(now)
+        //   .add(30, 'minutes')
+        //   .toDate(),
         attendees: 1,
         groupName: '',
         meeting: false,

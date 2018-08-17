@@ -17,10 +17,11 @@ const { utils } = interceptClient;
 class DateSummary extends React.PureComponent {
   render() {
     const { value, onClickChange } = this.props;
-    const hasValue = !!value;
-    const label = utils.getDateTimespanDisplay(value);
+    const hasValue = !!value && !!value.date && !!value.start && !!value.end;
 
     if (hasValue) {
+      const label = utils.getDateTimespanDisplay(value);
+
       return (
         <div className="value-summary">
           <h4 className="value-summary__label">
@@ -39,8 +40,8 @@ class DateSummary extends React.PureComponent {
       );
     }
     return (
-      <div>
-        <h4 className="value-summary__label">Room</h4>
+      <div className="value-summary">
+        <h4 className="value-summary__label">Date &amp; Time</h4>
         <Button
           className="value-summary__button"
           variant="raised"
@@ -48,7 +49,7 @@ class DateSummary extends React.PureComponent {
           size="small"
           onClick={onClickChange}
         >
-          Choose a Room
+          Choose a Time
         </Button>
       </div>
     );
@@ -58,8 +59,8 @@ class DateSummary extends React.PureComponent {
 DateSummary.propTypes = {
   value: PropTypes.shape({
     date: PropTypes.object,
-    start: PropTypes.object,
-    end: PropTypes.object,
+    start: PropTypes.string,
+    end: PropTypes.string,
   }),
   onClickChange: PropTypes.func.isRequired,
 };

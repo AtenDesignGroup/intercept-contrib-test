@@ -14,9 +14,9 @@ import Slide from '@material-ui/core/Slide';
 
 // Local Components
 import ReserveRoomDateForm from './ReserveRoomDateForm';
-import utils from '../../../../../../../node_modules/formsy-react/lib/utils';
+// import utils from '../../../../../../../node_modules/formsy-react/lib/utils';
 
-const { constants, api, select } = interceptClient;
+const { constants, api, select, utils } = interceptClient;
 const c = constants;
 const roomIncludes = ['image_primary', 'image_primary.field_media_image'];
 
@@ -153,57 +153,48 @@ class ReserveRoomStep2 extends React.Component {
         user: drupalSettings.intercept.user.uuid,
       },
     };
-    this.handleCalendarNavigate = this.handleCalendarNavigate.bind(this);
-    this.handleCalendarView = this.handleCalendarView.bind(this);
-    // this.handleFilterChange = this.handleFilterChange.bind(this);
-    // this.handleViewChange = this.handleViewChange.bind(this);
-    // this.handleFormChange = this.handleFormChange.bind(this);
-    // this.onExited = this.onExited.bind(this);
-    // this.doFetchRooms = debounce(this.doFetchRooms, 500).bind(this);
   }
 
-  componentDidMount() {
-    // this.doFetchRooms(this.props.filters, this.props.view, this.props.calView, this.props.date);
-    // this.props.fetchLocations();
-  }
+  getDefaultValues = ({ formValues, room, location, event, filters }) => {
+    const values = pick(formValues, ['date', 'start', 'end', 'meetingStart', 'meetingEnd']);
 
-  handleViewChange = (value) => {
-    // this.props.onChangeView(value);
-    // this.doFetchRooms(this.props.filters, value, this.props.calView, this.props.date);
+    if (!values.date) {
+      values.date = filters.date || utils.getUserStartOfDay();
+    }
+
+  //   values: {
+  //     date: utils.roundTo(new Date()).toDate(),
+  //       start: utils.roundTo(new Date()).toDate(),
+  //         end: utils
+  //           .roundTo(new Date())
+  //           .add(30, 'minutes')
+  //           .toDate(),
+  //           meetingStart: utils.roundTo(new Date()).toDate(),
+  //             meetingEnd: utils
+  //               .roundTo(new Date())
+  //               .add(30, 'minutes')
+  //               .toDate(),
+  // },
+  //   step: 15,
+  //     min: moment(new Date())
+  //       .tz(utils.getUserTimezone())
+  //       .startOf('hour')
+  //       .hour(8)
+  //       .toDate(),
+  //       max: moment(new Date())
+  //         .tz(utils.getUserTimezone())
+  //         .startOf('hour')
+  //         .hour(21)
+  //         .toDate(),
+    return values;
   };
-
-  handleCalendarNavigate = (date, calView) => {
-    this.props.onChangeDate(date);
-    // this.doFetchRooms(this.props.filters, 'calendar', calView, date);
-  };
-
-  handleCalendarView = (calView) => {
-    this.props.onChangeCalView(calView);
-    // this.doFetchRooms(this.props.filters, 'calendar', calView, this.props.date);
-  };
-
-  handleFilterChange(values) {
-    this.props.onChangeFilters(values);
-    // this.doFetchRooms(values);
-  }
-
-  // handleFormChange(formValues) {
-  //   this.setState({
-  //     formValues,
-  //   });
-  // }
 
   render() {
     const {
-      props,
-      handleCalendarNavigate,
-      handleViewChange,
-      handleCalendarView,
-      handleFilterChange,
-      // handleFormChange,
-    } = this;
-    const {
       calendarRooms,
+      room,
+      eventRecord,
+      locationRecord,
       rooms,
       roomsLoading,
       filters,
@@ -213,9 +204,8 @@ class ReserveRoomStep2 extends React.Component {
       onChange,
       formValues,
       onChangeStep,
-    } = props;
+    } = this.props;
 
-    const values = pick(formValues, ['date', 'start', 'end', 'meetingStart', 'meetingEnd']);
     const todayDate = moment.tz(interceptClient.utils.getUserTimezone()).format('YYYY-MM-DD');
     return (
       <div className="">
@@ -223,11 +213,17 @@ class ReserveRoomStep2 extends React.Component {
           <div className="l__secondary" />
           <div className="l__primary">
             <ReserveRoomDateForm
-              values={values}
+              values={this.getDefaultValues({
+                formValues,
+                room,
+                event: eventRecord,
+                location: locationRecord,
+                filters,
+              })}
               onChange={onChange}
               onSubmit={() => onChangeStep(2)}
-              min={moment.tz(`${todayDate} 9:00 AM`, 'YYYY-MM-DD h:mm A', interceptClient.utils.getUserTimezone())}
-              max={moment.tz(`${todayDate} 10:00 PM`, 'YYYY-MM-DD h:mm A', interceptClient.utils.getUserTimezone())}
+              min={'0000'}
+              max={'2345'}
             />
           </div>
         </div>
@@ -236,9 +232,11 @@ class ReserveRoomStep2 extends React.Component {
   }
 }
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state, ownProps) => ({
   rooms: select.roomsAscending(state),
   roomsLoading: select.recordsAreLoading(c.TYPE_ROOM)(state),
+  locationRecord: ownProps.room ? select.roomLocationRecord(ownProps.room)(state) : null,
+  eventRecord: ownProps.event ? select.event(ownProps.event)(state) : null,
   calendarRooms: [],
 });
 
@@ -268,7 +266,6 @@ ReserveRoomStep2.propTypes = {
   // filters: PropTypes.object,
   // onChangeCalView: PropTypes.func.isRequired,
   // onChangeView: PropTypes.func.isRequired,
-  // onChangeFilters: PropTypes.func.isRequired,
   // onChangeDate: PropTypes.func.isRequired,
 };
 

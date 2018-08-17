@@ -494,6 +494,10 @@ export const roomLabel = id =>
 export const roomLocation = id =>
   createSelector(room(id), item => get(item, 'data.relationships.field_location.data.id'));
 
+export const roomLocationRecord = id => (state) => {
+  return location(roomLocation(id)(state))(state);
+};
+
 export const roomLocationLabel = id => (state) => {
   const loc = location(roomLocation(id)(state))(state);
   return get(loc, 'data.attributes.title') || '';

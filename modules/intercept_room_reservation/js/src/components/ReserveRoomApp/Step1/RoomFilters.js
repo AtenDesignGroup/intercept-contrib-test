@@ -83,7 +83,7 @@ class EventFilters extends PureComponent {
     }
     return (
       <div className="">
-        <Formsy className="" onChange={console.log}>
+        <Formsy className="">
           <div className="l--subsection">
             <h4 className="section-title--secondary">Filter Rooms By</h4>
             <SelectResource

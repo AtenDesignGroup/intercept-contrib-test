@@ -65,10 +65,14 @@ addValidationRule(
   (values, value) => !values.refreshments || value !== '',
 );
 addValidationRule('isRequiredIfMeeting', (values, value) => !values.meeting || value !== '');
-addValidationRule(
-  'isFutureTime',
-  (values, value) => value === null || value > moment.tz(utils.getUserTimezone()).toDate(),
-);
+addValidationRule('isFutureTime', (values, value) => {
+  if (value === null) {
+    return true;
+  }
+  const now = new Date();
+  const time = utils.getDateFromTime(value, values[c.DATE]);
+  return time >= now;
+});
 addValidationRule('isAfterStart', (values, value) => value === null || value > values.start);
 addValidationRule('isOnOrAfterStart', (values, value) => value === null || value >= values.start);
 addValidationRule('isBeforeEnd', (values, value) => value === null || value < values.end);
@@ -82,7 +86,7 @@ function Transition(props) {
   return <Slide direction="up" {...props} />;
 }
 
-class ReserveRoomStep2 extends PureComponent {
+class ReserveRoomDateForm extends PureComponent {
   constructor(props) {
     super(props);
 
@@ -201,8 +205,8 @@ class ReserveRoomStep2 extends PureComponent {
 
   render() {
     const { values, min, max, step, onSubmit } = this.props;
-    const minValue = matchDate(min, values.date);
-    const maxValue = matchDate(max, values.date);
+    // const minValue = matchDate(min, values.date);
+    // const maxValue = matchDate(max, values.date);
 
     return (
       <div className="form">
@@ -235,8 +239,8 @@ class ReserveRoomStep2 extends PureComponent {
                 required
                 validations="isFutureTime"
                 validationError="Must be in the future"
-                min={minValue}
-                max={maxValue}
+                min={min}
+                max={max}
                 step={step}
               />
               <div className="input-group--subgroup">
@@ -295,75 +299,11 @@ class ReserveRoomStep2 extends PureComponent {
                   isFutureTime: 'Must be in the future',
                   isAfterStart: 'Must be after start time',
                 }}
-                min={minValue}
-                max={maxValue}
+                min={min}
+                max={max}
                 step={step}
               />
-              {/* <InputTime
-                clearable
-                label="Start Time"
-                value={values.start}
-                onChange={this.onValueChange('start')}
-                name="start"
-                required
-                validations="isFutureTime"
-                validationError="Must be in the future"
-              /> */}
-              {/* <InputTime
-                clearable
-                label="End Time"
-                value={values.end}
-                onChange={this.onValueChange('end')}
-                name="end"
-                required
-                validations={{
-                  isFutureTime: true,
-                  isAfterStart: true,
-                }}
-                validationErrors={{
-                  isFutureTime: 'Must be in the future',
-                  isAfterStart: 'Must be after start time',
-                }}
-              /> */}
             </div>
-            {/* <div className="input-group--date-time">
-              <InputTime
-                clearable
-                label="Meeting Start Time"
-                value={values.meetingStart}
-                onChange={this.onValueChange('meetingStart')}
-                name="meetingStart"
-                required={values.meeting}
-                validations={{
-                  isFutureTime: true,
-                  isOnOrAfterStart: true,
-                  isOnOrBeforeEnd: true,
-                }}
-                validationErrors={{
-                  isFutureTime: 'Must be in the future',
-                  isOnOrAfterStart: 'Must be on or after reservation start time',
-                  isOnOrBeforeEnd: 'Must be on or before reservation end time',
-                }}
-              />
-              <InputTime
-                clearable
-                label="Meeting End Time"
-                value={values.meetingEnd}
-                onChange={this.onValueChange('meetingEnd')}
-                name="meetingEnd"
-                required={values.meeting}
-                validations={{
-                  isFutureTime: true,
-                  isOnOrBeforeEnd: true,
-                  isAfterMeetingStart: true,
-                }}
-                validationErrors={{
-                  isFutureTime: 'Must be in the future',
-                  isOnOrBeforeEnd: 'Must be on or before reservation end time',
-                  isAfterMeetingStart: 'Must be after meeting start time',
-                }}
-              />
-            </div> */}
           </div>
 
           <div className="form__actions">
@@ -385,44 +325,30 @@ class ReserveRoomStep2 extends PureComponent {
   }
 }
 
-ReserveRoomStep2.propTypes = {
+ReserveRoomDateForm.propTypes = {
   values: PropTypes.shape({
     date: PropTypes.instanceOf(Date),
-    start: PropTypes.instanceOf(Date),
-    end: PropTypes.instanceOf(Date),
-    meetingStart: PropTypes.instanceOf(Date),
-    meetingEnd: PropTypes.instanceOf(Date),
+    start: PropTypes.string,
+    end: PropTypes.string,
+    meetingStart: PropTypes.string,
+    meetingEnd: PropTypes.string,
   }),
   onChange: PropTypes.func.isRequired,
 };
 
-ReserveRoomStep2.defaultProps = {
+ReserveRoomDateForm.defaultProps = {
   values: {
     date: utils.roundTo(new Date()).toDate(),
-    start: utils.roundTo(new Date()).toDate(),
-    end: utils
-      .roundTo(new Date())
-      .add(30, 'minutes')
-      .toDate(),
-    meetingStart: utils.roundTo(new Date()).toDate(),
-    meetingEnd: utils
-      .roundTo(new Date())
-      .add(30, 'minutes')
-      .toDate(),
+    start: null,
+    end: null,
+    meetingStart: null,
+    meetingEnd: null,
   },
   step: 15,
-  min: moment(new Date())
-    .tz(utils.getUserTimezone())
-    .startOf('hour')
-    .hour(8)
-    .toDate(),
-  max: moment(new Date())
-    .tz(utils.getUserTimezone())
-    .startOf('hour')
-    .hour(21)
-    .toDate(),
+  min: '0000',
+  max: '2200',
 };
 
 const mapStateToProps = (state, ownProps) => ({});
 
-export default connect(mapStateToProps)(ReserveRoomStep2);
+export default connect(mapStateToProps)(ReserveRoomDateForm);

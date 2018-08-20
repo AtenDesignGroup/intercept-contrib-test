@@ -426,33 +426,41 @@ class ReserveRoomStep1 extends React.Component {
     const roomFooter = (roomProps) => {
       const reservable = get(roomProps, 'room.attributes.field_reservable_online');
       const phoneNumber = get(roomProps, 'room.attributes.field_reservation_phone_number');
+      let status = null;
 
-      if (!reservable && !utils.userHasRole(roomStaffRoles)) {
-        const phoneLink = phoneNumber ? (
-          <a href={`tel:${phoneNumber}`} className="call-prompt__link">
-            {phoneNumber}
-          </a>
-        ) : null;
+      if (!reservable) {
+        if (!utils.userHasRole(roomStaffRoles)) {
+          const phoneLink = phoneNumber ? (
+            <a href={`tel:${phoneNumber}`} className="call-prompt__link">
+              {phoneNumber}
+            </a>
+          ) : null;
 
-        return (
-          <p className="call-prompt">
-            <span className="call-prompt__text">Call to Reserve</span> {phoneLink}
-          </p>
-        );
+          return (
+            <p className="call-prompt">
+              <span className="call-prompt__text">Call to Reserve</span> {phoneLink}
+            </p>
+          );
+        }
+
+        status = (<p className="action-button__message">{'Customer must call to reserve'}</p>);
       }
 
       return (
-        <Button
-          variant={'raised'}
-          size="small"
-          color="primary"
-          className={'action-button__button'}
-          onClick={() => handleRoomSelect(roomProps.uuid)}
-        >
-          {'Reserve'}
-        </Button>
+        <div class="action-button">
+          <Button
+            variant={'raised'}
+            size="small"
+            color="primary"
+            className={'action-button__button'}
+            onClick={() => handleRoomSelect(roomProps.uuid)}
+          >
+            {'Reserve'}
+          </Button>
+          {status}
+        </div>
       );
-    };
+    }
 
     return (
       <div className="l--sidebar-before">

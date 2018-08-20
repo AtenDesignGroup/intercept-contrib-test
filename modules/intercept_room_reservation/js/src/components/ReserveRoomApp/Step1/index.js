@@ -354,7 +354,7 @@ class ReserveRoomStep1 extends React.Component {
         },
       });
     }
-  }
+  };
 
   handleRoomSelect = (value) => {
     this.props.onChangeRoom(value);
@@ -425,10 +425,14 @@ class ReserveRoomStep1 extends React.Component {
     const roomToShow = this.state.room[this.state.room.exiting ? 'previous' : 'current'];
     const roomFooter = (roomProps) => {
       const reservable = get(roomProps, 'room.attributes.field_reservable_online');
+      const staffOnly = get(roomProps, 'room.attributes.field_staff_use_only');
       const phoneNumber = get(roomProps, 'room.attributes.field_reservation_phone_number');
       let status = null;
 
       if (!reservable) {
+        const statusText = staffOnly
+          ? 'Customers cannot reserve this room'
+          : 'Customers must call to reserve';
         if (!utils.userHasRole(roomStaffRoles)) {
           const phoneLink = phoneNumber ? (
             <a href={`tel:${phoneNumber}`} className="call-prompt__link">
@@ -443,11 +447,11 @@ class ReserveRoomStep1 extends React.Component {
           );
         }
 
-        status = (<p className="action-button__message">{'Customer must call to reserve'}</p>);
+        status = <p className="action-button__message">{statusText}</p>;
       }
 
       return (
-        <div class="action-button">
+        <div className="action-button">
           <Button
             variant={'raised'}
             size="small"
@@ -460,7 +464,7 @@ class ReserveRoomStep1 extends React.Component {
           {status}
         </div>
       );
-    }
+    };
 
     return (
       <div className="l--sidebar-before">

@@ -31,6 +31,7 @@ const labels = {
   [ATTENDEES]: 'Number of Attendees',
   [DURATION]: 'Duration',
   [TIME]: 'Time of Day',
+  [c.KEYWORD]: 'Keyword',
 };
 
 const durationOptions = [
@@ -86,6 +87,12 @@ class EventFilters extends PureComponent {
         <Formsy className="">
           <div className="l--subsection">
             <h4 className="section-title--secondary">Filter Rooms By</h4>
+            <KeywordFilter
+              handleChange={this.onInputChange(c.KEYWORD)}
+              value={filters[c.KEYWORD]}
+              name={c.KEYWORD}
+              label={labels[c.KEYWORD]}
+            />
             <SelectResource
               multiple
               type={c.TYPE_LOCATION}

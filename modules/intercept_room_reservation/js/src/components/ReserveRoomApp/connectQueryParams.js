@@ -49,6 +49,7 @@ const encodeFilters = (value) => {
     [c.DATE]: !value[c.DATE] ? null : encodeDate(value[c.DATE]),
     [TIME]: encodeString(value.time),
     [DURATION]: encodeString(value.duration),
+    [c.KEYWORD]: encodeString(value.keyword),
   });
   return encodeObject(filters, ':', '_');
 };
@@ -63,6 +64,7 @@ const decodeFilters = (values) => {
     [c.TYPE_ROOM_TYPE]: decodeArray(value.type, ',') || [],
     [ATTENDEES]: decode(UrlQueryParamTypes.number, value.attendees),
     [c.DATE]: decodeDate(value[c.DATE]),
+    [c.KEYWORD]: decodeString(value.keyword),
     [TIME]: decodeString(value.time),
     [DURATION]: decodeString(value.duration),
   };

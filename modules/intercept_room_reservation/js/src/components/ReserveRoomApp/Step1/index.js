@@ -184,6 +184,18 @@ function getFilters(values) {
   return filter;
 }
 
+// Filter function for room keyword searchs.
+const byKeyword = keyword => (room) => {
+  if (!keyword) {
+    return true;
+  }
+
+  const haystack = get(room, 'data.attributes.title').toLowerCase();
+  const needle = keyword.toLowerCase();
+
+  return haystack.indexOf(needle) >= 0;
+};
+
 class ReserveRoomStep1 extends React.Component {
   constructor(props) {
     super(props);
@@ -317,7 +329,6 @@ class ReserveRoomStep1 extends React.Component {
 
   // Requests available rooms
   fetchAvailableRooms() {
-    console.log('fetching available rooms');
     this.setState({
       availability: {
         ...this.state.availability,
@@ -500,8 +511,8 @@ class ReserveRoomStep1 extends React.Component {
   }
 }
 
-const mapStateToProps = state => ({
-  rooms: select.roomsAscending(state),
+const mapStateToProps = (state, ownProps) => ({
+  rooms: select.roomsAscending(state).filter(byKeyword(ownProps.filters[c.KEYWORD])),
   roomsLoading: select.recordsAreLoading(c.TYPE_ROOM)(state),
   calendarRooms: [],
 });

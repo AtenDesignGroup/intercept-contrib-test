@@ -31,7 +31,7 @@ class KeywordFilter extends React.Component {
     const htmlId = `keyword-input--${id}`;
 
     return (
-      <div className="keyword-filter">
+      <div className="keyword-filter input input--text">
         <FormControl className="keyword-filter__control">
           <InputLabel htmlFor={htmlId} className="keyword-filter__label">
             {label}

@@ -9,6 +9,9 @@ import { connect } from 'react-redux';
 import interceptClient from 'interceptClient';
 import drupalSettings from 'drupalSettings';
 
+// UUID
+import v4 from 'uuid/v4';
+
 // Material UI
 import Button from '@material-ui/core/Button';
 import ExpansionPanel from '@material-ui/core/ExpansionPanel';
@@ -39,8 +42,9 @@ import Formsy, { addValidationRule } from 'formsy-react';
 
 // Local Components
 import ReserveRoomConfirmation from './ReserveRoomConfirmation';
+import ReservationTeaser from './../../../ReservationTeaser';
 
-const { constants, select, utils } = interceptClient;
+const { actions, constants, select, utils } = interceptClient;
 const c = constants;
 
 const matchTime = (original, ref) => {
@@ -75,6 +79,65 @@ addValidationRule('isRequiredIfMeeting', (values, value) => !values.meeting || v
 // addValidationRule('isOnOrBeforeEnd', (values, value) => value <= values.end);
 // addValidationRule('isAfterMeetingStart', (values, value) => value > values.meetingStart);
 
+const buildRoomReservation = (values) => {
+  const uuid = v4();
+
+  const output = {
+    id: uuid,
+    type: c.TYPE_ROOM_RESERVATION,
+    attributes: {
+      uuid,
+      field_attendee_count: values.attendees,
+      field_dates: {
+        value: utils.dateToDrupal(utils.getDateFromTime(values.start, values.date)),
+        end_value: utils.dateToDrupal(utils.getDateFromTime(values.end, values.date)),
+      },
+      field_group_name: values.groupName,
+      field_meeting_dates: {
+        value: values.meetingStart
+          ? utils.dateToDrupal(utils.getDateFromTime(values.meetingStart, values.date))
+          : null,
+        end_value: values.meetingEnd
+          ? utils.dateToDrupal(utils.getDateFromTime(values.meetingEnd, values.date))
+          : null,
+      },
+      field_meeting_purpose_details: values.meetingDetails,
+      field_refreshments: values.refreshments,
+      field_refreshments_description: {
+        value: values.refreshmentsDesc,
+        // format: "basic_html"
+      },
+      field_status: 'requested',
+    },
+    relationships: {
+      field_event: {
+        data: null,
+      },
+      field_room: {
+        data: {
+          type: c.TYPE_ROOM,
+          id: values[c.TYPE_ROOM],
+        },
+      },
+      field_meeting_purpose: {
+        data: values[c.TYPE_MEETING_PURPOSE]
+          ? {
+            type: c.TYPE_MEETING_PURPOSE,
+            id: values[c.TYPE_MEETING_PURPOSE],
+          }
+          : null,
+      },
+      field_user: {
+        data: {
+          type: c.TYPE_USER,
+          id: values.user,
+        },
+      },
+    },
+  };
+  return output;
+};
+
 function Transition(props) {
   return <Slide direction="up" {...props} />;
 }
@@ -93,6 +156,7 @@ class ReserveRoomForm extends PureComponent {
       },
       openDialog: false,
       canSubmit: false,
+      uuid: null,
     };
 
     this.form = React.createRef();
@@ -102,7 +166,7 @@ class ReserveRoomForm extends PureComponent {
     this.updateValues = this.updateValues.bind(this);
     this.toggleValue = this.toggleValue.bind(this);
     this.onCloseDialog = this.onCloseDialog.bind(this);
-    this.onDateChange = this.onDateChange.bind(this);
+    // this.onDateChange = this.onDateChange.bind(this);
     this.onInputChange = this.onInputChange.bind(this);
     this.onOpenDialog = this.onOpenDialog.bind(this);
     // this.onSwitchChange = this.onSwitchChange.bind(this);
@@ -125,42 +189,25 @@ class ReserveRoomForm extends PureComponent {
     };
   }
 
-  onDateChange(value) {
-    const start = matchDate(this.props.values.start, value);
-    const end = matchDate(this.props.values.end, value);
-    this.updateValues({
-      [c.DATE]: value,
-      start,
-      end,
-    });
-  }
-
-  onStartChange(value) {
-    const start = matchTime(value, this.props.values.start);
-    const end = matchTime(value, this.props.values.end);
-    this.updateValues({
-      [c.DATE]: value,
-      start,
-      end,
-    });
-  }
-
-  // onSwitchChange(key) {
-  //   return (event) => {
-  //     this.updateValue(key, event.target.checked);
-  //     this.setState({
-  //       expand: {
-  //         ...this.state.expand,
-  //         [key]: event.target.checked,
-  //       },
-  //     });
-  //   };
+  // onDateChange(value) {
+  //   const start = matchDate(this.props.values.start, value);
+  //   const end = matchDate(this.props.values.end, value);
+  //   this.updateValues({
+  //     [c.DATE]: value,
+  //     start,
+  //     end,
+  //   });
   // }
 
-  // onRoomSelect = (id) => {
-  //   this.collapse('findRoom')();
-  //   this.onValueChange(c.TYPE_ROOM)(id);
-  // };
+  // onStartChange(value) {
+  //   const start = matchTime(value, this.props.values.start);
+  //   const end = matchTime(value, this.props.values.end);
+  //   this.updateValues({
+  //     [c.DATE]: value,
+  //     start,
+  //     end,
+  //   });
+  // }
 
   onOpenDialog = () => {
     this.setState({ openDialog: true });
@@ -211,6 +258,16 @@ class ReserveRoomForm extends PureComponent {
     };
   }
 
+  saveEntitytoStore = (values) => {
+    const { save } = this.props;
+    const entity = buildRoomReservation(values);
+    this.setState({
+      uuid: entity.id,
+    });
+    save(entity);
+    return entity.id;
+  };
+
   updateValue(key, value) {
     const newValues = { ...this.props.values, [key]: value };
     this.props.onChange(newValues);
@@ -228,16 +285,19 @@ class ReserveRoomForm extends PureComponent {
   render() {
     const { values, combinedValues, meetingPurpose, room } = this.props;
     const showMeetingPurposeExplanation = !!purposeRequiresExplanation(meetingPurpose);
+    let content = null;
 
-    return (
-      <div className="form">
-        <Formsy
-          className="form__main"
-          ref={this.form}
-          onValidSubmit={this.onOpenDialog}
-          onValid={this.enableButton}
-          onInvalid={this.disableButton}
-        >
+    if (this.state.uuid) {
+      content = <ReservationTeaser id={this.state.uuid} />;
+    }
+    else {
+      content = (<Formsy
+        className="form__main"
+        ref={this.form}
+        onValidSubmit={this.onOpenDialog}
+        onValid={this.enableButton}
+        onInvalid={this.disableButton}
+      >
         <div className="l--2-col">
           <div className="l__main">
             <div className="l__primary">
@@ -308,12 +368,20 @@ class ReserveRoomForm extends PureComponent {
             </Button>
           </div>
         </div>
-        </Formsy>
+      </Formsy>)
+    }
+
+    return (
+      <div className="form">
+        {content}
         <ReserveRoomConfirmation
           open={this.state.openDialog}
           onCancel={this.onCloseDialog}
           onConfirm={() => {
-            this.onCloseDialog();
+            return this.saveEntitytoStore({
+              ...combinedValues,
+              [c.TYPE_ROOM]: room,
+            });
           }}
           values={{
             ...combinedValues,
@@ -355,12 +423,14 @@ ReserveRoomForm.propTypes = {
     user: PropTypes.string,
   }),
   onChange: PropTypes.func.isRequired,
+  save: PropTypes.func.isRequired,
   meetingPurpose: PropTypes.object,
   combinedValues: PropTypes.object,
   room: PropTypes.string,
 };
 
 ReserveRoomForm.defaultProps = {
+  combinedValues: {},
   values: {
     attendees: 1,
     groupName: '',
@@ -382,4 +452,13 @@ const mapStateToProps = (state, ownProps) => ({
     : null,
 });
 
-export default connect(mapStateToProps)(ReserveRoomForm);
+const mapDispatchToProps = dispatch => ({
+  save: (data) => {
+    dispatch(actions.add(data, c.TYPE_ROOM_RESERVATION, data.id));
+  },
+});
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(ReserveRoomForm);

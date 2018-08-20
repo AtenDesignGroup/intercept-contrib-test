@@ -34,7 +34,7 @@ class ReservationTeaser extends PureComponent {
     return (
       <Teaser
         key={id}
-        title={get(reservation, 'attributes.title')}
+        title={get(reservation, 'attributes.title') || ''}
         modifiers={[image ? 'with-image' : 'without-image']}
         image={image}
         supertitle={get(reservation, 'attributes.location')}
@@ -50,12 +50,12 @@ ReservationTeaser.propTypes = {
   id: PropTypes.string.isRequired,
   reservation: PropTypes.object.isRequired,
   image: PropTypes.string,
-  actions: PropTypes.object,
+  actions: PropTypes.array,
 };
 
 ReservationTeaser.defaultProps = {
   image: null,
-  actions: []
+  actions: null,
 };
 
 const mapStateToProps = (state, ownProps) => {

@@ -51,7 +51,7 @@ const text = {
   },
 };
 
-const buildRoomReservation = (values) => {
+const buildEventRegistration = (values) => {
   const uuid = v4();
 
   const output = {
@@ -147,7 +147,7 @@ class EventRegisterForm extends PureComponent {
 
   saveEntitytoStore = (values) => {
     const { save } = this.props;
-    const entity = buildRoomReservation(values);
+    const entity = buildEventRegistration(values);
     this.setState({
       uuid: entity.id,
     });

@@ -67,18 +67,27 @@ class ReservationManager implements ReservationManagerInterface {
   }
 
   protected function hasOpeningHoursConflict($reservations, $params, $node) {
-    $start = $params['start'];
-    $end = $params['end'];
-    $start_date = $this->getDate($params['start']);
-    $end_date = $this->getDate($params['end']);
     if (!$hours = $this->getHours($params, $node)) {
       // Appears to be closed.
       return TRUE;
     }
-    $start_time = $this->getAdjustedDate($params['start'], $hours['starthours'], $start_date, 'start');
-    $end_time = $this->getAdjustedDate($params['end'], $hours['endhours'], $end_date, 'end');
-    $params['start'] = $start_time->format(self::FORMAT);
-    $params['end'] = $end_time->format(self::FORMAT);
+    foreach (['start', 'end'] as $type) {
+      // get location start/end hours for location
+      // convert to date objects using the start date param as a base, but default timezone
+      // convert timezone to UTC
+      // return dates
+      $selected_date = $this->getDrupalDate($params[$type]);
+      // Hardcode get start date here because the end date might span into another day.
+      // TODO: Make this less error prone by defining a way to specify the current searched "day".
+      $date = $this->timeToDate($hours[$type . 'hours'], $this->getDate($params['start']));
+      $converted_date = $this->convertTimezone($date);
+      if ($type == 'start' && ($converted_date > $selected_date)) {
+        $params['start'] = $converted_date->format(self::FORMAT);
+      }
+      if ($type == 'end' && ($converted_date < $selected_date)) {
+        $params['end'] = $converted_date->format(self::FORMAT);
+      }
+    }
     return $this->hasReservationConflict($reservations, $params);
   }
 
@@ -90,10 +99,14 @@ class ReservationManager implements ReservationManagerInterface {
     if (!$location = $this->getLocation($node)) {
       return FALSE;
     }
-    $start_date = $this->getDate($params['start']);
+    $start_date = $this->convertDate($params['start']);
     $d = $start_date->format('w');
+    // Eventually there is going to be a TIMEZONE setting on this field.
     $hours = $location->field_location_hours;
     $values = $hours->getValue();
+    // e.g. 'starthours' => '0900', 'endhours' => '1700'
+    $times = $values[$d];
+
     return !empty($values[$d]) ? $values[$d] : FALSE;
   }
 
@@ -101,23 +114,7 @@ class ReservationManager implements ReservationManagerInterface {
     return empty($this->getHours($params, $node));
   }
 
-  protected function getAdjustedDate($selected_time, $location_time, $date, $type = 'start') {
-    $time = $this->getDate($selected_time)->format('Gi');
-    // If the closing hours or open hours differ, we use them.
-    $convert_timezone = FALSE;
-    if ($type == 'start') {
-      if ($time < $location_time) {
-        $convert_timezone = TRUE;
-        $time = $location_time;
-      }
-    }
-    if ($type == 'end') {
-      if ($time > $location_time) {
-        $convert_timezone = TRUE;
-        $time = $location_time;
-      }
-    }
-
+  protected function timeToDate($time, $base_date) {
     // Then just covert that time to a full date using the date part specified.
     // Make sure it's 4 digits.
     $time = \Drupal\office_hours\OfficeHoursDateHelper::datePad($time, 4);
@@ -128,25 +125,34 @@ class ReservationManager implements ReservationManagerInterface {
       $min = substr($time, -2);
       $time = $hour . ':' . $min;
     }
-    if ($convert_timezone) {
-      $config = \Drupal::config('system.date');
-      $config_data_default_timezone = $config->get('timezone.default');
-      $timezone = new \DateTimeZone($config_data_default_timezone);
-      $date = new DrupalDateTime($date->format('Y-m-d\T') . $time, $timezone);
-      $date->setTimezone(new \DateTimeZone('UTC'));
-    }
-    else {
-      $date = new DrupalDateTime($date->format('Y-m-d\T') . $time);
-    }
+    $new_date_time = new DrupalDateTime($base_date->format('Y-m-d\T') . $time, $this->getDefaultTimezone());
+    return $new_date_time;
+  }
+
+  protected function convertTimezone($date, $new_timezone = 'UTC') {
+    $date->setTimezone(new \DateTimeZone($new_timezone));
     return $date;
   }
 
-  public function convertDate($string) {
+  protected function getUtcTimezone() {
+    return new \DateTimeZone('UTC');
+  }
+
+  protected function getDefaultTimezone() {
     $config = \Drupal::config('system.date');
     $config_data_default_timezone = $config->get('timezone.default');
-    $timezone = new \DateTimeZone($config_data_default_timezone);
-    $date = new DrupalDateTime($string, $timezone);
-    $date->setTimezone(new \DateTimeZone('UTC'));
+    return new \DateTimeZone($config_data_default_timezone);
+  }
+
+  /**
+   * $from_default
+   *   TRUE if converting from default to UTC, FALSE if opposite.
+   */
+  public function convertDate($string, $from_default = TRUE) {
+    $from = $from_default ? $this->getDefaultTimezone() : $this->getUtcTimezone();
+    $to = $from_default ? $this->getUtcTimezone() : $this->getDefaultTimezone();
+    $date = new DrupalDateTime($string, $from);
+    $date->setTimezone($to);
     return $date;
   }
 

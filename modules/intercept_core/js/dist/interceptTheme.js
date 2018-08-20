@@ -1,1 +1,142 @@
-(function(b,c){if('object'==typeof exports&&'object'==typeof module)module.exports=c();else if('function'==typeof define&&define.amd)define([],c);else{var d=c();for(var a in d)('object'==typeof exports?exports:b)[a]=d[a]}})('undefined'==typeof self?this:self,function(){return function(a){function b(d){if(c[d])return c[d].exports;var e=c[d]={i:d,l:!1,exports:{}};return a[d].call(e.exports,e,e.exports,b),e.l=!0,e.exports}var c={};return b.m=a,b.c=c,b.d=function(a,c,d){b.o(a,c)||Object.defineProperty(a,c,{configurable:!1,enumerable:!0,get:d})},b.n=function(a){var c=a&&a.__esModule?function(){return a['default']}:function(){return a};return b.d(c,'a',c),c},b.o=function(a,b){return Object.prototype.hasOwnProperty.call(a,b)},b.p='',b(b.s=0)}([function(a,b){'use strict';Object.defineProperty(b,'__esModule',{value:!0});var c='#fff',d={palette:{primary:{light:'#039BE5',main:'#0288D1',dark:'#0277BD',contrastText:c},secondary:{light:'#D9DCE0',main:'#7A7D81',dark:'#4C4D4F',contrastText:c},error:{main:'#F44336'}}};window.interceptTheme=d,b['default']=d}])});
+(function webpackUniversalModuleDefinition(root, factory) {
+	if(typeof exports === 'object' && typeof module === 'object')
+		module.exports = factory();
+	else if(typeof define === 'function' && define.amd)
+		define([], factory);
+	else {
+		var a = factory();
+		for(var i in a) (typeof exports === 'object' ? exports : root)[i] = a[i];
+	}
+})(typeof self !== 'undefined' ? self : this, function() {
+return /******/ (function(modules) { // webpackBootstrap
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
+/******/
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId]) {
+/******/ 			return installedModules[moduleId].exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			i: moduleId,
+/******/ 			l: false,
+/******/ 			exports: {}
+/******/ 		};
+/******/
+/******/ 		// Execute the module function
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/
+/******/ 		// Flag the module as loaded
+/******/ 		module.l = true;
+/******/
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/
+/******/
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = modules;
+/******/
+/******/ 	// expose the module cache
+/******/ 	__webpack_require__.c = installedModules;
+/******/
+/******/ 	// define getter function for harmony exports
+/******/ 	__webpack_require__.d = function(exports, name, getter) {
+/******/ 		if(!__webpack_require__.o(exports, name)) {
+/******/ 			Object.defineProperty(exports, name, {
+/******/ 				configurable: false,
+/******/ 				enumerable: true,
+/******/ 				get: getter
+/******/ 			});
+/******/ 		}
+/******/ 	};
+/******/
+/******/ 	// getDefaultExport function for compatibility with non-harmony modules
+/******/ 	__webpack_require__.n = function(module) {
+/******/ 		var getter = module && module.__esModule ?
+/******/ 			function getDefault() { return module['default']; } :
+/******/ 			function getModuleExports() { return module; };
+/******/ 		__webpack_require__.d(getter, 'a', getter);
+/******/ 		return getter;
+/******/ 	};
+/******/
+/******/ 	// Object.prototype.hasOwnProperty.call
+/******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
+/******/
+/******/ 	// __webpack_public_path__
+/******/ 	__webpack_require__.p = "";
+/******/
+/******/ 	// Load entry module and return exports
+/******/ 	return __webpack_require__(__webpack_require__.s = 0);
+/******/ })
+/************************************************************************/
+/******/ ([
+/* 0 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+// B & W
+var black = '#000';
+var white = '#fff';
+
+// Grayscale
+var gray00 = '#130f13';
+var gray10 = '#261f26';
+var gray20 = '#4C4D4F';
+var gray30 = '#7A7D81';
+var gray40 = '#818487';
+var gray50 = '#878B90';
+var gray60 = '#D9DCE0';
+var gray70 = '#E4E8EB';
+var gray80 = '#EEF1F4';
+var gray90 = '#F6F8F9';
+
+// Red
+var red50 = '#F44336';
+
+// Blue
+var blue10 = '#008DB1';
+var blue20 = '#0277BD';
+var blue40 = '#0288D1';
+var blue50 = '#039BE5';
+var blue60 = '#03A9F4';
+var blue80 = '#29B6F6';
+
+// Orange
+var orange50 = '#FFA726';
+
+var interceptTheme = {
+  palette: {
+    primary: {
+      light: blue50,
+      main: blue40,
+      dark: blue20,
+      contrastText: white
+    },
+    secondary: {
+      light: gray60,
+      main: gray30,
+      dark: gray20,
+      contrastText: white
+    },
+    error: {
+      main: red50
+    }
+  }
+};
+
+window.interceptTheme = interceptTheme;
+exports['default'] = interceptTheme;
+
+/***/ })
+/******/ ]);
+});

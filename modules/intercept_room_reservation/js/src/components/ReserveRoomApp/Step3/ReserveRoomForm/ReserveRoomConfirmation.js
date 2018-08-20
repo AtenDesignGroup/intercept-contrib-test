@@ -9,62 +9,6 @@ import RoomReservationStatus from './RoomReservationStatus';
 
 const { actions, api, constants, select, utils, session } = interceptClient;
 const c = constants;
-
-const buildRoomReservation = (values) => {
-  const uuid = v4();
-
-  const output = {
-    id: uuid,
-    type: c.TYPE_ROOM_RESERVATION,
-    attributes: {
-      uuid,
-      field_attendee_count: values.attendees,
-      field_dates: {
-        value: utils.dateToDrupal(utils.getDateFromTime(values.start, values.date)),
-        end_value: utils.dateToDrupal(utils.getDateFromTime(values.end, values.date)),
-      },
-      field_group_name: values.groupName,
-      field_meeting_dates: {
-        value: values.meetingStart ? utils.dateToDrupal(utils.getDateFromTime(values.meetingStart, values.date)) : null,
-        end_value: values.meetingEnd ? utils.dateToDrupal(utils.getDateFromTime(values.meetingEnd, values.date)) : null,
-      },
-      field_meeting_purpose_details: values.meetingDetails,
-      field_refreshments: values.refreshments,
-      field_refreshments_description: {
-        value: values.refreshmentsDesc,
-        // format: "basic_html"
-      },
-      field_status: 'requested',
-    },
-    relationships: {
-      field_event: {
-        data: null,
-      },
-      field_room: {
-        data: {
-          type: c.TYPE_ROOM,
-          id: values[c.TYPE_ROOM],
-        },
-      },
-      field_meeting_purpose: {
-        data: values[c.TYPE_MEETING_PURPOSE]
-          ? {
-            type: c.TYPE_MEETING_PURPOSE,
-            id: values[c.TYPE_MEETING_PURPOSE],
-          }
-          : null,
-      },
-      field_user: {
-        data: {
-          type: c.TYPE_USER,
-          id: values.user,
-        },
-      },
-    },
-  };
-  return output;
-};
-
 class ReserveRoomConfirmation extends React.PureComponent {
   constructor(props) {
     super(props);
@@ -78,14 +22,19 @@ class ReserveRoomConfirmation extends React.PureComponent {
   }
 
   handleConfirm() {
-    const { onConfirm, values, save } = this.props;
-    const entity = buildRoomReservation(values);
-    this.setState({
-      saved: true,
-      uuid: entity.id,
-    });
-    save(entity);
-    onConfirm();
+    // const { onConfirm, values, save } = this.props;
+    // const entity = buildRoomReservation(values);
+    // this.setState({
+    //   saved: true,
+    //   uuid: entity.id,
+    // });
+    // save(entity);
+    // onConfirm();
+
+    const { onConfirm, save } = this.props;
+    const uuid = onConfirm();
+    save(uuid);
+    this.setState({ saved: true, uuid });
   }
 
   render() {
@@ -142,13 +91,13 @@ ReserveRoomConfirmation.defaultProps = {
 const mapStateToProps = () => ({});
 
 const mapDispatchToProps = dispatch => ({
-  save: (data) => {
-    dispatch(actions.add(data, c.TYPE_ROOM_RESERVATION, data.id));
+  save: (uuid) => {
+    // dispatch(actions.add(data, c.TYPE_ROOM_RESERVATION, data.id));
     session
       .getToken()
       .then((token) => {
         dispatch(
-          api[c.TYPE_ROOM_RESERVATION].sync(data.id, { headers: { 'X-CSRF-Token': token } }),
+          api[c.TYPE_ROOM_RESERVATION].sync(uuid, { headers: { 'X-CSRF-Token': token } }),
         );
       })
       .catch((e) => {

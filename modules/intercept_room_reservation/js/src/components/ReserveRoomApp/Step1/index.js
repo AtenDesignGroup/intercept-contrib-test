@@ -38,6 +38,14 @@ const roomStaffRoles = [
   'intercept_room_reservation_approver',
 ];
 
+const roomManagerRoles = [
+  'administrator',
+  'intercept_event_manager',
+  'intercept_event_organizer',
+  'intercept_system_admin',
+  'intercept_room_reservation_approver',
+];
+
 function getDateSpan(value, view = 'day') {
   const start = moment(value).startOf(view);
   const end = moment(value).endOf(view);
@@ -431,9 +439,9 @@ class ReserveRoomStep1 extends React.Component {
 
       if (!reservable) {
         const statusText = staffOnly
-          ? 'Customers cannot reserve this room'
-          : 'Customers must call to reserve';
-        if (!utils.userHasRole(roomStaffRoles)) {
+          ? 'Only event organizers can reserve staff only rooms'
+          : 'Only event organizers can reserve online';
+        if (!utils.userHasRole(roomManagerRoles)) {
           const phoneLink = phoneNumber ? (
             <a href={`tel:${phoneNumber}`} className="call-prompt__link">
               {phoneNumber}

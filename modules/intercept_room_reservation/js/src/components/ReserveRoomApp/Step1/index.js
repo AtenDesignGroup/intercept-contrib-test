@@ -29,22 +29,6 @@ const ATTENDEES = 'attendees';
 const TIME = 'time';
 const DURATION = 'duration';
 const roomIncludes = ['image_primary', 'image_primary.field_media_image'];
-const roomStaffRoles = [
-  'administrator',
-  'intercept_event_manager',
-  'intercept_event_organizer',
-  'intercept_staff',
-  'intercept_system_admin',
-  'intercept_room_reservation_approver',
-];
-
-const roomManagerRoles = [
-  'administrator',
-  'intercept_event_manager',
-  'intercept_event_organizer',
-  'intercept_system_admin',
-  'intercept_room_reservation_approver',
-];
 
 function getDateSpan(value, view = 'day') {
   const start = moment(value).startOf(view);
@@ -87,7 +71,7 @@ function getRoleBasedFilters() {
     },
   };
 
-  if (utils.userHasRole(roomStaffRoles)) {
+  if (utils.userIsStaff()) {
     filter = {};
   }
 
@@ -368,7 +352,7 @@ class ReserveRoomStep1 extends React.Component {
         availability: {
           ...this.state.availability,
           loading: false,
-          rooms: res,
+          rooms: JSON.parse(res),
           shouldUpdate: false,
         },
       });
@@ -437,6 +421,34 @@ class ReserveRoomStep1 extends React.Component {
     });
   }
 
+  onlyAvailable = (availability) => {
+    const { rooms } = availability;
+    const isStaff = utils.userIsStaff();
+    const conflictProp = isStaff ? 'has_reservation_conflict' : 'has_open_hours_conflict';
+
+    return (room) => {
+      const id = get(room, 'data.id');
+
+      // If the room is not returned from the availabilty request, lets assume it's available;
+      if (!rooms[id]) {
+        return true;
+      }
+
+      // Return true if there is no conflict.
+      return !rooms[id][conflictProp];
+    }
+  }
+
+  showAvailable = (rooms) => {
+    const { availability } = this.state;
+
+    if (availability.rooms.length === 0 || availability.loading) {
+      return rooms;
+    }
+
+    return rooms.filter(this.onlyAvailable(availability));
+  }
+
   render() {
     const { props, handleFilterChange, handleRoomSelect } = this;
     const { rooms, roomsLoading, filters } = props;
@@ -452,7 +464,7 @@ class ReserveRoomStep1 extends React.Component {
         const statusText = staffOnly
           ? 'Only event organizers can reserve staff only rooms'
           : 'Only event organizers can reserve online';
-        if (!utils.userHasRole(roomManagerRoles)) {
+        if (!utils.userIsManager()) {
           const phoneLink = phoneNumber ? (
             <a href={`tel:${phoneNumber}`} className="call-prompt__link">
               {phoneNumber}
@@ -493,7 +505,7 @@ class ReserveRoomStep1 extends React.Component {
           </div>
           <div className="l__primary">
             <PageSpinner loading={roomsLoading} />
-            <RoomList rooms={rooms} teaserProps={{ footer: roomFooter }} />
+            <RoomList rooms={this.showAvailable(rooms)} teaserProps={{ footer: roomFooter }} />
             {(this.state.room.previous || this.state.room.current) && (
               <Slide
                 direction="up"

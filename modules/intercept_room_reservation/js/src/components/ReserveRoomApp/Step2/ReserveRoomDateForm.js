@@ -218,92 +218,90 @@ class ReserveRoomDateForm extends PureComponent {
           onInvalid={this.disableButton}
         >
           <div className="l--subsection">
-            <h4 className="">Choose a Time</h4>
-            <div className="">
-              <InputDate
-                handleChange={this.onDateChange}
-                defaultValue={null}
-                value={values[c.DATE]}
-                name={c.DATE}
-                required
-                clearable={false}
-                validations="isFutureDate"
-                validationError="Date must be in the future"
-              />
+            <h4 className="section-title--secondary">Choose a Time</h4>
+            <InputDate
+              handleChange={this.onDateChange}
+              defaultValue={null}
+              value={values[c.DATE]}
+              name={c.DATE}
+              required
+              clearable={false}
+              validations="isFutureDate"
+              validationError="Date must be in the future"
+            />
+            <SelectTime
+              clearable
+              label="Start Time"
+              value={values.start}
+              onChange={this.onValueChange('start')}
+              name="start"
+              required
+              validations="isFutureTime"
+              validationError="Must be in the future"
+              min={min}
+              max={max}
+              step={step}
+            />
+            <div className="input-group--subgroup">
               <SelectTime
                 clearable
-                label="Start Time"
-                value={values.start}
-                onChange={this.onValueChange('start')}
-                name="start"
-                required
-                validations="isFutureTime"
-                validationError="Must be in the future"
-                min={min}
-                max={max}
-                step={step}
-              />
-              <div className="input-group--subgroup">
-                <SelectTime
-                  clearable
-                  label="Meeting Start Time"
-                  value={values.meetingStart}
-                  onChange={this.onValueChange('meetingStart')}
-                  name="meetingStart"
-                  validations={{
-                    isFutureTime: false,
-                    isOnOrAfterStart: true,
-                    isOnOrBeforeEnd: true,
-                  }}
-                  validationErrors={{
-                    isFutureTime: 'Must be in the future',
-                    isOnOrAfterStart: 'Must be on or after reservation start time',
-                    isOnOrBeforeEnd: 'Must be on or before reservation end time',
-                  }}
-                  min={values.start}
-                  max={values.end}
-                  step={step}
-                />
-                <SelectTime
-                  label="Meeting End Time"
-                  value={values.meetingEnd}
-                  onChange={this.onValueChange('meetingEnd')}
-                  name="meetingEnd"
-                  validations={{
-                    isFutureTime: true,
-                    isOnOrBeforeEnd: true,
-                    isAfterMeetingStart: true,
-                  }}
-                  validationErrors={{
-                    isFutureTime: 'Must be in the future',
-                    isOnOrBeforeEnd: 'Must be on or before reservation end time',
-                    isAfterMeetingStart: 'Must be after meeting start time',
-                  }}
-                  min={values.start}
-                  max={values.end}
-                  step={step}
-                />
-              </div>
-              <SelectTime
-                clearable
-                label="End Time"
-                value={values.end}
-                onChange={this.onValueChange('end')}
-                name="end"
-                required
+                label="Meeting Start Time"
+                value={values.meetingStart}
+                onChange={this.onValueChange('meetingStart')}
+                name="meetingStart"
                 validations={{
-                  isFutureTime: true,
-                  isAfterStart: true,
+                  isFutureTime: false,
+                  isOnOrAfterStart: true,
+                  isOnOrBeforeEnd: true,
                 }}
                 validationErrors={{
                   isFutureTime: 'Must be in the future',
-                  isAfterStart: 'Must be after start time',
+                  isOnOrAfterStart: 'Must be on or after reservation start time',
+                  isOnOrBeforeEnd: 'Must be on or before reservation end time',
                 }}
-                min={min}
-                max={max}
+                min={values.start}
+                max={values.end}
+                step={step}
+              />
+              <SelectTime
+                label="Meeting End Time"
+                value={values.meetingEnd}
+                onChange={this.onValueChange('meetingEnd')}
+                name="meetingEnd"
+                validations={{
+                  isFutureTime: true,
+                  isOnOrBeforeEnd: true,
+                  isAfterMeetingStart: true,
+                }}
+                validationErrors={{
+                  isFutureTime: 'Must be in the future',
+                  isOnOrBeforeEnd: 'Must be on or before reservation end time',
+                  isAfterMeetingStart: 'Must be after meeting start time',
+                }}
+                min={values.start}
+                max={values.end}
                 step={step}
               />
             </div>
+            <SelectTime
+              clearable
+              label="End Time"
+              value={values.end}
+              onChange={this.onValueChange('end')}
+              name="end"
+              required
+              validations={{
+                isFutureTime: true,
+                isAfterStart: true,
+              }}
+              validationErrors={{
+                isFutureTime: 'Must be in the future',
+                isAfterStart: 'Must be after start time',
+              }}
+              min={min}
+              max={max}
+              step={step}
+            />
           </div>
 
           <div className="form__actions">

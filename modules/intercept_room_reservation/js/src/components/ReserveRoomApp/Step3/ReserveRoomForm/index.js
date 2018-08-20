@@ -166,13 +166,9 @@ class ReserveRoomForm extends PureComponent {
     this.updateValues = this.updateValues.bind(this);
     this.toggleValue = this.toggleValue.bind(this);
     this.onCloseDialog = this.onCloseDialog.bind(this);
-    // this.onDateChange = this.onDateChange.bind(this);
     this.onInputChange = this.onInputChange.bind(this);
     this.onOpenDialog = this.onOpenDialog.bind(this);
-    // this.onSwitchChange = this.onSwitchChange.bind(this);
     this.onValueChange = this.onValueChange.bind(this);
-    // this.onRoomSelect = this.onRoomSelect.bind(this);
-
     this.disableButton = this.disableButton.bind(this);
     this.enableButton = this.enableButton.bind(this);
   }
@@ -188,26 +184,6 @@ class ReserveRoomForm extends PureComponent {
       this.updateValue(key, value);
     };
   }
-
-  // onDateChange(value) {
-  //   const start = matchDate(this.props.values.start, value);
-  //   const end = matchDate(this.props.values.end, value);
-  //   this.updateValues({
-  //     [c.DATE]: value,
-  //     start,
-  //     end,
-  //   });
-  // }
-
-  // onStartChange(value) {
-  //   const start = matchTime(value, this.props.values.start);
-  //   const end = matchTime(value, this.props.values.end);
-  //   this.updateValues({
-  //     [c.DATE]: value,
-  //     start,
-  //     end,
-  //   });
-  // }
 
   onOpenDialog = () => {
     this.setState({ openDialog: true });
@@ -283,92 +259,95 @@ class ReserveRoomForm extends PureComponent {
   }
 
   render() {
-    const { values, combinedValues, meetingPurpose, room } = this.props;
+    const { values, combinedValues, hasConflict, meetingPurpose, room } = this.props;
     const showMeetingPurposeExplanation = !!purposeRequiresExplanation(meetingPurpose);
+
     let content = null;
 
     if (this.state.uuid) {
       content = <ReservationTeaser id={this.state.uuid} />;
     }
     else {
-      content = (<Formsy
-        className="form__main"
-        ref={this.form}
-        onValidSubmit={this.onOpenDialog}
-        onValid={this.enableButton}
-        onInvalid={this.disableButton}
-      >
-        <div className="l--2-col">
-          <div className="l__main">
-            <div className="l__primary">
-              <h4 className="section-title section-title--secondary">Reservation Details</h4>
-              <InputNumber
-                label="Number of Attendees"
-                value={values.attendees}
-                onChange={this.onValueChange('attendees')}
-                name={'attendees'}
-                min={0}
-                int
-                required={!utils.userIsStaff()}
-                validations="isPositive"
-                validationError="Attendees must be a positive number"
-              />
-              <InputText
-                label="Group Name"
-                onChange={this.onValueChange('groupName')}
-                value={values.groupName}
-                name="groupName"
-                helperText={'Help others find you by name.'}
-              />
-              <SelectResource
-                type={c.TYPE_MEETING_PURPOSE}
-                name={c.TYPE_MEETING_PURPOSE}
-                handleChange={this.onInputChange(c.TYPE_MEETING_PURPOSE)}
-                value={values.meetingPurpose}
-                label={'Purpose for using this room'}
-                required={!utils.userIsStaff()}
-              />
-              <InputText
-                label="Description"
-                onChange={this.onValueChange('meetingDetails')}
-                value={values.meetingDetails}
-                name="meetingDetails"
-                required={showMeetingPurposeExplanation}
-              />
+      content = (
+        <Formsy
+          className="form__main"
+          ref={this.form}
+          onValidSubmit={this.onOpenDialog}
+          onValid={this.enableButton}
+          onInvalid={this.disableButton}
+        >
+          <div className="l--2-col">
+            <div className="l__main">
+              <div className="l__primary">
+                <h4 className="section-title section-title--secondary">Reservation Details</h4>
+                <InputNumber
+                  label="Number of Attendees"
+                  value={values.attendees}
+                  onChange={this.onValueChange('attendees')}
+                  name={'attendees'}
+                  min={0}
+                  int
+                  required={!utils.userIsStaff()}
+                  validations="isPositive"
+                  validationError="Attendees must be a positive number"
+                />
+                <InputText
+                  label="Group Name"
+                  onChange={this.onValueChange('groupName')}
+                  value={values.groupName}
+                  name="groupName"
+                  helperText={'Help others find you by name.'}
+                />
+                <SelectResource
+                  type={c.TYPE_MEETING_PURPOSE}
+                  name={c.TYPE_MEETING_PURPOSE}
+                  handleChange={this.onInputChange(c.TYPE_MEETING_PURPOSE)}
+                  value={values.meetingPurpose}
+                  label={'Purpose for using this room'}
+                  required={!utils.userIsStaff()}
+                />
+                <InputText
+                  label="Description"
+                  onChange={this.onValueChange('meetingDetails')}
+                  value={values.meetingDetails}
+                  name="meetingDetails"
+                  required={showMeetingPurposeExplanation}
+                />
+              </div>
+              <div className="l__secondary">
+                <h4 className="section-title section-title--secondary">Refreshments</h4>
+                <InputCheckbox
+                  label="Serving light refreshments?"
+                  checked={values.refreshments}
+                  onChange={this.toggleValue}
+                  value="refreshments"
+                  name="refreshments"
+                />
+                <InputText
+                  label="Please describe your light refreshments."
+                  value={values.refreshmentsDesc}
+                  onChange={this.onValueChange('refreshmentsDesc')}
+                  name="refreshmentDesc"
+                  required={values.refreshments}
+                  disabled={!values.refreshments}
+                />
+              </div>
             </div>
-            <div className="l__secondary">
-              <h4 className="section-title section-title--secondary">Refreshments</h4>
-              <InputCheckbox
-                label="Serving light refreshments?"
-                checked={values.refreshments}
-                onChange={this.toggleValue}
-                value="refreshments"
-                name="refreshments"
-              />
-              <InputText
-                label="Please describe your light refreshments."
-                value={values.refreshmentsDesc}
-                onChange={this.onValueChange('refreshmentsDesc')}
-                name="refreshmentDesc"
-                required={values.refreshments}
-                disabled={!values.refreshments}
-              />
+            <div className="form__actions l__footer">
+              <Button
+                variant="raised"
+                size="large"
+                color="primary"
+                type="submit"
+                className="button button--primary"
+                disabled={!this.state.canSubmit || hasConflict || !room}
+              >
+                Reserve
+              </Button>
             </div>
           </div>
-          <div className="form__actions l__footer">
-            <Button
-              variant="raised"
-              size="large"
-              color="primary"
-              type="submit"
-              className="button button--primary"
-              disabled={!this.state.canSubmit || !room}
-            >
-              Reserve
-            </Button>
-          </div>
-        </div>
-      </Formsy>)
+        </Formsy>
+      );
     }
 
     return (
@@ -377,12 +356,10 @@ class ReserveRoomForm extends PureComponent {
         <ReserveRoomConfirmation
           open={this.state.openDialog}
           onCancel={this.onCloseDialog}
-          onConfirm={() => {
-            return this.saveEntitytoStore({
-              ...combinedValues,
-              [c.TYPE_ROOM]: room,
-            });
-          }}
+          onConfirm={() => this.saveEntitytoStore({
+            ...combinedValues,
+            [c.TYPE_ROOM]: room,
+          })}
           values={{
             ...combinedValues,
             [c.TYPE_ROOM]: room,
@@ -413,6 +390,7 @@ class ReserveRoomForm extends PureComponent {
 }
 
 ReserveRoomForm.propTypes = {
+  availability: PropTypes.object,
   values: PropTypes.shape({
     attendees: PropTypes.number,
     groupName: PropTypes.string,
@@ -430,6 +408,7 @@ ReserveRoomForm.propTypes = {
 };
 
 ReserveRoomForm.defaultProps = {
+  availability: null,
   combinedValues: {},
   values: {
     attendees: 1,

@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import moment from 'moment';
 import debounce from 'lodash/debounce';
+import get from 'lodash/get';
 import pick from 'lodash/pick';
 import interceptClient from 'interceptClient';
 import drupalSettings from 'drupalSettings';
@@ -16,8 +17,9 @@ import SelectResource from 'intercept/SelectResource';
 import ReserveRoomForm from './ReserveRoomForm';
 import DateSummary from './DateSummary';
 import RoomSummary from './RoomSummary';
+import ValueSummaryFooter from './ValueSummaryFooter';
 
-const { constants, api, select } = interceptClient;
+const { constants, select, utils } = interceptClient;
 const c = constants;
 const roomIncludes = ['image_primary', 'image_primary.field_media_image'];
 
@@ -125,39 +127,16 @@ class ReserveRoomStep3 extends React.Component {
       calView: props.calView,
       date: props.date,
       filters: props.filters,
-      // formValues: {
-      //   [c.TYPE_ROOM]: null,
-      //   date: new Date(),
-      //   start: moment()
-      //     .startOf('hour')
-      //     .add(1, 'h')
-      //     .toDate(),
-      //   end: moment()
-      //     .startOf('hour')
-      //     .add(2, 'h')
-      //     .toDate(),
-      //   attendees: 1,
-      //   groupName: '',
-      //   meeting: false,
-      //   meetingStart: moment()
-      //     .startOf('hour')
-      //     .add(1, 'h')
-      //     .toDate(),
-      //   meetingEnd: moment()
-      //     .startOf('hour')
-      //     .add(2, 'h')
-      //     .toDate(),
-      //   [c.TYPE_MEETING_PURPOSE]: null,
-      //   meetingDetails: '',
-      //   refreshments: false,
-      //   refreshmentsDesc: '',
-      //   user: drupalSettings.intercept.user.uuid,
-      // },
       view: props.view,
       room: {
         current: null,
         previous: null,
         exiting: false,
+      },
+      availability: {
+        loading: false,
+        shouldUpdate: false,
+        rooms: {},
       },
     };
     this.handleCalendarNavigate = this.handleCalendarNavigate.bind(this);
@@ -168,9 +147,83 @@ class ReserveRoomStep3 extends React.Component {
   }
 
   componentDidMount() {
-    // this.doFetchRooms(this.props.filters, this.props.view, this.props.calView, this.props.date);
-    // this.props.fetchLocations();
+    const { formValues, room } = this.props;
+    const { start, end, date } = formValues;
+    const shouldValidateConflicts = !!(room && start && end && date);
+    this.mounted = true;
+
+    if (shouldValidateConflicts) {
+      this.fetchAvailableRooms();
+    }
   }
+
+  componentWillUnmount() {
+    this.mounted = false;
+  }
+
+  // Get query params based on current rooms and filters.
+  getRoomAvailabilityQuery = () => {
+    const { formValues } = this.props;
+    const start = utils.getDateFromTime(formValues.start, formValues[c.DATE]);
+    const end = utils.getDateFromTime(formValues.end, formValues[c.DATE]);
+    const options = {
+      rooms: [this.props.room],
+    };
+
+    // Compute duration of reservation.
+    options.duration = utils.getDurationInMinutes(start, end);
+    options.start = utils.dateToDrupal(start);
+    options.end = utils.dateToDrupal(end);
+
+    return options;
+  };
+
+  // Requests available rooms
+  fetchAvailableRooms() {
+    this.setState({
+      availability: {
+        ...this.state.availability,
+        loading: true,
+        shouldUpdate: false,
+      },
+    });
+
+    fetch('/api/rooms/availability', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify(this.getRoomAvailabilityQuery()),
+    })
+      .then(res => res.text())
+      .then(this.handleAvailabiltyResponse)
+      .catch((e) => {
+        if (this.mounted) {
+          this.setState({
+            availability: {
+              ...this.state.availability,
+              loading: false,
+              shouldUpdate: false,
+            },
+          });
+        }
+      });
+  }
+
+  handleAvailabiltyResponse = (res) => {
+    if (this.mounted) {
+      this.setState({
+        availability: {
+          ...this.state.availability,
+          loading: false,
+          rooms: JSON.parse(res),
+          shouldUpdate: false,
+        },
+      });
+    }
+  };
 
   handleViewChange = (value) => {
     // this.props.onChangeView(value);
@@ -193,15 +246,6 @@ class ReserveRoomStep3 extends React.Component {
   };
 
   handleFormChange(formValues) {
-    // let room = this.state.room;
-    // if (formValues[c.TYPE_ROOM] !== this.state.formValues[c.TYPE_ROOM]) {
-    //   room = {
-    //     current: formValues[c.TYPE_ROOM],
-    //     previous: this.state.room.current,
-    //     exiting: this.state.room.current !== this.state.room.previous,
-    //   };
-    // }
-
     this.setState({
       // room,
       formValues: {
@@ -210,16 +254,6 @@ class ReserveRoomStep3 extends React.Component {
       },
     });
   }
-
-  // onExited() {
-  //   console.log('exited');
-  //   this.setState({
-  //     room: {
-  //       ...this.state.room,
-  //       exiting: false,
-  //     },
-  //   });
-  // }
 
   doFetchRooms(
     values = this.props.filters,
@@ -238,6 +272,17 @@ class ReserveRoomStep3 extends React.Component {
       },
     });
   }
+
+  hasConflict = () => {
+    const availability = get(this, `state.availability.rooms.${this.props.room}`) || null;
+    if (!availability) {
+      return false;
+    }
+    const isStaff = utils.userIsStaff();
+    const conflictProp = isStaff ? 'has_reservation_conflict' : 'has_open_hours_conflict';
+
+    return availability[conflictProp];
+  };
 
   render() {
     const {
@@ -270,6 +315,8 @@ class ReserveRoomStep3 extends React.Component {
       'groupName',
       c.TYPE_MEETING_PURPOSE,
     ]);
+    const hasConflict = this.hasConflict();
+
     return (
       <div className="l--default">
         <div className="l__header">
@@ -277,11 +324,21 @@ class ReserveRoomStep3 extends React.Component {
             <RoomSummary value={room} onClickChange={() => onChangeStep(0)} />
             <DateSummary value={dateValues} onClickChange={() => onChangeStep(1)} />
           </div>
+          {hasConflict && (<ValueSummaryFooter
+            level={'error'}
+            message={'This room is not available during this time.'}
+          />)}
         </div>
         <div className="l__main">
           <div className="l__primary">
             <div className="l--subsection--tight">
-              <ReserveRoomForm values={values} combinedValues={formValues} onChange={onChange} room={room} />
+              <ReserveRoomForm
+                values={values}
+                combinedValues={formValues}
+                onChange={onChange}
+                room={room}
+                hasConflict={hasConflict}
+              />
             </div>
           </div>
         </div>
@@ -313,7 +370,7 @@ ReserveRoomStep3.propTypes = {
   // rooms: PropTypes.arrayOf(Object).isRequired,
   // roomsLoading: PropTypes.bool.isRequired,
   // fetchLocations: PropTypes.func.isRequired,
-  // fetchRooms: PropTypes.func.isRequired,
+  fetchRooms: PropTypes.func.isRequired,
   fetchUser: PropTypes.func.isRequired,
   // calView: PropTypes.string,
   // date: PropTypes.instanceOf(Date),

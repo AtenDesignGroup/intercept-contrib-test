@@ -119,6 +119,10 @@ export const getDateTimespanDisplay = ({ date, start, end }) =>
     getDateFromTime(end),
   )}`;
 
+// Gets the duration in minutes of an event based on start and end time.
+export const getDurationInMinutes = (start, end) =>
+  moment.duration(moment(end).diff(moment(start))).asMinutes();
+
 // Converts a Date object to a Drupal compatible string.
 //   Trims `.000Z` off the end.
 export const dateToDrupal = date =>
@@ -179,6 +183,25 @@ export const userIsStaff = () =>
     'intercept_event_manager',
     'intercept_event_organizer',
     'intercept_staff',
+    'intercept_system_admin',
+    'intercept_room_reservation_approver',
+  ]);
+
+/**
+ * Check if the current user is considered a manager.
+ *
+ * @return {Boolean}
+ *   True if the user has at least one of:
+ *     intercept_event_manager
+ *     intercept_event_organizer
+ *     intercept_system_admin
+ *     intercept_room_reservation_approver
+ *   otherwise False.
+ */
+export const userIsManager = () =>
+  userHasRole([
+    'intercept_event_manager',
+    'intercept_event_organizer',
     'intercept_system_admin',
     'intercept_room_reservation_approver',
   ]);

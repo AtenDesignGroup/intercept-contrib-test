@@ -208,10 +208,9 @@ class ReserveRoomStep2 extends React.Component {
 
     const todayDate = moment.tz(interceptClient.utils.getUserTimezone()).format('YYYY-MM-DD');
     return (
-      <div className="">
+      <div className="l--sidebar-before">
         <div className="l__main">
-          <div className="l__secondary" />
-          <div className="l__primary">
+          <div className="l__secondary">
             <ReserveRoomDateForm
               values={this.getDefaultValues({
                 formValues,
@@ -225,6 +224,8 @@ class ReserveRoomStep2 extends React.Component {
               min={'0000'}
               max={'2345'}
             />
+          </div>
+          <div className="l__primary">
           </div>
         </div>
       </div>

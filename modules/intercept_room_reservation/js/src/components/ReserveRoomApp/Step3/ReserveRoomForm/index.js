@@ -13,21 +13,14 @@ import drupalSettings from 'drupalSettings';
 import v4 from 'uuid/v4';
 
 // Material UI
-import Button from '@material-ui/core/Button';
-import ExpansionPanel from '@material-ui/core/ExpansionPanel';
-import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
-import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Switch from '@material-ui/core/Switch';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import AppBar from '@material-ui/core/AppBar';
+import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
 import CloseIcon from '@material-ui/icons/Close';
 import Slide from '@material-ui/core/Slide';
-import Collapse from '@material-ui/core/Collapse';
 
 // Intercept Components
 import SelectResource from 'intercept/SelectResource';
@@ -59,7 +52,6 @@ const matchTime = (original, ref) => {
   output.setMilliseconds(ref.getMilliseconds());
   return output;
 };
-const matchDate = (original, ref) => matchTime(ref, original);
 
 const purposeRequiresExplanation = meetingPurpose =>
   meetingPurpose && meetingPurpose.data.attributes.field_requires_explanation;
@@ -71,17 +63,9 @@ addValidationRule(
   (values, value) => !values.refreshments || value !== '',
 );
 addValidationRule('isRequiredIfMeeting', (values, value) => !values.meeting || value !== '');
-// addValidationRule('isFutureDate', (values, value) => value >= matchTime(new Date(), value));
-// // addValidationRule('isFutureTime', (values, value) => value > new Date());
-// addValidationRule('isAfterStart', (values, value) => value > values.start);
-// addValidationRule('isOnOrAfterStart', (values, value) => value >= values.start);
-// addValidationRule('isBeforeEnd', (values, value) => value < values.end);
-// addValidationRule('isOnOrBeforeEnd', (values, value) => value <= values.end);
-// addValidationRule('isAfterMeetingStart', (values, value) => value > values.meetingStart);
 
 const buildRoomReservation = (values) => {
   const uuid = v4();
-
   const output = {
     id: uuid,
     type: c.TYPE_ROOM_RESERVATION,
@@ -105,13 +89,15 @@ const buildRoomReservation = (values) => {
       field_refreshments: values.refreshments,
       field_refreshments_description: {
         value: values.refreshmentsDesc,
-        // format: "basic_html"
       },
       field_status: 'requested',
     },
     relationships: {
       field_event: {
-        data: null,
+        data: values[c.TYPE_EVENT] ? {
+          type: c.TYPE_EVENT,
+          id: values[c.TYPE_EVENT],
+        } : null,
       },
       field_room: {
         data: {
@@ -259,7 +245,14 @@ class ReserveRoomForm extends PureComponent {
   }
 
   render() {
-    const { values, combinedValues, hasConflict, meetingPurpose, room } = this.props;
+    const {
+      combinedValues,
+      event,
+      hasConflict,
+      meetingPurpose,
+      room,
+      values,
+    } = this.props;
     const showMeetingPurposeExplanation = !!purposeRequiresExplanation(meetingPurpose);
 
     let content = null;
@@ -356,13 +349,17 @@ class ReserveRoomForm extends PureComponent {
         <ReserveRoomConfirmation
           open={this.state.openDialog}
           onCancel={this.onCloseDialog}
-          onConfirm={() => this.saveEntitytoStore({
-            ...combinedValues,
-            [c.TYPE_ROOM]: room,
-          })}
+          onConfirm={() =>
+            this.saveEntitytoStore({
+              ...combinedValues,
+              [c.TYPE_ROOM]: room,
+              [c.TYPE_EVENT]: event,
+            })
+          }
           values={{
             ...combinedValues,
             [c.TYPE_ROOM]: room,
+            [c.TYPE_EVENT]: event,
           }}
         />
 
@@ -390,7 +387,6 @@ class ReserveRoomForm extends PureComponent {
 }
 
 ReserveRoomForm.propTypes = {
-  availability: PropTypes.object,
   values: PropTypes.shape({
     attendees: PropTypes.number,
     groupName: PropTypes.string,
@@ -405,10 +401,11 @@ ReserveRoomForm.propTypes = {
   meetingPurpose: PropTypes.object,
   combinedValues: PropTypes.object,
   room: PropTypes.string,
+  event: PropTypes.string,
+  hasConflict: PropTypes.bool,
 };
 
 ReserveRoomForm.defaultProps = {
-  availability: null,
   combinedValues: {},
   values: {
     attendees: 1,
@@ -420,7 +417,9 @@ ReserveRoomForm.defaultProps = {
     user: drupalSettings.intercept.user.uuid,
   },
   meetingPurpose: null,
-  room: '',
+  room: null,
+  event: null,
+  hasConflict: false,
 };
 
 const mapStateToProps = (state, ownProps) => ({

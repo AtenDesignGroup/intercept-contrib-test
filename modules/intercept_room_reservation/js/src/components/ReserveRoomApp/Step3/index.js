@@ -157,6 +157,22 @@ class ReserveRoomStep3 extends React.Component {
     }
   }
 
+  componentDidUpdate(prevProps) {
+    const { formValues, room } = this.props;
+    const { start, end, date } = formValues;
+    const hasValues = !!(room && start && end && date);
+    const valuesChanged =
+      prevProps.room !== room ||
+      prevProps.formValues.end !== end ||
+      prevProps.formValues.start !== start ||
+      prevProps.formValues.date !== date;
+    const shouldValidateConflicts = hasValues && valuesChanged;
+
+    if (shouldValidateConflicts) {
+      this.fetchAvailableRooms();
+    }
+  }
+
   componentWillUnmount() {
     this.mounted = false;
   }
@@ -300,6 +316,7 @@ class ReserveRoomStep3 extends React.Component {
       filters,
       view,
       calView,
+      event,
       room,
       formValues,
       onChange,
@@ -324,10 +341,12 @@ class ReserveRoomStep3 extends React.Component {
             <RoomSummary value={room} onClickChange={() => onChangeStep(0)} />
             <DateSummary value={dateValues} onClickChange={() => onChangeStep(1)} />
           </div>
-          {hasConflict && (<ValueSummaryFooter
-            level={'error'}
-            message={'This room is not available during this time.'}
-          />)}
+          {hasConflict && (
+            <ValueSummaryFooter
+              level={'error'}
+              message={'This room is not available during this time.'}
+            />
+          )}
         </div>
         <div className="l__main">
           <div className="l__primary">
@@ -337,6 +356,7 @@ class ReserveRoomStep3 extends React.Component {
                 combinedValues={formValues}
                 onChange={onChange}
                 room={room}
+                event={event}
                 hasConflict={hasConflict}
               />
             </div>

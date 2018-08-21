@@ -5,7 +5,7 @@ import ContentList from 'intercept/ContentList';
 
 class RoomList extends React.PureComponent {
   render() {
-    const { rooms, teaserProps, TeaserComponent } = this.props;
+    const { rooms, teaserProps, TeaserComponent, loading } = this.props;
 
     const teasers = items =>
       items.map(item => ({
@@ -17,7 +17,7 @@ class RoomList extends React.PureComponent {
       rooms.length > 0 ? (
         <ContentList items={teasers(rooms)} key={0} />
       ) : (
-        <p key={0}>No rooms available</p>
+        !loading && <p key={0}>No rooms available</p>
       );
 
     return <div className="rooms-list">{list}</div>;
@@ -28,11 +28,13 @@ RoomList.propTypes = {
   rooms: PropTypes.arrayOf(Object).isRequired,
   TeaserComponent: PropTypes.func,
   teaserProps: PropTypes.object,
+  loading: PropTypes.bool,
 };
 
 RoomList.defaultProps = {
   TeaserComponent: RoomTeaser,
   teaserProps: {},
+  loading: false,
 };
 
 export default RoomList;

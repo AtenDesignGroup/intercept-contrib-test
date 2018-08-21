@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import v4 from 'uuid/v4';
 import interceptClient from 'interceptClient';
 import DialogConfirm from 'intercept/Dialog/DialogConfirm';
 import RoomReservationSummary from './RoomReservationSummary';

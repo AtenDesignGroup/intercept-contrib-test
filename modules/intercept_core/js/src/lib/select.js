@@ -1,6 +1,8 @@
 import { createSelector } from 'reselect';
+import moment from 'moment';
 import forEach from 'lodash/forEach';
 import get from 'lodash/get';
+import find from 'lodash/find';
 import groupBy from 'lodash/groupBy';
 import map from 'lodash/map';
 import mapValues from 'lodash/mapValues';
@@ -474,6 +476,22 @@ export const location = id => state => state[c.TYPE_LOCATION].items[id];
 export const locations = state => state[c.TYPE_LOCATION].items;
 export const locationsOptions = keyValues(locations, 'data.attributes.title');
 export const locationsLabels = peek(locations, 'data.attributes.title');
+export const locationHours = id => (state) => {
+  const loc = location(id)(state);
+  return get(loc, 'data.attributes.field_location_hours') || '';
+};
+export const locationHoursOnDate = (id, date) => (state) => {
+  const hours = locationHours(id)(state);
+  const day = moment.tz(date, utils.getUserTimezone).format('d');
+  const daysHours = find(hours, item => item.day === day);
+  if (daysHours) {
+    return {
+      start: daysHours.starthours,
+      end: daysHours.endhours,
+    };
+  }
+  return null;
+};
 
 //
 // Rooms
@@ -484,7 +502,13 @@ export const roomsArray = state => map(state[c.TYPE_ROOM].items, item => item);
 export const roomsOptions = keyValues(rooms, 'data.attributes.title');
 export const roomsLabels = peek(rooms, 'data.attributes.title');
 export const roomsAscending = createSelector(roomsArray, items =>
-  items.sort((a, b) => recordLabel(a) - recordLabel(b)),
+  items.sort((a, b) =>
+    b.data.attributes.title === a.data.attributes.title
+      ? 0
+      : b.data.attributes.title > a.data.attributes.title
+        ? -1
+        : 1
+  )
 );
 
 // Get the room's title
@@ -494,13 +518,16 @@ export const roomLabel = id =>
 export const roomLocation = id =>
   createSelector(room(id), item => get(item, 'data.relationships.field_location.data.id'));
 
-export const roomLocationRecord = id => (state) => {
-  return location(roomLocation(id)(state))(state);
-};
+export const roomLocationRecord = id => state => location(roomLocation(id)(state))(state);
 
 export const roomLocationLabel = id => (state) => {
   const loc = location(roomLocation(id)(state))(state);
   return get(loc, 'data.attributes.title') || '';
+};
+
+export const roomLocationHours = id => (state) => {
+  const loc = location(roomLocation(id)(state))(state);
+  return get(loc, 'data.attributes.field_location_hours') || '';
 };
 
 export const roomReservation = id => records(c.TYPE_ROOM_RESERVATION, id);

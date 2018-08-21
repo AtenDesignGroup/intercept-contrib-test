@@ -13,10 +13,11 @@ import Button from '@material-ui/core/Button';
 import Slide from '@material-ui/core/Slide';
 
 // Intercept Components
-import ViewSwitcher from 'intercept/ViewSwitcher';
+import LoadingIndicator from 'intercept/LoadingIndicator';
 import PageSpinner from 'intercept/PageSpinner';
 import RoomTeaser from 'intercept/RoomTeaser';
 import SelectResource from 'intercept/SelectResource';
+import ViewSwitcher from 'intercept/ViewSwitcher';
 
 // Local Components
 import RoomFilters from './RoomFilters';
@@ -414,6 +415,11 @@ class ReserveRoomStep1 extends React.Component {
     fetchRooms({
       filters: getFilters(values, view, calView, date),
       include: roomIncludes,
+      sort: {
+        title: {
+          path: 'title',
+        },
+      },
       replace: true,
       headers: {
         'X-Consumer-ID': interceptClient.consumer,
@@ -436,8 +442,8 @@ class ReserveRoomStep1 extends React.Component {
 
       // Return true if there is no conflict.
       return !rooms[id][conflictProp];
-    }
-  }
+    };
+  };
 
   showAvailable = (rooms) => {
     const { availability } = this.state;
@@ -447,7 +453,7 @@ class ReserveRoomStep1 extends React.Component {
     }
 
     return rooms.filter(this.onlyAvailable(availability));
-  }
+  };
 
   render() {
     const { props, handleFilterChange, handleRoomSelect } = this;
@@ -505,7 +511,10 @@ class ReserveRoomStep1 extends React.Component {
           </div>
           <div className="l__primary">
             <PageSpinner loading={roomsLoading} />
-            <RoomList rooms={this.showAvailable(rooms)} teaserProps={{ footer: roomFooter }} />
+            <RoomList
+              rooms={this.showAvailable(rooms)}
+              teaserProps={{ footer: roomFooter }}
+              loading={roomsLoading} />
             {(this.state.room.previous || this.state.room.current) && (
               <Slide
                 direction="up"
@@ -516,6 +525,7 @@ class ReserveRoomStep1 extends React.Component {
                 <RoomTeaser uuid={roomToShow} id={roomToShow} className="room-teaser" />
               </Slide>
             )}
+            <LoadingIndicator loading={roomsLoading} />
           </div>
         </div>
       </div>
@@ -542,20 +552,11 @@ const mapDispatchToProps = dispatch => ({
 });
 
 ReserveRoomStep1.propTypes = {
-  // calendarRooms: PropTypes.arrayOf(Object).isRequired,
   rooms: PropTypes.arrayOf(Object).isRequired,
   roomsLoading: PropTypes.bool.isRequired,
   fetchLocations: PropTypes.func.isRequired,
   fetchRooms: PropTypes.func.isRequired,
   fetchUser: PropTypes.func.isRequired,
-  // calView: PropTypes.string,
-  // date: PropTypes.instanceOf(Date),
-  // view: PropTypes.string,
-  // filters: PropTypes.object,
-  // onChangeCalView: PropTypes.func.isRequired,
-  // onChangeView: PropTypes.func.isRequired,
-  // onChangeFilters: PropTypes.func.isRequired,
-  // onChangeDate: PropTypes.func.isRequired,
 };
 
 ReserveRoomStep1.defaultProps = {

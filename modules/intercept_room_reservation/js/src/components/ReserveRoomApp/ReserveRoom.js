@@ -3,6 +3,8 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import moment from 'moment';
 import debounce from 'lodash/debounce';
+import get from 'lodash/get';
+import pick from 'lodash/pick';
 import interceptClient from 'interceptClient';
 import drupalSettings from 'drupalSettings';
 
@@ -25,10 +27,16 @@ const { constants, api, select, utils } = interceptClient;
 const c = constants;
 const roomIncludes = ['image_primary', 'image_primary.field_media_image'];
 
-addValidationRule('isFutureDate', (values, value) => {
-  // return true;
-  return !value || value >= utils.getUserStartOfDay();
-});
+// Buffer around meeting times for events.
+const ROOM_RESERVATION_MEETING_BUFFER = 30;
+const ROOM_RESERVATION_DEFAULT_ATTENDEES_COUNT = 10;
+
+addValidationRule(
+  'isFutureDate',
+  (values, value) =>
+    // return true;
+    !value || value >= utils.getUserStartOfDay(),
+);
 
 function getDateSpan(value, view = 'day') {
   const start = moment(value).startOf(view);
@@ -164,12 +172,23 @@ class ReserveRoom extends React.Component {
         exiting: false,
       },
     };
-    this.handleFilterChange = this.handleFilterChange.bind(this);
     this.onExited = this.onExited.bind(this);
-    this.doFetchRooms = debounce(this.doFetchRooms, 500).bind(this);
   }
 
   componentDidMount() {
+    if (this.props.event) {
+      const filters = {
+        uuid: {
+          path: 'uuid',
+          value: this.props.event,
+        },
+      };
+      this.props.fetchEvent({
+        filters,
+        include: ['field_room'],
+      });
+    }
+
     if (this.props.room) {
       const filters = {
         uuid: {
@@ -179,6 +198,12 @@ class ReserveRoom extends React.Component {
       };
       this.props.fetchRooms({
         filters,
+        sort: {
+          title: {
+            path: 'title',
+            // direction: getSortDirection(view, values),
+          },
+        },
         include: [...roomIncludes, 'field_location'],
         headers: {
           'X-Consumer-ID': interceptClient.consumer,
@@ -187,10 +212,86 @@ class ReserveRoom extends React.Component {
     }
   }
 
-  handleFilterChange(values) {
-    this.props.onChangeFilters(values);
-    this.doFetchRooms(values);
+  componentDidUpdate(prevProps) {
+    // If we just received event data, let's go ahead and update the form values.
+    if (prevProps.eventRecord !== this.props.eventRecord) {
+      this.handleFormChange(this.getEventValues());
+      this.props.onChangeRoom(get(this, 'props.eventRecord.data.relationships.field_room.data.id'));
+    }
   }
+
+  getEventValues = () => {
+    const { formValues, room, event, eventRecord, locationRecord, filters } = this.props;
+
+    const values = pick(formValues, [
+      'date',
+      'start',
+      'end',
+      'meetingStart',
+      'meetingEnd',
+      'attendees',
+      'groupName',
+    ]);
+
+    // If there's an event but it has not populated yet, hold off on default props.
+    if (event && !eventRecord) {
+      return values;
+    }
+
+    const { data } = eventRecord;
+
+    const tz = utils.getUserTimezone();
+    const nowish = utils.roundTo(new Date()).tz(tz);
+    const minTime = '0000';
+    const maxTime = '2345';
+    const { duration } = filters;
+    const startValue = utils.dateFromDrupal(get(data, 'attributes.field_date_time.value'));
+    const endValue = utils.dateFromDrupal(get(data, 'attributes.field_date_time.end_value'));
+
+    if (!values.date) {
+      values.date = moment(startValue)
+        .tz(tz)
+        .startOf('day')
+        .toDate();
+    }
+
+    if (!values.start) {
+      values.start = moment(startValue)
+        .tz(tz)
+        .subtract(ROOM_RESERVATION_MEETING_BUFFER, 'minutes')
+        .format('HHmm');
+    }
+
+    if (!values.end) {
+      values.end = moment(endValue)
+        .tz(tz)
+        .add(ROOM_RESERVATION_MEETING_BUFFER, 'minutes')
+        .format('HHmm');
+    }
+
+    if (!values.meetingStart) {
+      values.meetingStart = moment(startValue)
+        .tz(tz)
+        .format('HHmm');
+    }
+
+    if (!values.meetingEnd) {
+      values.meetingEnd = moment(endValue)
+        .tz(tz)
+        .format('HHmm');
+    }
+
+    if (!values.attendees) {
+      values.attendees =
+        get(data, 'attributes.field_capacity_max') || ROOM_RESERVATION_DEFAULT_ATTENDEES_COUNT;
+    }
+
+    if (!values.groupName) {
+      values.groupName = get(data, 'attributes.title');
+    }
+
+    return values;
+  };
 
   handleFormChange = (formValues) => {
     let room = this.state.room;
@@ -220,31 +321,12 @@ class ReserveRoom extends React.Component {
     });
   }
 
-  doFetchRooms(
-    values = this.props.filters,
-    view = this.props.view,
-    calView = this.props.calView,
-    date = this.props.date,
-  ) {
-    const { fetchRooms } = this.props;
-
-    fetchRooms({
-      // filters: getFilters(values, view, calView, date),
-      include: roomIncludes,
-      // replace: true,
-      headers: {
-        'X-Consumer-ID': interceptClient.consumer,
-      },
-    });
-  }
-
   render() {
     const {
       props,
       handleCalendarNavigate,
       handleViewChange,
       handleCalendarView,
-      handleFilterChange,
       handleFormChange,
     } = this;
     const {
@@ -299,6 +381,7 @@ ReserveRoom.propTypes = {
   fetchLocations: PropTypes.func.isRequired,
   fetchRooms: PropTypes.func.isRequired,
   fetchUser: PropTypes.func.isRequired,
+  fetchEvent: PropTypes.func.isRequired,
   // Props from URL
   onChangeStep: PropTypes.func.isRequired,
   step: PropTypes.number,
@@ -324,7 +407,8 @@ ReserveRoom.defaultProps = {
   event: null,
 };
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state, ownProps) => ({
+  eventRecord: ownProps.event ? select.event(ownProps.event)(state) : null,
   rooms: select.roomsAscending(state),
   roomsLoading: select.recordsAreLoading(c.TYPE_ROOM)(state),
   calendarRooms: [],
@@ -333,6 +417,9 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => ({
   fetchRooms: (options) => {
     dispatch(api[c.TYPE_ROOM].fetchAll(options));
+  },
+  fetchEvent: (options) => {
+    dispatch(api[c.TYPE_EVENT].fetchAll(options));
   },
   fetchLocations: (options) => {
     dispatch(api[c.TYPE_LOCATION].fetchAll(options));

@@ -68,7 +68,6 @@ const sparseFieldsets = {
 function getDate(value, view = 'day', boundary = 'start') {
   const method = boundary === 'start' ? 'startOf' : 'endOf';
   const date = moment.tz(value, utils.getUserTimezone())[method](view);
-console.log(value);
   // The calendar view may include date from the previous or next month
   // so we make sure to include the beginning of the first week and
   // end of the last week.

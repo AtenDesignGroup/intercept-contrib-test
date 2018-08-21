@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import moment from 'moment';
+import get from 'lodash/get';
 import pick from 'lodash/pick';
 
 import interceptClient from 'interceptClient';
@@ -155,78 +156,63 @@ class ReserveRoomStep2 extends React.Component {
     };
   }
 
-  getDefaultValues = ({ formValues, room, location, event, filters }) => {
+  componentDidMount() {
+    this.props.onChange(this.getDefaultValues());
+  }
+
+  getDefaultValues = () => {
+    const { formValues, room, event, eventRecord, locationRecord, filters } = this.props;
+
     const values = pick(formValues, ['date', 'start', 'end', 'meetingStart', 'meetingEnd']);
+
+    // If there's an event but it has not populated yet, hold off on default props.
+    if (event && !eventRecord) {
+      return values;
+    }
+
+    const isStaff = utils.userIsStaff();
+    const nowish = utils.roundTo(new Date()).tz(utils.getUserTimezone());
+
+    // @todo: Take into account location hours.
+    const minTime = '0000';
+    const maxTime = '2345';
+    const { duration } = filters;
 
     if (!values.date) {
       values.date = filters.date || utils.getUserStartOfDay();
     }
 
-  //   values: {
-  //     date: utils.roundTo(new Date()).toDate(),
-  //       start: utils.roundTo(new Date()).toDate(),
-  //         end: utils
-  //           .roundTo(new Date())
-  //           .add(30, 'minutes')
-  //           .toDate(),
-  //           meetingStart: utils.roundTo(new Date()).toDate(),
-  //             meetingEnd: utils
-  //               .roundTo(new Date())
-  //               .add(30, 'minutes')
-  //               .toDate(),
-  // },
-  //   step: 15,
-  //     min: moment(new Date())
-  //       .tz(utils.getUserTimezone())
-  //       .startOf('hour')
-  //       .hour(8)
-  //       .toDate(),
-  //       max: moment(new Date())
-  //         .tz(utils.getUserTimezone())
-  //         .startOf('hour')
-  //         .hour(21)
-  //         .toDate(),
+    if (!values.start) {
+      values.start = nowish.format('HHmm');
+    }
+
+    if (!values.end) {
+      values.end = nowish.add(duration || 30, 'minutes').format('HHmm');
+    }
+
     return values;
   };
 
   render() {
     const {
-      calendarRooms,
-      room,
-      eventRecord,
-      locationRecord,
-      rooms,
-      roomsLoading,
-      filters,
-      view,
-      date,
-      calView,
       onChange,
       formValues,
       onChangeStep,
     } = this.props;
 
-    const todayDate = moment.tz(interceptClient.utils.getUserTimezone()).format('YYYY-MM-DD');
     return (
       <div className="l--sidebar-before">
         <div className="l__main">
           <div className="l__secondary">
             <ReserveRoomDateForm
-              values={this.getDefaultValues({
-                formValues,
-                room,
-                event: eventRecord,
-                location: locationRecord,
-                filters,
-              })}
+              values={formValues}
               onChange={onChange}
               onSubmit={() => onChangeStep(2)}
               min={'0000'}
               max={'2345'}
             />
           </div>
-          <div className="l__primary">
-          </div>
+          <div className="l__primary" />
         </div>
       </div>
     );
@@ -237,37 +223,16 @@ const mapStateToProps = (state, ownProps) => ({
   rooms: select.roomsAscending(state),
   roomsLoading: select.recordsAreLoading(c.TYPE_ROOM)(state),
   locationRecord: ownProps.room ? select.roomLocationRecord(ownProps.room)(state) : null,
-  eventRecord: ownProps.event ? select.event(ownProps.event)(state) : null,
+  // eventRecord: ownProps.event ? select.event(ownProps.event)(state) : null,
   calendarRooms: [],
 });
 
-const mapDispatchToProps = dispatch => ({
-  fetchRooms: (options) => {
-    dispatch(api[c.TYPE_ROOM].fetchAll(options));
-  },
-  fetchLocations: (options) => {
-    dispatch(api[c.TYPE_LOCATION].fetchAll(options));
-  },
-  fetchUser: (options) => {
-    dispatch(api[c.TYPE_USER].fetchAll(options));
-  },
-});
-
 ReserveRoomStep2.propTypes = {
-  // calendarRooms: PropTypes.arrayOf(Object).isRequired,
   rooms: PropTypes.arrayOf(Object).isRequired,
   roomsLoading: PropTypes.bool.isRequired,
-  fetchLocations: PropTypes.func.isRequired,
-  fetchRooms: PropTypes.func.isRequired,
-  fetchUser: PropTypes.func.isRequired,
   onChange: PropTypes.func.isRequired,
-  // calView: PropTypes.string,
-  // date: PropTypes.instanceOf(Date),
-  // view: PropTypes.string,
-  // filters: PropTypes.object,
-  // onChangeCalView: PropTypes.func.isRequired,
-  // onChangeView: PropTypes.func.isRequired,
-  // onChangeDate: PropTypes.func.isRequired,
+  onChangeRoom: PropTypes.func.isRequired,
+  onChangeStep: PropTypes.func.isRequired,
 };
 
 ReserveRoomStep2.defaultProps = {
@@ -279,5 +244,4 @@ ReserveRoomStep2.defaultProps = {
 
 export default connect(
   mapStateToProps,
-  mapDispatchToProps,
 )(ReserveRoomStep2);

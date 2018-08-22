@@ -38,6 +38,7 @@ function intercept_core_page_attachments(array &$attachments) {
 function intercept_core_entity_type_build(array &$entity_types) {
   /** @var $entity_types \Drupal\Core\Entity\EntityTypeInterface[] */
   $entity_types['profile']->setFormClass('customer', '\Drupal\intercept_core\Form\ProfileForm');
+  $entity_types['user']->setFormClass('customer', '\Drupal\intercept_core\Form\UserProfileForm');
 }
 
 /**
@@ -51,16 +52,6 @@ function intercept_core_menu_links_discovered_alter(&$links) {
 }
 
 /**
- * Implements hook_local_tasks_alter().
- */
-function intercept_core_local_tasks_alter(&$local_tasks) {
-  // Change the title of the profile customer user tab.
-  if (isset($local_tasks['entity.profile.user_profile_form:profile.type.customer'])) {
-    $local_tasks['entity.profile.user_profile_form:profile.type.customer']['title'] = t('Settings');
-  }
-}
-
-/**
  * Perform alterations before an entity form is included in the IEF widget.
  *
  * @param $entity_form
@@ -69,6 +60,9 @@ function intercept_core_local_tasks_alter(&$local_tasks) {
  *   The form state of the parent form.
  */
 function intercept_core_inline_entity_form_entity_form_alter(&$entity_form, &$form_state) {
+  if ($entity_form['#form_id'] == 'user_customer_form' && $entity_form['#entity_type'] == 'profile') {
+    $form_state->getFormObject()->alterProfileForm($entity_form, $form_state);
+  }
   if ($entity_form['#entity_type'] == 'media') {
     // Hide the revision log message field on all media forms.
     $entity_form['revision_log_message']['#access'] = FALSE;
@@ -81,17 +75,15 @@ function intercept_core_inline_entity_form_entity_form_alter(&$entity_form, &$fo
 function intercept_core_entity_extra_field_info() {
   $extra = [];
 
-  $extra['profile']['customer']['form']['card_number'] = [
-    'label' => t('Card number'),
-    'description' => t('ILS card number'),
-    'weight' => 10,
+  $extra['user']['user']['form']['customer_profile'] = [
+    'label' => t('Customer profile form'),
+    'description' => t('An inline entity form for the customer profile entity.'),
     'visible' => FALSE,
   ];
 
   $extra['profile']['customer']['form']['pin'] = [
     'label' => t('Pin'),
     'description' => t('ILS pin'),
-    'weight' => 15,
     'visible' => FALSE,
   ];
 

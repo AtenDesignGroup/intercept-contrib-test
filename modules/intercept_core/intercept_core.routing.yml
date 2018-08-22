@@ -26,9 +26,18 @@ intercept_core.account.settings:
   defaults:
     _controller: '\Drupal\intercept_core\Controller\UserAccount::userRedirect'
     _title: 'Settings'
-    route_name: 'entity.profile.type.user_profile_form'
+    route_name: 'intercept_core.user_profile_form'
   requirements:
     _user_is_logged_in: 'TRUE'
+
+intercept_core.user_profile_form:
+  path: '/user/{user}/settings'
+  defaults:
+    _entity_form: 'user.customer'
+    _title_callback: 'Drupal\user\Controller\UserController::userTitle'
+  requirements:
+    user: '\d+'
+    _entity_access: 'user.update'
 
 intercept_core.admin_permissions:
   path: '/admin/config/intercept/permissions'

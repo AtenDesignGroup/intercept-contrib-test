@@ -5,6 +5,11 @@ namespace Drupal\intercept_core\Form;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\profile\Form\ProfileForm as CoreProfileForm;
 
+/**
+ * @deprecated
+ *
+ * TODO: Delete.
+ */
 class ProfileForm extends CoreProfileForm {
 
   /**

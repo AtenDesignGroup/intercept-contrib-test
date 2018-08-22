@@ -58,14 +58,18 @@ class Customer implements EventSubscriberInterface {
    * @param RouteBuildEvent $event
    */
   public function routeAlter(RouteBuildEvent $event) {
-    $collection = $event->getRouteCollection();
-    if ($profile_route = $collection->get('entity.profile.type.user_profile_form')) {
-      $profile_route
-        ->setDefault('_controller', '\Drupal\intercept_core\Controller\ProfileController::userProfileForm')
-        ->setDefault('_title_callback', '\Drupal\intercept_core\Controller\ProfileController::addPageTitle')
-        ->setPath('/user/{user}/settings')
-      ->setDefault('profile_type', 'customer');
-    }
+    /**
+     * This is disabled because the settings page is now a user based form.
+     * TODO: Eithe remove this, or see if we need it to edit the permissions of the core profile form.
+     */
+//    $collection = $event->getRouteCollection();
+//    if ($profile_route = $collection->get('entity.profile.type.user_profile_form')) {
+//      $profile_route
+//        ->setDefault('_controller', '\Drupal\intercept_core\Controller\ProfileController::userProfileForm')
+//        ->setDefault('_title_callback', '\Drupal\intercept_core\Controller\ProfileController::addPageTitle')
+//        ->setPath('/user/{user}/settings')
+//      ->setDefault('profile_type', 'customer');
+//    }
   }
 
 }

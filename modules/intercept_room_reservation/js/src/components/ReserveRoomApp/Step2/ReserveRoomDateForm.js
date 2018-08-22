@@ -343,8 +343,8 @@ ReserveRoomDateForm.defaultProps = {
     meetingEnd: null,
   },
   step: 15,
-  min: '0000',
-  max: '2200',
+  min: null,
+  max: null,
 };
 
 const mapStateToProps = (state, ownProps) => ({});

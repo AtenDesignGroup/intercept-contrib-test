@@ -1,12 +1,15 @@
 import { createSelector } from 'reselect';
 import moment from 'moment';
+import compact from 'lodash/compact';
 import forEach from 'lodash/forEach';
 import get from 'lodash/get';
 import find from 'lodash/find';
+import flatten from 'lodash/flatten';
 import groupBy from 'lodash/groupBy';
 import map from 'lodash/map';
 import mapValues from 'lodash/mapValues';
 import cloneDeep from 'lodash/cloneDeep';
+import padStart from 'lodash/padStart';
 import pickBy from 'lodash/pickBy';
 import sortBy from 'lodash/sortBy';
 import uniqBy from 'lodash/uniqBy';
@@ -493,6 +496,36 @@ export const locationHoursOnDate = (id, date) => (state) => {
   return null;
 };
 
+// Gets the earliest and lates open hours.
+// Useful for setting defaults.
+export const locationsOpenHoursLimit = createSelector(locations, (locs) => {
+  const hours = flatten(compact(map(locs, loc => get(loc, 'data.attributes.field_location_hours'))));
+  if (hours.length <= 0) {
+    return {
+      min: '0900',
+      max: '2100',
+    };
+  }
+  return {
+    min: padStart(sortBy(hours, 'starthours').shift().starthours, 4, '0'),
+    max: padStart(sortBy(hours, 'endhours').pop().endhours, 4, '0'),
+  };
+});
+
+export const locationOpenHours = (id, date) => createSelector(
+  location(id),
+  (loc) => {
+    const hours = get(loc, 'data.attributes.field_location_hours');
+    const day = parseInt(moment(date).tz(utils.getUserTimezone()).format('d'), 10);
+    const dayHours = find(hours, value => value.day === day);
+
+    return dayHours ? {
+      min: padStart(dayHours.starthours, 4, '0'),
+      max: padStart(dayHours.endhours, 4, '0'),
+    } : null;
+  }
+);
+
 //
 // Rooms
 //
@@ -525,9 +558,9 @@ export const roomLocationLabel = id => (state) => {
   return get(loc, 'data.attributes.title') || '';
 };
 
-export const roomLocationHours = id => (state) => {
-  const loc = location(roomLocation(id)(state))(state);
-  return get(loc, 'data.attributes.field_location_hours') || '';
+export const roomLocationHours = (id, date) => (state) => {
+  const loc = roomLocation(id)(state);
+  return locationOpenHours(loc, date)(state);
 };
 
 export const roomReservation = id => records(c.TYPE_ROOM_RESERVATION, id);

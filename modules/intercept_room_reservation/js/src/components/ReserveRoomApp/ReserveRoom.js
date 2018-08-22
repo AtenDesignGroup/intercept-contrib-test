@@ -411,6 +411,7 @@ const mapStateToProps = (state, ownProps) => ({
   eventRecord: ownProps.event ? select.event(ownProps.event)(state) : null,
   rooms: select.roomsAscending(state),
   roomsLoading: select.recordsAreLoading(c.TYPE_ROOM)(state),
+  openHoursLimit: select.locationsOpenHoursLimit(state),
   calendarRooms: [],
 });
 

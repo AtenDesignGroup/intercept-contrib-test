@@ -174,8 +174,6 @@ class ReserveRoomStep2 extends React.Component {
     const nowish = utils.roundTo(new Date()).tz(utils.getUserTimezone());
 
     // @todo: Take into account location hours.
-    const minTime = '0000';
-    const maxTime = '2345';
     const { duration } = filters;
 
     if (!values.date) {
@@ -194,11 +192,17 @@ class ReserveRoomStep2 extends React.Component {
   };
 
   render() {
-    const {
-      onChange,
-      formValues,
-      onChangeStep,
-    } = this.props;
+    const { onChange, formValues, onChangeStep, hours } = this.props;
+
+    const limits = utils.userIsStaff()
+      ? {
+        min: '0000',
+        max: '2345',
+      } : hours ? hours : {
+        min: null,
+        max: null,
+      };
+
 
     return (
       <div className="l--sidebar-before">
@@ -208,8 +212,8 @@ class ReserveRoomStep2 extends React.Component {
               values={formValues}
               onChange={onChange}
               onSubmit={() => onChangeStep(2)}
-              min={'0000'}
-              max={'2345'}
+              min={limits.min}
+              max={limits.max}
             />
           </div>
           <div className="l__primary" />
@@ -219,13 +223,21 @@ class ReserveRoomStep2 extends React.Component {
   }
 }
 
-const mapStateToProps = (state, ownProps) => ({
-  rooms: select.roomsAscending(state),
-  roomsLoading: select.recordsAreLoading(c.TYPE_ROOM)(state),
-  locationRecord: ownProps.room ? select.roomLocationRecord(ownProps.room)(state) : null,
-  // eventRecord: ownProps.event ? select.event(ownProps.event)(state) : null,
-  calendarRooms: [],
-});
+const mapStateToProps = (state, ownProps) => {
+  const hours =
+    ownProps.formValues.date && ownProps.room
+      ? select.roomLocationHours(ownProps.room, ownProps.formValues.date)(state)
+      : select.locationsOpenHoursLimit(state);
+
+  return {
+    rooms: select.roomsAscending(state),
+    roomsLoading: select.recordsAreLoading(c.TYPE_ROOM)(state),
+    locationRecord: ownProps.room ? select.roomLocationRecord(ownProps.room)(state) : null,
+    // eventRecord: ownProps.event ? select.event(ownProps.event)(state) : null,
+    hours,
+    calendarRooms: [],
+  };
+};
 
 ReserveRoomStep2.propTypes = {
   rooms: PropTypes.arrayOf(Object).isRequired,
@@ -233,6 +245,7 @@ ReserveRoomStep2.propTypes = {
   onChange: PropTypes.func.isRequired,
   onChangeRoom: PropTypes.func.isRequired,
   onChangeStep: PropTypes.func.isRequired,
+  hours: PropTypes.object,
 };
 
 ReserveRoomStep2.defaultProps = {
@@ -240,8 +253,7 @@ ReserveRoomStep2.defaultProps = {
   calView: 'month',
   date: new Date(),
   filters: {},
+  hours: null,
 };
 
-export default connect(
-  mapStateToProps,
-)(ReserveRoomStep2);
+export default connect(mapStateToProps)(ReserveRoomStep2);

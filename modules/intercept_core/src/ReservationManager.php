@@ -58,9 +58,10 @@ class ReservationManager implements ReservationManagerInterface {
 
     // Now check open space between (start time or last reservation) and end time.
     $date = empty($reservations) ? $this->getDrupalDate($params['start']) : end($reservations)->getEndDate();
-    $int = $date->diff($this->getDrupalDate($params['end']));
-    $total = $int->h * 60 + $int->i;
-    if ($total >= $params['duration']) {
+    // Calculate (start time or last reservation) + duration.
+    $slot_start = $date->add(new \DateInterval('PT' . $params['duration'] . 'M'));
+    $slot_end = $this->getDrupalDate($params['end']);
+    if ($slot_end >= $slot_start) {
       $has_openings = TRUE;
     }
     return !$has_openings;

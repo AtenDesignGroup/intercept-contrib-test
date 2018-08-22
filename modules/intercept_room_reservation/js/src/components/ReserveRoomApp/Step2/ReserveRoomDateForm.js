@@ -205,8 +205,14 @@ class ReserveRoomDateForm extends PureComponent {
 
   render() {
     const { values, min, max, step, onSubmit } = this.props;
+    const isClosed = !min || !max;
     // const minValue = matchDate(min, values.date);
     // const maxValue = matchDate(max, values.date);
+    let validationErrors = {};
+
+    if (isClosed) {
+      validationErrors[c.DATE] = 'Location is closed';
+    }
 
     return (
       <div className="form">
@@ -216,6 +222,7 @@ class ReserveRoomDateForm extends PureComponent {
           onValidSubmit={this.onOpenDialog}
           onValid={this.enableButton}
           onInvalid={this.disableButton}
+          validationErrors={validationErrors}
         >
           <div className="l--subsection">
             <h4 className="section-title--secondary">Choose a Time</h4>
@@ -241,6 +248,7 @@ class ReserveRoomDateForm extends PureComponent {
               min={min}
               max={max}
               step={step}
+              disabled={isClosed}
             />
             <div className="input-group--subgroup">
               <SelectTime
@@ -262,6 +270,7 @@ class ReserveRoomDateForm extends PureComponent {
                 min={values.start}
                 max={values.end}
                 step={step}
+                disabled={isClosed}
               />
               <SelectTime
                 label="Meeting End Time"
@@ -281,6 +290,7 @@ class ReserveRoomDateForm extends PureComponent {
                 min={values.start}
                 max={values.end}
                 step={step}
+                disabled={isClosed}
               />
             </div>
             <SelectTime
@@ -301,6 +311,7 @@ class ReserveRoomDateForm extends PureComponent {
               min={min}
               max={max}
               step={step}
+              disabled={isClosed}
             />
           </div>
 

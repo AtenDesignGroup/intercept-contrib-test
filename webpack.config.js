@@ -16,6 +16,7 @@ const entries = {
   intercept_room_reservation: [
     'reserveRoom',
     'roomReservationList',
+    'roomReservationActionButton',
   ],
   intercept_equipment: [
     'reserveEquipment',

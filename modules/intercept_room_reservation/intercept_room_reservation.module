@@ -169,5 +169,11 @@ function intercept_room_reservation_room_reservation_view(array &$build, RoomRes
       '@count' => $count,
     ]) : '',
    ];
-
+  $build['action_button'] = [
+    '#markup' => '<div class="js--room-reservation-action" data-reservation-uuid="' . $room_reservation->uuid() . '" data-status="' . $room_reservation->field_status->value . '" >' . $room_reservation->field_status->value . '</div>',
+    // '#markup' => '<div class="event-register-button js--event-register-button" data-event-uuid="' . $entity->uuid() . '"><div class="js--room-reservation-action" data-room-uuid="{{room.uuid.value}}" data-status="{{room_reservation.field_status.value}}" >',
+    '#attached' => [
+      'library' => ['intercept_room_reservation/roomReservationActionButton'],
+      ]
+    ];
 }

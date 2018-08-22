@@ -50,6 +50,7 @@ export const getDateFromTime = (time, date) =>
     .tz(date, getUserTimezone())
     .hour(time.slice(0, 2))
     .minute(time.slice(2))
+    .startOf('minute')
     .toDate();
 
 // Normalize a date object to a single day. Used to compare days for different dates.

@@ -7,7 +7,7 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import { CSSTransition } from 'react-transition-group';
 
 const LoadingIndicator = (props) => {
-  const { loading, label } = props;
+  const { loading, label, size } = props;
 
   return (
     <CSSTransition
@@ -16,7 +16,7 @@ const LoadingIndicator = (props) => {
       classNames="loading-indicator"
     >
       <div className="loading-indicator">
-        <CircularProgress size={40} /> <span className="loading-indicator__label">{label}</span>
+        <CircularProgress size={size} /> <span className="loading-indicator__label">{label}</span>
       </div>
     </CSSTransition>
   );
@@ -25,10 +25,12 @@ const LoadingIndicator = (props) => {
 LoadingIndicator.propTypes = {
   loading: PropTypes.bool.isRequired,
   label: PropTypes.string,
+  size: PropTypes.number,
 };
 
 LoadingIndicator.defaultProps = {
   label: 'Loading',
+  size: 40,
 };
 
 export default LoadingIndicator;

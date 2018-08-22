@@ -67,8 +67,11 @@ class SelectTime extends React.Component {
    */
   static getOptions(min, max, step) {
     const options = [];
-    const minDate = moment.tz(min, 'HHmm', utils.getUserTimezone()).toDate();
-    const maxDate = moment.tz(max, 'HHmm', utils.getUserTimezone()).toDate();
+    if (!min || !max) {
+      return options;
+    }
+    const minDate = utils.getDateFromTime(min);
+    const maxDate = utils.getDateFromTime(max);
     const i = utils.roundTo(minDate, step).clone();
 
     // Abort if the min time is after the max time to avoid an infinite loop.
@@ -76,13 +79,25 @@ class SelectTime extends React.Component {
       return options;
     }
     do {
+      const key = i.format('HHmm');
       const value = utils.getTimeDisplay(i);
-      options.push({
-        key: i.format('HHmm'),
-        value,
-      });
+
+      if (key === '0000' && i > minDate) {
+        options.push({
+          key: '2400',
+          value: 'Midnight',
+        });
+      }
+      else {
+        options.push({
+          key,
+          value,
+        });
+      }
+
       i.add(step, 'minutes');
     } while (i.toDate() <= maxDate);
+
     return options;
   }
 
@@ -109,7 +124,7 @@ class SelectTime extends React.Component {
   };
 
   render() {
-    const { min, max, step, label } = this.props;
+    const { min, max, step, label, disabled } = this.props;
     const value = this.props.getValue();
     const options = this.options(min, max, step);
     const checkboxId = id => `select-filter--${id}`;
@@ -137,6 +152,7 @@ class SelectTime extends React.Component {
             MenuProps={MenuProps}
             error={!this.props.isValid()}
             required={this.props.required}
+            disabled={disabled}
           >
             {options.map(option => (
               <MenuItem key={option.key} value={option.key} className="select-filter__menu-item">
@@ -165,6 +181,7 @@ SelectTime.propTypes = {
   max: PropTypes.string,
   step: PropTypes.number,
   onChange: PropTypes.func.isRequired,
+  disabel: PropTypes.bool,
 };
 
 SelectTime.defaultProps = {
@@ -174,6 +191,7 @@ SelectTime.defaultProps = {
   min: '0000',
   max: '1159',
   step: 15,
+  disabled: false,
 };
 
 export default withStyles(styles, { withTheme: true })(withFormsy(SelectTime));

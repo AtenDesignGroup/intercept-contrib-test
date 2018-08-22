@@ -1,7 +1,7 @@
 manageRoomReservations:
   js:
     js/dist/roomReservationList.js:
-      preprocess: false
+      preprocess: true
 
   dependencies:
     - core/drupalSettings
@@ -15,7 +15,7 @@ manageRoomReservations:
 reserveRoom:
   js:
     js/dist/reserveRoom.js:
-      preprocess: false
+      preprocess: true
 
   dependencies:
     - core/drupalSettings
@@ -27,3 +27,17 @@ reserveRoom:
     - intercept_core/interceptTheme
     - intercept_core/bigCalendar
     - intercept_core/materialIcons
+
+roomReservationActionButton:
+  js:
+    js/dist/roomReservationActionButton.js:
+      preprocess: false
+
+  dependencies:
+    - core/drupalSettings
+    - intercept_core/babelHelpers
+    - intercept_core/react
+    - intercept_core/moment
+    - intercept_core/interceptClient
+    - intercept_core/interceptCommon
+    - intercept_core/interceptTheme

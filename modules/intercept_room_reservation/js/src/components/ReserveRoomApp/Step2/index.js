@@ -17,106 +17,8 @@ import Slide from '@material-ui/core/Slide';
 import ReserveRoomDateForm from './ReserveRoomDateForm';
 // import utils from '../../../../../../../node_modules/formsy-react/lib/utils';
 
-const { constants, api, select, utils } = interceptClient;
+const { constants, select, utils } = interceptClient;
 const c = constants;
-const roomIncludes = ['image_primary', 'image_primary.field_media_image'];
-
-function getDateSpan(value, view = 'day') {
-  const start = moment(value).startOf(view);
-  const end = moment(value).endOf(view);
-
-  // The calendar view may include date from the previous or next month
-  // so we make sure to include the beginning of the first week and
-  // end of the last week.
-  if (view === 'month') {
-    start.startOf('week');
-    end.endOf('week');
-  }
-  return [start.toISOString(), end.toISOString()];
-}
-
-function getPublishedFilters(value = true) {
-  return {
-    published: {
-      path: 'status',
-      value: value ? '1' : '0',
-    },
-  };
-}
-
-function getDateFilters(values, view = 'list', calView = 'day', date = new Date()) {
-  const path = 'field_date_time.value';
-  let operator = '>';
-  let value = moment(new Date())
-    .subtract(1, 'day')
-    .endOf('day')
-    .toISOString();
-
-  // Handler Calendar view.
-  // The date should be determined by the date and calendar view type
-  // rather than the selected date value.
-  if (view === 'calendar') {
-    value = getDateSpan(date, calView);
-    operator = 'BETWEEN';
-  }
-  else if (values.date) {
-    value = getDateSpan(values.date, 'day');
-    operator = 'BETWEEN';
-  }
-
-  return {
-    data: {
-      path,
-      value,
-      operator,
-    },
-  };
-}
-
-function getFilters(values, view = 'list', calView = 'day', date = new Date()) {
-  const filter = {
-    ...getPublishedFilters(true),
-  };
-
-  if (!values) {
-    return filter;
-  }
-
-  const types = [
-    { id: c.TYPE_ROOM_TYPE, path: 'field_room_type.uuid', conjunction: 'OR' },
-    { id: c.TYPE_LOCATION, path: 'field_location.uuid', conjunction: 'OR' },
-    // { id: c.TYPE_AUDIENCE, path: 'field_event_audience.uuid', conjunction: 'OR' },
-  ];
-
-  types.forEach((type) => {
-    if (values[type.id] && values[type.id].length > 0) {
-      if (type.conjunction === 'AND') {
-        const group = `${type.id}-group`;
-        filter[group] = {
-          type: 'group',
-          conjunction: type.conjunction,
-        };
-        values[type.id].forEach((element, key) => {
-          const id = `${type.id}-${key}`;
-          filter[id] = {
-            path: type.path,
-            value: element,
-            memberOf: group,
-          };
-        });
-      }
-      else {
-        filter[type.id] = {
-          path: type.path,
-          value: values[type.id],
-          operator: 'IN',
-        };
-      }
-    }
-  });
-
-  return filter;
-}
 
 class ReserveRoomStep2 extends React.Component {
   constructor(props) {
@@ -197,7 +99,7 @@ class ReserveRoomStep2 extends React.Component {
     const limits = utils.userIsStaff()
       ? {
         min: '0000',
-        max: '2345',
+        max: '2400',
       } : hours ? hours : {
         min: null,
         max: null,
@@ -226,7 +128,9 @@ class ReserveRoomStep2 extends React.Component {
 const mapStateToProps = (state, ownProps) => {
   const hours =
     ownProps.formValues.date && ownProps.room
+      // Open hours for current day.
       ? select.roomLocationHours(ownProps.room, ownProps.formValues.date)(state)
+      // Default open hours.
       : select.locationsOpenHoursLimit(state);
 
   return {

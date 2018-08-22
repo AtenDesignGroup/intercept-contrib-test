@@ -97,9 +97,11 @@ export const recordIds = selector =>
   createSelector(selector, items => map(items, item => get(item, 'data.id')));
 
 export const recordIsLoading = (type, id) =>
-  createSelector(record(getIdentifier(type, id)), item => item.state.syncing);
+  createSelector(
+    record(getIdentifier(type, id)),
+    item => !!get(item, 'state.syncing'));
 
-export const recordsAreLoading = resource => state => state[resource].syncing;
+export const recordsAreLoading = type => state => state[type].syncing;
 
 export const recordLabel = identifier =>
   createSelector(
@@ -499,7 +501,9 @@ export const locationHoursOnDate = (id, date) => (state) => {
 // Gets the earliest and lates open hours.
 // Useful for setting defaults.
 export const locationsOpenHoursLimit = createSelector(locations, (locs) => {
-  const hours = flatten(compact(map(locs, loc => get(loc, 'data.attributes.field_location_hours'))));
+  const hours = flatten(
+    compact(map(locs, loc => get(loc, 'data.attributes.field_location_hours'))),
+  );
   if (hours.length <= 0) {
     return {
       min: '0900',
@@ -512,19 +516,24 @@ export const locationsOpenHoursLimit = createSelector(locations, (locs) => {
   };
 });
 
-export const locationOpenHours = (id, date) => createSelector(
-  location(id),
-  (loc) => {
+export const locationOpenHours = (id, date) =>
+  createSelector(location(id), (loc) => {
     const hours = get(loc, 'data.attributes.field_location_hours');
-    const day = parseInt(moment(date).tz(utils.getUserTimezone()).format('d'), 10);
+    const day = parseInt(
+      moment(date)
+        .tz(utils.getUserTimezone())
+        .format('d'),
+      10,
+    );
     const dayHours = find(hours, value => value.day === day);
 
-    return dayHours ? {
-      min: padStart(dayHours.starthours, 4, '0'),
-      max: padStart(dayHours.endhours, 4, '0'),
-    } : null;
-  }
-);
+    return dayHours
+      ? {
+        min: padStart(dayHours.starthours, 4, '0'),
+        max: padStart(dayHours.endhours, 4, '0'),
+      }
+      : null;
+  });
 
 //
 // Rooms
@@ -535,13 +544,14 @@ export const roomsArray = state => map(state[c.TYPE_ROOM].items, item => item);
 export const roomsOptions = keyValues(rooms, 'data.attributes.title');
 export const roomsLabels = peek(rooms, 'data.attributes.title');
 export const roomsAscending = createSelector(roomsArray, items =>
-  items.sort((a, b) =>
-    b.data.attributes.title === a.data.attributes.title
-      ? 0
-      : b.data.attributes.title > a.data.attributes.title
-        ? -1
-        : 1
-  )
+  items.sort(
+    (a, b) =>
+      (b.data.attributes.title === a.data.attributes.title
+        ? 0
+        : b.data.attributes.title > a.data.attributes.title
+          ? -1
+          : 1),
+  ),
 );
 
 // Get the room's title
@@ -563,8 +573,48 @@ export const roomLocationHours = (id, date) => (state) => {
   return locationOpenHours(loc, date)(state);
 };
 
+function getReservationStatusText(resource) {
+  const status = get(resource, 'data.attributes.field_status');
+
+  switch (status) {
+    case 'declined':
+      return 'Declined';
+    case 'approved':
+      return 'Approved';
+    case 'cancelled':
+      return 'Cancelled';
+    case 'requested':
+      return 'Awaiting Approval';
+    default:
+      return null;
+  }
+}
+
+function getReservationButtonText(resource) {
+  const status = get(resource, 'data.attributes.field_status');
+
+  switch (status) {
+    case 'declined':
+      return 'Rerequest';
+    case 'approved':
+      return 'Cancel';
+    case 'cancelled':
+      return 'Cancelled';
+    case 'requested':
+      return 'Cancel';
+    default:
+      return null;
+  }
+}
+
 export const roomReservation = id => records(c.TYPE_ROOM_RESERVATION, id);
 export const roomReservations = records(c.TYPE_ROOM_RESERVATION);
+
+export const reservationStatusText = (id, type) =>
+  createSelector(record({ id, type }), getReservationStatusText);
+
+export const reservationButtonText = (id, type) =>
+  createSelector(record({ id, type }), getReservationButtonText);
 
 //
 // Tag

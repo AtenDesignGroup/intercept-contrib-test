@@ -28,8 +28,6 @@ function RoomDetail(props) {
     return null;
   }
 
-  console.log(resource);
-
   const capacityMinValue = get(resource, 'attributes.field_capacity_min');
   const capacityMin = capacityMinValue ? (
     <FieldInline

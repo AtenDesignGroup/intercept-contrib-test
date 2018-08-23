@@ -10,8 +10,12 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 
 class UserAccount extends ControllerBase {
 
-  public function userRedirect($route_name) {
-    return $this->redirect($route_name, ['user' => $this->currentUser()->id()]);
+  public function userRedirect($route_name, \Symfony\Component\HttpFoundation\Request $request) {
+    $params = \Drupal::service('current_route_match')->getParameters();
+    $params->add(['user' => $this->currentUser()->id()]);
+    $params->remove('route_name');
+
+    return $this->redirect($route_name, $params->all());
   }
 
   public function customerRegisterApi(\Symfony\Component\HttpFoundation\Request $request) {

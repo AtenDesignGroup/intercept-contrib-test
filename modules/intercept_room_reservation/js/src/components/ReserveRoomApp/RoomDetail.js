@@ -55,6 +55,15 @@ function RoomDetail(props) {
     </div>
   ) : null;
 
+  const bodyValue = get(resource, 'attributes.field_text_content.processed');
+  const createBodyMarkup = () => ({ __html: bodyValue });
+  const body = bodyValue ? (
+    <div className="field field--inline">
+      <strong className="field__label">More about this room</strong>
+      <div className="field__items" dangerouslySetInnerHTML={createBodyMarkup()} />
+    </div>
+  ) : null;
+
   const equipmentValue = get(resource, 'attributes.field_room_standard_equipment');
   const equipment = equipmentValue ? (
     <FieldInline
@@ -74,12 +83,13 @@ function RoomDetail(props) {
         subtitle={get(resource, 'relationships.field_room_type.attributes.name')}
         title={resource.attributes.title}
         label={resource.attributes.field_must_register ? 'Registration Required' : null}
-        body={resource.attributes['field_text_teaser'].value}
+        body={get(resource, 'attributes.field_text_intro.value')}
       >
         {capacityMin}
         {capacityMax}
         {equipment}
         {fees}
+        {body}
       </Summary>
     </div>
   );

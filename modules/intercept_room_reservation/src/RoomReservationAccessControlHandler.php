@@ -43,4 +43,17 @@ class RoomReservationAccessControlHandler extends EntityAccessControlHandler {
     return AccessResult::allowedIfHasPermission($account, 'create room_reservation');
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  protected function checkEntityOwnerPermissions(EntityInterface $entity, $operation, AccountInterface $account) {
+    $result = parent::checkEntityOwnerPermissions($entity, $operation, $account);
+    if ($operation == 'view' && $result->isNeutral() && $account->id() == $entity->getOwnerId()) {
+      $permissions = [
+        "view own {$entity->getEntityTypeId()}",
+      ];
+      $result = AccessResult::allowedIfHasPermissions($account, $permissions, 'OR');
+    }
+    return $result;
+  }
 }

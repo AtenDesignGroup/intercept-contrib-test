@@ -13,8 +13,16 @@ const FieldInline = (props) => {
   }
 
   const valueList = [].concat(values).map(
-    value =>
-      (value.href ? (
+    (value) => {
+      if (value.html) {
+        return (<div
+          key={value.id}
+          className="field__option"
+          dangerouslySetInnerHTML={value.html}
+        />);
+      }
+
+      return (value.href ? (
         <a key={value.id} href={value.href} className="field__option" onClick={onClick}>
           {value.name}
         </a>
@@ -22,7 +30,8 @@ const FieldInline = (props) => {
         <span key={value.id} className="field__option" onClick={onClick}>
           {value.name}
         </span>
-      )),
+      ));
+    }
   );
 
   return (

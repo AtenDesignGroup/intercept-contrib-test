@@ -84,6 +84,10 @@ const urlPropsQueryConfig = {
   step: { type: UrlQueryParamTypes.number },
   // Selected Room
   room: { type: UrlQueryParamTypes.string },
+  // Room Detail
+  roomDetail: { type: UrlQueryParamTypes.string },
+  // Detail View
+  detail: { type: UrlQueryParamTypes.boolean },
   // Event
   event: { type: UrlQueryParamTypes.string },
   filters: {

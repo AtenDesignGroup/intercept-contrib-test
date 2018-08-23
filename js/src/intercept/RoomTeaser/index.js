@@ -44,7 +44,7 @@ class RoomTeaser extends PureComponent {
       <Teaser
         key={id}
         uuid={id}
-        modifiers={[image ? 'with-image' : 'without-image']}
+        modifiers={['narrow', image ? 'with-image' : 'without-image']}
         footer={footer}
         image={image}
         supertitle={get(room, 'relationships.field_location.attributes.title')}

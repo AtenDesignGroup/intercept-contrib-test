@@ -455,6 +455,22 @@ class ReserveRoomStep1 extends React.Component {
     return rooms.filter(this.onlyAvailable(availability));
   };
 
+  renderDetailButton = (roomProps) => {
+    const { onViewRoomDetail } = this.props;
+
+    return (
+      <Button
+        variant={'outlined'}
+        size="small"
+        color="primary"
+        className={'action-button__button'}
+        onClick={() => onViewRoomDetail(roomProps.uuid)}
+      >
+        {'View Details'}
+      </Button>
+    );
+  };
+
   render() {
     const { props, handleFilterChange, handleRoomSelect } = this;
     const { rooms, roomsLoading, filters } = props;
@@ -498,6 +514,7 @@ class ReserveRoomStep1 extends React.Component {
           >
             {'Reserve'}
           </Button>
+          {this.renderDetailButton(roomProps)}
           {status}
         </div>
       );
@@ -514,7 +531,8 @@ class ReserveRoomStep1 extends React.Component {
             <RoomList
               rooms={this.showAvailable(rooms)}
               teaserProps={{ footer: roomFooter }}
-              loading={roomsLoading} />
+              loading={roomsLoading}
+            />
             {(this.state.room.previous || this.state.room.current) && (
               <Slide
                 direction="up"
@@ -557,6 +575,7 @@ ReserveRoomStep1.propTypes = {
   fetchLocations: PropTypes.func.isRequired,
   fetchRooms: PropTypes.func.isRequired,
   fetchUser: PropTypes.func.isRequired,
+  onViewRoomDetail: PropTypes.func.isRequired,
 };
 
 ReserveRoomStep1.defaultProps = {

@@ -22,6 +22,7 @@ import ReserveRoomStepper from './ReserveRoomStepper';
 import ReserveRoomStep1 from './Step1';
 import ReserveRoomStep2 from './Step2';
 import ReserveRoomStep3 from './Step3';
+import RoomDetailDialog from './RoomDetailDialog';
 
 const { constants, api, select, utils } = interceptClient;
 const c = constants;
@@ -138,7 +139,6 @@ function getFilters(values, view = 'list', calView = 'day', date = new Date()) {
 class ReserveRoom extends React.Component {
   constructor(props) {
     super(props);
-    const now = utils.getUserTimeNow();
 
     this.state = {
       // date: props.date,
@@ -149,12 +149,6 @@ class ReserveRoom extends React.Component {
         date: null,
         start: null,
         end: null,
-        // date: utils.roundTo(now).toDate(),
-        // start: utils.roundTo(now).toDate(),
-        // end: utils
-        //   .roundTo(now)
-        //   .add(30, 'minutes')
-        //   .toDate(),
         attendees: 1,
         groupName: '',
         meeting: false,
@@ -323,33 +317,29 @@ class ReserveRoom extends React.Component {
 
   render() {
     const {
-      props,
-      handleCalendarNavigate,
-      handleViewChange,
-      handleCalendarView,
-      handleFormChange,
-    } = this;
-    const {
-      calendarRooms,
-      rooms,
-      roomsLoading,
-      filters,
-      view,
-      date,
-      calView,
       step,
       onChangeStep,
-    } = props;
+      detail,
+      roomDetail,
+      onChangeDetail,
+      onChangeRoomDetail,
+    } = this.props;
 
     const steps = [
-      <ReserveRoomStep1 {...props} />,
+      <ReserveRoomStep1
+        onViewRoomDetail={(id) => {
+          onChangeRoomDetail(id);
+          onChangeDetail(true);
+        }}
+        {...this.props}
+      />,
       <ReserveRoomStep2
-        {...props}
+        {...this.props}
         onChange={this.handleFormChange}
         formValues={this.state.formValues}
       />,
       <ReserveRoomStep3
-        {...props}
+        {...this.props}
         onChange={this.handleFormChange}
         formValues={this.state.formValues}
       />,
@@ -360,7 +350,7 @@ class ReserveRoom extends React.Component {
         <header className="l__header l--section">
           <h1 className="page-title">Reserve a Room</h1>
           <ReserveRoomStepper
-            {...props}
+            {...this.props}
             step={step}
             onChangeStep={onChangeStep}
             values={this.state.formValues}
@@ -369,13 +359,19 @@ class ReserveRoom extends React.Component {
         <div className="l__main">
           <div className="l__primary">{steps[step]}</div>
         </div>
+        <RoomDetailDialog
+          open={!!(detail && roomDetail)}
+          onClose={() => {
+            onChangeDetail(false);
+          }}
+          id={roomDetail}
+        />
       </div>
     );
   }
 }
 
 ReserveRoom.propTypes = {
-  // calendarRooms: PropTypes.arrayOf(Object).isRequired,
   rooms: PropTypes.arrayOf(Object).isRequired,
   roomsLoading: PropTypes.bool.isRequired,
   fetchLocations: PropTypes.func.isRequired,
@@ -383,18 +379,16 @@ ReserveRoom.propTypes = {
   fetchUser: PropTypes.func.isRequired,
   fetchEvent: PropTypes.func.isRequired,
   // Props from URL
-  onChangeStep: PropTypes.func.isRequired,
-  step: PropTypes.number,
-  onChangeRoom: PropTypes.func.isRequired,
-  room: PropTypes.string,
+  detail: PropTypes.bool,
   event: PropTypes.string,
-  // date: PropTypes.instanceOf(Date),
-  // view: PropTypes.string,
+  onChangeStep: PropTypes.func.isRequired,
+  onChangeRoom: PropTypes.func.isRequired,
+  onChangeDetail: PropTypes.func.isRequired,
+  onChangeRoomDetail: PropTypes.func.isRequired,
+  room: PropTypes.string,
+  roomDetail: PropTypes.string,
+  step: PropTypes.number,
   filters: PropTypes.object,
-  // onChangeCalView: PropTypes.func.isRequired,
-  // onChangeView: PropTypes.func.isRequired,
-  // onChangeFilters: PropTypes.func.isRequired,
-  // onChangeDate: PropTypes.func.isRequired,
 };
 
 ReserveRoom.defaultProps = {
@@ -403,6 +397,8 @@ ReserveRoom.defaultProps = {
   date: new Date(),
   filters: {},
   step: 0,
+  detail: false,
+  roomDetail: null,
   room: null,
   event: null,
 };

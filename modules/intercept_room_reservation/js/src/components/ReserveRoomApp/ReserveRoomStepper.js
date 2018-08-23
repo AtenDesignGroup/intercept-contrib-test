@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { withStyles } from '@material-ui/core/styles';
+import withWidth, { isWidthUp } from '@material-ui/core/withWidth';
 import Stepper from '@material-ui/core/Stepper';
 import Step from '@material-ui/core/Step';
 import StepButton from '@material-ui/core/StepButton';
@@ -125,12 +126,15 @@ class HorizontalNonLinearStepper extends React.Component {
   }
 
   render() {
-    const { classes, step } = this.props;
+    const { classes, step, width } = this.props;
     const steps = getSteps();
 
     return (
       <div className={classes.root}>
-        <Stepper nonLinear activeStep={step}>
+        <Stepper
+          nonLinear
+          activeStep={step}
+          orientation={isWidthUp('md', width) ? 'horizontal' : 'vertical'}>
           {steps.map((label, index) => (
             <Step key={label}>
               <StepButton
@@ -218,4 +222,4 @@ const mapStateToProps = (state, ownProps) => {
   };
 };
 
-export default connect(mapStateToProps)(withStyles(styles)(HorizontalNonLinearStepper));
+export default withWidth()(connect(mapStateToProps)(withStyles(styles)(HorizontalNonLinearStepper)));

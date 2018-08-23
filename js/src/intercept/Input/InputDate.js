@@ -42,7 +42,7 @@ class InputDate extends React.Component {
   onClear = () => this.onChange(null);
 
   render() {
-    const { clearable, required, label } = this.props;
+    const { clearable, disabled, required, label } = this.props;
 
     const value = this.props.getValue();
     const inputValue = value === '' ? null : value;
@@ -53,6 +53,7 @@ class InputDate extends React.Component {
           onChange={this.onChange}
           onClear={this.onClear}
           clearable={clearable}
+          disabled={disabled}
           label={label}
           required={required}
           InputLabelProps={InputLabelProps(inputValue)}
@@ -71,6 +72,7 @@ InputDate.propTypes = {
   value: PropTypes.instanceOf(Date),
   handleChange: PropTypes.func.isRequired,
   clearable: PropTypes.bool,
+  disabled: PropTypes.bool,
   label: PropTypes.string,
 };
 // Specifies the default values for props:
@@ -79,6 +81,7 @@ InputDate.defaultProps = {
   value: null,
   label: 'Date',
   clearable: true,
+  disabled: false,
 };
 
 export default withStyles(styles)(withFormsy(InputDate));

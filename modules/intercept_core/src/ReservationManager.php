@@ -181,6 +181,7 @@ class ReservationManager implements ReservationManagerInterface {
       }
       $query->condition('field_dates.value', $start_date->format(self::FORMAT), '>=');
       $query->condition('field_dates.end_value', $end_date->format(self::FORMAT), '<=');
+      $query->condition('field_status', ['canceled', 'denied'], 'NOT IN');
     });
 
     $nodes = $this->nodes('room', isset($params['rooms']) ? $params['rooms'] : []);

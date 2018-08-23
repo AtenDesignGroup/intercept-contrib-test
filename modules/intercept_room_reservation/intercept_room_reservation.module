@@ -91,6 +91,39 @@ function intercept_room_reservation_theme() {
   ];
 }
 
+function intercept_room_reservation_form_node_event_edit_form_alter(&$form, $form_state) {
+  $node = $form_state->getFormObject()->getEntity();
+  $manager = \Drupal::service('intercept_core.reservation.manager');
+  $reservations = $manager->reservations('room', function($query) use ($node) {
+    $query->condition('field_event', $node->id(), '=');
+    $query->condition('field_status', ['canceled', 'denied'], 'NOT IN');
+  });
+  $form['reservations'] = [
+    '#title' => t('Reservations'),
+    '#type' => 'fieldset',
+  ];
+
+  /** @var $view_builder \Drupal\Core\Entity\EntityViewBuilderInterface */
+  $view_builder = \Drupal::service('entity_type.manager')
+    ->getViewBuilder('room_reservation');
+
+  if (\Drupal::service('module_handler')->moduleExists('js_confirm_pop_up_js')) {
+    $form['#attributes']['class'][] = 'js-confirm-pop-up';
+    $form['#attached']['library'][] = 'js_confirm_pop_up/js_confirm_pop_up_js';
+  }
+  $form['reservations']['view'] = $view_builder->viewMultiple($reservations, 'teaser');
+  $form['reservations']['create'] = [
+    '#type' => 'link',
+    '#title' => 'Create a new reservation',
+    '#url' => Url::fromRoute('intercept_room_reservation.reserve_room'),
+    '#options' => ['query' => [
+      'event' => $node->uuid(),
+      'step' => 2,
+    ]],
+  ];
+    //'#url' => Url::fromRoute('/reserve-room?event=[event_uuid]&step=2
+}
+
 /**
  * Prepares variables for Room reservation templates.
  *
@@ -132,6 +165,12 @@ function intercept_room_reservation_theme_suggestions_room_reservation(array $va
  */
 function intercept_room_reservation_entity_extra_field_info() {
   $extra = [];
+
+  $extra['node']['event']['form']['reservations'] = [
+    'label' => t('Reservations'),
+    'description' => t('Manage reservations for this event.'),
+    'visible' => FALSE,
+  ];
 
   $extra['room_reservation']['room_reservation']['display']['location_full'] = [
     'label' => t('Full location'),

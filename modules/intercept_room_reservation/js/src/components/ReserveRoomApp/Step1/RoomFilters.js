@@ -4,8 +4,13 @@ import PropTypes from 'prop-types';
 
 import Formsy from 'formsy-react';
 
+import moment from 'moment';
+
 // Lodash
 import map from 'lodash/map';
+
+// Material UI
+import Button from '@material-ui/core/Button';
 
 // Intercept
 import interceptClient from 'interceptClient';
@@ -18,12 +23,14 @@ import SelectResource from 'intercept/SelectResource';
 import SelectSingle from 'intercept/Select/SelectSingle';
 import InputDate from 'intercept/Input/InputDate';
 import InputNumber from 'intercept/Input/InputNumber';
+import InputCheckbox from 'intercept/Input/InputCheckbox';
 
-const { constants } = interceptClient;
+const { constants, utils } = interceptClient;
 const c = constants;
 const ATTENDEES = 'attendees';
 const TIME = 'time';
 const DURATION = 'duration';
+const NOW = 'now';
 
 const labels = {
   [c.TYPE_LOCATION]: 'Location',
@@ -64,6 +71,34 @@ class EventFilters extends PureComponent {
     this.props.onChange(newFilters);
   };
 
+  onFilterNow = () => {
+    const { filters } = this.props;
+    const duration = filters.duration || 30;
+    const date = utils.getUserStartOfDay();
+    const now = parseInt(
+      moment()
+        .tz(utils.getUserTimezone())
+        .format('HHmm'),
+      10,
+    );
+    let time = 'afternoon';
+    if (now < 1200) {
+      time = 'morning';
+    }
+    else if (now > 1700) {
+      time = 'evening';
+    }
+
+    const newFilters = {
+      ...filters,
+      duration,
+      date,
+      time,
+    };
+    console.log(filters, newFilters);
+    this.props.onChange(newFilters);
+  };
+
   onInputChange = key => (event) => {
     this.onFilterChange(key, event.target.value);
   };
@@ -74,6 +109,10 @@ class EventFilters extends PureComponent {
 
   onAttendeesChange = (value) => {
     this.onFilterChange(ATTENDEES, value);
+  };
+
+  onNowChange = () => {
+    this.onFilterChange(NOW, !this.props.filters[NOW]);
   };
 
   render() {
@@ -118,12 +157,29 @@ class EventFilters extends PureComponent {
               name={'attendees'}
               min={0}
               int
-              // validations="isPositive"
-              // validationError="Attendees must be a positive number"
             />
           </div>
           <div className="l--subsection">
-            <h4 className="section-title--secondary">Show Rooms Available On</h4>
+            <h4 className="section-title--secondary">
+              Show Available
+              {/* <Button
+                variant="raised"
+                size="small"
+                color="primary"
+                type="submit"
+                className="button button--primary"
+                onClick={this.onFilterNow}
+              >
+              Now
+              </Button> */}
+            </h4>
+            <InputCheckbox
+              label="Avalailable Now"
+              checked={filters[NOW]}
+              onChange={() => this.onNowChange()}
+              value={NOW}
+              name={NOW}
+            />
             <InputDate
               handleChange={this.onDateChange}
               defaultValue={null}
@@ -132,13 +188,14 @@ class EventFilters extends PureComponent {
               clearable
               validations="isFutureDate"
               validationError="Date must be in the future"
+              disabled={filters[NOW]}
             />
             <SelectSingle
               name={TIME}
               handleChange={this.onInputChange(TIME)}
               value={filters[TIME]}
               label={labels[TIME]}
-              disabled={!filters[c.DATE]}
+              disabled={filters[NOW] || !filters[c.DATE]}
               options={timeOptions}
               clearable
             />
@@ -148,7 +205,7 @@ class EventFilters extends PureComponent {
               value={filters[DURATION]}
               label={labels[DURATION]}
               options={durationOptions}
-              disabled={!filters[c.DATE]}
+              disabled={!filters[NOW] && !filters[c.DATE]}
               clearable
             />
           </div>

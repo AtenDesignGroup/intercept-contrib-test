@@ -13,6 +13,8 @@ import updateWithHistory from 'intercept/updateWithHistory';
 const {
   decodeArray,
   encodeArray,
+  decodeBoolean,
+  encodeBoolean,
   decodeObject,
   encodeObject,
   decodeString,
@@ -24,6 +26,7 @@ const c = constants;
 const ATTENDEES = 'attendees';
 const TIME = 'time';
 const DURATION = 'duration';
+const NOW = 'now';
 
 const removeFalseyProps = obj => pickBy(obj, prop => prop);
 
@@ -35,11 +38,12 @@ const decodeDate = (value) => {
   }
 
   return moment.tz(value, utils.getUserTimezone()).toDate() || null;
-}
+};
 
-const encodeDate = value => moment(value)
-  .tz(utils.getUserTimezone())
-  .format('YYYY-MM-DD') || null;
+const encodeDate = value =>
+  moment(value)
+    .tz(utils.getUserTimezone())
+    .format('YYYY-MM-DD') || null;
 
 const encodeFilters = (value) => {
   const filters = removeFalseyProps({
@@ -50,6 +54,7 @@ const encodeFilters = (value) => {
     [TIME]: encodeString(value.time),
     [DURATION]: encodeString(value.duration),
     [c.KEYWORD]: encodeString(value.keyword),
+    [NOW]: encodeBoolean(value[NOW]),
   });
   return encodeObject(filters, ':', '_');
 };
@@ -67,6 +72,7 @@ const decodeFilters = (values) => {
     [c.KEYWORD]: decodeString(value.keyword),
     [TIME]: decodeString(value.time),
     [DURATION]: decodeString(value.duration),
+    [NOW]: decodeBoolean(value[NOW]),
   };
   return filters;
 };

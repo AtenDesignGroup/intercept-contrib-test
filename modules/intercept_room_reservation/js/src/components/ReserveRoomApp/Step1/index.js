@@ -5,19 +5,23 @@ import moment from 'moment';
 import debounce from 'lodash/debounce';
 import get from 'lodash/get';
 import isEqual from 'lodash/isEqual';
-import interceptClient from 'interceptClient';
+
+/* eslint-disable */
 import drupalSettings from 'drupalSettings';
+/* eslint-enable */
 
 // Material UI
 import Button from '@material-ui/core/Button';
 import Slide from '@material-ui/core/Slide';
 
 // Intercept Components
+/* eslint-disable */
+import interceptClient from 'interceptClient';
+
 import LoadingIndicator from 'intercept/LoadingIndicator';
 import PageSpinner from 'intercept/PageSpinner';
 import RoomTeaser from 'intercept/RoomTeaser';
-import SelectResource from 'intercept/SelectResource';
-import ViewSwitcher from 'intercept/ViewSwitcher';
+/* eslint-enable */
 
 // Local Components
 import RoomFilters from './RoomFilters';
@@ -29,21 +33,8 @@ const c = constants;
 const ATTENDEES = 'attendees';
 const TIME = 'time';
 const DURATION = 'duration';
+const NOW = 'now';
 const roomIncludes = ['image_primary', 'image_primary.field_media_image'];
-
-function getDateSpan(value, view = 'day') {
-  const start = moment(value).startOf(view);
-  const end = moment(value).endOf(view);
-
-  // The calendar view may include date from the previous or next month
-  // so we make sure to include the beginning of the first week and
-  // end of the last week.
-  if (view === 'month') {
-    start.startOf('week');
-    end.endOf('week');
-  }
-  return [start.toISOString(), end.toISOString()];
-}
 
 function getPublishedFilters(value = true) {
   return {
@@ -89,35 +80,6 @@ function getAttendeesFilters(values = {}) {
       path: 'field_capacity_max',
       value: values[ATTENDEES],
       operator: '>=',
-    },
-  };
-}
-
-function getDateFilters(values, view = 'list', calView = 'day', date = new Date()) {
-  const path = 'field_date_time.value';
-  let operator = '>';
-  let value = moment()
-    .subtract(1, 'day')
-    .endOf('day')
-    .toISOString();
-
-  // Handler Calendar view.
-  // The date should be determined by the date and calendar view type
-  // rather than the selected date value.
-  if (view === 'calendar') {
-    value = getDateSpan(date, calView);
-    operator = 'BETWEEN';
-  }
-  else if (values.date) {
-    value = getDateSpan(values.date, 'day');
-    operator = 'BETWEEN';
-  }
-
-  return {
-    data: {
-      path,
-      value,
-      operator,
     },
   };
 }
@@ -185,7 +147,6 @@ class ReserveRoomStep1 extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      calView: props.calView,
       date: props.date,
       filters: props.filters,
       formValues: {
@@ -216,7 +177,6 @@ class ReserveRoomStep1 extends React.Component {
         refreshmentsDesc: '',
         user: drupalSettings.intercept.user.uuid,
       },
-      view: props.view,
       room: {
         current: null,
         previous: null,
@@ -243,7 +203,7 @@ class ReserveRoomStep1 extends React.Component {
     const { filters, rooms } = this.props;
     const didUpdate = prop => !isEqual(prevProps[prop], this.props[prop]);
 
-    if (filters[c.DATE] && (didUpdate('rooms') || didUpdate('filters'))) {
+    if ((filters[c.DATE] || filters[NOW] === true) && (didUpdate('rooms') || didUpdate('filters'))) {
       this.setState({
         availability: {
           ...this.state.availability,
@@ -252,7 +212,7 @@ class ReserveRoomStep1 extends React.Component {
       });
     }
 
-    // Fetch room availabilty if necessary.
+    // Fetch room availability if necessary.
     if (rooms.length > 0 && availability.shouldUpdate && !availability.loading) {
       this.fetchAvailableRooms();
     }
@@ -271,6 +231,31 @@ class ReserveRoomStep1 extends React.Component {
     });
   }
 
+  onlyAvailable = (availability) => {
+    const { rooms } = availability;
+    const isStaff = utils.userIsStaff();
+    const isManager = utils.userIsManager();
+    const conflictProp = isStaff ? 'has_reservation_conflict' : 'has_open_hours_conflict';
+
+    return (room) => {
+      const id = get(room, 'data.id');
+
+      // If the room is not reservable online,
+      // we'll show it to non-managers so they can call for availability.
+      if (!isManager && !get(room, 'data.attributes.field_reservable_online')) {
+        return true;
+      }
+
+      // If the room is not returned from the availabilty request, lets assume it's available;
+      if (!rooms[id]) {
+        return true;
+      }
+
+      // Return true if there is no conflict.
+      return !rooms[id][conflictProp];
+    };
+  };
+
   // Get query params based on current rooms and filters.
   getRoomAvailabilityQuery = () => {
     const options = {
@@ -278,9 +263,18 @@ class ReserveRoomStep1 extends React.Component {
       duration: 30,
     };
 
+    if (this.props.filters[DURATION]) {
+      options.duration = this.props.filters[DURATION];
+    }
+
     const tz = utils.getUserTimezone();
 
-    if (this.props.filters[c.DATE]) {
+    if (this.props.filters[NOW]) {
+      const date = utils.roundTo(new Date(), 15, 'minutes', 'floor').tz(tz);
+      options.start = utils.dateToDrupal(date.clone());
+      options.end = utils.dateToDrupal(date.clone().add(options.duration, 'minute'));
+    }
+    else if (this.props.filters[c.DATE]) {
       const date = moment.tz(this.props.filters[c.DATE], tz);
       options.start = date.clone().hour(0);
       options.end = date.clone().endOf('day');
@@ -303,10 +297,6 @@ class ReserveRoomStep1 extends React.Component {
 
       options.start = utils.dateToDrupal(options.start);
       options.end = utils.dateToDrupal(options.end);
-    }
-
-    if (this.props.filters[DURATION]) {
-      options.duration = this.props.filters[DURATION];
     }
 
     return options;
@@ -365,16 +355,6 @@ class ReserveRoomStep1 extends React.Component {
     this.props.onChangeStep(1);
   };
 
-  handleCalendarNavigate = (date, calView) => {
-    this.props.onChangeDate(date);
-    this.doFetchRooms(this.props.filters, 'calendar', calView, date);
-  };
-
-  handleCalendarView = (calView) => {
-    this.props.onChangeCalView(calView);
-    this.doFetchRooms(this.props.filters, 'calendar', calView, this.props.date);
-  };
-
   handleFilterChange = (values) => {
     this.props.onChangeFilters(values);
 
@@ -405,15 +385,12 @@ class ReserveRoomStep1 extends React.Component {
     oldValues[ATTENDEES] !== newValues[ATTENDEES];
 
   doFetchRooms(
-    values = this.props.filters,
-    view = this.props.view,
-    calView = this.props.calView,
-    date = this.props.date,
+    values = this.props.filters
   ) {
     const { fetchRooms } = this.props;
 
     fetchRooms({
-      filters: getFilters(values, view, calView, date),
+      filters: getFilters(values),
       include: roomIncludes,
       sort: {
         title: {
@@ -427,26 +404,13 @@ class ReserveRoomStep1 extends React.Component {
     });
   }
 
-  onlyAvailable = (availability) => {
-    const { rooms } = availability;
-    const isStaff = utils.userIsStaff();
-    const conflictProp = isStaff ? 'has_reservation_conflict' : 'has_open_hours_conflict';
-
-    return (room) => {
-      const id = get(room, 'data.id');
-
-      // If the room is not returned from the availabilty request, lets assume it's available;
-      if (!rooms[id]) {
-        return true;
-      }
-
-      // Return true if there is no conflict.
-      return !rooms[id][conflictProp];
-    };
-  };
-
   showAvailable = (rooms) => {
     const { availability } = this.state;
+    const { filters } = this.props;
+
+    if (!filters[NOW] && !filters[c.DATE]) {
+      return rooms;
+    }
 
     if (availability.rooms.length === 0 || availability.loading) {
       return rooms;
@@ -472,20 +436,20 @@ class ReserveRoomStep1 extends React.Component {
   };
 
   render() {
-    const { props, handleFilterChange, handleRoomSelect } = this;
-    const { rooms, roomsLoading, filters } = props;
+    const { handleFilterChange, handleRoomSelect } = this;
+    const { rooms, roomsLoading, filters } = this.props;
 
     const roomToShow = this.state.room[this.state.room.exiting ? 'previous' : 'current'];
     const roomFooter = (roomProps) => {
       const reservable = get(roomProps, 'room.attributes.field_reservable_online');
-      const staffOnly = get(roomProps, 'room.attributes.field_staff_use_only');
+      // const staffOnly = get(roomProps, 'room.attributes.field_staff_use_only');
       const phoneNumber = get(roomProps, 'room.attributes.field_reservation_phone_number');
       let status = null;
 
       if (!reservable) {
-        const statusText = staffOnly
-          ? 'Only event organizers can reserve staff only rooms'
-          : 'Only event organizers can reserve online';
+        // const statusText = staffOnly
+        //   ? 'Only event organizers can reserve staff only rooms'
+        //   : 'Only event organizers can reserve online';
         if (!utils.userIsManager()) {
           const phoneLink = phoneNumber ? (
             <a href={`tel:${phoneNumber}`} className="call-prompt__link">
@@ -495,12 +459,14 @@ class ReserveRoomStep1 extends React.Component {
 
           return (
             <p className="call-prompt">
-              <span className="call-prompt__text">Call to Reserve</span> {phoneLink}
+              <span className="call-prompt__text">Call for information</span> {phoneLink}
             </p>
           );
         }
 
-        status = <p className="action-button__message">{statusText}</p>;
+        // Currently not showing the status message.
+        // status = <p className="action-button__message">{statusText}</p>;
+        status = null;
       }
 
       return (
@@ -570,18 +536,18 @@ const mapDispatchToProps = dispatch => ({
 });
 
 ReserveRoomStep1.propTypes = {
+  filters: PropTypes.object,
   rooms: PropTypes.arrayOf(Object).isRequired,
   roomsLoading: PropTypes.bool.isRequired,
   fetchLocations: PropTypes.func.isRequired,
   fetchRooms: PropTypes.func.isRequired,
-  fetchUser: PropTypes.func.isRequired,
   onViewRoomDetail: PropTypes.func.isRequired,
+  onChangeFilters: PropTypes.func.isRequired,
+  onChangeRoom: PropTypes.func.isRequired,
+  onChangeStep: PropTypes.func.isRequired,
 };
 
 ReserveRoomStep1.defaultProps = {
-  view: 'list',
-  calView: 'month',
-  date: new Date(),
   filters: {},
 };
 

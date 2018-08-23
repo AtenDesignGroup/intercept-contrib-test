@@ -5,6 +5,7 @@ namespace Drupal\intercept_core;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\entity\EntityPermissionProvider;
 use Drupal\Component\Utility\Unicode;
+use Drupal\user\EntityOwnerInterface;
 
 class ReservationPermissionsProvider extends EntityPermissionProvider {
 
@@ -28,5 +29,25 @@ class ReservationPermissionsProvider extends EntityPermissionProvider {
     }
 
     return $this->processPermissions($permissions, $entity_type);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function buildEntityTypePermissions(EntityTypeInterface $entity_type) {
+    $permissions = parent::buildEntityTypePermissions(($entity_type));
+    $entity_type_id = $entity_type->id();
+    $has_owner = $entity_type->entityClassImplements(EntityOwnerInterface::class);
+    $singular_label = $entity_type->getSingularLabel();
+    $plural_label = $entity_type->getPluralLabel();
+
+    if ($has_owner) {
+      $permissions["view own {$entity_type_id}"] = [
+        'title' => $this->t('View own @type', [
+          '@type' => $plural_label,
+        ]),
+      ];
+    }
+    return $permissions;
   }
 }

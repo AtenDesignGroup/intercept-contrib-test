@@ -15,8 +15,11 @@
  * @ingroup themeable
  */
 #}
-<div{{ attributes.addClass('room-reservation') }}>
+<div{{ attributes.addClass('room-reservation', 'form-item') }}>
   {% if content %}
-    {{- content -}}
+    {{- content|without('action_button', 'field_location', 'field_status', 'room_location') -}}
   {% endif %}
+  <footer>
+    {{ content.action_button }}
+  </footer>
 </div>

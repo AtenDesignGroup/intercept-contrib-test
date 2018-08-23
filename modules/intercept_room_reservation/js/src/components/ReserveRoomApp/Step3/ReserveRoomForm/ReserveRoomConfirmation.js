@@ -5,6 +5,7 @@ import interceptClient from 'interceptClient';
 import DialogConfirm from 'intercept/Dialog/DialogConfirm';
 import RoomReservationSummary from './RoomReservationSummary';
 import RoomReservationStatus from './RoomReservationStatus';
+import get from 'lodash/get';
 
 const { actions, api, constants, select, utils, session } = interceptClient;
 const c = constants;
@@ -21,15 +22,6 @@ class ReserveRoomConfirmation extends React.PureComponent {
   }
 
   handleConfirm() {
-    // const { onConfirm, values, save } = this.props;
-    // const entity = buildRoomReservation(values);
-    // this.setState({
-    //   saved: true,
-    //   uuid: entity.id,
-    // });
-    // save(entity);
-    // onConfirm();
-
     const { onConfirm, save } = this.props;
     const uuid = onConfirm();
     save(uuid);
@@ -37,7 +29,7 @@ class ReserveRoomConfirmation extends React.PureComponent {
   }
 
   render() {
-    const { open, onCancel, values } = this.props;
+    const { open, onCancel, values, eventNid } = this.props;
     const { uuid, saved } = this.state;
 
     const content =
@@ -65,6 +57,13 @@ class ReserveRoomConfirmation extends React.PureComponent {
         onCancel,
       };
 
+    if (uuid && eventNid) {
+      dialogProps.confirmText = 'Back to Edit Event';
+      dialogProps.onConfirm = () => {
+        window.location.href = `/node/${eventNid}/edit`;
+      };
+    }
+
     return (
       <DialogConfirm {...dialogProps} open={open}>
         {content}
@@ -79,15 +78,29 @@ ReserveRoomConfirmation.propTypes = {
   open: PropTypes.bool,
   save: PropTypes.func.isRequired,
   values: PropTypes.object.isRequired,
+  eventNid: PropTypes.number,
 };
 
 ReserveRoomConfirmation.defaultProps = {
   onConfirm: null,
   onCancel: null,
   open: false,
+  eventNid: null,
 };
 
-const mapStateToProps = () => ({});
+const mapStateToProps = (state, ownProps) => {
+  const { values } = ownProps;
+  const eventId = values[c.TYPE_EVENT];
+  let eventNid = null;
+
+  if (eventId) {
+    eventNid = get(select.event(values[c.TYPE_EVENT])(state), 'data.attributes.nid');
+  }
+
+  return {
+    eventNid,
+  };
+};
 
 const mapDispatchToProps = dispatch => ({
   save: (uuid) => {
@@ -95,9 +108,7 @@ const mapDispatchToProps = dispatch => ({
     session
       .getToken()
       .then((token) => {
-        dispatch(
-          api[c.TYPE_ROOM_RESERVATION].sync(uuid, { headers: { 'X-CSRF-Token': token } }),
-        );
+        dispatch(api[c.TYPE_ROOM_RESERVATION].sync(uuid, { headers: { 'X-CSRF-Token': token } }));
       })
       .catch((e) => {
         console.log('Unable to save Reservation', e);

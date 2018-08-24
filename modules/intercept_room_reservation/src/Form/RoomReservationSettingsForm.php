@@ -46,6 +46,14 @@ class RoomReservationSettingsForm extends ConfigFormBase {
   public function buildForm(array $form, FormStateInterface $form_state) {
     $form = parent::buildForm($form, $form_state);
     $config = $this->config(self::CONFIG_NAME);
+
+    $form['agreement_text'] = [
+      '#title' => $this->t('Terms and conditions agreement'),
+      '#type' => 'text_format',
+      '#default_value' => $this->getTextFormat('agreement_text', 'value'),
+      '#format' => $this->getTextFormat('agreement_text', 'format'),
+    ];
+
     $form['reservation_limit'] = [
       '#title' => $this->t('Room reservation limit'),
       '#type' => 'number',
@@ -84,6 +92,12 @@ class RoomReservationSettingsForm extends ConfigFormBase {
       ];
     }
     return $form;
+  }
+
+  private function getTextFormat($config_name, $subfield) {
+    $config = $this->config(self::CONFIG_NAME)->get($config_name);
+    $default_value = $subfield == 'value' ? '' : 'basic_html';
+    return !empty($config) && !empty($config[$subfield]) ? $config[$subfield] : $default_value;
   }
 
   /**

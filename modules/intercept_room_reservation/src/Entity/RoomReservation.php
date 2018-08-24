@@ -99,6 +99,11 @@ class RoomReservation extends ReservationBase implements RoomReservationInterfac
     return $this;
   }
 
+  public function request() {
+    $this->set('field_status', 'requested');
+    return $this;
+  }
+
   public function deny() {
     return $this->decline();
   }
@@ -135,4 +140,31 @@ class RoomReservation extends ReservationBase implements RoomReservationInterfac
     return $fields;
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function preSave(EntityStorageInterface $storage) {
+    parent::preSave($storage);
+    if ($this->isNew()) {
+      $this->setDefaultStatus();
+    }
+  }
+
+  /**
+   * Set status based on the room being reserved.
+   */
+  public function setDefaultStatus() {
+    if (!$this->hasField('field_room')) {
+      return;
+    }
+    if (!$this->get('field_room')->isEmpty()) {
+      $room = $this->get('field_room')->entity;
+      $approval_required = $room->field_approval_required->getString();
+      $current_status = $this->get('field_status')->getString();
+
+      if (!$approval_required && $current_status == 'requested') {
+        $this->approve();
+      }
+    }
+  }
 }

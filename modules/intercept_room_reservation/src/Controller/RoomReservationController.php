@@ -6,10 +6,11 @@ use Drupal\Component\Utility\Xss;
 use Drupal\Component\Serialization\Json;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\TempStore\PrivateTempStoreFactory;
 use Drupal\Core\Url;
 use Drupal\intercept_core\ReservationManagerInterface;
 use Drupal\intercept_room_reservation\Entity\RoomReservationInterface;
+use Drupal\intercept_room_reservation\Form\RoomReservationAgreementForm;
 use Drupal\user\UserInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -23,11 +24,14 @@ class RoomReservationController extends ControllerBase implements ContainerInjec
 
   protected $reservationManager;
 
+  protected $tempStoreFactory;
+
   /**
    * Create a new RoomReservationController.
    */
-  public function __construct(ReservationManagerInterface $reservation_manager) {
+  public function __construct(ReservationManagerInterface $reservation_manager, PrivateTempStoreFactory $temp_store_factory) {
     $this->reservationManager = $reservation_manager;
+    $this->tempStoreFactory = $temp_store_factory;
   }
 
   /**
@@ -35,15 +39,78 @@ class RoomReservationController extends ControllerBase implements ContainerInjec
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('intercept_core.reservation.manager')
+      $container->get('intercept_core.reservation.manager'),
+      $container->get('user.private_tempstore')
     );
   }
 
   /**
-   * Hello.
+   * Reserve Room.
    *
-   * @return string
-   *   Return Hello string.
+   * @return array
+   *   Return Room reservation page.
+   */
+  public function reserve(\Symfony\Component\HttpFoundation\Request $request) {
+    $step = $request->query->get('step');
+    $build = [];
+
+    // TODO: Move this to the reservation manager.
+    $store = $this->tempStoreFactory->get('reservation_agreement');
+    if (!$store->get('room')) {
+      return $this->agreement($request);
+    }
+
+    if ($this->currentUser()->isAnonymous()) {
+      return $this->redirect('user.login', [
+        'destination' => Url::fromRoute('<current>')->toString(),
+      ]);
+    }
+    $build = [];
+    $build['#attached']['library'][] = 'intercept_room_reservation/reserveRoom';
+    $build['#markup'] = '';
+    $build['intercept_room_reserve']['#markup'] = '<div id="reserveRoomRoot" />';
+
+    return $build;
+  }
+
+  /**
+   * Show agreement form page.
+   */
+  public function agreement(\Symfony\Component\HttpFoundation\Request $request) {
+    $config = $this->config('intercept_room_reservation.settings');
+    $agreement = $config->get('agreement_text');
+    $build['agreement'] = [
+      '#type' => 'html_tag',
+      '#tag' => 'div',
+      '#attributes' => [
+        'id' => 'reserveRoomRoot',
+        // TODO: Move this into the theme layer with the react.js version of this page.
+        'class' => ['l--offset'],
+      ],
+    ];
+
+    $build['agreement']['title'] = [
+      '#type' => 'html_tag',
+      '#tag' => 'h1',
+      '#value' => t('Reserve a room'),
+    ];
+
+    $build['agreement']['text'] = [
+      '#type' => 'processed_text',
+      '#text' => $agreement['value'],
+      '#format' => $agreement['format'],
+    ];
+
+    $build['agreement']['form'] = $this->formBuilder()->getForm(RoomReservationAgreementForm::class);
+
+    return $build;
+  }
+
+  /**
+   * User account reservations.
+   *
+   * @return array
+   *   Page callback for user/{user}/reservations.
    */
   public function manage(UserInterface $user) {
     $build = [];

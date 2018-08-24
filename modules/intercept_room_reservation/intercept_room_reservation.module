@@ -50,9 +50,29 @@ function intercept_room_reservation_preprocess_page(array &$variables) {
 }
 
 /**
+ * Implements_hook_entity_presave().
+ */
+function intercept_room_reservation_entity_presave(\Drupal\Core\Entity\EntityInterface $entity) {
+  if ($entity->getEntityTypeId() == 'room_reservation' && $entity->isNew()) {
+    // If they've signed the agreement, remove it from their session.
+    if (\Drupal::service('current_user')->isAnonymous()) {
+      return;
+    }
+    $temp_store = \Drupal::service('user.private_tempstore')->get('reservation_agreement');
+    if ($temp_store->get('room')) {
+      $temp_store->delete('room');
+      if ($entity->hasField('field_agreement')) {
+        $entity->field_agreement->setValue(1);
+      }
+    }
+  }
+}
+
+/**
  * Implements hook_entity_operation().
  */
 function intercept_room_reservation_entity_operation(\Drupal\Core\Entity\EntityInterface $entity) {
+  // TODO: Move this to the reservation manager.
   if ($entity->getEntityTypeId() == 'room_reservation' ) {
     $operation = function($op) use ($entity) {
       return [

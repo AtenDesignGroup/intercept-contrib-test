@@ -61,7 +61,7 @@ class RoomReservationController extends ControllerBase implements ContainerInjec
     }
 
     if ($this->reservationManager->userExceededReservationLimit($this->currentUser())) {
-      $config = $this->config('intercept_room_reservation.settings')->get('reservation_limit_text');
+      $config = $this->config('intercept_room_reservation.settings');
       $limit_text = $config->get('reservation_limit_text');
       $text = !empty($limit_text['value']) ? $limit_text['value'] : '';
       $build['message'] = [

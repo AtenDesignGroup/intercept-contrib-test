@@ -2,9 +2,12 @@
 
 namespace Drupal\intercept_core;
 
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Mail\MailManagerInterface;
 use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
+use Drupal\intercept_room_reservation\Entity\RoomReservation;
 use Drupal\office_hours\OfficeHoursDateHelper;
 
 /**
@@ -21,13 +24,20 @@ class ReservationManager implements ReservationManagerInterface {
    */
   protected $entityTypeManager;
 
+    /**
+     * @var ConfigFactoryInterface
+     */
+  protected $configFactory;
+
   protected $idKey;
 
   /**
    * Constructs a new ReservationManager object.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, ConfigFactoryInterface $config_factory, MailManagerInterface $mail_manager) {
     $this->entityTypeManager = $entity_type_manager;
+    $this->configFactory = $config_factory;
+    $this->mailManager = $mail_manager;
   }
 
   protected function getTimezone() {
@@ -166,6 +176,17 @@ class ReservationManager implements ReservationManagerInterface {
       ];
     }
     return $return;
+  }
+
+  public function userExceededReservationLimit(\Drupal\core\Session\AccountInterface $user) {
+    $reservations = $this->reservations('room', function($query) use ($user) {
+      $query->condition('field_user', $user->id(), '=');
+      $date = new \Drupal\Core\Datetime\DrupalDateTime('now', new \DateTimeZone('UTC'));
+      $query->condition('field_dates.end_value', $date->format('Y-m-d\TH:i:s'), '>');
+      $query->condition('field_status', ['requested', 'approved'], 'IN');
+    });
+    $config = $this->configFactory->get('intercept_room_reservation.settings');
+    return count($reservations) >= $config->get('reservation_limit');
   }
 
   public function availability($params = []) {

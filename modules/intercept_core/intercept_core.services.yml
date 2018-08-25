@@ -19,4 +19,4 @@ services:
     arguments: ['@module_handler', '@cache.discovery']
   intercept_core.reservation.manager:
     class: Drupal\intercept_core\ReservationManager
-    arguments: ['@entity_type.manager']
+    arguments: ['@entity_type.manager', '@config.factory', '@plugin.manager.mail']

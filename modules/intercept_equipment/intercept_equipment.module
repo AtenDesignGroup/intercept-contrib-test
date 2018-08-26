@@ -157,3 +157,33 @@ function intercept_equipment_equipment_reservation_insert(Drupal\Core\Entity\Ent
   }
 
 }
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function intercept_equipment_form_views_exposed_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
+  $view = $form_state->get('view');
+  if ($view->id() == 'intercept_equipment_reservations' && $view->current_display == 'embed') {
+    $link = function($d, $o, $t) {
+      $query = \Drupal::request()->query->all();
+      // 2 is upcoming dates combined filter.
+      $query['field_dates_value'] = $d;
+      $query['sort'] = $o;
+      $query['order'] = 'field_dates_value';
+      return [
+        '#type' => 'link',
+        '#title' => t($t),
+        '#url' => \Drupal\Core\Url::fromRoute('<current>', [], [
+          'query' => $query,
+        ]),
+        '#attributes' => ['class' => ['date-filter', 'date-filter-' . strtolower($t)]],
+      ];
+    };
+    $form['links'] = [
+      '#weight' => -5,
+      'past' => $link(1, 'desc', 'Past'),
+      'upcoming' => $link(2, 'asc', 'Upcoming'),
+    ];
+    $form['field_dates_value']['#type'] = 'hidden';
+  }
+}

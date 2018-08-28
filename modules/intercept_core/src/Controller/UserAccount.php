@@ -24,7 +24,10 @@ class UserAccount extends ControllerBase {
     if (!empty($params['barcode'])) {
       $user = \Drupal::service('intercept_ils.mapping_manager')->loadByBarcode($params['barcode']);
     }
-    return JsonResponse::create(!empty($user) ? ['uuid' => $user->uuid()] : [], 200);
+    return JsonResponse::create(!empty($user) ? [
+      'uuid' => $user->uuid(),
+      'name' => $user->getDisplayName(),
+    ] : [], 200);
   }
 
   public function customerSearchApi(\Symfony\Component\HttpFoundation\Request $request) {

@@ -45,8 +45,8 @@ class ManagementControllerBase extends ControllerBase {
   /**
    * Defaultpage.
    *
-   * @return array 
-   *   Rendered array for admin page. 
+   * @return array
+   *   Rendered array for admin page.
    */
   public function view(AccountInterface $user, Request $request) {
     $page_name = $this->routeMatch->getRouteObject()->getOption('_page_name');
@@ -139,7 +139,8 @@ class ManagementControllerBase extends ControllerBase {
 
   protected function getButton($title, $route, $params = []) {
     $button = \Drupal\Core\Link::createFromRoute($title, $route, $params)->toRenderable();
-    $button['#attributes']['class'][] = 'btn-block';
+    $button['#attributes']['class'][] = 'btn-link';
+    // $button['#attributes']['class'][] = 'more-link';
     $button['#access'] = $button['#url']->access($this->currentUser());
     return $button;
   }

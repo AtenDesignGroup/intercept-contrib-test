@@ -26,7 +26,6 @@ class EventPermissionProvider extends EntityPermissionProvider {
     if ($entity_type_id == 'event_registration') {
       $permissions["cancel {$entity_type_id} entities"] = [
         'title' => $this->t('Cancel @type', [
-          '@action' => \Drupal\Component\Utility\Unicode::ucwords($action),
           '@type' => $plural_label,
         ]),
       ];

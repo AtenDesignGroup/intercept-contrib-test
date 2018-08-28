@@ -54,8 +54,10 @@ class EquipmentReservationForm extends ContentEntityForm {
     ];
 
     // Pre-fill the user field with the current user's information.
-    $current_user = \Drupal\user\Entity\User::load(\Drupal::currentUser()->id());
-    $form['field_user']['widget'][0]['target_id']['#default_value'] = $current_user;
+    if (empty($form['field_user']['widget'][0]['target_id']['#default_value'])) {
+      $current_user = \Drupal\user\Entity\User::load(\Drupal::currentUser()->id());
+      $form['field_user']['widget'][0]['target_id']['#default_value'] = $current_user;
+    }
 
     $entity = $this->entity;
 

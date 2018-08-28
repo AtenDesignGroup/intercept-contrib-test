@@ -24,6 +24,7 @@ import Slide from '@material-ui/core/Slide';
 
 // Intercept Components
 import SelectResource from 'intercept/SelectResource';
+import SelectUser from 'intercept/SelectUser';
 import InputDate from 'intercept/Input/InputDate';
 import InputTime from 'intercept/Input/InputTime';
 import InputNumber from 'intercept/Input/InputNumber';
@@ -171,6 +172,12 @@ class ReserveRoomForm extends PureComponent {
     };
   }
 
+  onValueUserChange(key) {
+    return (value) => {
+      this.updateValue(key, value);
+    };
+  }
+
   onOpenDialog = () => {
     this.setState({ openDialog: true });
   };
@@ -272,58 +279,71 @@ class ReserveRoomForm extends PureComponent {
           <div className="l--2-col">
             <div className="l__main">
               <div className="l__primary">
-                <h4 className="section-title section-title--secondary">Reservation Details</h4>
-                <InputNumber
-                  label="Number of Attendees"
-                  value={values.attendees}
-                  onChange={this.onValueChange('attendees')}
-                  name={'attendees'}
-                  min={0}
-                  int
-                  required={!utils.userIsStaff()}
-                  validations="isPositive"
-                  validationError="Attendees must be a positive number"
-                />
-                <InputText
-                  label="Group Name"
-                  onChange={this.onValueChange('groupName')}
-                  value={values.groupName}
-                  name="groupName"
-                  helperText={'Help others find you by name.'}
-                />
-                <SelectResource
-                  type={c.TYPE_MEETING_PURPOSE}
-                  name={c.TYPE_MEETING_PURPOSE}
-                  handleChange={this.onInputChange(c.TYPE_MEETING_PURPOSE)}
-                  value={values.meetingPurpose}
-                  label={'Purpose for using this room'}
-                  required={!utils.userIsStaff()}
-                />
-                <InputText
-                  label="Description"
-                  onChange={this.onValueChange('meetingDetails')}
-                  value={values.meetingDetails}
-                  name="meetingDetails"
-                  required={showMeetingPurposeExplanation}
-                />
+                <div className="l--subsection">
+                  <h4 className="section-title section-title--secondary">Reservation Details</h4>
+                  <InputNumber
+                    label="Number of Attendees"
+                    value={values.attendees}
+                    onChange={this.onValueChange('attendees')}
+                    name={'attendees'}
+                    min={0}
+                    int
+                    required={!utils.userIsStaff()}
+                    validations="isPositive"
+                    validationError="Attendees must be a positive number"
+                  />
+                  <InputText
+                    label="Group Name"
+                    onChange={this.onValueChange('groupName')}
+                    value={values.groupName}
+                    name="groupName"
+                    helperText={'Help others find you by name.'}
+                  />
+                  <SelectResource
+                    type={c.TYPE_MEETING_PURPOSE}
+                    name={c.TYPE_MEETING_PURPOSE}
+                    handleChange={this.onInputChange(c.TYPE_MEETING_PURPOSE)}
+                    value={values.meetingPurpose}
+                    label={'Purpose for using this room'}
+                    required={!utils.userIsStaff()}
+                  />
+                  <InputText
+                    label="Description"
+                    onChange={this.onValueChange('meetingDetails')}
+                    value={values.meetingDetails}
+                    name="meetingDetails"
+                    required={showMeetingPurposeExplanation}
+                  />
+                </div>
               </div>
               <div className="l__secondary">
-                <h4 className="section-title section-title--secondary">Refreshments</h4>
-                <InputCheckbox
-                  label="Serving light refreshments?"
-                  checked={values.refreshments}
-                  onChange={this.toggleValue}
-                  value="refreshments"
-                  name="refreshments"
-                />
-                <InputText
-                  label="Please describe your light refreshments."
-                  value={values.refreshmentsDesc}
-                  onChange={this.onValueChange('refreshmentsDesc')}
-                  name="refreshmentDesc"
-                  required={values.refreshments}
-                  disabled={!values.refreshments}
-                />
+                <div className="l--subsection">
+                  <h4 className="section-title section-title--secondary">Account</h4>
+                  <SelectUser
+                    label="Reserved For"
+                    value={values.user}
+                    onChange={value => this.onValueChange('user')(value.uuid)}
+                    name={'user'}
+                  />
+                </div>
+                <div className="l--subsection">
+                  <h4 className="section-title section-title--secondary">Refreshments</h4>
+                  <InputCheckbox
+                    label="Serving light refreshments?"
+                    checked={values.refreshments}
+                    onChange={this.toggleValue}
+                    value="refreshments"
+                    name="refreshments"
+                  />
+                  <InputText
+                    label="Please describe your light refreshments."
+                    value={values.refreshmentsDesc}
+                    onChange={this.onValueChange('refreshmentsDesc')}
+                    name="refreshmentDesc"
+                    required={values.refreshments}
+                    disabled={!values.refreshments}
+                  />
+                </div>
               </div>
             </div>
             <div className="form__actions l__footer">

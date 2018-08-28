@@ -9,6 +9,7 @@ import utils from '../../../../../node_modules/formsy-react/lib/utils';
 //
 export const getUserUtcOffset = () => get(drupalSettings, 'intercept.user.utc_offset');
 export const getUserTimezone = () => get(drupalSettings, 'intercept.user.timezone');
+export const getUserName = () => get(drupalSettings, 'intercept.user.name');
 export const getUserUid = () => get(drupalSettings, 'intercept.user.id');
 export const getUserUuid = () => get(drupalSettings, 'intercept.user.uuid');
 export const getUserRoles = () => get(drupalSettings, 'intercept.user.roles');

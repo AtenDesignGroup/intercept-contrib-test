@@ -158,7 +158,7 @@ class ReserveRoom extends React.Component {
         meetingDetails: '',
         refreshments: false,
         refreshmentsDesc: '',
-        user: drupalSettings.intercept.user.uuid,
+        user: utils.getUserUuid(),
       },
       room: {
         current: null,

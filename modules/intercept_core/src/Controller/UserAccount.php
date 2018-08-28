@@ -26,7 +26,7 @@ class UserAccount extends ControllerBase {
     }
     return JsonResponse::create(!empty($user) ? [
       'uuid' => $user->uuid(),
-      'name' => $user->getDisplayName(),
+      'name' => $user->full_name,
     ] : [], 200);
   }
 

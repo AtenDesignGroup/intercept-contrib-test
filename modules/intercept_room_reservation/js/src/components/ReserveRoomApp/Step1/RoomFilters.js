@@ -174,7 +174,7 @@ class EventFilters extends PureComponent {
               </Button> */}
             </h4>
             <InputCheckbox
-              label="Avalailable Now"
+              label="Available Now"
               checked={filters[NOW]}
               onChange={() => this.onNowChange()}
               value={NOW}

@@ -36,7 +36,7 @@ class RoomReservationActionButtonApp extends React.Component {
       case 'denied':
         return isManager ? [approve(), cancel()] : null;
       case 'approved':
-        return isManager ? [deny(), cancel()] : null;
+        return isManager ? [deny(), cancel()] : [cancel()];
       case 'canceled':
         return isManager ? [request()] : null;
       default:

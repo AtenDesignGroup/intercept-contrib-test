@@ -67,7 +67,7 @@ class SelectUser extends React.Component {
     return (
       <div className="select-user">
         <UserName label={label} name={this.state.value.name} />
-        <div>
+        {canScan && (<div>
           <RegistrationLookup
             name={name}
             onSuccess={this.handleChange}
@@ -75,7 +75,7 @@ class SelectUser extends React.Component {
             value={this.state.formValue}
           />
           {this.resetLink()}
-        </div>
+        </div>)}
       </div>
     );
   }

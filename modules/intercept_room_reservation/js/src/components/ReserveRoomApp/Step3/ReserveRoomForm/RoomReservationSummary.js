@@ -10,14 +10,18 @@ const { getDayDisplay } = utils;
 const timeDisplay = (time, date) => utils.getTimeDisplay(utils.getDateFromTime(time, date));
 
 const RoomReservationSummary = props => (
-  <article className="reservation-summary">
-    <p className="reservation-summary__location">{props.location}</p>
-    <h3 className="reservation-summary__room">{props.room}</h3>
-    <span className="reservation-summary__date">{getDayDisplay(props.date)}&nbsp;</span>
-    <span className="reservation-summary__time">{`${timeDisplay(
-      props.start,
-      props.date,
-    )} to ${timeDisplay(props.end, props.date)}`}</span>
+  <article className="summary">
+    <header className="summary__header">
+      <div className="summary__supertitle">{props.location}</div>
+      <h3 className="summary__title">{props.room}</h3>
+    </header>
+    <p className="summary__dateline">
+      <span className="summary__dateline-date">{getDayDisplay(props.date)}&nbsp;</span>
+      <span className="summary__dateline-time">{`${timeDisplay(
+        props.start,
+        props.date,
+      )} to ${timeDisplay(props.end, props.date)}`}</span>
+    </p>
   </article>
 );
 

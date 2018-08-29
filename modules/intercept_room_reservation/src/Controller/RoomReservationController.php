@@ -88,8 +88,9 @@ class RoomReservationController extends ControllerBase implements ContainerInjec
     }
 
     // TODO: Move this to the reservation manager.
+    $bypass_agreement = $this->currentUser()->hasPermission('bypass room reservation agreement');
     $store = $this->tempStoreFactory->get('reservation_agreement');
-    if (!$store->get('room')) {
+    if (!$store->get('room') && !$bypass_agreement) {
       return $this->agreement($request);
     }
 

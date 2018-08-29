@@ -179,6 +179,9 @@ class ReservationManager implements ReservationManagerInterface {
   }
 
   public function userExceededReservationLimit(\Drupal\core\Session\AccountInterface $user) {
+    if ($user->hasPermission('bypass room reservation limit')) {
+      return FALSE;
+    }
     $reservations = $this->reservations('room', function($query) use ($user) {
       $query->condition('field_user', $user->id(), '=');
       $date = new \Drupal\Core\Datetime\DrupalDateTime('now', new \DateTimeZone('UTC'));

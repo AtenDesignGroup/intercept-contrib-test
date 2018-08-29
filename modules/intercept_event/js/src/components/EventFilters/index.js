@@ -76,7 +76,7 @@ class EventFilters extends PureComponent {
     }
 
     return (
-      <div className="filters">
+      <div className="filters filters--4up">
         <h3 className="filters__heading">Filter</h3>
         <Formsy className="filters__inputs">
           <KeywordFilter

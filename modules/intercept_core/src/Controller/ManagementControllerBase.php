@@ -58,7 +58,11 @@ class ManagementControllerBase extends ControllerBase {
     }
     if ($method) {
       $build = $this->{$method}($user, $request);
-      return $this->doAlter($build);
+      $build = [
+        '#theme' => 'intercept_management',
+        '#content' => $this->doAlter($build),
+      ];
+      return $build;
     }
     return [
       '#type' => 'markup',

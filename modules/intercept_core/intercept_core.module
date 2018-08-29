@@ -34,6 +34,18 @@ function intercept_core_page_attachments(array &$attachments) {
 }
 
 /**
+ * Implements hook_theme().
+ */
+function intercept_core_theme() {
+  return [
+    'intercept_management' => [
+      'variables' => ['content' => NULL],
+      'template' => 'intercept-management',
+    ]
+  ];
+}
+
+/**
  * Implements hook_entity_type_build().
  */
 function intercept_core_entity_type_build(array &$entity_types) {

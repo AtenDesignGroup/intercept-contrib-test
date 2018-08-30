@@ -10,7 +10,9 @@ const { select, api } = interceptClient;
 
 class SelectResource extends React.Component {
   componentDidMount() {
-    this.props.fetchAll({});
+    if (this.props.shouldFetch) {
+      this.props.fetchAll({});
+    }
   }
 
   render() {
@@ -64,6 +66,7 @@ SelectResource.defaultProps = {
   chips: false,
   multiple: false,
   value: null,
+  shouldFetch: true,
 };
 
 SelectResource.propTypes = {
@@ -72,6 +75,7 @@ SelectResource.propTypes = {
   fetchAll: PropTypes.func.isRequired,
   label: PropTypes.string.isRequired,
   multiple: PropTypes.bool,
+  shouldFetch: PropTypes.bool,
   options: PropTypes.arrayOf(Object).isRequired,
   value: PropTypes.oneOfType([PropTypes.arrayOf(String), PropTypes.string]),
   type: PropTypes.string.isRequired,

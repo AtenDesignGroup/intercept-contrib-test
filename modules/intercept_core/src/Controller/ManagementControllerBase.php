@@ -146,6 +146,7 @@ class ManagementControllerBase extends ControllerBase {
     $button['#attributes']['class'][] = 'btn-link';
     // $button['#attributes']['class'][] = 'more-link';
     $button['#access'] = $button['#url']->access($this->currentUser());
+    $button['#suffix'] = '<br>';
     return $button;
   }
 

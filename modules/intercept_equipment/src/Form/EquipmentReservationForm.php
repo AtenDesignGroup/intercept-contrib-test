@@ -186,7 +186,7 @@ class EquipmentReservationForm extends ContentEntityForm {
     }
 
     // Display the view embed with the node id of the piece of equipment.
-    $availability_view = views_embed_view('intercept_equipment_reservations', 'embed', $nid);
+    $availability_view = views_embed_view('intercept_equipment_reservations_availability', 'embed', $nid);
     $output = '<div id="edit-output">';
     $output .= '<h2>Upcoming Reservations</h2>';
     $output .= \Drupal::service('renderer')->render($availability_view);

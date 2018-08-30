@@ -30,6 +30,22 @@ function intercept_event_theme() {
 }
 
 /**
+ * Implements hook_entity_access().
+ */
+function intercept_event_entity_access(\Drupal\Core\Entity\EntityInterface $entity, $operation, \Drupal\Core\Session\AccountInterface $account) {
+  if ($entity->getEntityTypeId()== 'flagging' && $entity->bundle() == 'saved_event' && $operation == 'view') {
+    $permissions = [
+      'view saved_event flagging entities',
+      'administer flaggings'
+    ];
+    if ($entity->getOwnerId() == $account->id()) {
+      $permissions[] = 'view own saved_event flagging entities';
+    }
+    return AccessResult::allowedIfHasPermissions($account, $permissions, 'OR');
+  }
+
+}
+/**
  * Implements hook_entity_operation().
  */
 function intercept_event_entity_operation(\Drupal\Core\Entity\EntityInterface $entity) {

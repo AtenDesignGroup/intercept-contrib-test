@@ -18,3 +18,9 @@ access event attendance tab:
 
 access event registrations tab:
   title: 'Access the node/{node}/registrations menu task'
+
+view saved_event flagging entities:
+  title: 'View saved event flagging entities'
+
+view own saved_event flagging entities:
+  title: 'View OWN saved event flagging entities'

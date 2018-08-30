@@ -140,6 +140,7 @@ class EventFilters extends PureComponent {
               value={filters[c.TYPE_LOCATION]}
               label={labels[c.TYPE_LOCATION]}
               chips
+              shouldFetch={false}
             />
             <SelectResource
               multiple

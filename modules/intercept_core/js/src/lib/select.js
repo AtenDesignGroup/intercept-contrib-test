@@ -89,6 +89,13 @@ export const keyValues = (selector, path) =>
     })),
   );
 
+// RICHAPP-638: Postponed until Drupal 8.6
+// https://atendesign.atlassian.net/browse/RICHAPP-638
+// export const getTermTree = (terms) => {
+//   const branches = groupBy(terms, 'data.relationships.parent.data.0.id');
+//   return branches;
+// };
+
 export const record = identifier => state => state[identifier.type].items[identifier.id];
 
 export const records = type => state => state[type].items;
@@ -97,9 +104,7 @@ export const recordIds = selector =>
   createSelector(selector, items => map(items, item => get(item, 'data.id')));
 
 export const recordIsLoading = (type, id) =>
-  createSelector(
-    record(getIdentifier(type, id)),
-    item => !!get(item, 'state.syncing'));
+  createSelector(record(getIdentifier(type, id)), item => !!get(item, 'state.syncing'));
 
 export const recordsAreLoading = type => state => state[type].syncing;
 
@@ -110,15 +115,26 @@ export const recordLabel = identifier =>
   );
 
 export const recordOptions = type =>
-  createSelector(records(type), items =>
-    sortBy(
-      map(items, item => ({
-        key: item.data.id,
-        value: get(item, 'data.attributes.title') || get(item, 'data.attributes.name'),
-      })),
-      i => i.value,
-    ),
-  );
+  createSelector(records(type), (items) => {
+    const isTerm = type.indexOf('taxonomy_term') >= 0;
+    let sorted = [];
+
+    // If this is a taxonomy term, sort it by weight then alphabetically by name.
+    if (isTerm) {
+      // RICHAPP-638: Postponed until Drupal 8.6
+      // getTermTree(items);
+      sorted = sortBy(sortBy(items, 'data.attributes.name'), 'data.attributes.weight');
+    }
+    // Else sort alphabetically by title
+    else {
+      sorted = sortBy(items, 'data.attributes.title');
+    }
+
+    return sorted.map(item => ({
+      key: item.data.id,
+      value: get(item, 'data.attributes.title') || get(item, 'data.attributes.name'),
+    }));
+  });
 
 // Converts the records object into an Array.
 export const recordsList = type => createSelector(records(type), items => map(items, item => item));

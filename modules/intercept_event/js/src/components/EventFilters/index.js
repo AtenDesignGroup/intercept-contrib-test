@@ -69,14 +69,14 @@ class EventFilters extends PureComponent {
   }
 
   render() {
-    const { showDate, filters } = this.props;
+    const { showDate, filters, view } = this.props;
     let currentFilters = currentFiltersConfig(filters);
     if (!showDate) {
       currentFilters = currentFilters.filter(f => [c.DATE_START, c.DATE_END].indexOf(f.key) < 0);
     }
 
     return (
-      <div className="filters filters--4up">
+      <div className={`filters filters--${view === 'calendar' ? '4up' : '3up'}`}>
         <h3 className="filters__heading">Filter</h3>
         <Formsy className="filters__inputs">
           <KeywordFilter
@@ -141,11 +141,13 @@ EventFilters.propTypes = {
   onChange: PropTypes.func.isRequired,
   showDate: PropTypes.bool,
   filters: PropTypes.object,
+  view: PropTypes.string,
 };
 
 EventFilters.defaultProps = {
   showDate: true,
   filters: {},
+  view: null,
 };
 
 export default EventFilters;

@@ -407,6 +407,7 @@ class BrowseEvents extends Component {
                 onChange={handleFilterChange}
                 showDate={view === 'list'}
                 filters={filters}
+                view={view}
               />
             </div>
             <div className="l__primary">{eventComponent}</div>

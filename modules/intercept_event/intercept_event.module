@@ -304,7 +304,31 @@ function intercept_event_entity_bundle_field_info(\Drupal\Core\Entity\EntityType
       ])
       ->setClass(\Drupal\intercept_event\EventRegistrationField::class);
 
+    $fields['event_recurrence'] = \Drupal\Core\Field\BaseFieldDefinition::create('entity_reference')
+      ->setLabel(t('Event recurrence'))
+      ->setSetting('target_type', 'event_recurrence')
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
   }
   return $fields;
+}
 
+/**
+ * Implements hook_entity_base_field_info().
+ */
+function intercept_event_entity_base_field_info(\Drupal\Core\Entity\EntityTypeInterface $entity_type) {
+  if ($entity_type->id() == 'node') {
+    $definitions = [];
+    $definitions['event_recurrence'] = \Drupal\Core\Field\BaseFieldDefinition::create('entity_reference')
+      ->setName('event_reccurence')
+      ->setLabel(t('Event recurrence'))
+      ->setTargetEntityTypeId($entity_type->id())
+      ->setSettings([
+        'unsigned' => false,
+        'size' => 'normal',
+        'target_type' => 'event_recurrence',
+      ])
+      ->setCardinality(1);
+    return $definitions;
+  }
 }

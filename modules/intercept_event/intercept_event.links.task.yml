@@ -14,10 +14,10 @@ entity.event_recurrence.edit_form:
   base_route: entity.event_recurrence.canonical
   title: 'Edit'
 
-entity.event_recurrence.version_history:
-  route_name: entity.event_recurrence.version_history
+entity.event_recurrence.events_form:
+  route_name: entity.event_recurrence.events_form
   base_route: entity.event_recurrence.canonical
-  title: 'Revisions'
+  title: 'Events'
 
 entity.event_recurrence.delete_form:
   route_name:  entity.event_recurrence.delete_form

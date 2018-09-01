@@ -19,6 +19,9 @@ class EventRecurrenceListBuilder extends EntityListBuilder {
    */
   public function buildHeader() {
     $header['id'] = $this->t('Event Recurrence ID');
+    $header['date'] = $this->t('Date');
+    $header['rule'] = $this->t('Rule');
+    $header['events'] = $this->t('Events');
     return $header + parent::buildHeader();
   }
 
@@ -32,6 +35,9 @@ class EventRecurrenceListBuilder extends EntityListBuilder {
       'entity.event_recurrence.edit_form',
       ['event_recurrence' => $entity->id()]
     );
+    $row['date'] = $entity->getDate();
+    $row['rule'] = $entity->getRecurHandler()->humanReadable();
+    $row['events'] = count($entity->getEvents());
     return $row + parent::buildRow($entity);
   }
 

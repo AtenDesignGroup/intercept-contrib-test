@@ -8,6 +8,7 @@ use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\intercept_core\DateRangeFormatterTrait;
 use Drupal\intercept_core\Field\Computed\MethodItemList;
 use Drupal\user\UserInterface;
 
@@ -65,6 +66,8 @@ class EventRegistration extends ContentEntityBase implements EventRegistrationIn
 
   use StringTranslationTrait;
 
+  use DateRangeFormatterTrait;
+
   public function label() {
     return $this->getTitle();
   }
@@ -79,15 +82,9 @@ class EventRegistration extends ContentEntityBase implements EventRegistrationIn
     }
     $values = [
       '@title' => $event->label(),
+      '@date' => $this->getDateRange($dates),
     ];
-    if ($from_date = $dates->get('value')->getDateTime()) {
-      $values['@date'] = $from_date->format('n/j/Y');
-      $values['@time_start'] = $from_date->format('g:i A');
-    }
-    if ($to_date = $dates->get('end_value')->getDateTime()) {
-      $values['@time_end'] = $to_date->format('g:i A');
-    }
-    return !empty($values) ? $this->t('@title @date: @time_start - @time_end', $values) : '';
+    return !empty($values) ? $this->t('@title @date', $values) : '';
   }
 
   public function total() {

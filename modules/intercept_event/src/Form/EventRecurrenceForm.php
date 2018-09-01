@@ -4,6 +4,11 @@ namespace Drupal\intercept_event\Form;
 
 use Drupal\Core\Entity\ContentEntityForm;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\date_recur\DateRecurRRule;
+use Drupal\date_recur\Plugin\DateRecurOccurrenceHandler\DefaultDateRecurOccurrenceHandler;
+use Drupal\date_recur\Plugin\DateRecurOccurrenceHandlerInterface;
+use Drupal\date_recur\Plugin\Field\FieldType\DateRecurItem;
+use Drupal\node\NodeInterface;
 
 /**
  * Form controller for Event Recurrence edit forms.
@@ -18,6 +23,10 @@ class EventRecurrenceForm extends ContentEntityForm {
   public function buildForm(array $form, FormStateInterface $form_state) {
     /* @var $entity \Drupal\intercept_event\Entity\EventRecurrence */
     $form = parent::buildForm($form, $form_state);
+
+    if ($this->entity->isNew()) {
+      $form['event']['#access'] = FALSE;
+    }
 
     if (!$this->entity->isNew()) {
       $form['new_revision'] = [
@@ -65,7 +74,6 @@ class EventRecurrenceForm extends ContentEntityForm {
           '%label' => $entity->label(),
         ]));
     }
-    $form_state->setRedirect('entity.event_recurrence.canonical', ['event_recurrence' => $entity->id()]);
+    $form_state->setRedirect('entity.event_recurrence.edit_form', ['event_recurrence' => $entity->id()]);
   }
-
 }

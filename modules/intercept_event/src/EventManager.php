@@ -16,6 +16,16 @@ class EventManager implements EventManagerInterface {
   use StringTranslationTrait;
 
   /**
+   * @var AccountProxyInterface
+   */
+  protected $currentUser;
+
+  /**
+   * @var EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
    * Constructs a new EventManager object.
    */
   public function __construct(AccountProxyInterface $current_user, EntityTypeManagerInterface $entity_type_manager) {

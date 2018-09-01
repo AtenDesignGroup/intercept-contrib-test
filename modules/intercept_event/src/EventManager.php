@@ -96,6 +96,45 @@ class EventManager implements EventManagerInterface {
     return $form;
   }
 
+  /**
+   * Alter a node edit form to add template functionality.
+   */
+  public function nodeEditFormAlter(&$form, \Drupal\Core\Form\FormStateInterface $form_state) {
+    if (!$this->currentUser->hasPermission('edit event field field_event_is_template')) {
+      return;
+    }
+    $node = $form_state->getFormObject()->getEntity();
+    $is_template = $node->field_event_is_template->getString();
+    $form['actions']['template_create'] = [
+      '#type' => 'submit',
+      '#value' => t('Use as template'),
+      '#access' => empty($is_template),
+      '#weight' => 15,
+      '#submit' => array_merge($form['actions']['submit']['#submit'], [[$this, 'nodeEditFormSubmit']]),
+    ];
+
+    if ($is_template) {
+      $form['actions']['submit']['#value'] = t('Save template');
+    }
+  }
+
+  public function nodeEditFormSubmit(&$form, \Drupal\Core\Form\FormStateInterface $form_state) {
+    $event = $form_state->getFormObject()->getEntity();
+    $event_template = $event->createDuplicate();
+    // This is to separate it from other events in the admin/content menu.
+    $event_template->field_event_is_template->setValue(1);
+    $event_template->event_recurrence->setValue(NULL);
+    $event_template->save();
+    // TODO: Use the message service.
+    drupal_set_message($this->t('Event template @link has been created.', [
+      '@link' => $event_template->link(),
+    ]));
+    // TODO: Fix this so that this overrides the admin/content destination.
+    $form_state->setRedirect('entity.node.edit_form', [
+      'node' => $event_template->id()
+    ]);
+  }
+
   public function load($id) {
     // First try to see if the id provided is a uuid.
     if ($entities = $this->entityTypeManager->getStorage('node')->loadByProperties(['uuid' => $id])) {

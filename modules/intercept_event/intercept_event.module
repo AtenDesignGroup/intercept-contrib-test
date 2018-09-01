@@ -1,6 +1,7 @@
 <?php
 
 use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\TypedData\DataDefinition;
 
 /**
@@ -199,7 +200,7 @@ function intercept_event_form_views_exposed_form_alter(&$form, \Drupal\Core\Form
 /**
  * Implements hook_form_FORM_ID_alter().
  */
-function intercept_event_form_node_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state) {
+function intercept_event_form_node_form_alter(&$form, FormStateInterface $form_state) {
   $node = $form_state->getFormObject()->getEntity();
   $request = \Drupal::service('request_stack')->getCurrentRequest();
   if ($node->bundle() == 'event' && $node->isNew() && $request->query->get('template')) {
@@ -229,7 +230,7 @@ function intercept_event_node_view(array &$build, \Drupal\Core\Entity\EntityInte
  *
  * @see intercept_event_form_node_form_alter()
  */
-function intercept_event_node_event_form_validate(&$form, \Drupal\Core\Form\FormStateInterface $form_state) {
+function intercept_event_node_event_form_validate(&$form, FormStateInterface $form_state) {
   // Skip validation if registration is not required.
   $values = $form_state->getValues();
   $must_register = $values['field_must_register']['value'];

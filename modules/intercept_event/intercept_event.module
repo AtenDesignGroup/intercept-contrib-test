@@ -202,6 +202,9 @@ function intercept_event_form_views_exposed_form_alter(&$form, \Drupal\Core\Form
  */
 function intercept_event_form_node_form_alter(&$form, FormStateInterface $form_state) {
   $node = $form_state->getFormObject()->getEntity();
+  if ($node->bundle() == 'event' && !$node->isNew()) {
+    \Drupal::service('intercept_event.manager')->nodeEditFormAlter($form, $form_state);
+  }
   $request = \Drupal::service('request_stack')->getCurrentRequest();
   if ($node->bundle() == 'event' && $node->isNew() && $request->query->get('template')) {
     $form['field_event_is_template']['widget']['value']['#default_value'] = 1;

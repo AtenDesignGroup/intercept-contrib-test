@@ -21,13 +21,13 @@ class EventRecurrenceAccessControlHandler extends EntityAccessControlHandler {
     /** @var \Drupal\intercept_event\Entity\EventRecurrenceInterface $entity */
     switch ($operation) {
       case 'view':
-        return AccessResult::allowedIfHasPermission($account, 'view recurrence entities');
+        return AccessResult::allowedIfHasPermission($account, 'view event_recurrence');
 
       case 'update':
-        return AccessResult::allowedIfHasPermission($account, 'edit event recurrence entities');
+        return AccessResult::allowedIfHasPermission($account, 'update event_recurrence');
 
       case 'delete':
-        return AccessResult::allowedIfHasPermission($account, 'delete event recurrence entities');
+        return AccessResult::allowedIfHasPermission($account, 'delete event_recurrence');
     }
 
     // Unknown operation, no opinion.
@@ -38,7 +38,7 @@ class EventRecurrenceAccessControlHandler extends EntityAccessControlHandler {
    * {@inheritdoc}
    */
   protected function checkCreateAccess(AccountInterface $account, array $context, $entity_bundle = NULL) {
-    return AccessResult::allowedIfHasPermission($account, 'add event recurrence entities');
+    return AccessResult::allowedIfHasPermission($account, 'create event_recurrence');
   }
 
 }

@@ -16,6 +16,12 @@ intercept_core.permissions:
   route_name: intercept_core.admin_permissions
   parent: intercept_core.settings
 
+intercept_core.admin_structure:
+  title: 'InterCEPT'
+  description: 'Configure InterCEPT entity structures.'
+  route_name: intercept_core.admin_structure
+  parent: system.admin_structure
+
 intercept_core.account.settings:
   title: 'Settings'
   weight: 15

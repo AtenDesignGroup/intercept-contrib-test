@@ -10,7 +10,7 @@ equipment_reservation.admin.structure.settings:
   title: 'Equipment reservations'
   description: 'Configure Equipment reservation entities'
   route_name: equipment_reservation.settings
-  parent: system.admin_structure
+  parent: intercept_core.admin_structure
 
 equipment_reservation.reserve_equipment:
   title: Reserve Equipment

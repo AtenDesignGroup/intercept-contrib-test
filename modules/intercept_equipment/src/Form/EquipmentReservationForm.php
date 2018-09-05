@@ -181,14 +181,14 @@ class EquipmentReservationForm extends ContentEntityForm {
     // We only need the nid though.
     if (!is_numeric($nid)){
       $pattern = '/\(([^\)]*?)\)/'; // text between () excluding ().
-      preg_match($pattern, $nid, $matches);
+      preg_match($pattern, $nid, $matches, NULL, -1);
       $nid = $matches[1];
     }
 
     // Display the view embed with the node id of the piece of equipment.
-    $availability_view = views_embed_view('intercept_equipment_reservations_availability', 'embed', $nid);
     $output = '<div id="edit-output">';
     $output .= '<h2>Upcoming Reservations</h2>';
+    $availability_view = views_embed_view('intercept_equipment_reservations_availability', 'embed', $nid);
     $output .= \Drupal::service('renderer')->render($availability_view);
     $output .= '</div>';
     return ['#markup' => $output];

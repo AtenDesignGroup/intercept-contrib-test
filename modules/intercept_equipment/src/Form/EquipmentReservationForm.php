@@ -58,6 +58,11 @@ class EquipmentReservationForm extends ContentEntityForm {
       $current_user = \Drupal\user\Entity\User::load(\Drupal::currentUser()->id());
       $form['field_user']['widget'][0]['target_id']['#default_value'] = $current_user;
     }
+    // Pre-fill the equipment field if it's in the query string params.
+    $equipment_nid = \Drupal::request()->query->get('id');
+    if (!empty($equipment_nid) && empty($form['field_equipment']['widget'][0]['target_id']['#default_value'])) {
+      $form['field_equipment']['widget'][0]['target_id']['#default_value'] = Node::load($equipment_nid);
+    }
 
     $entity = $this->entity;
 

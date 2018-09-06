@@ -32,7 +32,7 @@ class EventAccessControlHandler extends EntityAccessControlHandler {
     /** @var \Drupal\Core\Access\AccessResult $result */
     $result = parent::checkAccess($entity, $operation, $account);
 
-    if ($result->isNeutral()) {
+    if ($result->isNeutral() && $this->hasReferencedUser($entity)) {
       $result = $this->checkEntityUserReferencedPermissions($entity, $operation, $account);
     }
 
@@ -68,4 +68,7 @@ class EventAccessControlHandler extends EntityAccessControlHandler {
     return $return;
   }
 
+  protected function hasReferencedUser(EntityInterface $entity) {
+    return $entity->hasField('field_user');
+  }
 }

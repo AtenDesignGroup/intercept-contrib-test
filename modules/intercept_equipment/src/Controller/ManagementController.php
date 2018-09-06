@@ -13,9 +13,8 @@ class ManagementController extends ManagementControllerBase {
       $build['links']['equipment'] = $this->getManagementButton('Equipment', 'equipment_configuration');
     }
     if ($page_name == 'default') {
-      $build['links']['equipment'] = $this->getButton('Reserve equipment', 'entity.equipment_reservation.add_form');
-      // @TODO: Decoupled version:
-      //$build['links']['equipment'] = $this->getButton('Reserve equipment', 'intercept_equipment.reserve_equipment');
+      //$build['links']['equipment'] = $this->getButton('Reserve equipment', 'entity.equipment_reservation.add_form');
+      $build['links']['equipment'] = $this->getButton('Reserve equipment', 'view.intercept_equipment.page');
       $build['links']['equipment']['#access'] = $this->currentUser->hasPermission('add equipment reservation entities');
     }
   }

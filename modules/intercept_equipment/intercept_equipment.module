@@ -6,6 +6,11 @@
  */
 
 use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Render\Element;
+use Drupal\intercept_equipment\Entity\EquipmentReservationInterface;
+use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
+use Drupal\Core\Url;
 use Drupal\Core\Database\Database;
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\node\Entity\Node;
@@ -173,7 +178,7 @@ function intercept_equipment_form_views_exposed_form_alter(&$form, \Drupal\Core\
       return [
         '#type' => 'link',
         '#title' => t($t),
-        '#url' => \Drupal\Core\Url::fromRoute('<current>', [], [
+        '#url' => Url::fromRoute('<current>', [], [
           'query' => $query,
         ]),
         '#attributes' => ['class' => ['date-filter', 'date-filter-' . strtolower($t)]],
@@ -186,4 +191,51 @@ function intercept_equipment_form_views_exposed_form_alter(&$form, \Drupal\Core\
     ];
     $form['field_dates_value']['#type'] = 'hidden';
   }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function intercept_equipment_theme() {
+  return [
+    'equipment_reservation' => [
+      'render element' => 'elements',
+    ],
+  ];
+}
+
+/**
+ * Prepares variables for Equipment reservation templates.
+ *
+ * Default template: equipment_reservation.html.twig.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - elements: An associative array containing the user information and any
+ *   - attributes: HTML attributes for the containing element.
+ */
+function template_preprocess_equipment_reservation(array &$variables) {
+  // Fetch EquipmentReservation Entity Object.
+  $equipment_reservation = $variables['equipment_reservation'] = $variables['elements']['#equipment_reservation'];
+  $variables['view_mode'] = $variables['elements']['#view_mode'];
+  // Helpful $content variable for templates.
+  foreach (Element::children($variables['elements']) as $key) {
+    $variables['content'][$key] = $variables['elements'][$key];
+  }
+  $variables['label'] = $equipment_reservation->label();
+}
+
+/**
+ * Implements hook_theme_suggestions_HOOK().
+ */
+function intercept_equipment_theme_suggestions_equipment_reservation(array $variables) {
+  $suggestions = [];
+  $equipment_reservation = $variables['elements']['#equipment_reservation'];
+  $sanitized_view_mode = strtr($variables['elements']['#view_mode'], '.', '_');
+
+  $suggestions[] = 'equipment_reservation__' . $sanitized_view_mode;
+  $suggestions[] = 'equipment_reservation__' . $equipment_reservation->bundle();
+  $suggestions[] = 'equipment_reservation__' . $equipment_reservation->bundle() . '__' . $sanitized_view_mode;
+
+  return $suggestions;
 }

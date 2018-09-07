@@ -20,4 +20,4 @@ intercept_equipment.account.equipment_reservations:
     _title: 'Equipment Reservations'
     route_name: 'entity.user.equipment_reservations'
   requirements:
-    _user_is_logged_in: 'TRUE'
+    _permission: 'create equipment reservation entities'

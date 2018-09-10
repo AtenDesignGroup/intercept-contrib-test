@@ -120,7 +120,7 @@ class EventManager implements EventManagerInterface {
       '#value' => t('Use as template'),
       '#access' => empty($is_template),
       '#weight' => 15,
-      '#submit' => array_merge($form['actions']['submit']['#submit'], [[$this, 'nodeEditFormSubmit']]),
+      '#submit' => array_merge($form['actions']['submit']['#submit'], [[static::class, 'nodeEditFormSubmit']]),
     ];
 
     if ($is_template) {
@@ -128,7 +128,7 @@ class EventManager implements EventManagerInterface {
     }
   }
 
-  public function nodeEditFormSubmit(&$form, \Drupal\Core\Form\FormStateInterface $form_state) {
+  public static function nodeEditFormSubmit(&$form, \Drupal\Core\Form\FormStateInterface $form_state) {
     $event = $form_state->getFormObject()->getEntity();
     $event_template = $event->createDuplicate();
     // This is to separate it from other events in the admin/content menu.
@@ -136,7 +136,7 @@ class EventManager implements EventManagerInterface {
     $event_template->event_recurrence->setValue(NULL);
     $event_template->save();
     // TODO: Use the message service.
-    drupal_set_message($this->t('Event template @link has been created.', [
+    drupal_set_message(t('Event template @link has been created.', [
       '@link' => $event_template->link(),
     ]));
     // TODO: Fix this so that this overrides the admin/content destination.

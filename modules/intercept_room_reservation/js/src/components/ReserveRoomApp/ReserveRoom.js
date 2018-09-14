@@ -198,12 +198,33 @@ class ReserveRoom extends React.Component {
             // direction: getSortDirection(view, values),
           },
         },
-        include: [...roomIncludes, 'field_location'],
+        include: [...roomIncludes],
         headers: {
           'X-Consumer-ID': interceptClient.consumer,
         },
       });
     }
+
+    this.props.fetchLocations({
+      filters: {
+        onlyBranchLocation: {
+          path: 'field_branch_location',
+          value: '1',
+        },
+        published: {
+          path: 'status',
+          value: '1',
+        },
+      },
+      fields: {
+        [c.TYPE_LOCATION]: [
+          'uuid',
+          'title',
+          'field_location_hours',
+          'field_branch_location',
+        ]
+      }
+    });
   }
 
   componentDidUpdate(prevProps) {

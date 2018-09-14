@@ -204,14 +204,6 @@ class ReserveRoomStep1 extends React.Component {
 
   componentDidMount() {
     this.doFetchRooms(this.props.filters, this.props.view, this.props.calView, this.props.date);
-    this.props.fetchLocations({
-      filters: {
-        onlyBranchLocation: {
-          path: 'field_branch_location',
-          value: '1',
-        },
-      },
-    });
     this.mounted = true;
   }
 

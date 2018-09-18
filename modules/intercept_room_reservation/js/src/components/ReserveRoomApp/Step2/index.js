@@ -15,6 +15,7 @@ import Slide from '@material-ui/core/Slide';
 
 // Local Components
 import ReserveRoomDateForm from './ReserveRoomDateForm';
+import RoomAvailabilityCalendar from './RoomAvailabilityCalendar';
 // import utils from '../../../../../../../node_modules/formsy-react/lib/utils';
 
 const { constants, select, utils } = interceptClient;
@@ -94,7 +95,7 @@ class ReserveRoomStep2 extends React.Component {
   };
 
   render() {
-    const { onChange, formValues, onChangeStep, hours } = this.props;
+    const { onChange, formValues, onChangeStep, hours, room } = this.props;
 
     const limits = utils.userIsStaff()
       ? {
@@ -118,7 +119,13 @@ class ReserveRoomStep2 extends React.Component {
               max={limits.max}
             />
           </div>
-          <div className="l__primary" />
+          <div className="l__primary">
+            <RoomAvailabilityCalendar
+              room={room}
+              min={limits.min}
+              max={limits.max}
+            />
+          </div>
         </div>
       </div>
     );
@@ -144,6 +151,7 @@ const mapStateToProps = (state, ownProps) => {
 };
 
 ReserveRoomStep2.propTypes = {
+  room: PropTypes.string,
   rooms: PropTypes.arrayOf(Object).isRequired,
   roomsLoading: PropTypes.bool.isRequired,
   onChange: PropTypes.func.isRequired,
@@ -158,6 +166,7 @@ ReserveRoomStep2.defaultProps = {
   date: new Date(),
   filters: {},
   hours: null,
+  room: null,
 };
 
 export default connect(mapStateToProps)(ReserveRoomStep2);

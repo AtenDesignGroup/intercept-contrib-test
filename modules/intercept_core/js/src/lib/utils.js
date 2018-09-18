@@ -24,7 +24,7 @@ export const getUserTimeNow = () =>
     .toDate();
 
 // Set default moment timezone.
-moment.tz.setDefault(getUserTimezone());
+// moment.tz.setDefault(getUserTimezone());
 
 //
 // Date Functions

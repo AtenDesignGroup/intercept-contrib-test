@@ -184,9 +184,10 @@ class EquipmentReservationForm extends ContentEntityForm {
     // In some cases this field value shows up looking like:
     // Portable Projector (2655)
     // We only need the nid though.
-    if (!is_numeric($nid)){
-      $pattern = '/\(([^\)]*?)\)/'; // text between () excluding ().
-      preg_match($pattern, $nid, $matches, NULL, -1);
+    if (!is_numeric($nid)) {
+      $nid = str_replace('"', '', $nid);
+      $pattern = '/\(([^\)]*?)\)$/'; // text between () excluding ().
+      preg_match($pattern, $nid, $matches);
       $nid = $matches[1];
     }
 

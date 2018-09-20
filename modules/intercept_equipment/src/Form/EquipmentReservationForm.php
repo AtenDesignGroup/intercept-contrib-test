@@ -95,18 +95,20 @@ class EquipmentReservationForm extends ContentEntityForm {
     // Equipment Fields:
     // field_text_content, field_equipment_type, field_duration_min, image_primary
     $minimum_reservation = $equipment_node->get('field_duration_min')->getValue();
-    $minimum_reservation = new \DateInterval($minimum_reservation[0]['value']);
-    // Set it up like 0:1 meaning "0 days:1 hour"
-    $minimum_reservation = $minimum_reservation->format('%d') . ':' . $minimum_reservation->format('%h');
-    $equipment_type = $equipment_node->get('field_equipment_type')->getValue();
-    $equipment_type = $equipment_type[0]['target_id'];
-    $equipment_term = Term::load($equipment_type);
-    $email_addresses = $equipment_term->get('field_email')->getValue();
+    if (!empty($minimum_reservation)) {
+      $minimum_reservation = new \DateInterval($minimum_reservation[0]['value']);
+      // Set it up like 0:1 meaning "0 days:1 hour"
+      $minimum_reservation = $minimum_reservation->format('%d') . ':' . $minimum_reservation->format('%h');
+      $equipment_type = $equipment_node->get('field_equipment_type')->getValue();
+      $equipment_type = $equipment_type[0]['target_id'];
+      $equipment_term = Term::load($equipment_type);
+      $email_addresses = $equipment_term->get('field_email')->getValue();
 
-    // Reservation period must be at least as long as the largest minimum reservation period of any item in the cart
-    if (!$this->timeCheck($requested_reservation_period, $minimum_reservation)) {
-      $explodies = explode(':', $minimum_reservation);
-      $form_state->setErrorByName('field_dates', t('The minimum reservation on this piece of equipment is ' . $explodies[0] . ' day(s) and ' . $explodies[1] . ' hour(s). Please make a reservation for at least that long.'));
+      // Reservation period must be at least as long as the largest minimum reservation period of any item in the cart
+      if (!$this->timeCheck($requested_reservation_period, $minimum_reservation)) {
+        $explodies = explode(':', $minimum_reservation);
+        $form_state->setErrorByName('field_dates', t('The minimum reservation on this piece of equipment is ' . $explodies[0] . ' day(s) and ' . $explodies[1] . ' hour(s). Please make a reservation for at least that long.'));
+      }
     }
     // Items in the cart must be available during the reservation period
     // Get other reservations at same time. No two people can have the same thing checked out at the same time.

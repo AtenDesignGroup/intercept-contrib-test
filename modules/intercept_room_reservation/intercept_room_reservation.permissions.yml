@@ -24,5 +24,5 @@ bypass room reservation limit:
   description: 'Assign to users that do not need to adhere to a reservation limit for room reservations'
 
 bypass room reservation agreement:
-  title: 'Bypass room reservation agreement'
-  description: 'Assign to roles that can bypass the room reservation agreement'
+  title: 'Bypass room reservation agreement & approval process'
+  description: 'Assign to roles that can bypass the room reservation agreement & approval process'

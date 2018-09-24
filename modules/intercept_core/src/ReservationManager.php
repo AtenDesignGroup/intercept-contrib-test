@@ -132,18 +132,21 @@ class ReservationManager implements ReservationManagerInterface {
       if ($debug) {
         $debug_data['schedule'] = $this->getSchedule($reservations, $params);
         $debug_data['schedule_by_open_hours'] = $this->getScheduleByOpenHours($reservations, $params, $node);
-        $hours = $this->getHours($params, $node);
-        $hours_start = $this->timeToDate($hours['starthours'], $this->dateUtility->getDate($params['start']));
-        $hours_end = $this->timeToDate($hours['endhours'], $this->dateUtility->getDate($params['end']));
-        $debug_data['hours'] = [
-          'start' => ['raw' => $hours['starthours']],
-          'end' => ['raw' => $hours['endhours']],
-        ];
+        $debug_data['hours'] = FALSE;
+        if (!$this->isClosed($params, $node)) {
+          $hours = $this->getHours($params, $node);
+          $hours_start = $this->timeToDate($hours['starthours'], $this->dateUtility->getDate($params['start']));
+          $hours_end = $this->timeToDate($hours['endhours'], $this->dateUtility->getDate($params['end']));
+          $debug_data['hours'] = [
+            'start' => ['raw' => $hours['starthours']],
+            'end' => ['raw' => $hours['endhours']],
+          ];
 
-        $debug_data['hours']['start']['default_timezone'] = $hours_start->format(self::FORMAT);
-        $debug_data['hours']['start']['storage_timezone'] = $this->dateUtility->convertTimezone($hours_start, 'storage')->format(self::FORMAT);
-        $debug_data['hours']['end']['default_timezone'] = $hours_end->format(self::FORMAT);
-        $debug_data['hours']['end']['storage_timezone'] = $this->dateUtility->convertTimezone($hours_end, 'storage')->format(self::FORMAT);
+          $debug_data['hours']['start']['default_timezone'] = $hours_start->format(self::FORMAT);
+          $debug_data['hours']['start']['storage_timezone'] = $this->dateUtility->convertTimezone($hours_start, 'storage')->format(self::FORMAT);
+          $debug_data['hours']['end']['default_timezone'] = $hours_end->format(self::FORMAT);
+          $debug_data['hours']['end']['storage_timezone'] = $this->dateUtility->convertTimezone($hours_end, 'storage')->format(self::FORMAT);
+        }
       }
       $return[$uuid]['dates'] = $this->getDates($reservations);
       if ($debug) {
@@ -341,9 +344,10 @@ class ReservationManager implements ReservationManagerInterface {
     $hours = $location->field_location_hours;
     $values = $hours->getValue();
     // e.g. 'starthours' => '0900', 'endhours' => '1700'
-    $times = $values[$d];
-
-    return !empty($values[$d]) ? $values[$d] : FALSE;
+    return array_reduce($values, function($car, $val) use ($d) {
+      if ($val['day'] == $d) { $car = $val; }
+      return $car;
+    });
   }
 
   protected function isClosed($params, $node) {

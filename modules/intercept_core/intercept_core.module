@@ -121,11 +121,17 @@ function intercept_core_user_load(array $entities) {
     });
     // Set defaults to use regardless of profile data.
     $entity->full_name = $entity->name->getString();
+    $entity->first_name = '';
     $entity->barcode = '';
 
     if ($profile = reset($profile)) {
+
+      $first_name = trim($profile->field_first_name->getString());
+      if (!empty($first_name)) {
+        $entity->first_name = $first_name;
+      }
       $full_name = join(' ', [
-        trim($profile->field_first_name->getString()),
+        $first_name,
         trim($profile->field_last_name->getString()),
       ]);
       if (!empty(trim($full_name))) {

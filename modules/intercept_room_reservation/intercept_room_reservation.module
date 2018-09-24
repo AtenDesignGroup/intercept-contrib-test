@@ -50,10 +50,13 @@ function intercept_room_reservation_preprocess_page(array &$variables) {
 }
 
 /**
- * Implements_hook_entity_presave().
+ * Implements hook_ENTITY_TYPE_presave().
  */
-function intercept_room_reservation_entity_presave(\Drupal\Core\Entity\EntityInterface $entity) {
-  if ($entity->getEntityTypeId() == 'room_reservation' && $entity->isNew()) {
+function intercept_room_reservation_room_reservation_presave(RoomReservationInterface $entity) {
+  if ($entity->statusHasChanged()) {
+    \Drupal::service('intercept_core.reservation.manager')->notifyStatusChange($entity, $entity->getOriginalStatus(), $entity->getNewStatus());
+  }
+  if ($entity->isNew()) {
     // If they've signed the agreement, remove it from their session.
     if (\Drupal::service('current_user')->isAnonymous()) {
       return;
@@ -109,6 +112,17 @@ function intercept_room_reservation_theme() {
       'render element' => 'elements',
     ],
   ];
+}
+
+/**
+ * Implements hook_mail().
+ */
+function intercept_room_reservation_mail($key, &$message, $params) {
+  if (!empty($params['reservation_manager'])) {
+    /** @var \Drupal\intercept_core\ReservationManager $reservation_manager **/
+    $reservation_manager = $params['reservation_manager'];
+    $params['reservation_manager']->buildEmail($key, $message, $params);
+  }
 }
 
 function intercept_room_reservation_form_node_event_edit_form_alter(&$form, $form_state) {

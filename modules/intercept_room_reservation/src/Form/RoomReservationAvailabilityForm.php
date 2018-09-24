@@ -140,9 +140,9 @@ class RoomReservationAvailabilityForm extends FormBase {
       $method = 'get' . ucwords($tz) . 'Timezone';
 
       $param_start    = $this->rf($param_info['start'][$tz . '_timezone'], $tz);
-      $location_start = $this->rf($hours['start'][$tz . '_timezone'], $tz);
+      $location_start = $hours ? $this->rf($hours['start'][$tz . '_timezone'], $tz) : 'Closed';
       $param_end      = $this->rf($param_info['end'][$tz . '_timezone'], $tz);
-      $location_end   = $this->rf($hours['end'][$tz . '_timezone'], $tz);
+      $location_end   = $hours ? $this->rf($hours['end'][$tz . '_timezone'], $tz) : 'Closed';
       $column = [
         $this->dateUtility->{$method}()->getName(),
         $param_start,

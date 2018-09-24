@@ -209,7 +209,7 @@ function intercept_room_reservation_entity_extra_field_info() {
 }
 
 /**
- * Implements hook_ENTITY_TYPE_view()().
+ * Implements hook_ENTITY_TYPE_view().
  */
 function intercept_room_reservation_room_reservation_view(array &$build, RoomReservationInterface $room_reservation, EntityViewDisplayInterface $display, $view_mode) {
   $build['location_full'] = [

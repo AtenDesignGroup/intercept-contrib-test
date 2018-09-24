@@ -12,6 +12,8 @@ use Drupal\office_hours\OfficeHoursDateHelper;
 
 /**
  * Class ReservationManager.
+ *
+ * TODO: Move partially over to an EntityReservationManager/RoomReservationManager.
  */
 class ReservationManager implements ReservationManagerInterface {
 

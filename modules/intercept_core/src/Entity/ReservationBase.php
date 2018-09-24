@@ -40,36 +40,60 @@ abstract class ReservationBase extends RevisionableContentEntityBase {
    * {@inheritdoc}
    */
   public function label() {
-    $dates = $this->get('field_dates')->first();
-    if (!$dates || !$dates->get('value') || !$dates->get('end_value')) {
+    $timezone = drupal_get_user_timezone();
+    return $this->getDateRange($timezone);
+  }
+
+  public function getDateRange($timezone = 'UTC') {
+    if (!$this->getStartDate() || !$this->getEndDate()) {
       return '';
     }
     $values = [];
-    $timezone = drupal_get_user_timezone();
-    if ($from_date = $dates->get('start_date')->getValue()) {
-      $values['@date'] = $from_date->format('F j, Y', ['timezone' => $timezone]);
-      $values['@time_start'] = $from_date->format('h:i A', ['timezone' => $timezone]);
-    }
-    if ($to_date = $dates->get('end_date')->getValue()) {
-      $values['@time_end'] = $to_date->format('h:i A', ['timezone' => $timezone]);
-    }
+    $from_date = $this->getStartDate();
+    $values['@date'] = $from_date->format('F j, Y', ['timezone' => $timezone]);
+    $values['@time_start'] = $from_date->format('h:i A', ['timezone' => $timezone]);
+
+    $to_date = $this->getEndDate();
+    $values['@time_end'] = $to_date->format('h:i A', ['timezone' => $timezone]);
     return !empty($values) ? $this->t('@date from @time_start to @time_end', $values) : '';
   }
 
   public function getStartDate() {
-    $dates = $this->get('field_dates')->first();
-    return $dates->get('start_date')->getValue();
+    return $this->get('field_dates')->start_date;
   }
 
   public function getEndDate() {
-    $dates = $this->get('field_dates')->first();
-    return $dates->get('end_date')->getValue();
+    return $this->get('field_dates')->end_date;
+  }
+
+  public function getLocation() {
+    $type = $this->reservationType();
+    return $this->get("{$type}_location")->entity;
+  }
+
+  public function getOriginalStatus() {
+    return isset($this->original) ? $this->original->field_status->getString() : FALSE;
+  }
+
+  public function getNewStatus() {
+    return $this->field_status->getString();
+  }
+
+  public function statusHasChanged() {
+    if ($this->isNew()) {
+      return TRUE;
+    }
+    $original_status = $this->original->field_status->getString();
+    $new_status = $this->field_status->getString();
+    return $this->getOriginalStatus() != $this->getNewStatus();
   }
 
   /**
    * A string for the location node associated with this reservation.
    *
    * @return \Drupal\Core\StringTranslation\TranslatableMarkup
+   *
+   * TODO: Change this to locationString();
    */
   public function location() {
     $type = $this->reservationType();
@@ -186,6 +210,13 @@ abstract class ReservationBase extends RevisionableContentEntityBase {
   public function setOwner(UserInterface $account) {
     $this->set('author', $account->id());
     return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getRegistrant() {
+    return $this->get('field_user') ? $this->get('field_user')->entity : FALSE;
   }
 
   /**

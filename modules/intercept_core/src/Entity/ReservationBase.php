@@ -11,6 +11,7 @@ use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\intercept_core\Field\Computed\FileFieldItemList;
 use Drupal\intercept_core\Field\Computed\MethodItemList;
+use Drupal\intercept_core\Utility\Dates;
 use Drupal\user\UserInterface;
 
 abstract class ReservationBase extends RevisionableContentEntityBase {
@@ -64,6 +65,17 @@ abstract class ReservationBase extends RevisionableContentEntityBase {
 
   public function getEndDate() {
     return $this->get('field_dates')->end_date;
+  }
+
+  private function hasBothDates() {
+    return $this->getStartDate() && $this->getEndDate();
+  }
+
+  public function getDuration() {
+    if ($this->hasBothDates()) {
+      return Dates::duration($this->getStartDate(), $this->getEndDate());
+    }
+    return '';
   }
 
   public function getLocation() {

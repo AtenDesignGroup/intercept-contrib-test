@@ -36,10 +36,26 @@ intercept_room_reservation.account.room_reservations:
   requirements:
     _user_is_logged_in: 'TRUE'
 
+    #room_reservation.availability:
+    #  path: '/admin/content/room-reservations/availability'
+    #  defaults:
+    #    _controller: 'Drupal\intercept_room_reservation\Controller\RoomReservationController::availabilityAdmin'
+    #  requirements:
+    #    _role: 'administrator'
+
+intercept_room_reservation.api.user_status:
+  path: '/api/rooms/user/status'
+  methods: [POST, GET]
+  defaults:
+    _controller: 'Drupal\intercept_room_reservation\Controller\RoomReservationController::userStatus'
+  requirements:
+    _access: 'TRUE'
+
+
 intercept_room_reservation.api.availability:
   path: '/api/rooms/availability'
   methods: [POST, GET]
   defaults:
     _controller: 'Drupal\intercept_room_reservation\Controller\RoomReservationController::availability'
   requirements:
-    _permission: 'create room_reservation'
+    _access: 'TRUE'

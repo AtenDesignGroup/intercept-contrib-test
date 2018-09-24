@@ -11,6 +11,7 @@ use Drupal\Core\Url;
 use Drupal\intercept_core\ReservationManagerInterface;
 use Drupal\intercept_room_reservation\Entity\RoomReservationInterface;
 use Drupal\intercept_room_reservation\Form\RoomReservationAgreementForm;
+use Drupal\intercept_room_reservation\Form\RoomReservationAvailabilityForm;
 use Drupal\user\UserInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -301,6 +302,23 @@ class RoomReservationController extends ControllerBase implements ContainerInjec
     return $build;
   }
 
+  /**
+   * API Callback to get a user's status.
+   */
+  public function userStatus(\Symfony\Component\HttpFoundation\Request $request) {
+    $result = [
+      'uuid' => $this->currentUser()->getAccount()->uuid(),
+      'limit' => $this->config('intercept_room_reservation.settings')->get('reservation_limit', 1),
+      'count' => $this->reservationManager->userReservationCount($this->currentUser()),
+      'exceededLimit' => $this->reservationManager->userExceededReservationLimit($this->currentUser()),
+    ];
+
+    return JsonResponse::create($result, 200);
+  }
+
+  /**
+   * Room node local task for reservations.
+   */
   public function reservations(\Drupal\node\NodeInterface $node, \Symfony\Component\HttpFoundation\Request $request) {
     $reservations = $this->reservationManager->reservations('room', function($query) use ($node) {
       $query->condition('field_room', $node->id(), '=');
@@ -309,7 +327,24 @@ class RoomReservationController extends ControllerBase implements ContainerInjec
     $list = $this->entityTypeManager()->getListBuilder('room_reservation');
 
     $list->setEntityIds(array_keys($reservations));
-    return $list->render();
+    $link = \Drupal\Core\Link::createFromRoute('Create reservation', 'entity.room_reservation.add_form', [
+      'room' => $node->id(),
+    ], [
+      'attributes' => ['class' => ['button button-action']], 
+    ]);
+    $form_state = new \Drupal\Core\Form\FormState();
+    $form_state->set('node', $node);
+    $form = $this->formBuilder()->buildForm(RoomReservationAvailabilityForm::class, $form_state);
+    return [
+      'create' => $link->toRenderable(),
+      'list' => $list->render(),
+      'availability_form' => [
+        '#title' => $this->t('Availability form'),
+        '#type' => 'details',
+        '#open' => !empty($form_state->getUserInput()),
+        'form' => $form,
+      ],
+    ];
   }
 
   public function availability(\Symfony\Component\HttpFoundation\Request $request) {
@@ -329,6 +364,7 @@ class RoomReservationController extends ControllerBase implements ContainerInjec
         'end' => $params['end'],
         'duration' => $params['duration'],
         'rooms' => $rooms,
+        'debug' => !empty($params['debug']),
       ]);
     }
 

@@ -6,6 +6,7 @@ use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Mail\MailManagerInterface;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\Utility\Token;
 use Drupal\intercept_core\Utility\Dates;
@@ -73,7 +74,7 @@ class ReservationManager implements ReservationManagerInterface {
     ];
   }
 
-  public function userExceededReservationLimit(\Drupal\core\Session\AccountInterface $user) {
+  public function userExceededReservationLimit(AccountInterface $user) {
     if ($user->hasPermission('bypass room reservation limit')) {
       return FALSE;
     }

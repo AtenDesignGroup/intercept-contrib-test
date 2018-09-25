@@ -15,6 +15,7 @@ use Drupal\intercept_room_reservation\Form\RoomReservationAvailabilityForm;
 use Drupal\user\UserInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Class RoomReservationController.
@@ -104,7 +105,7 @@ class RoomReservationController extends ControllerBase implements ContainerInjec
   }
 
   /**
-   * Show agreement form page.
+   * Reservation agreement form page.
    */
   public function agreement(\Symfony\Component\HttpFoundation\Request $request) {
     $config = $this->config('intercept_room_reservation.settings');
@@ -347,6 +348,38 @@ class RoomReservationController extends ControllerBase implements ContainerInjec
     ];
   }
 
+  /**
+   * Custom callback to check availabiity before reserving a room.
+   */
+  public function reserveRoom(\Symfony\Component\HttpFoundation\Request $request) {
+    $decode = \Drupal::service('serializer.encoder.jsonapi')->decode($request->getContent(), 'api_json');
+    $dates = $decode['data']['attributes']['field_dates'];
+    $room = $decode['data']['relationships']['field_room']['data']['id'];
+    $manager = \Drupal::service('intercept_core.reservation.manager');
+    $availability = $manager->availability([
+      'rooms' => $manager->convertIds([$room]),
+      'start' => $dates['value'],
+      'end' => $dates['end_value'],
+    ]);
+
+    $availability[$room]['uuid'] = $room;
+
+    if ($availability[$room]['has_reservation_conflict']) {
+      return JsonResponse::create([
+        'message' => $this->t('Has reservation conflict'),
+        'conflicting_reservation' => $availability[$room],
+        'error' => TRUE,
+        'error_code' => 409,
+      ], 409);
+    }
+
+    $resource_type = \Drupal::service('jsonapi.resource_type.repository')->get('room_reservation', 'room_reservation');
+    return \Drupal::service('jsonapi.request_handler')->handle($request, $resource_type);
+  }
+
+  /**
+   * API Callback to check room availability.
+   */
   public function availability(\Symfony\Component\HttpFoundation\Request $request) {
     // Accept query sring params, and then also accept a post request.
     $params = $request->query->get('filter');

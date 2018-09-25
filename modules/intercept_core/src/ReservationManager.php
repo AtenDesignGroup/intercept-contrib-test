@@ -78,14 +78,18 @@ class ReservationManager implements ReservationManagerInterface {
     if ($user->hasPermission('bypass room reservation limit')) {
       return FALSE;
     }
+    $config = $this->configFactory->get('intercept_room_reservation.settings');
+    return $this->userReservationCount($user) >= $config->get('reservation_limit');
+  }
+
+  public function userReservationCount(AccountInterface $user) {
     $reservations = $this->reservations('room', function($query) use ($user) {
       $query->condition('field_user', $user->id(), '=');
       $date = new DrupalDateTime('now', $this->dateUtility->getUtcTimezone());
       $query->condition('field_dates.end_value', $date->format('Y-m-d\TH:i:s'), '>');
       $query->condition('field_status', ['requested', 'approved'], 'IN');
     });
-    $config = $this->configFactory->get('intercept_room_reservation.settings');
-    return count($reservations) >= $config->get('reservation_limit');
+    return count($reservations);
   }
 
   public function availability($params = []) {

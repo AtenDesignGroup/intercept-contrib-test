@@ -6,10 +6,11 @@ use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Mail\MailManagerInterface;
+use Drupal\Core\Session\AccountProxyInterface;
+use Drupal\Core\Utility\Token;
 use Drupal\intercept_core\Utility\Dates;
 use Drupal\intercept_room_reservation\Entity\RoomReservation;
 use Drupal\intercept_room_reservation\Entity\RoomReservationInterface;
-
 /**
  * Class ReservationManager.
  *
@@ -35,13 +36,25 @@ class ReservationManager implements ReservationManagerInterface {
   protected $dateUtility;
 
   /**
+   * @var Token
+   */
+  protected $token;
+
+  /**
+   * @var AccountProxyInterface
+   */
+  protected $currentUser;
+
+  /**
    * Constructs a new ReservationManager object.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, ConfigFactoryInterface $config_factory, MailManagerInterface $mail_manager, Dates $date_utility) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, ConfigFactoryInterface $config_factory, MailManagerInterface $mail_manager, Dates $date_utility, Token $token, AccountProxyInterface $current_user) {
     $this->entityTypeManager = $entity_type_manager;
     $this->configFactory = $config_factory;
     $this->mailManager = $mail_manager;
     $this->dateUtility = $date_utility;
+    $this->token = $token;
+    $this->currentUser = $current_user;
   }
 
   /**

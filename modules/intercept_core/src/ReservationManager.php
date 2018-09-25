@@ -96,6 +96,14 @@ class ReservationManager implements ReservationManagerInterface {
     // Show debug information in return.
     $debug = !empty($params['debug']);
     // Reservations keyed by room uuid.
+    if (empty($params['duration'])) {
+
+      $duration = $this->dateUtility->duration(
+        $this->dateUtility->getDrupalDate($params['start']),
+        $this->dateUtility->getDrupalDate($params['end'])
+      );
+      $params['duration'] = $duration;
+    }
     $data = $this->reservationsByNode('room', function($query) use ($params) {
       $start_date = $this->dateUtility->getDate($params['start']);
       $end_date = $this->dateUtility->getDate($params['end']);

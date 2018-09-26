@@ -150,8 +150,12 @@ class EventRecurrence extends RevisionableContentEntityBase implements EventRecu
   }
 
   public function getRecurHandler() {
+    if (!$this->getRecurField()) {
+      return FALSE;
+    }
     return $this->getRecurField()->getOccurrenceHandler();
   }
+
   public function getRecurField() {
     if (!$this->hasField('field_event_rrule')) {
       return FALSE;

@@ -36,7 +36,8 @@ class EventRecurrenceListBuilder extends EntityListBuilder {
       ['event_recurrence' => $entity->id()]
     );
     $row['date'] = $entity->getDate();
-    $row['rule'] = $entity->getRecurHandler()->humanReadable();
+    $handler = $entity->getRecurHandler();
+    $row['rule'] = $handler ? $handler->humanReadable() : '';
     $row['events'] = count($entity->getEvents());
     return $row + parent::buildRow($entity);
   }

@@ -17,7 +17,7 @@ trait ItemTraverseTrait {
 
   private function traverse(EntityInterface $entity, array $fields) {
     $field = array_shift($fields);
-    if ($entity->{$field} && $entity->{$field}->entity) {
+    if ($entity->hasField($field) && !empty($entity->get($field)->entity)) {
       return empty($fields) ? $entity->{$field}->entity : $this->traverse($entity->{$field}->entity, $fields);
     }
     return FALSE;

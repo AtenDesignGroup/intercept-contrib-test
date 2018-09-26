@@ -56,12 +56,6 @@ class RoomReservationController extends ControllerBase implements ContainerInjec
     $step = $request->query->get('step');
     $build = [];
 
-    if ($this->currentUser()->isAnonymous()) {
-      return $this->redirect('user.login', [
-        'destination' => Url::fromRoute('<current>')->toString(),
-      ]);
-    }
-
     if ($this->reservationManager->userExceededReservationLimit($this->currentUser())) {
       $config = $this->config('intercept_room_reservation.settings');
       $limit_text = $config->get('reservation_limit_text');

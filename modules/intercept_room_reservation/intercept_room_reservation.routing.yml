@@ -25,7 +25,7 @@ intercept_room_reservation.reserve_room:
     _controller: '\Drupal\intercept_room_reservation\Controller\RoomReservationController::reserve'
     _title: 'reserve'
   requirements:
-    _access: TRUE
+    _access: 'TRUE'
 
 intercept_room_reservation.account.room_reservations:
   path: '/account/room-reservations'

@@ -44,8 +44,32 @@ class UserProfileForm extends \Drupal\user\ProfileForm {
       $form_state->set('patron', $patron);
       $entity_form['field_barcode']['widget'][0]['value']['#default_value'] = $patron->barcode;
       $entity_form['#ief_element_submit'][] = [$this, 'saveInlineEntityForm'];
+      foreach (['field_first_name', 'field_last_name'] as $field) {
+        $entity_form[$field]['widget'][0]['#disabled'] = TRUE;
+      }
+      $this->populateAddress($patron, $entity_form['field_address']);
     }
     $entity_form['field_barcode']['widget']['#disabled'] = TRUE;
+  }
+
+  protected function populateAddress($patron, &$address_field) {
+      $data = $patron->data();
+      if (!empty($data->PatronAddresses[0])) {
+        $address = $data->PatronAddresses[0];
+        $address_field = &$address_field['widget'][0]['address'];
+        $address_field['#default_value']['country_code'] = 'US';
+        $replacements = [
+          'address_line1' => 'StreetOne',
+          'postal_code' => 'PostalCode',
+          'locality' => 'City',
+          'administrative_area' => 'State',
+        ];
+        foreach ($replacements as $drupal => $ils) {
+          $address_field['#default_value'][$drupal] = $address->{$ils};
+        }
+
+        $address_field['#disabled'] = TRUE;
+      }
   }
 
   protected function getInlineEntityFormDisplay(ContentEntityInterface $entity, $view_mode) {

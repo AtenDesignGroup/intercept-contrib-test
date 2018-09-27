@@ -15,6 +15,9 @@ function intercept_event_theme() {
     'event_registration_event_form' => [
       'render element' => 'form',
     ],
+    'event_recurrence_event_form' => [
+      'render element' => 'form',
+    ],
     'events_recommended' => [
       'variables' => ['content' => NULL],
       'template' => 'events-recommended',
@@ -79,6 +82,13 @@ function intercept_event_entity_extra_field_info() {
     'visible' => FALSE,
   ];
 
+  $extra['node']['event']['form']['recurring_event'] = [
+    'label' => t('Recurring event'),
+    'description' => t('View event recurrence information.'),
+    'weight' => 10,
+    'visible' => FALSE,
+  ];
+
   return $extra;
 }
 
@@ -89,7 +99,9 @@ function intercept_event_entity_type_build(array &$entity_types) {
   /** @var $entity_types \Drupal\Core\Entity\EntityTypeInterface[] */
   $entity_types['node']
     ->setFormClass('template', 'Drupal\intercept_event\Form\EventTemplateForm')
-    ->setLinkTemplate('template-form', '/node/{node}/template');
+    ->setLinkTemplate('template-form', '/node/{node}/template')
+    ->setFormClass('recurrence', 'Drupal\intercept_event\Form\EventRecurrenceEventsForm')
+    ->setLinkTemplate('recurrence-form', '/node/{node}/recurrences');
 }
 
 /**
@@ -202,6 +214,9 @@ function intercept_event_form_views_exposed_form_alter(&$form, \Drupal\Core\Form
  */
 function intercept_event_form_node_form_alter(&$form, FormStateInterface $form_state) {
   $node = $form_state->getFormObject()->getEntity();
+  if ($node->bundle() == 'event' && $node->hasField('event_recurrence')) {
+    \Drupal::service('intercept_event.recurring_manager')->nodeFormAlter($form, $form_state);
+  }
   if ($node->bundle() == 'event' && !$node->isNew()) {
     \Drupal::service('intercept_event.manager')->nodeEditFormAlter($form, $form_state);
   }

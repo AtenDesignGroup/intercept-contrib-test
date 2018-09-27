@@ -28,7 +28,6 @@ class EventRegistrationEventForm extends ContentEntityForm {
     $form['#theme'] = 'event_registration_event_form';
 
     // TODO: Move to intercept_base theme.
-    $form['#attributes']['class'][] = 'l--offset';
     $form['customer_first_name'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Customer First Name'),

@@ -86,6 +86,16 @@ entity.node.template:
   options:
     _admin_route: TRUE
 
+entity.node.recurrence_form:
+  path: '/node/{node}/recurrences'
+  defaults:
+    _entity_form: 'node.recurrence'
+  requirements:
+    _entity_access: 'node.update'
+    _entity_bundle: 'event'
+    _custom_access: 'intercept_event.recurring_manager:isRecurrenceBaseEvent'
+    _permission: 'update any event_recurrence'
+
 entity.node.template_form:
   path: '/event/{node}/template'
   defaults:

@@ -191,6 +191,7 @@ function intercept_event_form_views_exposed_form_alter(&$form, \Drupal\Core\Form
       $query['date'] = $d;
       $query['sort'] = $o;
       $query['order'] = 'field_date_time';
+      ($d == 1) ? $suffix = ' - ' : $suffix = '';
       return [
         '#type' => 'link',
         '#title' => t($t),
@@ -198,6 +199,7 @@ function intercept_event_form_views_exposed_form_alter(&$form, \Drupal\Core\Form
           'query' => $query,
         ]),
         '#attributes' => ['class' => ['date-filter', 'date-filter-' . strtolower($t)]],
+        '#suffix' => $suffix,
       ];
     };
     $form['links'] = [

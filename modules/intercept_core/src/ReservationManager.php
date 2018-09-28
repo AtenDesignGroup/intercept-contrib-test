@@ -491,6 +491,8 @@ class ReservationManager implements ReservationManagerInterface {
    * @see intercept_room_reservation_mail()
    */
   public function buildEmail($key, &$message, $params) {
+    $headers['content-type']= 'text/html';
+    $message['headers'] = $headers;
     $email_config = $params['email_config'];
     $variables = [
       '%site_name' => \Drupal::config('system.site')->get('name'),
@@ -503,7 +505,7 @@ class ReservationManager implements ReservationManagerInterface {
     $subject = $this->token->replace($email_config['subject'], $token_replacements);
     $body = $this->token->replace($email_config['body'], $token_replacements);
     $message['subject'] = str_replace(["\r", "\n"], '', $subject);
-    $message['body'][] = \Drupal\Core\Mail\MailFormatHelper::htmlToText($body);
+    $message['body'][] = $body;
   }
 
 }

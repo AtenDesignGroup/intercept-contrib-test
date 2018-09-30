@@ -3,7 +3,7 @@ entity.user.equipment_reservations:
   defaults:
     _controller: '\Drupal\intercept_equipment\Controller\EquipmentReservationController::reserveEquipment'
   requirements:
-    _permission: 'create equipment reservation entities'
+    _permission: 'add equipment reservation entities'
 
 intercept_equipment.reserve_equipment:
   path: '/equipment/reserve'
@@ -11,7 +11,7 @@ intercept_equipment.reserve_equipment:
     _controller: '\Drupal\intercept_equipment\Controller\EquipmentReservationController::reserveEquipment'
     _title: 'Reserve Equipment'
   requirements:
-    _permission: 'create equipment reservation entities'
+    _permission: 'add equipment reservation entities'
 
 intercept_equipment.account.equipment_reservations:
   path: '/account/equipment-reservations'
@@ -20,4 +20,4 @@ intercept_equipment.account.equipment_reservations:
     _title: 'Equipment Reservations'
     route_name: 'entity.user.equipment_reservations'
   requirements:
-    _permission: 'create equipment reservation entities'
+    _permission: 'add equipment reservation entities'

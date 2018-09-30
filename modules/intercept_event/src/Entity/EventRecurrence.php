@@ -33,7 +33,6 @@ use Drupal\user\UserInterface;
  *       "add" = "Drupal\intercept_event\Form\EventRecurrenceForm",
  *       "edit" = "Drupal\intercept_event\Form\EventRecurrenceForm",
  *       "delete" = "Drupal\intercept_event\Form\EventRecurrenceDeleteForm",
- *       "events" = "Drupal\intercept_event\Form\EventRecurrenceEventsForm",
  *     },
  *     "access" = "Drupal\intercept_event\EventAccessControlHandler",
  *     "permission_provider" = "Drupal\intercept_event\EventPermissionProvider",
@@ -56,7 +55,6 @@ use Drupal\user\UserInterface;
  *     "canonical" = "/event-recurrence/{event_recurrence}",
  *     "add-form" = "/event-recurrence/add",
  *     "edit-form" = "/event-recurrence/{event_recurrence}/edit",
- *     "events-form" = "/event-recurrence/{event_recurrence}/events",
  *     "delete-form" = "/event-recurrence/{event_recurrence}/delete",
  *     "version-history" = "/admin/structure/intercept/event_recurrence/{event_recurrence}/revisions",
  *     "revision" = "/admin/structure/intercept/event_recurrence/{event_recurrence}/revisions/{event_recurrence_revision}/view",
@@ -150,8 +148,12 @@ class EventRecurrence extends RevisionableContentEntityBase implements EventRecu
   }
 
   public function getRecurHandler() {
+    if (!$this->getRecurField()) {
+      return FALSE;
+    }
     return $this->getRecurField()->getOccurrenceHandler();
   }
+
   public function getRecurField() {
     if (!$this->hasField('field_event_rrule')) {
       return FALSE;

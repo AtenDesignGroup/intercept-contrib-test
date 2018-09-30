@@ -33,20 +33,30 @@ class RoomReservationListBuilder extends EntityListBuilder {
    * {@inheritdoc}
    */
   public function buildRow(EntityInterface $entity) {
-    // Fix the dates to be non-UTC in the display.
-    // Dates/times of reservation
-    $reservation_dates = $entity->get('field_dates')->getValue();
-    $dateTime = new DrupalDateTime($reservation_dates[0]['value'], 'UTC');
-    $reservation_start_date = date('m-d-Y g:i A', $dateTime->getTimestamp());
-    $dateTime = new DrupalDateTime($reservation_dates[0]['end_value'], 'UTC');
-    $reservation_end_date = date('m-d-Y g:i A', $dateTime->getTimestamp());
     /* @var $entity \Drupal\intercept_room_reservation\Entity\RoomReservation */
-    $row['name'] = $entity->link($reservation_start_date . ' - ' . $reservation_end_date);
+    $row['name'] = $entity->link($entity->getDateRange('UTC'));
     $row['room'] = $this->getEntityLabel($entity->field_room->entity, $this->t('No room'));
-    $row['location'] = $entity->get('location')->entity ? $entity->get('location')->entity->label() : '';
+    $row['location'] = $entity->getLocation()? $entity->getLocation()->link() : '';
     $row['user'] = $this->getEntityLabel($entity->field_user->entity, $this->t('No user'));
     $row['status'] = $entity->field_status->getString();
     return $row + parent::buildRow($entity);
+  }
+
+  /**
+   * Loads entity IDs using a pager sorted by the entity id.
+   *
+   * @return array
+   *   An array of entity IDs.
+   */
+  protected function getEntityIds() {
+    $query = $this->getStorage()->getQuery()
+      ->sort('created', 'DESC');
+
+    // Only add the pager if a limit is specified.
+    if ($this->limit) {
+      $query->pager($this->limit);
+    }
+    return $query->execute();
   }
 
   private function getEntityLabel(EntityInterface $entity = NULL, $default = '') {

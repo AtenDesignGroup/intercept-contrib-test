@@ -27,46 +27,46 @@ class ManagementController extends ManagementControllerBase {
   }
 
   public function viewRoomReservationConfiguration(AccountInterface $user, Request $request) {
+    // This can also be moved into a separate function, for example:
+    // 'reservation_canceled' - viewRoomReservationConfigurationReservationCanceled()
+    if ($form_key = $request->query->get('view')) {
+      $form = $this->formBuilder()->getForm(RoomReservationSettingsForm::class);
+      $this->hideElements($form, [$form_key, 'email']);
+      return $form;
+    }
+
     $build = [
       'title' => $this->title('Room Reservations'),
       'taxonomies' => $this->getTaxonomyVocabularyTable(['meeting_purpose']),
     ];
 
-    $table = $this->table();
-    $table->row($this->getButtonSubpage('email_approve', 'Room Reservation Approved Email'), '');
-    $table->row($this->getButtonSubpage('email_cancel', 'Room Reservation Canceled Email'), '');
-    $table->row($this->getButtonSubpage('email_denied', 'Room Reservation Denied Email'), '');
-    $table->row($this->getButtonSubpage('reservation_limit', 'Number of Customer Reservations'), '');
-
     $build['settings'] = [
       'title' => $this->h2('Settings'),
-      'table' => $table->toArray(),
     ];
 
+    $table = $this->table();
+    $emails = \Drupal\intercept_core\ReservationManager::emails();
+    foreach ($emails as $key => $name) {
+      $table->row($this->getButtonSubpage($key, $name), '');
+    }
+
+    $build['settings']['emails'] = [
+      '#type' => 'fieldset',
+      '#title' => $this->t('Reservation emails'),
+    ];
+
+    $build['settings']['emails']['table'] = $table->toRenderable();
+
+    $table = $this->table();
+    $table->row($this->getButtonSubpage('reservation_limit', 'Number of Customer Reservations'), '');
+
+    $build['settings']['general'] = [
+      '#type' => 'fieldset',
+      '#title' => $this->t('General settings'),
+    ];
+
+    $build['settings']['general']['table'] = $table->toRenderable();
     return $build;
   }
 
-  public function viewRoomReservationConfigurationEmailCancel(AccountInterface $user, Request $request) {
-    $form = $this->formBuilder()->getForm(RoomReservationSettingsForm::class);
-    $this->hideElements($form, ['reservation_canceled', 'email']);
-    return $form;
-  }
-
-  public function viewRoomReservationConfigurationEmailApprove(AccountInterface $user, Request $request) {
-    $form = $this->formBuilder()->getForm(RoomReservationSettingsForm::class);
-    $this->hideElements($form, ['reservation_accepted', 'email']);
-    return $form;
-  }
-
-  public function viewRoomReservationConfigurationEmailDenied(AccountInterface $user, Request $request) {
-    $form = $this->formBuilder()->getForm(RoomReservationSettingsForm::class);
-    $this->hideElements($form, ['reservation_rejected', 'email']);
-    return $form;
-  }
-
-  public function viewRoomReservationConfigurationReservationLimit(AccountInterface $user, Request $request) {
-    $form = $this->formBuilder()->getForm(RoomReservationSettingsForm::class);
-    $this->hideElements($form, ['reservation_limit']);
-    return $form;
-  }
 }

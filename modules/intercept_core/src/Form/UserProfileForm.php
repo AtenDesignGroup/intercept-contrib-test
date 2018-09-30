@@ -5,8 +5,10 @@ namespace Drupal\intercept_core\Form;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\profile\Entity\ProfileInterface;
 use Drupal\profile\ProfileStorageInterface;
 use Drupal\user\UserInterface;
+use RCPL\Polaris\Entity\Patron;
 
 class UserProfileForm extends \Drupal\user\ProfileForm {
 
@@ -41,11 +43,45 @@ class UserProfileForm extends \Drupal\user\ProfileForm {
     }
     // Set the default value for barcode and add a save handler for the pin.
     if ($patron = \Drupal::service('polaris.client')->patron->getByUser($user)) {
+      $this->populateName($entity_form, $patron, $profile);
       $form_state->set('patron', $patron);
       $entity_form['field_barcode']['widget'][0]['value']['#default_value'] = $patron->barcode;
       $entity_form['#ief_element_submit'][] = [$this, 'saveInlineEntityForm'];
+      foreach (['field_first_name', 'field_last_name'] as $field) {
+        $entity_form[$field]['widget'][0]['#disabled'] = TRUE;
+      }
+      $this->populateAddress($patron, $entity_form['field_address']);
     }
     $entity_form['field_barcode']['widget']['#disabled'] = TRUE;
+  }
+
+  private function populateName(array &$form, Patron $patron,  ProfileInterface $profile) {
+    if ($patron->getFirstName() != $profile->get('field_first_name')->getString()) {
+      $form['field_first_name']['widget'][0]['value']['#default_value'] = $patron->getFirstName();
+    }
+    if ($patron->getLastName() != $profile->get('field_first_name')->getString()) {
+      $form['field_last_name']['widget'][0]['value']['#default_value'] = $patron->getLastName();
+    }
+  }
+
+  protected function populateAddress($patron, &$address_field) {
+      $data = $patron->data();
+      if (!empty($data->PatronAddresses[0])) {
+        $address = $data->PatronAddresses[0];
+        $address_field = &$address_field['widget'][0]['address'];
+        $address_field['#default_value']['country_code'] = 'US';
+        $replacements = [
+          'address_line1' => 'StreetOne',
+          'postal_code' => 'PostalCode',
+          'locality' => 'City',
+          'administrative_area' => 'State',
+        ];
+        foreach ($replacements as $drupal => $ils) {
+          $address_field['#default_value'][$drupal] = $address->{$ils};
+        }
+
+        $address_field['#disabled'] = TRUE;
+      }
   }
 
   protected function getInlineEntityFormDisplay(ContentEntityInterface $entity, $view_mode) {

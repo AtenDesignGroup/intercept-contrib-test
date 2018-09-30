@@ -21,6 +21,14 @@ intercept_core.general:
   requirements:
     _permission: 'administer intercept_core'
 
+intercept_core.admin_structure:
+  path: '/admin/structure/intercept'
+  defaults:
+    _controller: '\Drupal\system\Controller\SystemController::systemAdminMenuBlockPage'
+    _title: 'InterCEPT'
+  requirements:
+    _permission: 'access administration pages'
+
 intercept_core.account.settings:
   path: '/account/settings'
   defaults:

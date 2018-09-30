@@ -8,10 +8,12 @@ use Drupal\user\Form\UserPermissionsForm as CoreUserPermissionsForm;
 class UserPermissionsForm extends CoreUserPermissionsForm {
 
   /**
-   * {@inheritdoc}
+   * Get InterCEPT specific roles.
+   *
+   * @eturn array
    */
-  protected function getRoles() {
-    return $this->roleStorage->loadMultiple([
+  public static function roles() {
+    return [
       'intercept_registered_customer',
       'intercept_kiosk',
       'intercept_staff',
@@ -19,7 +21,14 @@ class UserPermissionsForm extends CoreUserPermissionsForm {
       'intercept_event_organizer',
       'intercept_event_manager',
       'intercept_system_admin',
-    ]);
+    ];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function getRoles() {
+    return $this->roleStorage->loadMultiple(self::roles());
   }
 
   /**

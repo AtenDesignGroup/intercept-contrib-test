@@ -25,7 +25,7 @@ intercept_room_reservation.reserve_room:
     _controller: '\Drupal\intercept_room_reservation\Controller\RoomReservationController::reserve'
     _title: 'reserve'
   requirements:
-    _permission: 'access content'
+    _access: 'TRUE'
 
 intercept_room_reservation.account.room_reservations:
   path: '/account/room-reservations'
@@ -36,10 +36,27 @@ intercept_room_reservation.account.room_reservations:
   requirements:
     _user_is_logged_in: 'TRUE'
 
+intercept_room_reservation.api.reserve:
+  path: '/api/rooms/reserve'
+  defaults:
+    _controller: '\Drupal\intercept_room_reservation\Controller\RoomReservationController::reserveRoom'
+  methods: [POST, GET]
+  requirements:
+    # TODO: Find out if this is the right permission.
+    _permission: 'access content'
+
+intercept_room_reservation.api.user_status:
+  path: '/api/rooms/user/status'
+  methods: [POST, GET]
+  defaults:
+    _controller: 'Drupal\intercept_room_reservation\Controller\RoomReservationController::userStatus'
+  requirements:
+    _user_is_logged_in: 'TRUE'
+
 intercept_room_reservation.api.availability:
   path: '/api/rooms/availability'
   methods: [POST, GET]
   defaults:
     _controller: 'Drupal\intercept_room_reservation\Controller\RoomReservationController::availability'
   requirements:
-    _permission: 'create room_reservation'
+    _access: 'TRUE'

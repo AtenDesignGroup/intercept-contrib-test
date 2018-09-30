@@ -17,6 +17,10 @@ class RoomReservationForm extends ContentEntityForm {
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
     /* @var $entity \Drupal\intercept_room_reservation\Entity\RoomReservation */
+    $entity = $this->entity;
+    if ($entity->isNew() && ($room = $this->getRequest()->query->get('room'))) {
+      $entity->set('field_room', $room);
+    }
     $form = parent::buildForm($form, $form_state);
 
     if (!$this->entity->isNew()) {
@@ -28,7 +32,6 @@ class RoomReservationForm extends ContentEntityForm {
       ];
     }
 
-    $entity = $this->entity;
 
     return $form;
   }

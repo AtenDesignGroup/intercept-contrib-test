@@ -182,6 +182,21 @@ class ManagementControllerBase extends ControllerBase {
         ];
         $this->table['#rows'][] = $row;
       }
+
+      /**
+       * Alias of toArray for consistency.
+       *
+       * @return array
+       */
+      public function toRenderable() {
+        return $this->toArray();
+      }
+
+      /**
+       * To renderable array.
+       *
+       * @return array
+       */
       public function toArray() {
         return $this->table;
       }
@@ -190,6 +205,8 @@ class ManagementControllerBase extends ControllerBase {
 
   /**
    * Hide all elements in a form except specified keys.
+   *
+   * TODO: Rename this to isolateElements, or something similar.
    *
    * @param array $form
    *   Drupal form object

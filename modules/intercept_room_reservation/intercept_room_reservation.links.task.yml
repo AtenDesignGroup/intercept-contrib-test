@@ -26,6 +26,11 @@ entity.room_reservation.collection:
   base_route: system.admin_content
   weight: 15
 
+room_reservation.availability:
+  route_name: room_reservation.availability
+  title: 'Availability'
+  base_route: entity.room_reservation.collection
+
 entity.node.reservations:
   title: 'Reservations'
   route_name: entity.node.reservations

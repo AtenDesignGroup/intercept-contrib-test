@@ -11,9 +11,11 @@ use Drupal\Core\Url;
 use Drupal\intercept_core\ReservationManagerInterface;
 use Drupal\intercept_room_reservation\Entity\RoomReservationInterface;
 use Drupal\intercept_room_reservation\Form\RoomReservationAgreementForm;
+use Drupal\intercept_room_reservation\Form\RoomReservationAvailabilityForm;
 use Drupal\user\UserInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Class RoomReservationController.
@@ -53,12 +55,6 @@ class RoomReservationController extends ControllerBase implements ContainerInjec
   public function reserve(\Symfony\Component\HttpFoundation\Request $request) {
     $step = $request->query->get('step');
     $build = [];
-
-    if ($this->currentUser()->isAnonymous()) {
-      return $this->redirect('user.login', [
-        'destination' => Url::fromRoute('<current>')->toString(),
-      ]);
-    }
 
     if ($this->reservationManager->userExceededReservationLimit($this->currentUser())) {
       $config = $this->config('intercept_room_reservation.settings');
@@ -103,7 +99,7 @@ class RoomReservationController extends ControllerBase implements ContainerInjec
   }
 
   /**
-   * Show agreement form page.
+   * Reservation agreement form page.
    */
   public function agreement(\Symfony\Component\HttpFoundation\Request $request) {
     $config = $this->config('intercept_room_reservation.settings');
@@ -301,6 +297,23 @@ class RoomReservationController extends ControllerBase implements ContainerInjec
     return $build;
   }
 
+  /**
+   * API Callback to get a user's status.
+   */
+  public function userStatus(\Symfony\Component\HttpFoundation\Request $request) {
+    $result = [
+      'uuid' => $this->currentUser()->getAccount()->uuid(),
+      'limit' => $this->config('intercept_room_reservation.settings')->get('reservation_limit', 1),
+      'count' => $this->reservationManager->userReservationCount($this->currentUser()),
+      'exceededLimit' => $this->reservationManager->userExceededReservationLimit($this->currentUser()),
+    ];
+
+    return JsonResponse::create($result, 200);
+  }
+
+  /**
+   * Room node local task for reservations.
+   */
   public function reservations(\Drupal\node\NodeInterface $node, \Symfony\Component\HttpFoundation\Request $request) {
     $reservations = $this->reservationManager->reservations('room', function($query) use ($node) {
       $query->condition('field_room', $node->id(), '=');
@@ -309,9 +322,58 @@ class RoomReservationController extends ControllerBase implements ContainerInjec
     $list = $this->entityTypeManager()->getListBuilder('room_reservation');
 
     $list->setEntityIds(array_keys($reservations));
-    return $list->render();
+    $link = \Drupal\Core\Link::createFromRoute('Create reservation', 'entity.room_reservation.add_form', [
+      'room' => $node->id(),
+    ], [
+      'attributes' => ['class' => ['button button-action']], 
+    ]);
+    $form_state = new \Drupal\Core\Form\FormState();
+    $form_state->set('node', $node);
+    $form = $this->formBuilder()->buildForm(RoomReservationAvailabilityForm::class, $form_state);
+    return [
+      'create' => $link->toRenderable(),
+      'list' => $list->render(),
+      'availability_form' => [
+        '#title' => $this->t('Availability form'),
+        '#type' => 'details',
+        '#open' => !empty($form_state->getUserInput()),
+        'form' => $form,
+      ],
+    ];
   }
 
+  /**
+   * Custom callback to check availabiity before reserving a room.
+   */
+  public function reserveRoom(\Symfony\Component\HttpFoundation\Request $request) {
+    $decode = \Drupal::service('serializer.encoder.jsonapi')->decode($request->getContent(), 'api_json');
+    $dates = $decode['data']['attributes']['field_dates'];
+    $room = $decode['data']['relationships']['field_room']['data']['id'];
+    $manager = \Drupal::service('intercept_core.reservation.manager');
+    $availability = $manager->availability([
+      'rooms' => $manager->convertIds([$room]),
+      'start' => $dates['value'],
+      'end' => $dates['end_value'],
+    ]);
+
+    $availability[$room]['uuid'] = $room;
+
+    if ($availability[$room]['has_reservation_conflict']) {
+      return JsonResponse::create([
+        'message' => $this->t('Has reservation conflict'),
+        'conflicting_reservation' => $availability[$room],
+        'error' => TRUE,
+        'error_code' => 409,
+      ], 409);
+    }
+
+    $resource_type = \Drupal::service('jsonapi.resource_type.repository')->get('room_reservation', 'room_reservation');
+    return \Drupal::service('jsonapi.request_handler')->handle($request, $resource_type);
+  }
+
+  /**
+   * API Callback to check room availability.
+   */
   public function availability(\Symfony\Component\HttpFoundation\Request $request) {
     // Accept query sring params, and then also accept a post request.
     $params = $request->query->get('filter');
@@ -329,6 +391,7 @@ class RoomReservationController extends ControllerBase implements ContainerInjec
         'end' => $params['end'],
         'duration' => $params['duration'],
         'rooms' => $rooms,
+        'debug' => !empty($params['debug']),
       ]);
     }
 

@@ -2,3 +2,6 @@ services:
   intercept_event.manager:
     class: Drupal\intercept_event\EventManager
     arguments: ['@current_user', '@entity_type.manager']
+  intercept_event.recurring_manager:
+    class: Drupal\intercept_event\RecurringEventManager
+    arguments: ['@current_user', '@entity_type.manager']

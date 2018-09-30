@@ -1,3 +1,13 @@
+event_recurring:
+  version: VERSION
+  js:
+    js/event_recurring.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
+    - core/drupalSettings
+    - date_recur/rrule
+
 eventCheckin:
   version: VERSION
   js:

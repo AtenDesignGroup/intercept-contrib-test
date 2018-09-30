@@ -160,6 +160,12 @@ class RoomReservation extends ReservationBase implements RoomReservationInterfac
     if (!$this->get('field_room')->isEmpty()) {
       $room = $this->get('field_room')->entity;
       $approval_required = $room->field_approval_required->getString();
+
+      $current_user = \Drupal::currentUser();
+      if ($current_user->hasPermission('bypass room reservation agreement')) {
+        $approval_required = FALSE;
+      }
+
       $current_status = $this->get('field_status')->getString();
 
       if (!$approval_required && $current_status == 'requested') {

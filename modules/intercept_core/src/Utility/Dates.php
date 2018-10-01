@@ -36,6 +36,24 @@ class Dates {
   }
 
   /**
+   * Get date storage format string.
+   *
+   * @return string
+   */
+  public static function storageFormat() {
+    return DateTimeItemInterface::DATETIME_STORAGE_FORMAT;
+  }
+
+  /**
+   * Alias for static::storageFormat()
+   *
+   * @return string
+   */
+  public function getStorageFormat() {
+    return self::storageFormat();
+  }
+
+  /**
    * Get a timezone object.
    *
    * @param string $name

@@ -26,7 +26,7 @@ import RoomTeaser from 'intercept/RoomTeaser';
 // Local Components
 import RoomFilters from './RoomFilters';
 import RoomList from './RoomList';
-// import { get } from 'https';
+import withAvailability from './../withAvailability';
 
 const { constants, api, select, utils } = interceptClient;
 const c = constants;
@@ -192,14 +192,9 @@ class ReserveRoomStep1 extends React.Component {
         previous: null,
         exiting: false,
       },
-      availability: {
-        loading: false,
-        shouldUpdate: false,
-        rooms: [],
-      },
+      availabilityShouldUpdate: false,
     };
     this.doFetchRooms = debounce(this.doFetchRooms, 500).bind(this);
-    this.fetchAvailableRooms = debounce(this.fetchAvailableRooms, 200).bind(this);
   }
 
   componentDidMount() {
@@ -208,22 +203,27 @@ class ReserveRoomStep1 extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
-    const { availability } = this.state;
-    const { filters, rooms } = this.props;
+    const { availabilityShouldUpdate } = this.state;
+    const { availability, fetchAvailability, filters, rooms } = this.props;
     const didUpdate = prop => !isEqual(prevProps[prop], this.props[prop]);
 
-    if ((filters[c.DATE] || filters[NOW] === true) && (didUpdate('rooms') || didUpdate('filters'))) {
+    if (
+      (filters[c.DATE] || filters[NOW] === true) &&
+      (didUpdate('rooms') || didUpdate('filters'))
+    ) {
+      // Force an update since filters have changed.
       this.setState({
-        availability: {
-          ...this.state.availability,
-          shouldUpdate: true,
-        },
+        availabilityShouldUpdate: true,
       });
     }
 
     // Fetch room availability if necessary.
-    if (rooms.length > 0 && availability.shouldUpdate && !availability.loading) {
-      this.fetchAvailableRooms();
+    if (rooms.length > 0 && availabilityShouldUpdate && !availability.loading) {
+      // Prevent further updates until filters have changed.
+      this.setState({
+        availabilityShouldUpdate: false,
+      });
+      fetchAvailability(this.getRoomAvailabilityQuery());
     }
   }
 
@@ -280,8 +280,10 @@ class ReserveRoomStep1 extends React.Component {
 
     if (this.props.filters[NOW]) {
       const date = utils.roundTo(new Date(), 15, 'minutes', 'floor').tz(tz);
-      options.start = utils.dateToDrupal(date.clone());
-      options.end = utils.dateToDrupal(date.clone().add(options.duration, 'minute'));
+      options.start = date.clone();
+      options.end = date.clone().add(options.duration, 'minute');
+      // options.start = utils.dateToDrupal(date.clone());
+      // options.end = utils.dateToDrupal(date.clone().add(options.duration, 'minute'));
     }
     else if (this.props.filters[c.DATE]) {
       const date = moment.tz(this.props.filters[c.DATE], tz);
@@ -304,60 +306,60 @@ class ReserveRoomStep1 extends React.Component {
           break;
       }
 
-      options.start = utils.dateToDrupal(options.start);
-      options.end = utils.dateToDrupal(options.end);
+      // options.start = utils.dateToDrupal(options.start);
+      // options.end = utils.dateToDrupal(options.end);
     }
 
     return options;
   };
 
-  // Requests available rooms
-  fetchAvailableRooms() {
-    this.setState({
-      availability: {
-        ...this.state.availability,
-        loading: true,
-        shouldUpdate: false,
-      },
-    });
+  // // Requests available rooms
+  // fetchAvailability() {
+  //   this.setState({
+  //     availability: {
+  //       ...this.state.availability,
+  //       loading: true,
+  //       shouldUpdate: false,
+  //     },
+  //   });
 
-    fetch('/api/rooms/availability', {
-      method: 'POST',
-      credentials: 'same-origin',
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-      },
-      body: JSON.stringify(this.getRoomAvailabilityQuery()),
-    })
-      .then(res => res.text())
-      .then(this.handleAvailabiltyResponse)
-      .catch((e) => {
-        console.log(e);
-        if (this.mounted) {
-          this.setState({
-            availability: {
-              ...this.state.availability,
-              loading: false,
-              shouldUpdate: false,
-            },
-          });
-        }
-      });
-  }
+  //   fetch('/api/rooms/availability', {
+  //     method: 'POST',
+  //     credentials: 'same-origin',
+  //     headers: {
+  //       'Content-Type': 'application/json',
+  //       Accept: 'application/json',
+  //     },
+  //     body: JSON.stringify(this.getRoomAvailabilityQuery()),
+  //   })
+  //     .then(res => res.text())
+  //     .then(this.handleAvailabiltyResponse)
+  //     .catch((e) => {
+  //       console.log(e);
+  //       if (this.mounted) {
+  //         this.setState({
+  //           availability: {
+  //             ...this.state.availability,
+  //             loading: false,
+  //             shouldUpdate: false,
+  //           },
+  //         });
+  //       }
+  //     });
+  // }
 
-  handleAvailabiltyResponse = (res) => {
-    if (this.mounted) {
-      this.setState({
-        availability: {
-          ...this.state.availability,
-          loading: false,
-          rooms: JSON.parse(res),
-          shouldUpdate: false,
-        },
-      });
-    }
-  };
+  // handleAvailabiltyResponse = (res) => {
+  //   if (this.mounted) {
+  //     this.setState({
+  //       availability: {
+  //         ...this.state.availability,
+  //         loading: false,
+  //         rooms: JSON.parse(res),
+  //         shouldUpdate: false,
+  //       },
+  //     });
+  //   }
+  // };
 
   handleRoomSelect = (value) => {
     this.props.onChangeRoom(value);
@@ -393,9 +395,7 @@ class ReserveRoomStep1 extends React.Component {
     get(oldValues, `${c.TYPE_ROOM_TYPE}.length`) !== get(newValues, `${c.TYPE_ROOM_TYPE}.length`) ||
     oldValues[ATTENDEES] !== newValues[ATTENDEES];
 
-  doFetchRooms(
-    values = this.props.filters
-  ) {
+  doFetchRooms(values = this.props.filters) {
     const { fetchRooms } = this.props;
 
     fetchRooms({
@@ -414,8 +414,7 @@ class ReserveRoomStep1 extends React.Component {
   }
 
   showAvailable = (rooms) => {
-    const { availability } = this.state;
-    const { filters } = this.props;
+    const { availability, filters } = this.props;
 
     if (!filters[NOW] && !filters[c.DATE]) {
       return rooms;
@@ -563,4 +562,4 @@ ReserveRoomStep1.defaultProps = {
 export default connect(
   mapStateToProps,
   mapDispatchToProps,
-)(ReserveRoomStep1);
+)(withAvailability(ReserveRoomStep1));

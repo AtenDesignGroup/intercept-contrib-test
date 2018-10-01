@@ -2,6 +2,9 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 
+// Lodash
+import get from 'lodash/get';
+
 // Redux
 import { connect } from 'react-redux';
 
@@ -24,6 +27,7 @@ import SelectTime from 'intercept/Select/SelectTime';
 import Formsy, { addValidationRule } from 'formsy-react';
 
 // Local Components
+import withAvailability from './../withAvailability';
 
 const { constants, utils } = interceptClient;
 const c = constants;
@@ -94,6 +98,47 @@ class ReserveRoomDateForm extends PureComponent {
     this.disableButton = this.disableButton.bind(this);
     this.enableButton = this.enableButton.bind(this);
   }
+
+  componentDidMount() {
+    const { fetchAvailability, values, room } = this.props;
+    const { start, end, date } = values;
+    const shouldValidateConflicts = !!(room && start && end && date);
+    this.mounted = true;
+
+    if (shouldValidateConflicts) {
+      fetchAvailability(this.getRoomAvailabilityQuery());
+    }
+  }
+
+  componentDidUpdate(prevProps) {
+    const { fetchAvailability, values, room } = this.props;
+    const { start, end, date } = values;
+    const hasValues = !!(room && start && end && date);
+    const valuesChanged =
+      prevProps.room !== room ||
+      prevProps.values.end !== end ||
+      prevProps.values.start !== start ||
+      prevProps.values.date !== date;
+    const shouldValidateConflicts = hasValues && valuesChanged && start < end;
+
+    if (shouldValidateConflicts) {
+      fetchAvailability(this.getRoomAvailabilityQuery(), () => this.resetForm());
+    }
+
+    if (valuesChanged) {
+      this.resetForm();
+    }
+  }
+
+  componentWillUnmount() {
+    this.mounted = false;
+  }
+
+  resetForm = () => {
+    if (get(this, 'form.current')) {
+      this.form.current.reset(this.props.values);
+    }
+  };
 
   onInputChange(key) {
     return (event) => {
@@ -180,6 +225,23 @@ class ReserveRoomDateForm extends PureComponent {
     };
   }
 
+  // Get room availability query params based on current rooms and filters.
+  getRoomAvailabilityQuery = () => {
+    const { values, room } = this.props;
+    const start = utils.getDateFromTime(values.start, values[c.DATE]);
+    const end = utils.getDateFromTime(values.end, values[c.DATE]);
+    const options = {
+      rooms: [room],
+    };
+
+    // Compute duration of reservation.
+    options.duration = utils.getDurationInMinutes(start, end);
+    options.start = start;
+    options.end = end;
+
+    return options;
+  };
+
   updateValue = (key, value) => {
     const newValues = { ...this.props.values, [key]: value };
     this.props.onChange(newValues);
@@ -191,14 +253,21 @@ class ReserveRoomDateForm extends PureComponent {
   };
 
   render() {
-    const { values, min, max, step, onSubmit } = this.props;
+    const { availability, disabledTimespans, values, min, max, step, onSubmit, room } = this.props;
     const isClosed = !min || !max;
-    // const minValue = matchDate(min, values.date);
-    // const maxValue = matchDate(max, values.date);
-    let validationErrors = {};
+    const validationErrors = {};
+    const conflictProp = utils.userIsStaff()
+      ? 'has_reservation_conflict'
+      : 'has_open_hours_conflict';
+    const conflictMessage = 'Room is not available at this time';
 
     if (isClosed) {
       validationErrors[c.DATE] = 'Location is closed';
+    }
+
+    if (get(availability, `rooms.${room}.${conflictProp}`)) {
+      validationErrors.start = conflictMessage;
+      validationErrors.end = conflictMessage;
     }
 
     return (
@@ -236,6 +305,8 @@ class ReserveRoomDateForm extends PureComponent {
               max={max}
               step={step}
               disabled={isClosed}
+              disabledSpans={disabledTimespans}
+              disabledExclude={'trailing'}
             />
             <div className="input-group--subgroup">
               <SelectTime
@@ -299,6 +370,8 @@ class ReserveRoomDateForm extends PureComponent {
               max={max}
               step={step}
               disabled={isClosed}
+              disabledSpans={disabledTimespans}
+              disabledExclude={'leading'}
             />
           </div>
 
@@ -347,4 +420,4 @@ ReserveRoomDateForm.defaultProps = {
 
 const mapStateToProps = (state, ownProps) => ({});
 
-export default connect(mapStateToProps)(ReserveRoomDateForm);
+export default connect(mapStateToProps)(withAvailability(ReserveRoomDateForm));

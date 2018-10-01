@@ -65,8 +65,14 @@ class SelectTime extends React.Component {
    * @param step {Number}
    *  Interval in which options are created in minutes.
    */
-  static getOptions(min, max, step) {
+  static getOptions(min, max, step, disabledSpans, disabledExclude) {
     const options = [];
+    const disabledOptions = this.constructor.getDisabledOptions(
+      disabledSpans,
+      step,
+      disabledExclude,
+    );
+
     if (!min || !max) {
       return options;
     }
@@ -79,26 +85,90 @@ class SelectTime extends React.Component {
       return options;
     }
     do {
-      const key = i.format('HHmm');
+      const key = i.tz(utils.getUserTimezone()).format('HHmm');
       const value = utils.getTimeDisplay(i);
 
       if (key === '0000' && i > minDate) {
         options.push({
           key: '2400',
           value: 'Midnight',
+          disabled: disabledOptions.indexOf('2400') >= 0,
         });
       }
       else {
         options.push({
           key,
           value,
+          disabled: disabledOptions.indexOf(key) >= 0,
         });
       }
 
       i.add(step, 'minutes');
     } while (i.toDate() <= maxDate);
 
+    switch (disabledExclude) {
+      case 'trailing':
+        options.pop();
+        break;
+      case 'leading':
+        options.shift();
+        break;
+      default:
+        break;
+    }
+
     return options;
+  }
+
+  /**
+   * Creates an array of time options.
+   * @param min {Date}
+   *  Earliest possible time option.
+   * @param max {Date}
+   *  Latest possible time option.
+   * @param step {Number}
+   *  Interval in which options are created in minutes.
+   */
+  static getDisabledOptions(disabledSpans, step, disabledExclude) {
+    // there is an array of start end objects
+    // for each object create a array of options that should be disabled
+    // concat all the disabled options.
+
+    return disabledSpans.reduce((spans, span) => {
+      const min = span.start;
+      const max = span.end;
+
+      if (!min || !max) {
+        return spans;
+      }
+
+      const minDate = utils.getDateFromTime(min);
+      const maxDate = utils.getDateFromTime(max);
+      const i = utils.roundTo(minDate, step).clone();
+
+      // Abort if the min time is after the max time to avoid an infinite loop.
+      if (min >= max) {
+        return spans;
+      }
+
+      if (disabledExclude === 'leading') {
+        i.add(step, 'minutes');
+      }
+
+      do {
+        const key = i.tz(utils.getUserTimezone()).format('HHmm');
+
+        if (key === '0000' && i > minDate) {
+          spans.push('2400');
+        }
+        else {
+          spans.push(key);
+        }
+
+        i.add(step, 'minutes');
+      } while (disabledExclude === 'trailing' ? i.toDate() < maxDate : i.toDate() <= maxDate);
+      return spans;
+    }, []);
   }
 
   constructor(props) {
@@ -124,9 +194,9 @@ class SelectTime extends React.Component {
   };
 
   render() {
-    const { min, max, step, label, disabled } = this.props;
+    const { min, max, step, label, disabled, disabledSpans, disabledExclude } = this.props;
     const value = this.props.getValue();
-    const options = this.options(min, max, step);
+    const options = this.options(min, max, step, disabledSpans, disabledExclude);
     const checkboxId = id => `select-filter--${id}`;
     const checkboxLabel = (text, id) => (
       <label className="select-filter__checkbox-label" htmlFor={id}>
@@ -155,7 +225,12 @@ class SelectTime extends React.Component {
             disabled={disabled}
           >
             {options.map(option => (
-              <MenuItem key={option.key} value={option.key} className="select-filter__menu-item">
+              <MenuItem
+                key={option.key}
+                disabled={option.disabled}
+                value={option.key}
+                className="select-filter__menu-item"
+              >
                 <ListItemText
                   disableTypography
                   primary={checkboxLabel(option.value, checkboxId(option.key))}
@@ -181,7 +256,9 @@ SelectTime.propTypes = {
   max: PropTypes.string,
   step: PropTypes.number,
   onChange: PropTypes.func.isRequired,
-  disabel: PropTypes.bool,
+  disabledSpans: PropTypes.array,
+  disabled: PropTypes.bool,
+  disabledExclude: PropTypes.string,
 };
 
 SelectTime.defaultProps = {
@@ -192,6 +269,8 @@ SelectTime.defaultProps = {
   max: '1159',
   step: 15,
   disabled: false,
+  disabledSpans: [],
+  disabledExclude: null,
 };
 
 export default withStyles(styles, { withTheme: true })(withFormsy(SelectTime));

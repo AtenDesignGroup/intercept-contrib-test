@@ -54,6 +54,11 @@ export const getDateFromTime = (time, date) =>
     .startOf('minute')
     .toDate();
 
+export const getTimeFromDate = date =>
+  moment(date)
+    .tz(getUserTimezone())
+    .format('HHmm');
+
 // Normalize a date object to a single day. Used to compare days for different dates.
 // export const getDayTimeStamp = date => ensureDate(date).setHours(0, 0, 0, 0);
 export const getDayTimeStamp = date =>

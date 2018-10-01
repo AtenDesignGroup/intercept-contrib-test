@@ -18,6 +18,7 @@ import ReserveRoomForm from './ReserveRoomForm';
 import DateSummary from './DateSummary';
 import RoomSummary from './RoomSummary';
 import ValueSummaryFooter from './ValueSummaryFooter';
+import withAvailability from './../withAvailability';
 
 const { constants, select, utils } = interceptClient;
 const c = constants;
@@ -46,36 +47,7 @@ function getPublishedFilters(value = true) {
   };
 }
 
-function getDateFilters(values, view = 'list', calView = 'day', date = new Date()) {
-  const path = 'field_date_time.value';
-  let operator = '>';
-  let value = moment(new Date())
-    .subtract(1, 'day')
-    .endOf('day')
-    .toISOString();
-
-  // Handler Calendar view.
-  // The date should be determined by the date and calendar view type
-  // rather than the selected date value.
-  if (view === 'calendar') {
-    value = getDateSpan(date, calView);
-    operator = 'BETWEEN';
-  }
-  else if (values.date) {
-    value = getDateSpan(values.date, 'day');
-    operator = 'BETWEEN';
-  }
-
-  return {
-    data: {
-      path,
-      value,
-      operator,
-    },
-  };
-}
-
-function getFilters(values, view = 'list', calView = 'day', date = new Date()) {
+function getFilters(values) {
   const filter = {
     ...getPublishedFilters(true),
   };
@@ -124,10 +96,7 @@ class ReserveRoomStep3 extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      calView: props.calView,
       date: props.date,
-      filters: props.filters,
-      view: props.view,
       room: {
         current: null,
         previous: null,
@@ -147,18 +116,22 @@ class ReserveRoomStep3 extends React.Component {
   }
 
   componentDidMount() {
-    const { formValues, room } = this.props;
+    const {
+      fetchAvailability,
+      formValues,
+      room
+    } = this.props;
     const { start, end, date } = formValues;
     const shouldValidateConflicts = !!(room && start && end && date);
     this.mounted = true;
 
     if (shouldValidateConflicts) {
-      this.fetchAvailableRooms();
+      fetchAvailability(this.getRoomAvailabilityQuery());
     }
   }
 
   componentDidUpdate(prevProps) {
-    const { formValues, room } = this.props;
+    const { fetchAvailability, formValues, room } = this.props;
     const { start, end, date } = formValues;
     const hasValues = !!(room && start && end && date);
     const valuesChanged =
@@ -169,7 +142,7 @@ class ReserveRoomStep3 extends React.Component {
     const shouldValidateConflicts = hasValues && valuesChanged;
 
     if (shouldValidateConflicts) {
-      this.fetchAvailableRooms();
+      fetchAvailability(this.getRoomAvailabilityQuery());
     }
   }
 
@@ -188,57 +161,10 @@ class ReserveRoomStep3 extends React.Component {
 
     // Compute duration of reservation.
     options.duration = utils.getDurationInMinutes(start, end);
-    options.start = utils.dateToDrupal(start);
-    options.end = utils.dateToDrupal(end);
+    options.start = start;
+    options.end = end;
 
     return options;
-  };
-
-  // Requests available rooms
-  fetchAvailableRooms() {
-    this.setState({
-      availability: {
-        ...this.state.availability,
-        loading: true,
-        shouldUpdate: false,
-      },
-    });
-
-    fetch('/api/rooms/availability', {
-      method: 'POST',
-      credentials: 'same-origin',
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-      },
-      body: JSON.stringify(this.getRoomAvailabilityQuery()),
-    })
-      .then(res => res.text())
-      .then(this.handleAvailabiltyResponse)
-      .catch((e) => {
-        if (this.mounted) {
-          this.setState({
-            availability: {
-              ...this.state.availability,
-              loading: false,
-              shouldUpdate: false,
-            },
-          });
-        }
-      });
-  }
-
-  handleAvailabiltyResponse = (res) => {
-    if (this.mounted) {
-      this.setState({
-        availability: {
-          ...this.state.availability,
-          loading: false,
-          rooms: JSON.parse(res),
-          shouldUpdate: false,
-        },
-      });
-    }
   };
 
   handleViewChange = (value) => {
@@ -290,7 +216,7 @@ class ReserveRoomStep3 extends React.Component {
   }
 
   hasConflict = () => {
-    const availability = get(this, `state.availability.rooms.${this.props.room}`) || null;
+    const availability = get(this, `props.availability.rooms.${this.props.room}`) || null;
     if (!availability) {
       return false;
     }
@@ -407,4 +333,4 @@ ReserveRoomStep3.defaultProps = {};
 export default connect(
   mapStateToProps,
   mapDispatchToProps,
-)(ReserveRoomStep3);
+)(withAvailability(ReserveRoomStep3));

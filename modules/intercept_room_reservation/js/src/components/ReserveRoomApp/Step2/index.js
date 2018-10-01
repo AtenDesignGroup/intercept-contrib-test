@@ -2,21 +2,25 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import moment from 'moment';
-import get from 'lodash/get';
+
+// Lodash
+import isEqual from 'lodash/isEqual';
 import pick from 'lodash/pick';
+import get from 'lodash/get';
+import map from 'lodash/map';
 
 import interceptClient from 'interceptClient';
 import drupalSettings from 'drupalSettings';
 
 // Material UI
-import Slide from '@material-ui/core/Slide';
+import Button from '@material-ui/core/Button';
 
 // Intercept Components
 
 // Local Components
 import ReserveRoomDateForm from './ReserveRoomDateForm';
 import RoomAvailabilityCalendar from './RoomAvailabilityCalendar';
-// import utils from '../../../../../../../node_modules/formsy-react/lib/utils';
+import withAvailability from './../withAvailability';
 
 const { constants, select, utils } = interceptClient;
 const c = constants;
@@ -25,43 +29,55 @@ class ReserveRoomStep2 extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      calView: props.calView,
-      date: props.date,
-      filters: props.filters,
-      formValues: {
-        [c.TYPE_ROOM]: null,
-        date: new Date(),
-        start: moment()
-          .startOf('hour')
-          .add(1, 'h')
-          .toDate(),
-        end: moment()
-          .startOf('hour')
-          .add(2, 'h')
-          .toDate(),
-        attendees: 1,
-        groupName: '',
-        meeting: false,
-        meetingStart: moment()
-          .startOf('hour')
-          .add(1, 'h')
-          .toDate(),
-        meetingEnd: moment()
-          .startOf('hour')
-          .add(2, 'h')
-          .toDate(),
-        [c.TYPE_MEETING_PURPOSE]: null,
-        meetingDetails: '',
-        refreshments: false,
-        refreshmentsDesc: '',
-        user: drupalSettings.intercept.user.uuid,
-      },
+      availabilityShouldUpdate: false,
     };
   }
 
   componentDidMount() {
     this.props.onChange(this.getDefaultValues());
+    // Fetch room availability if necessary.
+    if (this.props.room) {
+      // Prevent further updates until filters have changed.
+      this.setState({
+        availabilityShouldUpdate: false,
+      });
+      this.props.fetchAvailability(this.getRoomAvailabilityQuery());
+    }
   }
+
+  componentDidUpdate(prevProps) {
+    const { availabilityShouldUpdate } = this.state;
+    const { availability, fetchAvailability, room } = this.props;
+
+    if (!isEqual(prevProps.formValues[c.DATE], this.props.formValues[c.DATE])) {
+      this.setState({
+        availabilityShouldUpdate: true,
+      });
+    }
+
+    // Fetch room availability if necessary.
+    if (room && availabilityShouldUpdate && !availability.loading) {
+      // Prevent further updates until filters have changed.
+      this.setState({
+        availabilityShouldUpdate: false,
+      });
+      fetchAvailability(this.getRoomAvailabilityQuery());
+    }
+  }
+
+  // Get query params based on current rooms and filters.
+  getRoomAvailabilityQuery = () => {
+    const options = {
+      rooms: [this.props.room],
+      duration: 15,
+    };
+    const tz = utils.getUserTimezone();
+    const date = moment.tz(this.props.formValues[c.DATE], tz);
+    options.start = date.clone().startOf('day');
+    options.end = date.clone().endOf('day');
+
+    return options;
+  };
 
   getDefaultValues = () => {
     const { formValues, room, event, eventRecord, locationRecord, filters } = this.props;
@@ -73,7 +89,6 @@ class ReserveRoomStep2 extends React.Component {
       return values;
     }
 
-    const isStaff = utils.userIsStaff();
     const nowish = utils.roundTo(new Date()).tz(utils.getUserTimezone());
 
     // @todo: Take into account location hours.
@@ -94,37 +109,78 @@ class ReserveRoomStep2 extends React.Component {
     return values;
   };
 
+  getDisabledTimespans = () => {
+    const availability = get(this, `props.availability.rooms.${this.props.room}.dates`);
+
+    if (!availability) {
+      return [];
+    }
+
+    return map(availability, item => ({
+      start: utils.getTimeFromDate(utils.dateFromDrupal(item.start)),
+      end: utils.getTimeFromDate(utils.dateFromDrupal(item.end)),
+    }));
+  };
+
+  handleCalendarNavigate = (date) => {
+    this.props.onChange({
+      ...this.props.formValues,
+      [c.DATE]: date,
+    });
+  };
+
   render() {
-    const { onChange, formValues, onChangeStep, hours, room } = this.props;
+    const { availability, onChange, formValues, onChangeStep, hours, room } = this.props;
 
     const limits = utils.userIsStaff()
       ? {
         min: '0000',
         max: '2400',
-      } : hours ? hours : {
+      }
+      : hours || {
         min: null,
         max: null,
       };
-
 
     return (
       <div className="l--sidebar-before">
         <div className="l__main">
           <div className="l__secondary">
             <ReserveRoomDateForm
+              room={room}
               values={formValues}
               onChange={onChange}
               onSubmit={() => onChangeStep(2)}
               min={limits.min}
               max={limits.max}
+              disabledTimespans={this.getDisabledTimespans()}
             />
           </div>
           <div className="l__primary">
-            <RoomAvailabilityCalendar
-              room={room}
-              min={limits.min}
-              max={limits.max}
-            />
+            {room ? (
+              <RoomAvailabilityCalendar
+                room={room}
+                min={limits.min}
+                max={limits.max}
+                defaultDate={formValues.date}
+                date={formValues.date}
+                onNavigate={this.handleCalendarNavigate}
+                availability={availability}
+              />
+            ) : (
+              <div>
+                <p>Choose a room to see its availability</p>
+                <Button
+                  className="value-summary__button"
+                  variant="raised"
+                  color="primary"
+                  size="small"
+                  onClick={() => onChangeStep(0)}
+                >
+                  Choose a Room
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -135,10 +191,10 @@ class ReserveRoomStep2 extends React.Component {
 const mapStateToProps = (state, ownProps) => {
   const hours =
     ownProps.formValues.date && ownProps.room
-      // Open hours for current day.
-      ? select.roomLocationHours(ownProps.room, ownProps.formValues.date)(state)
-      // Default open hours.
-      : select.locationsOpenHoursLimit(state);
+      ? // Open hours for current day.
+      select.roomLocationHours(ownProps.room, ownProps.formValues.date)(state)
+      : // Default open hours.
+      select.locationsOpenHoursLimit(state);
 
   return {
     rooms: select.roomsAscending(state),
@@ -169,4 +225,4 @@ ReserveRoomStep2.defaultProps = {
   room: null,
 };
 
-export default connect(mapStateToProps)(ReserveRoomStep2);
+export default connect(mapStateToProps)(withAvailability(ReserveRoomStep2));

@@ -1,32 +1,34 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
+
+// Lodash
+import get from 'lodash/get';
+import map from 'lodash/map';
+
 import BigCalendar from 'intercept/BigCalendar';
+
 import Toolbar from 'react-big-calendar/lib/Toolbar';
 import ArrowBack from '@material-ui/icons/ArrowBack';
 import ArrowForward from '@material-ui/icons/ArrowForward';
 import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
-// import EventSummaryDialog from './EventSummaryDialog';
 import interceptClient from 'interceptClient';
 import moment from 'moment';
 
 const { utils } = interceptClient;
 
-const dateAccessor = prop => item =>
-  utils.dateFromDrupal(item.data.attributes.field_date_time[prop]);
-const startAccessor = dateAccessor('value');
-const endAccessor = dateAccessor('end_value');
-const titleAccessor = item => (
-  <p className="calendar-event-title--tiny">{item.data.attributes.title}</p>
-);
+const dateAccessor = prop => item => utils.dateFromDrupal(item[prop]);
+const startAccessor = dateAccessor('start');
+const endAccessor = dateAccessor('end');
+const titleAccessor = item => <p className="calendar-event-title--tiny">{'Booked'}</p>;
 
 const CalendarEvent = (props) => {
   const { event } = props;
   const { data } = event;
 
   return (
-    <div className="calendar-event">
-      <p className="calendar-event__title">{data.attributes.title}</p>
+    <div className="calendar-event calendar-event--disabled">
+      <p className="calendar-event__title">Booked</p>
     </div>
   );
 };
@@ -113,37 +115,51 @@ class RoomAvailabilityCalendar extends React.Component {
     date.setMinutes(minutes);
 
     return date;
-  }
+  };
 
   render() {
-    const events = [];
-    const { min, max } = this.props;
+    const { availability, date, defaultDate, min, max, room } = this.props;
+
+    let events = [];
+    const reservations = get(availability, `rooms.${room}.dates`);
+    if (reservations) {
+      events = map(reservations, (item, key) => ({
+        key,
+        ...item,
+      }));
+    }
 
     return (
       <React.Fragment>
         <BigCalendar
-          timeZoneName={utils.getUserTimezone()}
+          className={'rbc-calendar--no-overlap'}
           components={components}
-          events={events}
-          onSelectEvent={this.onSelectEvent}
-          titleAccessor={() => 'Booked'}
-          startAccessor={startAccessor}
-          endAccessor={endAccessor}
-          onNavigate={this.props.onNavigate}
-          onView={this.props.onView}
+          date={date}
+          defaultDate={defaultDate}
           defaultView={this.props.defaultView}
-          defaultDate={this.props.defaultDate}
-          popup
-          views={['week', 'day']}
           elementProps={{
             style: {
               height: 'calc(100vh - 26rem)',
             },
           }}
-          min={this.getDateFromTime(min ? min : '0000')}
+          eventPropGetter={() => ({
+            className: 'rbc-event--disabled',
+          })}
+          endAccessor={endAccessor}
+          events={events}
+          getNow={() => utils.getUserTimeNow()}
           max={this.getDateFromTime(max && max !== '2400' ? max : '2359')}
+          min={this.getDateFromTime(min || '0000')}
+          onNavigate={this.props.onNavigate}
+          // onSelectEvent={this.onSelectEvent}
+          onView={this.props.onView}
+          popup
           step={15}
+          startAccessor={startAccessor}
           timeslots={4}
+          timeZoneName={utils.getUserTimezone()}
+          titleAccessor={() => 'Booked'}
+          views={['day']}
         />
       </React.Fragment>
     );
@@ -153,6 +169,7 @@ class RoomAvailabilityCalendar extends React.Component {
 RoomAvailabilityCalendar.propTypes = {
   onNavigate: PropTypes.func,
   onView: PropTypes.func,
+  date: PropTypes.instanceOf(Date),
   defaultDate: PropTypes.instanceOf(Date),
   defaultView: PropTypes.string,
   min: PropTypes.string,
@@ -162,7 +179,8 @@ RoomAvailabilityCalendar.propTypes = {
 RoomAvailabilityCalendar.defaultProps = {
   onNavigate: null,
   onView: null,
-  defaultDate: new Date(),
+  date: utils.getUserStartOfDay(),
+  defaultDate: utils.getUserStartOfDay(),
   defaultView: 'day',
   min: '0000',
   max: '2359',

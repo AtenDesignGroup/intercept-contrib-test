@@ -11,6 +11,8 @@ use Drupal\date_recur\DateRecurRRule;
 use Drupal\date_recur\Plugin\DateRecurOccurrenceHandler\DefaultDateRecurOccurrenceHandler;
 use Drupal\date_recur\Plugin\DateRecurOccurrenceHandlerInterface;
 use Drupal\date_recur\Plugin\Field\FieldType\DateRecurItem;
+use Drupal\intercept_core\DateRangeFormatterTrait;
+use Drupal\intercept_core\Utility\Dates;
 use Drupal\intercept_event\Entity\EventRecurrenceInterface;
 use Drupal\intercept_event\RecurringEventManager;
 use Drupal\node\NodeInterface;
@@ -23,6 +25,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 class EventRecurrenceEventsForm extends ContentEntityForm {
 
+  use DateRangeFormatterTrait;
+
   /**
    * @var EventRecurrenceInterface
    */
@@ -34,11 +38,17 @@ class EventRecurrenceEventsForm extends ContentEntityForm {
   protected $recurringEventManager;
 
   /**
+   * @var Dates
+   */
+  protected $dateUtility;
+
+  /**
    * {@inheritdoc}
    */
-  public function __construct(EntityRepositoryInterface $entity_repository, EntityTypeBundleInfoInterface $entity_type_bundle_info = NULL, TimeInterface $time = NULL, RecurringEventManager $recurring_event_manager) {
+  public function __construct(EntityRepositoryInterface $entity_repository, EntityTypeBundleInfoInterface $entity_type_bundle_info = NULL, TimeInterface $time = NULL, RecurringEventManager $recurring_event_manager, Dates $date_utility) {
     parent::__construct($entity_repository, $entity_type_bundle_info, $time);
     $this->recurringEventManager = $recurring_event_manager;
+    $this->dateUtility = $date_utility;
   }
 
   /**
@@ -49,7 +59,8 @@ class EventRecurrenceEventsForm extends ContentEntityForm {
       $container->get('entity.repository'),
       $container->get('entity_type.bundle.info'),
       $container->get('datetime.time'),
-      $container->get('intercept_event.recurring_manager')
+      $container->get('intercept_event.recurring_manager'),
+      $container->get('intercept_core.utility.dates')
     );
   }
 
@@ -90,18 +101,23 @@ class EventRecurrenceEventsForm extends ContentEntityForm {
     ];
     $form['event_list']['table'] = [
       '#type' => 'table',
-      '#header' => ['Event ID', 'From', 'To', ''],
+      '#header' => ['Event ID', 'Date', ''],
       '#rows' => [],
     ];
 
     $nodes = $this->eventRecurrence->getEvents();
     if (!empty($nodes)) {
       foreach ($nodes as $node) {
-        $dates = $node->get('field_date_time')->first()->getValue();
+        $date_item = $node->get('field_date_time')->first();
+        $start_date = $this->dateUtility->convertTimezone($date_item->start_date, 'default');
+        $end_date = $this->dateUtility->convertTimezone($date_item->end_date, 'default');
         $column = [
           $node->link(),
-          $dates['value'],
-          $dates['end_value'],
+          $this->formatDateRange([
+            '@date' => $start_date->format($this->startDateFormat),
+            '@time_start' => $start_date->format($this->startTimeFormat),
+            '@time_end' => $end_date->format($this->endTimeFormat),
+          ]),
           $node->link('edit', 'edit-form'),
         ];
         $form['event_list']['table']['#rows'][] = $column;
@@ -112,9 +128,11 @@ class EventRecurrenceEventsForm extends ContentEntityForm {
       foreach ($dates as $date) {
         $column = [
           $this->t('Date preview, not created yet'),
-          $date['value']->format($storage_format),
-          $date['end_value']->format($storage_format),
-          '',
+          $this->formatDateRange([
+            '@date' => $date['value']->format($this->startDateFormat),
+            '@time_start' => $date['value']->format($this->startTimeFormat),
+            '@time_end' => $date['end_value']->format($this->endTimeFormat),
+          ]),
         ];
         $form['event_list']['table']['#rows'][] = $column;
       }
@@ -140,13 +158,20 @@ class EventRecurrenceEventsForm extends ContentEntityForm {
     return $element;
   }
 
+  private function compensate($date, $timezone = 'default') {
+    $converted = $this->dateUtility->convertTimezone($date, 'storage')
+      ->format($this->dateUtility->getStorageFormat());
+     $new_date = $this->dateUtility->getDrupalDate($converted, 'default');
+    return $timezone == 'default' ? $new_date : $this->dateUtility->convertTimezone($new_date, 'storage');
+  }
+
   /**
    * @param DateRecurItem $item
    *
    * @return array
    * @throws \Exception
    */
-  private function getDates($item) {
+  private function getDates($item, $timezone = 'default') {
     /** @var DateRecurOccurrenceHandlerInterface $handler */
     $handler = $item->getOccurrenceHandler();
     $storage_format = $item->getDateStorageFormat();
@@ -160,9 +185,14 @@ class EventRecurrenceEventsForm extends ContentEntityForm {
       ]];
     }
     else {
-      $until = new \DateTime();
-      $until->add(new \DateInterval($item->getFieldDefinition()->getSetting('precreate')));
-      return $handler->getOccurrencesForDisplay(NULL, $until);
+      $occurrences = $item->occurrences;
+      // We have to compensate for the DateTimeComputed class assuming UTC.
+      // TODO: Create issue for this in date_recur or in Drupal core.
+      foreach ($occurrences as &$value) {
+        $value['value'] = $this->compensate($value['value'], $timezone);
+        $value['end_value'] = $this->compensate($value['end_value'], $timezone);
+      }
+      return $occurrences;
     }
   }
 
@@ -230,7 +260,7 @@ class EventRecurrenceEventsForm extends ContentEntityForm {
 
     $recurring_rule_field = $this->eventRecurrence->getRecurField();
     $storage_format = $recurring_rule_field->getDateStorageFormat();
-    $dates = $this->getDates($recurring_rule_field);
+    $dates = $this->getDates($recurring_rule_field, 'storage');
     foreach ($dates as $date) {
       $event = $base_event->createDuplicate();
       $event->set('field_date_time', [

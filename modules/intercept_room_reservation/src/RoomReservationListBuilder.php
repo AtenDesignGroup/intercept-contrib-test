@@ -26,7 +26,8 @@ class RoomReservationListBuilder extends EntityListBuilder {
     $header['location'] = $this->t('Location');
     $header['user'] = $this->t('User');
     $header['status'] = $this->t('Status');
-    return $header + parent::buildHeader();
+    $header = array_merge($header, parent::buildHeader());
+    return $this->hideHeaderColumns($header);
   }
 
   /**
@@ -39,7 +40,8 @@ class RoomReservationListBuilder extends EntityListBuilder {
     $row['location'] = $entity->getLocation()? $entity->getLocation()->link() : '';
     $row['user'] = $this->getEntityLabel($entity->field_user->entity, $this->t('No user'));
     $row['status'] = $entity->field_status->getString();
-    return $row + parent::buildRow($entity);
+    $row = array_merge($row, parent::buildRow($entity));
+    return $row;
   }
 
   /**
@@ -49,6 +51,11 @@ class RoomReservationListBuilder extends EntityListBuilder {
    *   An array of entity IDs.
    */
   protected function getEntityIds() {
+    // If using SettableListBuilderTrait::setEntityIds then use that.
+    if (isset($this->entityIds)) {
+      return $this->entityIds;
+    }
+    // Otherwise override EntityListBuilder::getEntityIds to change sort.
     $query = $this->getStorage()->getQuery()
       ->sort('created', 'DESC');
 

@@ -320,8 +320,7 @@ class RoomReservationController extends ControllerBase implements ContainerInjec
       $query->sort('field_dates.value', 'ASC');
     });
     $list = $this->entityTypeManager()->getListBuilder('room_reservation');
-
-    $list->setEntityIds(array_keys($reservations));
+    $reservation_ids = array_keys($reservations);
     $link = \Drupal\Core\Link::createFromRoute('Create reservation', 'entity.room_reservation.add_form', [
       'room' => $node->id(),
     ], [
@@ -332,7 +331,11 @@ class RoomReservationController extends ControllerBase implements ContainerInjec
     $form = $this->formBuilder()->buildForm(RoomReservationAvailabilityForm::class, $form_state);
     return [
       'create' => $link->toRenderable(),
-      'list' => $list->render(),
+      'list' => $list
+      ->setEntityIds($reservation_ids)
+      ->setLimit(10)
+      ->hideColumns(['room'])
+      ->render(),
       'availability_form' => [
         '#title' => $this->t('Availability form'),
         '#type' => 'details',

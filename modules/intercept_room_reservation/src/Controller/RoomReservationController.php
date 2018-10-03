@@ -301,8 +301,9 @@ class RoomReservationController extends ControllerBase implements ContainerInjec
    * API Callback to get a user's status.
    */
   public function userStatus(\Symfony\Component\HttpFoundation\Request $request) {
+    $user = $this->entityTypeManager()->getStorage('user')->load($this->currentUser()->id());
     $result = [
-      'uuid' => $this->currentUser()->getAccount()->uuid(),
+      'uuid' => $user->uuid(),
       'limit' => $this->config('intercept_room_reservation.settings')->get('reservation_limit', 1),
       'count' => $this->reservationManager->userReservationCount($this->currentUser()),
       'exceededLimit' => $this->reservationManager->userExceededReservationLimit($this->currentUser()),

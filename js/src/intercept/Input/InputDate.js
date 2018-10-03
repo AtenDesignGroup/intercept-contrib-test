@@ -28,13 +28,43 @@ const InputLabelProps = value => ({
 });
 
 class InputDate extends React.Component {
-  onChange = (date) => {
-    const d = date
-      ? date
-        .tz(utils.getUserTimezone())
+  /**
+   * Normalizes date to the correct timezone.
+   * For some reason, an initial date value is timezone agnostic
+   * but subsequent clicks are not. This will ensure the date value
+   * is in the desired timezone.
+   * @param {Moment|null} date
+   *   The incoming date value from the input.
+   * @return {Date}
+   *    A normalized date set to the start of day in the desired timezone.
+   */
+  static normalize(date) {
+    let d = null;
+
+    if (date !== null) {
+      const value = date['_z']
+        ? date.clone()
+        : moment.tz(date.format('YYYY-MM-DD'), 'YYYY-MM-DD', utils.getUserTimezone());
+
+      d = value
         .startOf('day')
-        .toDate()
-      : null;
+        .toDate();
+    }
+
+    return d;
+  }
+
+  componentDidUpdate() {
+    // Force this component to be treated like a controlled component
+    // by updating formsy with passed prop values.
+    if (this.props.value !== this.props.getValue()) {
+      this.props.setValue(this.props.value);
+    }
+  }
+
+  onChange = (date) => {
+    const d = this.constructor.normalize(date);
+
     this.props.setValue(d);
     this.props.handleChange(d);
   };
@@ -46,7 +76,6 @@ class InputDate extends React.Component {
 
     const value = this.props.getValue();
     const inputValue = value === '' ? null : value;
-
     return (
       <MuiPickersUtilsProvider utils={MomentUtils} moment={moment}>
         <DatePicker

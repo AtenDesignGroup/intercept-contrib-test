@@ -455,7 +455,15 @@ BrowseEvents.defaultProps = {
   view: 'list',
   calView: 'month',
   date: new Date(),
-  filters: {},
+  filters: {
+    [c.KEYWORD]: '',
+    location: [],
+    type: [],
+    audience: [],
+    [c.DATE]: null,
+    [c.DATE_START]: null,
+    [c.DATE_END]: null,
+  },
 };
 
 export default connect(

@@ -50,7 +50,7 @@ const encodeFilters = (value) => {
     location: encodeArray(value[c.TYPE_LOCATION], ','),
     type: encodeArray(value[c.TYPE_ROOM_TYPE], ','),
     attendees: encode(UrlQueryParamTypes.number, value[ATTENDEES]),
-    [c.DATE]: !value[c.DATE] ? null : encodeDate(value[c.DATE]),
+    [c.DATE]: !value[c.DATE] ? null : utils.getDayTimeStamp(value[c.DATE]),
     [TIME]: encodeString(value.time),
     [DURATION]: encodeString(value.duration),
     [c.KEYWORD]: encodeString(value.keyword),
@@ -61,14 +61,23 @@ const encodeFilters = (value) => {
 
 const decodeFilters = (values) => {
   if (!values) {
-    return {};
+    return {
+      [c.TYPE_LOCATION]: [],
+      [c.TYPE_ROOM_TYPE]: [],
+      // [ATTENDEES]: decode(UrlQueryParamTypes.number, value.attendees),
+      [c.DATE]: null,
+      [c.KEYWORD]: '',
+      // [TIME]: decodeString(value.time),
+      // [DURATION]: decodeString(value.duration),
+      // [NOW]: decodeBoolean(value[NOW]),
+    };
   }
   const value = decodeObject(values, ':', '_');
   const filters = {
     [c.TYPE_LOCATION]: decodeArray(value.location, ',') || [],
     [c.TYPE_ROOM_TYPE]: decodeArray(value.type, ',') || [],
     [ATTENDEES]: decode(UrlQueryParamTypes.number, value.attendees),
-    [c.DATE]: decodeDate(value[c.DATE]),
+    [c.DATE]: value[c.DATE] ? utils.getDateFromDayTimeStamp(value[c.DATE]) : null,
     [c.KEYWORD]: decodeString(value.keyword),
     [TIME]: decodeString(value.time),
     [DURATION]: decodeString(value.duration),

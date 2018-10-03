@@ -22,9 +22,11 @@ import updateWithHistory from 'intercept/updateWithHistory';
 
 const { decodeArray, encodeArray, decodeObject, encodeObject } = Serialize;
 
-const c = interceptClient.constants;
+const { constants, utils } = interceptClient;
+const c = constants;
 
 const removeFalseyProps = obj => pickBy(obj, prop => prop);
+
 
 const encodeFilters = (value) => {
   const filters = removeFalseyProps({
@@ -32,16 +34,24 @@ const encodeFilters = (value) => {
     location: encodeArray(value[c.TYPE_LOCATION], ','),
     type: encodeArray(value[c.TYPE_EVENT_TYPE], ','),
     audience: encodeArray(value[c.TYPE_AUDIENCE], ','),
-    [c.DATE]: !value[c.DATE] ? null : encode(UrlQueryParamTypes.date, value[c.DATE]),
-    [c.DATE_START]: !value[c.DATE_START] ? null : encode(UrlQueryParamTypes.date, value[c.DATE_START]),
-    [c.DATE_END]: !value[c.DATE_END] ? null : encode(UrlQueryParamTypes.date, value[c.DATE_END]),
+    [c.DATE]: !value[c.DATE] ? null : utils.getDayTimeStamp(value[c.DATE]),
+    [c.DATE_START]: !value[c.DATE_START] ? null : utils.getDayTimeStamp(value[c.DATE_START]),
+    [c.DATE_END]: !value[c.DATE_END] ? null : utils.getDayTimeStamp(value[c.DATE_END]),
   });
   return encodeObject(filters, ':', '_');
 };
 
 const decodeFilters = (values) => {
   if (!values) {
-    return {};
+    return {
+      [c.KEYWORD]: '',
+      location: [],
+      type: [],
+      audience: [],
+      [c.DATE]: null,
+      [c.DATE_START]: null,
+      [c.DATE_END]: null,
+    };
   }
   const value = decodeObject(values, ':', '_');
   const filters = {
@@ -49,9 +59,9 @@ const decodeFilters = (values) => {
     [c.TYPE_LOCATION]: decodeArray(value.location, ',') || [],
     [c.TYPE_EVENT_TYPE]: decodeArray(value.type, ',') || [],
     [c.TYPE_AUDIENCE]: decodeArray(value.audience, ',') || [],
-    [c.DATE]: decode(UrlQueryParamTypes.date, value[c.DATE]) || null,
-    [c.DATE_START]: decode(UrlQueryParamTypes.date, value[c.DATE_START]) || null,
-    [c.DATE_END]: decode(UrlQueryParamTypes.date, value[c.DATE_END]) || null,
+    [c.DATE]: value[c.DATE] ? utils.getDateFromDayTimeStamp(value[c.DATE]) : null,
+    [c.DATE_START]: value[c.DATE_START] ? utils.getDateFromDayTimeStamp(value[c.DATE_START]) : null,
+    [c.DATE_END]: value[c.DATE_END] ? utils.getDateFromDayTimeStamp(value[c.DATE_END]) : null,
   };
   return filters;
 };

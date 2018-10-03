@@ -106,6 +106,9 @@ class SelectTime extends React.Component {
       i.add(step, 'minutes');
     } while (i.toDate() <= maxDate);
 
+    // Remove the first or last option based on disabledExcluded.
+    // This is useful to remove the latest time from a list of start times
+    // and the earliest time from a list of end times.
     switch (disabledExclude) {
       case 'trailing':
         options.pop();

@@ -16,6 +16,7 @@ import drupalSettings from 'drupalSettings';
 import Button from '@material-ui/core/Button';
 
 // Intercept Components
+import LoadingIndicator from 'intercept/LoadingIndicator';
 
 // Local Components
 import ReserveRoomDateForm from './ReserveRoomDateForm';
@@ -98,12 +99,14 @@ class ReserveRoomStep2 extends React.Component {
       values.date = filters.date || utils.getUserStartOfDay();
     }
 
-    if (!values.start) {
-      values.start = nowish.format('HHmm');
-    }
+    if ((!values.start || !values.end) && (utils.userIsStaff() || this.isWithinOpenHours(nowish))) {
+      if (!values.start) {
+        values.start = nowish.format('HHmm');
+      }
 
-    if (!values.end) {
-      values.end = nowish.add(duration || 30, 'minutes').format('HHmm');
+      if (!values.end) {
+        values.end = nowish.add(duration || 30, 'minutes').format('HHmm');
+      }
     }
 
     return values;
@@ -122,6 +125,26 @@ class ReserveRoomStep2 extends React.Component {
     }));
   };
 
+  isWithinOpenHours = (time) => {
+    const hours = this.props.hours;
+
+    if (hours == null) {
+      return false;
+    }
+
+    const ct = t => parseInt(t, 10) / 1000;
+
+    const now = ct(time.format('HHmm'));
+    const start = ct(hours.min);
+    const end = ct(hours.max);
+
+    if (start < end && now > start && now < end) {
+      return true;
+    }
+
+    return false;
+  };
+
   handleCalendarNavigate = (date) => {
     this.props.onChange({
       ...this.props.formValues,
@@ -130,16 +153,16 @@ class ReserveRoomStep2 extends React.Component {
   };
 
   render() {
-    const { availability, onChange, formValues, onChangeStep, hours, room } = this.props;
-
+    const { availability, onChange, isLoading, formValues, onChangeStep, hours, room } = this.props;
+    const isClosed = !hours;
     const limits = utils.userIsStaff()
       ? {
         min: '0000',
         max: '2400',
       }
       : hours || {
-        min: null,
-        max: null,
+        min: '0000',
+        max: '0000',
       };
 
     return (
@@ -157,30 +180,33 @@ class ReserveRoomStep2 extends React.Component {
             />
           </div>
           <div className="l__primary">
-            {room ? (
-              <RoomAvailabilityCalendar
-                room={room}
-                min={limits.min}
-                max={limits.max}
-                defaultDate={formValues.date}
-                date={formValues.date}
-                onNavigate={this.handleCalendarNavigate}
-                availability={availability}
-              />
-            ) : (
-              <div>
-                <p>Choose a room to see its availability</p>
-                <Button
-                  className="value-summary__button"
-                  variant="raised"
-                  color="primary"
-                  size="small"
-                  onClick={() => onChangeStep(0)}
-                >
-                  Choose a Room
-                </Button>
-              </div>
-            )}
+            {
+              isLoading ?
+                (<LoadingIndicator loading={isLoading} />)
+              : room ?
+                (<RoomAvailabilityCalendar
+                  room={room}
+                  min={limits.min}
+                  max={limits.max}
+                  defaultDate={formValues.date}
+                  date={formValues.date}
+                  onNavigate={this.handleCalendarNavigate}
+                  availability={availability}
+                  isClosed={isClosed}
+                />)
+              : (<div>
+                  <p>Choose a room to see its availability</p>
+                  <Button
+                    className="value-summary__button"
+                    variant="raised"
+                    color="primary"
+                    size="small"
+                    onClick={() => onChangeStep(0)}
+                  >
+                    Choose a Room
+                  </Button>
+                </div>
+              )}
           </div>
         </div>
       </div>
@@ -198,7 +224,8 @@ const mapStateToProps = (state, ownProps) => {
 
   return {
     rooms: select.roomsAscending(state),
-    roomsLoading: select.recordsAreLoading(c.TYPE_ROOM)(state),
+    isLoading:
+      select.recordsAreLoading(c.TYPE_ROOM)(state) || select.recordsAreLoading(c.TYPE_LOCATION)(state),
     locationRecord: ownProps.room ? select.roomLocationRecord(ownProps.room)(state) : null,
     // eventRecord: ownProps.event ? select.event(ownProps.event)(state) : null,
     hours,
@@ -209,7 +236,7 @@ const mapStateToProps = (state, ownProps) => {
 ReserveRoomStep2.propTypes = {
   room: PropTypes.string,
   rooms: PropTypes.arrayOf(Object).isRequired,
-  roomsLoading: PropTypes.bool.isRequired,
+  isLoading: PropTypes.bool.isRequired,
   onChange: PropTypes.func.isRequired,
   onChangeRoom: PropTypes.func.isRequired,
   onChangeStep: PropTypes.func.isRequired,

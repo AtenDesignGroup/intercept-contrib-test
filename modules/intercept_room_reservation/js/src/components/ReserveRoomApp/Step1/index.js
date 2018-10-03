@@ -313,54 +313,6 @@ class ReserveRoomStep1 extends React.Component {
     return options;
   };
 
-  // // Requests available rooms
-  // fetchAvailability() {
-  //   this.setState({
-  //     availability: {
-  //       ...this.state.availability,
-  //       loading: true,
-  //       shouldUpdate: false,
-  //     },
-  //   });
-
-  //   fetch('/api/rooms/availability', {
-  //     method: 'POST',
-  //     credentials: 'same-origin',
-  //     headers: {
-  //       'Content-Type': 'application/json',
-  //       Accept: 'application/json',
-  //     },
-  //     body: JSON.stringify(this.getRoomAvailabilityQuery()),
-  //   })
-  //     .then(res => res.text())
-  //     .then(this.handleAvailabiltyResponse)
-  //     .catch((e) => {
-  //       console.log(e);
-  //       if (this.mounted) {
-  //         this.setState({
-  //           availability: {
-  //             ...this.state.availability,
-  //             loading: false,
-  //             shouldUpdate: false,
-  //           },
-  //         });
-  //       }
-  //     });
-  // }
-
-  // handleAvailabiltyResponse = (res) => {
-  //   if (this.mounted) {
-  //     this.setState({
-  //       availability: {
-  //         ...this.state.availability,
-  //         loading: false,
-  //         rooms: JSON.parse(res),
-  //         shouldUpdate: false,
-  //       },
-  //     });
-  //   }
-  // };
-
   handleRoomSelect = (value) => {
     this.props.onChangeRoom(value);
     this.props.onChangeStep(1);

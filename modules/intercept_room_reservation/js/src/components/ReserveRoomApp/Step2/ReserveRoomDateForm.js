@@ -254,7 +254,7 @@ class ReserveRoomDateForm extends PureComponent {
 
   render() {
     const { availability, disabledTimespans, values, min, max, step, onSubmit, room } = this.props;
-    const isClosed = !min || !max;
+    const isClosed = min === max;
     const validationErrors = {};
     const conflictProp = utils.userIsStaff()
       ? 'has_reservation_conflict'

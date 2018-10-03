@@ -37,11 +37,11 @@ export const newUserDate = (date = new Date()) =>
 
 // Make sure the current value is a valid date object.
 export const ensureDate = (date) => {
+  if (date instanceof moment) {
+    return date.toDate();
+  }
   if (date instanceof Date) {
     return new Date(date);
-  }
-  if (date.toDate instanceof Function) {
-    return date.toDate();
   }
   return new Date(date);
 };
@@ -66,6 +66,11 @@ export const getDayTimeStamp = date =>
     .tz(getUserTimezone())
     .startOf('day')
     .format('YYYY-MM-DD');
+
+export const getDateFromDayTimeStamp = timestamp =>
+  moment
+    .tz(timestamp, 'YYYY-MM-DD', getUserTimezone())
+    .toDate();
 
 // Get a formatted date string.
 export const getDayDisplay = (date) => {
@@ -135,7 +140,8 @@ export const getDurationInMinutes = (start, end) =>
 export const dateToDrupal = date =>
   ensureDate(date)
     .toISOString()
-    .replace('.000Z', '');
+    .replace('.000Z', '')
+    .replace('.999Z', ''); // @todo Replace with regex
 
 // Converts a Drupal compatible string to a Date object.
 export const dateFromDrupal = date => moment(`${date}Z`, moment.ISO_8601).toDate();

@@ -20,7 +20,6 @@ const { utils } = interceptClient;
 const dateAccessor = prop => item => utils.dateFromDrupal(item[prop]);
 const startAccessor = dateAccessor('start');
 const endAccessor = dateAccessor('end');
-const titleAccessor = item => <p className="calendar-event-title--tiny">{'Booked'}</p>;
 
 const CalendarEvent = (props) => {
   const { event } = props;
@@ -28,7 +27,7 @@ const CalendarEvent = (props) => {
 
   return (
     <div className="calendar-event calendar-event--disabled">
-      <p className="calendar-event__title">Booked</p>
+      <p className="calendar-event__title">{event.title}</p>
     </div>
   );
 };
@@ -118,15 +117,35 @@ class RoomAvailabilityCalendar extends React.Component {
   };
 
   render() {
-    const { availability, date, defaultDate, min, max, room } = this.props;
+    const { availability, date, defaultDate, isClosed, min, max, room } = this.props;
 
     let events = [];
     const reservations = get(availability, `rooms.${room}.dates`);
     if (reservations) {
       events = map(reservations, (item, key) => ({
         key,
+        title: 'Booked',
         ...item,
       }));
+    }
+
+    if (isClosed) {
+      events.push({
+        start: utils.dateToDrupal(
+          moment(date)
+            .tz(utils.getUserTimezone())
+            .startOf('day')
+            .toDate()
+        ),
+        end: utils.dateToDrupal(
+          moment(date)
+            .tz(utils.getUserTimezone())
+            .endOf('day')
+            .toDate()
+        ),
+        allDay: true,
+        title: 'Location Closed',
+      });
     }
 
     return (
@@ -153,7 +172,6 @@ class RoomAvailabilityCalendar extends React.Component {
           onNavigate={this.props.onNavigate}
           // onSelectEvent={this.onSelectEvent}
           onView={this.props.onView}
-          popup
           step={15}
           startAccessor={startAccessor}
           timeslots={4}

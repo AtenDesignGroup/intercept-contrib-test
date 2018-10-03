@@ -57,6 +57,7 @@ function withAvailability(WrappedComponent, debounceTime = 200) {
           shouldUpdate: false,
         },
       });
+
       return fetch('/api/rooms/availability', {
         method: 'POST',
         credentials: 'same-origin',
@@ -66,8 +67,8 @@ function withAvailability(WrappedComponent, debounceTime = 200) {
         },
         body: JSON.stringify({
           ...query,
-          start: utils.dateToDrupal(query.start),
-          end: utils.dateToDrupal(query.end),
+          start: utils.dateToDrupal(utils.ensureDate(query.start)),
+          end: utils.dateToDrupal(utils.ensureDate(query.end)),
         }),
       })
         .then(res => res.text())

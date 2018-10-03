@@ -77,6 +77,13 @@ abstract class ReservationBase extends RevisionableContentEntityBase {
     }
     return '';
   }
+  public function getInterval() {
+    if ($this->getDuration() > 0) {
+      $int = Dates::interval($this->getStartDate(), $this->getEndDate());
+      return $int;
+    }
+    return '';
+  }
 
   public function getLocation() {
     $type = $this->reservationType();

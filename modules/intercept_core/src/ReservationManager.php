@@ -300,8 +300,7 @@ class ReservationManager implements ReservationManagerInterface {
     if ($start > $end) {
       return FALSE;
     }
-    $int = $start->diff($end);
-    $total = $int->h * 60 + $int->i;
+    $total = Dates::duration($start, $end);
     if ($total > 0) {
       $data = [
         'duration' => $total,

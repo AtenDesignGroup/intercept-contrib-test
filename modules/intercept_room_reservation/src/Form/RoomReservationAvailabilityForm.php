@@ -247,12 +247,25 @@ class RoomReservationAvailabilityForm extends FormBase {
   }
   private function scheduleTableRow($id, &$rows) {
     $reservation = \Drupal\intercept_room_reservation\Entity\RoomReservation::load($id);
+    $int = $reservation->getInterval();
+    $other = [];
+    foreach (['h' => 'hours', 'd' => 'days', 'm' => 'months'] as $prop => $label) {
+      if ($int->{$prop} > 0) {
+        $v = $int->{$prop};
+        $other[] = "$v $label";
+      }
+    }
+    $duration = $this->t('@minutes min@other', [
+      '@minutes' => $reservation->getDuration(),
+      '@other' => !empty($other) ? ' (' . join(', ', $other) . ')' : '',
+    ]);
     $column = [
       $reservation->getStartDate()->format($this->format()),
       $reservation->getEndDate()->format($this->format()),
       $reservation->link('Reservation'),
-      $reservation->getDuration(),
+      $duration,
     ];
+
     $rows[] = $column;
   }
 

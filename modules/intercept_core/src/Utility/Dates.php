@@ -27,12 +27,22 @@ class Dates {
    * @return int
    */
   public static function duration(DateTimePlus $date1, DateTimePlus $date2) {
+    $total = 0;
+    if ($int = self::interval($date1, $date2)) {
+      $hours = $int->h;
+      if ($int->days > 0) {
+        $hours += ($int->days * 24);
+      }
+      $total = ($hours * 60) + $int->i;
+    }
+    return $total;
+  }
+
+  public static function interval(DateTimePlus $date1, DateTimePlus $date2) {
     if ($date1 > $date2) {
       return FALSE;
     }
-    $int = $date1->diff($date2);
-    $total = $int->h * 60 + $int->i;
-    return $total;
+    return $date1->diff($date2);
   }
 
   /**

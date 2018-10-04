@@ -7,6 +7,7 @@ import moment from 'moment';
 import isEqual from 'lodash/isEqual';
 import pick from 'lodash/pick';
 import get from 'lodash/get';
+import filter from 'lodash/filter';
 import map from 'lodash/map';
 
 import interceptClient from 'interceptClient';
@@ -112,6 +113,15 @@ class ReserveRoomStep2 extends React.Component {
     return values;
   };
 
+  onlyTodaysReservations = (reservation) => {
+    const start = utils.dateFromDrupal(reservation.start);
+    const eod = moment(get(this, 'props.formValues.date'))
+      .tz(utils.getUserTimezone())
+      .endOf('day');
+
+    return start < eod;
+  };
+
   getDisabledTimespans = () => {
     const availability = get(this, `props.availability.rooms.${this.props.room}.dates`);
 
@@ -119,7 +129,7 @@ class ReserveRoomStep2 extends React.Component {
       return [];
     }
 
-    return map(availability, item => ({
+    return map(filter(availability, this.onlyTodaysReservations), item => ({
       start: utils.getTimeFromDate(utils.dateFromDrupal(item.start)),
       end: utils.getTimeFromDate(utils.dateFromDrupal(item.end)),
     }));
@@ -180,33 +190,33 @@ class ReserveRoomStep2 extends React.Component {
             />
           </div>
           <div className="l__primary">
-            {
-              isLoading ?
-                (<LoadingIndicator loading={isLoading} />)
-              : room ?
-                (<RoomAvailabilityCalendar
-                  room={room}
-                  min={limits.min}
-                  max={limits.max}
-                  defaultDate={formValues.date}
-                  date={formValues.date}
-                  onNavigate={this.handleCalendarNavigate}
-                  availability={availability}
-                  isClosed={isClosed}
-                />)
-              : (<div>
-                  <p>Choose a room to see its availability</p>
-                  <Button
-                    className="value-summary__button"
-                    variant="raised"
-                    color="primary"
-                    size="small"
-                    onClick={() => onChangeStep(0)}
-                  >
-                    Choose a Room
-                  </Button>
-                </div>
-              )}
+            {isLoading ? (
+              <LoadingIndicator loading={isLoading} />
+            ) : room ? (
+              <RoomAvailabilityCalendar
+                room={room}
+                min={limits.min}
+                max={limits.max}
+                defaultDate={formValues.date}
+                date={formValues.date}
+                onNavigate={this.handleCalendarNavigate}
+                availability={availability}
+                isClosed={isClosed}
+              />
+            ) : (
+              <div>
+                <p>Choose a room to see its availability</p>
+                <Button
+                  className="value-summary__button"
+                  variant="raised"
+                  color="primary"
+                  size="small"
+                  onClick={() => onChangeStep(0)}
+                >
+                  Choose a Room
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -225,7 +235,8 @@ const mapStateToProps = (state, ownProps) => {
   return {
     rooms: select.roomsAscending(state),
     isLoading:
-      select.recordsAreLoading(c.TYPE_ROOM)(state) || select.recordsAreLoading(c.TYPE_LOCATION)(state),
+      select.recordsAreLoading(c.TYPE_ROOM)(state) ||
+      select.recordsAreLoading(c.TYPE_LOCATION)(state),
     locationRecord: ownProps.room ? select.roomLocationRecord(ownProps.room)(state) : null,
     // eventRecord: ownProps.event ? select.event(ownProps.event)(state) : null,
     hours,

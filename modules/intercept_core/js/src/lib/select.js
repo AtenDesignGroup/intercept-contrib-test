@@ -429,11 +429,11 @@ function getRegisterStatusText(mustRegister, statusEvent, statusUser, eventResou
 
   switch (statusEvent) {
     case 'open_pending':
-      return `Registration Opens ${getRegistrationOpenDate(eventResource)}`;
+      return `Registration opens ${getRegistrationOpenDate(eventResource)}`;
     case 'waitlist':
-      return 'On a Waitlist';
+      return 'Waitlist is open';
     case 'full':
-      return 'Registration is Full';
+      return 'Registration is full';
     case 'closed':
       return 'Registration is closed';
     case 'expired':

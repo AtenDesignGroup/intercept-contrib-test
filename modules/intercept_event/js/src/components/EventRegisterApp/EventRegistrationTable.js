@@ -73,7 +73,7 @@ function EventRegistrationTable(props) {
       </TableHead>
       <TableBody>
         {data.map(n => (
-          <TableRow key={n.id} className={n.status === 'canceled' && classes.canceled}>
+          <TableRow key={n.id} className={n.status === 'canceled' ? classes.canceled : ''}>
             <TableCell>
               <RegistrationTallySummary id={n.id} />
             </TableCell>

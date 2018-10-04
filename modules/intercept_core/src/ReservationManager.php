@@ -363,7 +363,8 @@ class ReservationManager implements ReservationManagerInterface {
     if (!$location = $this->getLocation($node)) {
       return FALSE;
     }
-    $start_date = $this->dateUtility->convertDate($params['start']);
+    // Convert date to default time to match the field location storage.
+    $start_date = $this->dateUtility->convertDate($params['start'], FALSE);
     $d = $start_date->format('w');
     // Eventually there is going to be a TIMEZONE setting on this field.
     $hours = $location->field_location_hours;

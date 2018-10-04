@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
+import get from 'lodash/get';
 
 // Intercept
 /* eslint-disable */
@@ -15,12 +16,6 @@ import EventRegistrationTable from './EventRegistrationTable';
 const { api, select } = interceptClient;
 const c = interceptClient.constants;
 
-function onlyActiveOrWaitlist(registrations) {
-  return registrations.filter(
-    r => r.data.attributes.status === 'active' || r.data.attributes.status === 'waitlist',
-  );
-}
-
 class EventRegisterApp extends React.Component {
   componentDidMount() {
     this.props.fetchSegments();
@@ -29,6 +24,23 @@ class EventRegisterApp extends React.Component {
     this.props.fetchRegistrations(this.props.eventId);
   }
 
+  onlyActiveOrWaitlist = () =>
+    this.props.registrations.filter(
+      r => r.data.attributes.status === 'active' || r.data.attributes.status === 'waitlist',
+    );
+
+  acceptingReservations = () => {
+    const status = get(this, 'props.event.data.attributes.registration.status');
+
+    switch (status) {
+      case 'open':
+      case 'waitlist':
+        return true;
+      default:
+        return false;
+    }
+  };
+
   render() {
     const { registrations, registrationsLoading, eventId } = this.props;
 
@@ -36,15 +48,24 @@ class EventRegisterApp extends React.Component {
       return <LoadingIndicator loading />;
     }
 
-    const form = onlyActiveOrWaitlist(registrations).length <= 0
-      ? <EventRegisterForm {...this.props} />
-      : null;
+    const userHasNotRegistered = this.onlyActiveOrWaitlist().length <= 0;
+
+    let form = null;
+
+    if (userHasNotRegistered) {
+      form = this.acceptingReservations()
+        ? <EventRegisterForm {...this.props} />
+        : <p>Registrations are not being accepted at this time.</p>;
+    }
+
     const table = registrations.length > 0 ? <EventRegistrationTable eventId={eventId} /> : null;
 
-    return (<div className="l--offset">
-      {form}
-      {table}
-    </div>);
+    return (
+      <div className="l--offset">
+        {form}
+        {table}
+      </div>
+    );
   }
 }
 
@@ -70,7 +91,9 @@ EventRegisterApp.defaultProps = {
 };
 
 const mapStateToProps = (state, ownProps) => ({
-  registrations: select.eventRegistrationsByEventByUser(ownProps.eventId, ownProps.user.uuid)(state),
+  registrations: select.eventRegistrationsByEventByUser(ownProps.eventId, ownProps.user.uuid)(
+    state,
+  ),
   registrationsLoading: select.recordsAreLoading(c.TYPE_EVENT_REGISTRATION)(state),
   event: select.record(select.getIdentifier(c.TYPE_EVENT, ownProps.eventId))(state),
   users: select.record(select.getIdentifier(c.TYPE_USER, ownProps.user.uuid))(state),
@@ -131,4 +154,7 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
   },
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(EventRegisterApp);
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(EventRegisterApp);

@@ -4,6 +4,7 @@ namespace Drupal\intercept_room_reservation\Controller;
 
 use Drupal\intercept_core\Controller\ManagementControllerBase;
 use Drupal\intercept_room_reservation\Form\RoomReservationSettingsForm;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Session\AccountInterface;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -30,8 +31,12 @@ class ManagementController extends ManagementControllerBase {
     // This can also be moved into a separate function, for example:
     // 'reservation_canceled' - viewRoomReservationConfigurationReservationCanceled()
     if ($form_key = $request->query->get('view')) {
-      $form = $this->formBuilder()->getForm(RoomReservationSettingsForm::class);
-      $this->hideElements($form, [$form_key, 'email']);
+      $form_object = $this->classResolver
+        ->getInstanceFromDefinition(RoomReservationSettingsForm::class)
+        ->addAlter(self::class . '::alterEmailReservationSettingsForm');
+      $form_state = new \Drupal\Core\Form\FormState();
+      $form_state->set('show_form_key', $form_key);
+      $form = $this->formBuilder()->buildForm($form_object, $form_state);
       return $form;
     }
 
@@ -69,4 +74,21 @@ class ManagementController extends ManagementControllerBase {
     return $build;
   }
 
+  public static function alterEmailReservationSettingsForm(array &$form, FormStateInterface $form_state) {
+    $show = $form_state->get('show_form_key');
+    $children = \Drupal\Core\Render\Element::children($form);
+    $skip = ['actions', 'email'];
+
+    $form['email']['#type'] = 'container';
+    foreach ($children as $name) {
+      if (in_array($name, $skip)) {
+        continue;
+      }
+      if ($name == $show) {
+        $form[$name]['#open'] = TRUE;
+        continue;
+      }
+      $form[$name]['#access'] = FALSE;
+    }
+  }
 }

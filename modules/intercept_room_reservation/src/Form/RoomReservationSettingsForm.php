@@ -7,6 +7,7 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\intercept_core\AlterableFormTrait;
 
 /**
  * Class RoomReservationSettingsForm.
@@ -14,6 +15,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * @ingroup intercept_room_reservation
  */
 class RoomReservationSettingsForm extends ConfigFormBase {
+
+  use AlterableFormTrait;
 
   protected const CONFIG_NAME = 'intercept_room_reservation.settings';
 
@@ -178,6 +181,7 @@ class RoomReservationSettingsForm extends ConfigFormBase {
       ];
     }
 
+    $this->alterForm($form, $form_state);
     return $form;
   }
 

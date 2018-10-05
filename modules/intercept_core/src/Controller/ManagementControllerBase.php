@@ -3,6 +3,7 @@
 namespace Drupal\intercept_core\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\DependencyInjection\ClassResolverInterface;
 use Drupal\Core\Routing\CurrentRouteMatch;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Session\AccountProxyInterface;
@@ -25,11 +26,17 @@ class ManagementControllerBase extends ControllerBase {
   protected $routeMatch;
 
   /**
+   * @var ClassResolverInterface
+   */
+  protected $classResolver;
+
+  /**
    * Constructs a new AdminController object.
    */
-  public function __construct(AccountProxyInterface $current_user, CurrentRouteMatch $route_match) {
+  public function __construct(AccountProxyInterface $current_user, CurrentRouteMatch $route_match, ClassResolverInterface $class_resolver) {
     $this->currentUser = $current_user;
     $this->routeMatch = $route_match;
+    $this->classResolver = $class_resolver;
   }
 
   /**
@@ -38,7 +45,8 @@ class ManagementControllerBase extends ControllerBase {
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('current_user'),
-      $container->get('current_route_match')
+      $container->get('current_route_match'),
+      $container->get('class_resolver')
     );
   }
 

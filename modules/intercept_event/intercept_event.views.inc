@@ -4,6 +4,16 @@
  * Implements hook_views_data_alter().
  */
 function intercept_event_views_data_alter(&$data) {
+  $data['users_field_data']['uid_current'] = [
+    'real field' => 'uid',
+    'title' => t('InterCEPT Current'),
+    'help' => t('Filter the view to the currently logged in user but avoid an INNER join.'),
+    'filter' => [
+      'id' => 'user_current',
+      'type' => 'yes-no',
+    ],
+  ];
+
   $data['node_field_data']['event_attendance_count'] = [
     'title' => t('Event attendance count'),
     'help' => t('.'),

@@ -4,6 +4,7 @@ namespace Drupal\intercept_event;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 
@@ -22,11 +23,24 @@ class RecurringEventManager {
   protected $entityTypeManager;
 
   /**
+   * @var MessengerInterface
+   */
+  protected $messenger;
+
+  /**
    * Constructs a new EventManager object.
    */
-  public function __construct(AccountProxyInterface $current_user, EntityTypeManagerInterface $entity_type_manager) {
+  public function __construct(AccountProxyInterface $current_user, EntityTypeManagerInterface $entity_type_manager, MessengerInterface $messenger) {
     $this->currentUser = $current_user;
     $this->entityTypeManager = $entity_type_manager;
+    $this->messenger = $messenger;
+  }
+
+  /**
+   * @return MessengerInterface
+   */
+  public function messenger() {
+    return $this->messenger;
   }
 
   /**
@@ -50,23 +64,30 @@ class RecurringEventManager {
   private function eventRecurrenceBaseForm(&$form, FormStateInterface $form_state, $node) {
     $r = &$form['recurring_event'];
 
-    if (empty($recurrence) && !$node->isNew()) {
+    $recurrence = NULL;
+    if (!$node->isNew()) {
       $storage = \Drupal::service('entity_type.manager')->getStorage('event_recurrence');
       $recurrences = $storage->loadByProperties([
         'event' => $node->id(),
       ]);
-      $recurrence = $recurrences ? reset($recurrences) : FALSE;
-      $form['recurring_event']['#entity'] = $recurrence;
+      $recurrence = $recurrences ? reset($recurrences) : NULL;
     }
+    $form['recurring_event']['#entity'] = $recurrence;
 
     $form['recurring_event']['#attributes'] = [
       'class' => 'intercept-event-recurring-container',
       'data-intercept-event-recurring-name' => 'interval',
+      'data-event-id' => $node->id(),
       // TODO: This is not ajax friendly.
       'data-start-date-selector' => '#edit-field-date-time-0-value-date',
       'data-end-date-selector' => '#edit-field-date-time-0-end-value-date',
       'data-start-time-selector' => '#edit-field-date-time-0-value-time',
       'data-end-time-selector' => '#edit-field-date-time-0-end-value-time',
+    ];
+
+    $r['#attached']['drupalSettings']['intercept']['events'][$node->id()] = [
+      'hasRecurringEvents' => $recurrence && !empty($recurrence->getEvents()),
+      'recurringEventCount' => $recurrence ? count($recurrence->getEvents()) : 0,
     ];
 
     $form['recurring_event']['enabled'] = [
@@ -237,7 +258,7 @@ class RecurringEventManager {
       ])
     ];
 
-    $form['recurring_event']['disable'] = [
+    $form['recurring_event']['remove_from_recurrence'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Remove from recurrence'),
     ];
@@ -247,7 +268,7 @@ class RecurringEventManager {
     if (!$form_state->getFormObject()->getFormDisplay($form_state)->getComponent('recurring_event')) {
       return;
     }
-    $node = $form_state->getFormObject()->getEntity();
+    $node = $form_state->set('recurring_event_manager', $this)->getFormObject()->getEntity();
 
     $form['recurring_event'] = [
       '#type' => 'fieldset',
@@ -278,7 +299,20 @@ class RecurringEventManager {
 
   public static function nodeFormSubmit(&$form, $form_state) {
     $recurring = $form_state->getValue('recurring_event');
-    if (!empty($recurring['disable'])) {
+
+    $manager = $form_state->get('recurring_event_manager');
+    $node = $form_state->getFormObject()->getEntity();
+
+    // If the checkbox is disabled and this is a base event.
+    if (empty($recurring['enabled']) && ($recurrence = $manager->getBaseEventRecurrence($node))) {
+      $existing_events = $recurrence->getEvents();
+      if (!empty($existing_events)) {
+        $nodes = $recurrence->deleteEvents();
+        $manager->messenger->addStatus(t('@count recurring events deleted.', ['@count' => count($nodes)]));
+      }
+      $recurrence->delete();
+    }
+    if (!empty($recurring['remove_from_recurrence'])) {
       $node = $form_state->getFormObject()->getEntity();
       $node->event_recurrence->setValue(NULL);
       $node->save();

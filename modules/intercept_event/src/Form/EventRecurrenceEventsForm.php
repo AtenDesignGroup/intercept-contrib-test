@@ -212,15 +212,8 @@ class EventRecurrenceEventsForm extends ContentEntityForm {
    * Submit handler to delete all events.
    */
   public function deleteEvents(array &$form, FormStateInterface $form_state) {
-    $nodes = $this->entityTypeManager->getStorage('node')->loadByProperties([
-      'event_recurrence' => $this->eventRecurrence->id(),
-    ]);
-    $base_node = $form_state->getFormObject()->getEntity();
-    $nodes = array_filter($nodes, function($node) use ($base_node) {
-      return $base_node->id() != $node->id();
-    });
-    $this->entityTypeManager->getStorage('node')->delete($nodes);
-    drupal_set_message($this->t('@count events deleted.', ['@count' => count($nodes)]));
+    $nodes = $this->eventRecurrence->deleteEvents();
+    \Drupal::service('messenger')->addStatus($this->t('@count recurring events deleted.', ['@count' => count($nodes)]));
   }
 
   /**

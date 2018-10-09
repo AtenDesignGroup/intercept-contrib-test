@@ -110,6 +110,19 @@ class EventRecurrence extends RevisionableContentEntityBase implements EventRecu
   }
 
   /**
+   * Delete all events associated with this recurrence entity.
+   */
+  public function deleteEvents() {
+    $nodes = $this->getEvents();
+    $base_node = $this->event->entity;
+    $nodes = array_filter($nodes, function($node) use ($base_node) {
+      return $base_node->id() != $node->id();
+    });
+    $this->entityTypeManager()->getStorage('node')->delete($nodes);
+    return $nodes;
+  }
+
+  /**
    * {@inheritdoc}
    */
   protected function urlRouteParameters($rel) {

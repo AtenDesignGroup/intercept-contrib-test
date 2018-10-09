@@ -99,7 +99,7 @@ class EventsController extends ControllerBase {
     $event_nid = $node->id();
 
     return [
-      '#theme' => 'event_analysis',
+      '#theme' => 'node_event_analysis',
       '#content' => [
         'event_attendance_form' => [
           '#markup' => '',

@@ -342,6 +342,11 @@ function intercept_event_node_event_form_validate(&$form, FormStateInterface $fo
  */
 function intercept_event_entity_bundle_field_info(\Drupal\Core\Entity\EntityTypeInterface $entity_type, $bundle, array $base_field_definitions) {
   $fields = [];
+  if ($entity_type->id() == 'vote' && $bundle == 'evaluation') {
+    $fields['vote_criteria'] = \Drupal\Core\Field\BaseFieldDefinition::create('map')
+      ->setLabel(t('Vote criteria'));
+    return $fields;
+  }
   if ($entity_type->id() == 'node' && $bundle == 'event') {
     $fields['registration'] = \Drupal\Core\Field\BaseFieldDefinition::create('intercept_computed')
       ->setLabel(t('Registration details'))
@@ -367,6 +372,14 @@ function intercept_event_entity_bundle_field_info(\Drupal\Core\Entity\EntityType
  * Implements hook_entity_base_field_info().
  */
 function intercept_event_entity_base_field_info(\Drupal\Core\Entity\EntityTypeInterface $entity_type) {
+  if ($entity_type->id() == 'vote') {
+    $definitions = [];
+    $definitions['vote_criteria'] = \Drupal\Core\Field\BaseFieldDefinition::create('map')
+      ->setName('vote_criteria')
+      ->setLabel(t('Vote criteria'))
+      ->setCardinality(1);
+    return $definitions;
+  }
   if ($entity_type->id() == 'node') {
     $definitions = [];
     $definitions['event_recurrence'] = \Drupal\Core\Field\BaseFieldDefinition::create('entity_reference')

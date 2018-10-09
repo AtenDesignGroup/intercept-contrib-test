@@ -26,13 +26,13 @@ class EventRegistrationController extends ControllerBase {
    * @var EntityFormBuilderInterface
    */
   protected $entityFormBuilder;
+
   /**
    * EventsController constructor.
    *
    * @param EntityTypeManagerInterface $entity_type_manager
    * @param EntityFormBuilderInterface $entity_form_builder
    */
-
   public function __construct(EntityTypeManagerInterface $entity_type_manager, EntityFormBuilderInterface $entity_form_builder) {
     $this->entityTypeManager = $entity_type_manager;
     $this->entityFormBuilder = $entity_form_builder;

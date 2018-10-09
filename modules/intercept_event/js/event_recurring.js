@@ -87,7 +87,21 @@ Drupal.behaviors.eventRecurring = {
   bind: function ($container, context, settings) {
     $root = this;
     // Bind the enable button to populate values.
-    $container.find('.intercept-event-recurring-enable').once().on('change', function() {
+    var nodeId = $container.data('event-id');
+    var eventCount = function() {
+      return settings.intercept.events[nodeId].recurringEventCount;
+    }
+    var hasEvents = function() {
+      return settings.intercept.events[nodeId]
+        && settings.intercept.events[nodeId].hasRecurringEvents;
+    }
+    $container.find('.intercept-event-recurring-enable').once().on('change', function(e) {
+      if (!$(this).is(':checked') && hasEvents()) {
+        if (alert(Drupal.t('Warning: Clicking disable will delete !count recurring events.', { '!count': eventCount() })) != true) {
+          e.preventDefault();
+          return;
+        }
+      }
       if ($(this).is(':checked')) {
         $root.initialize($container, context);
       }

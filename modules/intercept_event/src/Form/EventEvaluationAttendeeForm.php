@@ -9,10 +9,10 @@ use Drupal\user\UserInterface;
 use Drupal\user\UserStorage;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
-class EventEvaluationDefaultForm extends EventEvaluationFormBase {
+class EventEvaluationAttendeeForm extends EventEvaluationFormBase {
 
   public function getFormId() {
-    return 'event_evaluation_default_form_' . $this->entity->id();
+    return 'event_evaluation_attendee_form_' . $this->entity->id();
   }
 
   public function buildForm(array $form, FormStateInterface $form_state) {

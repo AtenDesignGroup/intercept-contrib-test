@@ -263,7 +263,7 @@ function intercept_event_node_view(array &$build, \Drupal\Core\Entity\EntityInte
   }
   if ($entity->bundle() == 'event' && $display->getComponent('evaluation_attendee_js')) {
     $build['evaluation'] = \Drupal::service('intercept_event.evaluation_manager')
-      ->getJsForm($entity);
+      ->buildJsWidget($entity);
   }
   if ($entity->bundle() === 'event' && $entity->field_must_register->value === '1') {
     $build['register_prompt'] = [

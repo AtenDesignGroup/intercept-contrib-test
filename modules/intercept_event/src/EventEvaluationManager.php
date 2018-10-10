@@ -84,8 +84,28 @@ class EventEvaluationManager {
     return new EventEvaluation($vote);
   }
 
-  public function getDefaultForm(\Drupal\Core\Entity\EntityInterface $entity) {
-    $class = \Drupal\intercept_event\Form\EventEvaluationDefaultForm::class;
+  public function buildJsWidget(\Drupal\Core\Entity\EntityInterface $entity) {
+    $evaluation = $this->loadByEntity($entity);
+
+    $build['wrapper'] = [
+      '#type' => 'html_tag',
+      '#tag' => 'div',
+      '#attributes' => [
+        'class' => ['js-event-evaluation--attendee'],
+        'data-event' => [$entity->uuid()],
+        'data-event-type-primary' => [
+          $evaluation->getPrimaryEventType() ? $evaluation->getPrimaryEventType()->uuid() : '',
+        ],
+      ],
+      '#evaluation' => $evaluation,
+    ];
+
+    // Attach library here.
+    return $build;
+  }
+
+  public function getAttendeeForm(\Drupal\Core\Entity\EntityInterface $entity) {
+    $class = \Drupal\intercept_event\Form\EventEvaluationAttendeeForm::class;
     $form_arg = \Drupal::service('class_resolver')->getInstanceFromDefinition($class)
       ->setEntity($entity);
     $form_state = new \Drupal\Core\Form\FormState();

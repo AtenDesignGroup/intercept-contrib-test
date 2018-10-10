@@ -6,12 +6,11 @@ use Drupal\Component\Utility\Xss;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Url;
-use Drupal\request_for_purchase\Entity\RequestForPurchaseInterface;
 
 /**
  * Class EquipmentReservationController.
  *
- *  Returns responses for Request For Purchase routes.
+ *  Returns responses for Equipment Reservation routes.
  */
 class EquipmentReservationController extends ControllerBase implements ContainerInjectionInterface {
 

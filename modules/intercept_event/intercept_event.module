@@ -75,6 +75,27 @@ function intercept_event_entity_operation(\Drupal\Core\Entity\EntityInterface $e
 function intercept_event_entity_extra_field_info() {
   $extra = [];
 
+  $extra['node']['event']['display']['evaluation_attendee_default'] = [
+    'label' => t('Evaluation default (attendee)'),
+    'description' => t('View evaluation widget for attendees.'),
+    'weight' => 10,
+    'visible' => FALSE,
+  ];
+
+  $extra['node']['event']['display']['evaluation_attendee_js'] = [
+    'label' => t('Evaluation JS widget (attendee)'),
+    'description' => t('View evaluation widget for attendees.'),
+    'weight' => 10,
+    'visible' => FALSE,
+  ];
+
+  $extra['node']['event']['display']['evaluation_staff'] = [
+    'label' => t('Evaluation (staff)'),
+    'description' => t('View evaluation widget for staff users.'),
+    'weight' => 10,
+    'visible' => FALSE,
+  ];
+
   $extra['event_attendance']['event_attendance']['form']['event_summary'] = [
     'label' => t('Event summary'),
     'description' => t('View event summary information.'),
@@ -235,6 +256,14 @@ function intercept_event_form_node_form_alter(&$form, FormStateInterface $form_s
  * Implements hook_node_view().
  */
 function intercept_event_node_view(array &$build, \Drupal\Core\Entity\EntityInterface $entity, \Drupal\Core\Entity\Display\EntityViewDisplayInterface $display, $view_mode) {
+  if ($entity->bundle() == 'event' && $display->getComponent('evaluation_attendee_default')) {
+    $build['evaluation'] = \Drupal::service('intercept_event.evaluation_manager')
+      ->getDefaultForm($entity);
+  }
+  if ($entity->bundle() == 'event' && $display->getComponent('evaluation_attendee_js')) {
+    $build['evaluation'] = \Drupal::service('intercept_event.evaluation_manager')
+      ->getJsForm($entity);
+  }
   if ($entity->bundle() === 'event' && $entity->field_must_register->value === '1') {
     $build['register_prompt'] = [
       '#markup' => '<div class="event-register-button js--event-register-button" data-event-uuid="' . $entity->uuid() . '"></div>',

@@ -77,13 +77,31 @@ class EventRegistrationController extends ControllerBase {
     return $build;
   }
 
-  public function manage(UserInterface $user) {
+  /**
+   * Not used right now, here for reference.
+   */
+  public function manageJs(UserInterface $user) {
     $build = [];
 
     $build['#attached']['library'][] = 'intercept_event/manageEventRegistrations';
     $build['#markup'] = '';
     $build['intercept_event_registration']['#markup'] = '<div id="eventRegistrationRoot" />';
     $build['#attached']['drupalSettings']['intercept']['parameters']['user']['uuid'] = $user->uuid();
+
+    return $build;
+  }
+
+  /**
+   * Menu callback for user/{user}/events.
+   */
+  public function manage(UserInterface $user) {
+    $build = [];
+
+    $build['events'] = [
+      '#type' => 'view',
+      '#name' => 'intercept_user_events',
+      '#display_id' => 'embed',
+    ];
 
     return $build;
   }

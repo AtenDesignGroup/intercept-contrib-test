@@ -236,19 +236,14 @@ class ReserveRoomStep3 extends React.Component {
       handleFormChange,
     } = this;
     const {
-      calendarRooms,
-      rooms,
-      roomsLoading,
-      filters,
-      view,
-      calView,
       event,
       room,
       formValues,
       onChange,
       onChangeStep,
+      userStatus,
     } = props;
-    const { date, start, end } = formValues;
+    // const { date, start, end } = formValues;
     const dateValues = pick(formValues, ['date', 'start', 'end']);
     const values = pick(formValues, [
       'attendees',
@@ -259,6 +254,12 @@ class ReserveRoomStep3 extends React.Component {
       c.TYPE_MEETING_PURPOSE,
     ]);
     const hasConflict = this.hasConflict();
+
+    // Hide this step if the reservation status has not been checked or
+    // the user has exceeded their limit.
+    if (!userStatus.initialized || userStatus.loading || userStatus.exceededLimit) {
+      return null;
+    }
 
     return (
       <div className="l--default">
@@ -299,38 +300,12 @@ const mapStateToProps = state => ({
   calendarRooms: [],
 });
 
-const mapDispatchToProps = dispatch => ({
-  // fetchRooms: (options) => {
-  //   dispatch(api[c.TYPE_ROOM].fetchAll(options));
-  // },
-  // fetchLocations: (options) => {
-  //   dispatch(api[c.TYPE_LOCATION].fetchAll(options));
-  // },
-  // fetchUser: (options) => {
-  //   dispatch(api[c.TYPE_USER].fetchAll(options));
-  // },
-});
-
 ReserveRoomStep3.propTypes = {
-  // calendarRooms: PropTypes.arrayOf(Object).isRequired,
-  // rooms: PropTypes.arrayOf(Object).isRequired,
-  // roomsLoading: PropTypes.bool.isRequired,
-  // fetchLocations: PropTypes.func.isRequired,
   fetchRooms: PropTypes.func.isRequired,
-  fetchUser: PropTypes.func.isRequired,
-  // calView: PropTypes.string,
-  // date: PropTypes.instanceOf(Date),
-  // view: PropTypes.string,
-  // filters: PropTypes.object,
-  // onChangeCalView: PropTypes.func.isRequired,
-  // onChangeView: PropTypes.func.isRequired,
-  // onChangeFilters: PropTypes.func.isRequired,
-  // onChangeDate: PropTypes.func.isRequired,
 };
 
 ReserveRoomStep3.defaultProps = {};
 
 export default connect(
   mapStateToProps,
-  mapDispatchToProps,
 )(withAvailability(ReserveRoomStep3));

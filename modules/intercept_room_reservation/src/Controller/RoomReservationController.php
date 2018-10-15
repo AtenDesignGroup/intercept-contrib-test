@@ -56,32 +56,32 @@ class RoomReservationController extends ControllerBase implements ContainerInjec
     $step = $request->query->get('step');
     $build = [];
 
-    if ($this->reservationManager->userExceededReservationLimit($this->currentUser())) {
-      $config = $this->config('intercept_room_reservation.settings');
-      $limit_text = $config->get('reservation_limit_text');
-      $text = !empty($limit_text['value']) ? $limit_text['value'] : '';
-      $build['message'] = [
-        '#type' => 'html_tag',
-        '#tag' => 'div',
-        '#attributes' => [
-          'id' => 'reserveRoomRoot',
-          // TODO: Move this into the theme layer with the react.js version of this page.
-          'class' => ['l--offset'],
-        ],
-      ];
+    // if ($this->reservationManager->userExceededReservationLimit($this->currentUser())) {
+    //   $config = $this->config('intercept_room_reservation.settings');
+    //   $limit_text = $config->get('reservation_limit_text');
+    //   $text = !empty($limit_text['value']) ? $limit_text['value'] : '';
+    //   $build['message'] = [
+    //     '#type' => 'html_tag',
+    //     '#tag' => 'div',
+    //     '#attributes' => [
+    //       'id' => 'reserveRoomRoot',
+    //       // TODO: Move this into the theme layer with the react.js version of this page.
+    //       'class' => ['l--offset'],
+    //     ],
+    //   ];
 
-      $build['message']['text'] = [
-        '#type' => 'processed_text',
-        '#text' => $this->t($text, [
-          '@account-link' => \Drupal\Core\Link::createFromRoute('your account', 'entity.user.room_reservations', [
-            'user' => $this->currentUser()->id(),
-          ])->toString(),
-          '@max-room-reservations' => $config->get('reservation_limit'),
-        ]),
-        '#format' => !empty($limit_text['format']) ? $limit_text['format'] : 'basic_html',
-      ];
-      return $build;
-    }
+    //   $build['message']['text'] = [
+    //     '#type' => 'processed_text',
+    //     '#text' => $this->t($text, [
+    //       '@account-link' => \Drupal\Core\Link::createFromRoute('your account', 'entity.user.room_reservations', [
+    //         'user' => $this->currentUser()->id(),
+    //       ])->toString(),
+    //       '@max-room-reservations' => $config->get('reservation_limit'),
+    //     ]),
+    //     '#format' => !empty($limit_text['format']) ? $limit_text['format'] : 'basic_html',
+    //   ];
+    //   return $build;
+    // }
 
     // TODO: Move this to the reservation manager.
     $bypass_agreement = $this->currentUser()->hasPermission('bypass room reservation agreement');
@@ -325,7 +325,7 @@ class RoomReservationController extends ControllerBase implements ContainerInjec
     $link = \Drupal\Core\Link::createFromRoute('Create reservation', 'entity.room_reservation.add_form', [
       'room' => $node->id(),
     ], [
-      'attributes' => ['class' => ['button button-action']], 
+      'attributes' => ['class' => ['button button-action']],
     ]);
     $form_state = new \Drupal\Core\Form\FormState();
     $form_state->set('node', $node);

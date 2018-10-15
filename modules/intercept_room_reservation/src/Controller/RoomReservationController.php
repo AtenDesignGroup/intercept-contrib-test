@@ -372,6 +372,11 @@ class RoomReservationController extends ControllerBase implements ContainerInjec
     }
 
     $resource_type = \Drupal::service('jsonapi.resource_type.repository')->get('room_reservation', 'room_reservation');
+
+    // From Drupal\jsonapi\Routing::getRoutesForResourceType().
+    // This is still not ideal and will be discussed in
+    // https://www.drupal.org/project/intercept/issues/3002286.
+    $request->attributes->set('serialization_class', \Drupal\jsonapi\Resource\JsonApiDocumentTopLevel::class);
     return \Drupal::service('jsonapi.request_handler')->handle($request, $resource_type);
   }
 

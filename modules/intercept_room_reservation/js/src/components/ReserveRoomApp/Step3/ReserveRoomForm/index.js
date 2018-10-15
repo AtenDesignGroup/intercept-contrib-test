@@ -5,6 +5,9 @@ import PropTypes from 'prop-types';
 // Redux
 import { connect } from 'react-redux';
 
+// Lodash
+import get from 'lodash/get';
+
 // Intercept
 import interceptClient from 'interceptClient';
 import drupalSettings from 'drupalSettings';
@@ -64,6 +67,8 @@ addValidationRule(
   (values, value) => !values.refreshments || value !== '',
 );
 addValidationRule('isRequiredIfMeeting', (values, value) => !values.meeting || value !== '');
+addValidationRule('isGreaterOrEqualTo', (values, value, min) => min === null || value >= min);
+addValidationRule('isLesserOrEqualTo', (values, value, max) => max === null || value <= max);
 
 const buildRoomReservation = (values) => {
   const uuid = v4();
@@ -95,10 +100,12 @@ const buildRoomReservation = (values) => {
     },
     relationships: {
       field_event: {
-        data: values[c.TYPE_EVENT] ? {
-          type: c.TYPE_EVENT,
-          id: values[c.TYPE_EVENT],
-        } : null,
+        data: values[c.TYPE_EVENT]
+          ? {
+            type: c.TYPE_EVENT,
+            id: values[c.TYPE_EVENT],
+          }
+          : null,
       },
       field_room: {
         data: {
@@ -146,8 +153,6 @@ class ReserveRoomForm extends PureComponent {
       uuid: null,
     };
 
-    this.form = React.createRef();
-
     this.toggleState = this.toggleState.bind(this);
     this.updateValue = this.updateValue.bind(this);
     this.updateValues = this.updateValues.bind(this);
@@ -158,6 +163,15 @@ class ReserveRoomForm extends PureComponent {
     this.onValueChange = this.onValueChange.bind(this);
     this.disableButton = this.disableButton.bind(this);
     this.enableButton = this.enableButton.bind(this);
+  }
+
+  componentDidUpdate(prevProps) {
+    const { values } = this.props;
+    const valuesChanged = prevProps.values.attendees !== values.attendees;
+
+    if (valuesChanged) {
+      this.forceUpdate();
+    }
   }
 
   onInputChange(key) {
@@ -258,11 +272,14 @@ class ReserveRoomForm extends PureComponent {
       hasConflict,
       meetingPurpose,
       room,
+      roomCapacity,
       values,
     } = this.props;
     const showMeetingPurposeExplanation = !!purposeRequiresExplanation(meetingPurpose);
 
     let content = null;
+
+    this.form = React.createRef();
 
     if (this.state.uuid) {
       content = <ReservationTeaser id={this.state.uuid} />;
@@ -285,12 +302,27 @@ class ReserveRoomForm extends PureComponent {
                     label="Number of Attendees"
                     value={values.attendees}
                     onChange={this.onValueChange('attendees')}
+                    min={roomCapacity.min}
+                    // Disable max because manually input of an out of range value has
+                    // unexpected side effects with validation since the underlying input sets
+                    // an out of range value to null.
+                    // max={roomCapacity.max}
                     name={'attendees'}
-                    min={0}
                     int
                     required={!utils.userIsStaff()}
-                    validations="isPositive"
-                    validationError="Attendees must be a positive number"
+                    validations={{
+                      isPositive: true,
+                      isLesserOrEqualTo: roomCapacity.max,
+                      isGreaterOrEqualTo: roomCapacity.min,
+                    }}
+                    validationErrors={{
+                      isPositive: 'Attendees must be a positive number',
+                      isLesserOrEqualTo: `The maximum capacity of this room is ${roomCapacity.max}`,
+                      isGreaterOrEqualTo: `The minimum capacity of this room is ${
+                        roomCapacity.min
+                      }`,
+                    }}
+                    helperText={roomCapacity.max && `This room holds ${roomCapacity.min} to ${roomCapacity.max} people.`}
                   />
                   <InputText
                     label="Group Name"
@@ -421,6 +453,10 @@ ReserveRoomForm.propTypes = {
   meetingPurpose: PropTypes.object,
   combinedValues: PropTypes.object,
   room: PropTypes.string,
+  roomCapacity: PropTypes.shape({
+    min: PropTypes.number,
+    max: PropTypes.number,
+  }).isRequired,
   event: PropTypes.string,
   hasConflict: PropTypes.bool,
 };
@@ -428,7 +464,7 @@ ReserveRoomForm.propTypes = {
 ReserveRoomForm.defaultProps = {
   combinedValues: {},
   values: {
-    attendees: 1,
+    attendees: null,
     groupName: '',
     meetingPurpose: '',
     meetingDetails: '',
@@ -448,6 +484,12 @@ const mapStateToProps = (state, ownProps) => ({
       select.getIdentifier(c.TYPE_MEETING_PURPOSE, ownProps.values[c.TYPE_MEETING_PURPOSE]),
     )(state)
     : null,
+  roomCapacity: ownProps.room
+    ? select.roomCapacity(ownProps.room)(state)
+    : {
+      min: 0,
+      max: null,
+    },
 });
 
 const mapDispatchToProps = dispatch => ({

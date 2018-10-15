@@ -14,9 +14,6 @@ import Slide from '@material-ui/core/Slide';
 // Formsy
 import { addValidationRule } from 'formsy-react';
 
-// Intercept Components
-import PageSpinner from 'intercept/PageSpinner';
-
 // Local Components
 import ReserveRoomStepper from './ReserveRoomStepper';
 import ReserveRoomStep1 from './Step1';
@@ -151,7 +148,7 @@ class ReserveRoom extends React.Component {
         date: null,
         start: null,
         end: null,
-        attendees: 1,
+        attendees: null,
         groupName: '',
         meeting: false,
         meetingStart: null,

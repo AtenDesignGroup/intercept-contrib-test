@@ -577,6 +577,12 @@ export const roomLabel = id =>
 export const roomLocation = id =>
   createSelector(room(id), item => get(item, 'data.relationships.field_location.data.id'));
 
+export const roomCapacity = id =>
+  createSelector(room(id), item => ({
+    min: get(item, 'data.attributes.field_capacity_min'),
+    max: get(item, 'data.attributes.field_capacity_max'),
+  }));
+
 export const roomLocationRecord = id => state => location(roomLocation(id)(state))(state);
 
 export const roomLocationLabel = id => (state) => {

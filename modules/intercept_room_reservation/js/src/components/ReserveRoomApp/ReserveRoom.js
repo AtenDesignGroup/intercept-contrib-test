@@ -22,7 +22,9 @@ import ReserveRoomStepper from './ReserveRoomStepper';
 import ReserveRoomStep1 from './Step1';
 import ReserveRoomStep2 from './Step2';
 import ReserveRoomStep3 from './Step3';
+import RoomLimitWarning from './RoomLimitWarning';
 import RoomDetailDialog from './RoomDetailDialog';
+import withUserStatus from './withUserStatus';
 
 const { constants, api, select, utils } = interceptClient;
 const c = constants;
@@ -217,14 +219,11 @@ class ReserveRoom extends React.Component {
         },
       },
       fields: {
-        [c.TYPE_LOCATION]: [
-          'uuid',
-          'title',
-          'field_location_hours',
-          'field_branch_location',
-        ]
-      }
+        [c.TYPE_LOCATION]: ['uuid', 'title', 'field_location_hours', 'field_branch_location'],
+      },
     });
+
+    this.props.fetchUserStatus();
   }
 
   componentDidUpdate(prevProps) {
@@ -344,6 +343,7 @@ class ReserveRoom extends React.Component {
       roomDetail,
       onChangeDetail,
       onChangeRoomDetail,
+      userStatus,
     } = this.props;
 
     const steps = [
@@ -373,9 +373,14 @@ class ReserveRoom extends React.Component {
           <ReserveRoomStepper
             {...this.props}
             step={step}
-            onChangeStep={onChangeStep}
+            onChangeStep={(s) => {
+              this.props.fetchUserStatus();
+              onChangeStep(s);
+            }}
+
             values={this.state.formValues}
           />
+          <RoomLimitWarning userStatus={userStatus} />
         </header>
         <div className="l__main">
           <div className="l__primary">{steps[step]}</div>
@@ -398,9 +403,10 @@ ReserveRoom.propTypes = {
   fetchLocations: PropTypes.func.isRequired,
   fetchRooms: PropTypes.func.isRequired,
   fetchUser: PropTypes.func.isRequired,
+  fetchUserStatus: PropTypes.func.isRequired,
   fetchEvent: PropTypes.func.isRequired,
-  // Props from URL
   detail: PropTypes.bool,
+  // Props from URL
   event: PropTypes.string,
   onChangeStep: PropTypes.func.isRequired,
   onChangeRoom: PropTypes.func.isRequired,
@@ -450,4 +456,4 @@ const mapDispatchToProps = dispatch => ({
 export default connect(
   mapStateToProps,
   mapDispatchToProps,
-)(ReserveRoom);
+)(withUserStatus(ReserveRoom));

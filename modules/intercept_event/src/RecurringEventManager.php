@@ -268,7 +268,8 @@ class RecurringEventManager {
     if (!$form_state->getFormObject()->getFormDisplay($form_state)->getComponent('recurring_event')) {
       return;
     }
-    $node = $form_state->set('recurring_event_manager', $this)->getFormObject()->getEntity();
+    // Use in submit and validate handlers but do not actually submit.
+    $node = $form_state->setTemporaryValue('recurring_event_manager', $this)->getFormObject()->getEntity();
 
     $form['recurring_event'] = [
       '#type' => 'fieldset',
@@ -300,7 +301,7 @@ class RecurringEventManager {
   public static function nodeFormSubmit(&$form, $form_state) {
     $recurring = $form_state->getValue('recurring_event');
 
-    $manager = $form_state->get('recurring_event_manager');
+    $manager = $form_state->getTemporaryValue('recurring_event_manager');
     $node = $form_state->getFormObject()->getEntity();
 
     // If the checkbox is disabled and this is a base event.

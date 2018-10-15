@@ -108,7 +108,10 @@ const mapDispatchToProps = dispatch => ({
     session
       .getToken()
       .then((token) => {
-        dispatch(api[c.TYPE_ROOM_RESERVATION].sync(uuid, { headers: { 'X-CSRF-Token': token } }));
+        dispatch(api[c.TYPE_ROOM_RESERVATION].sync(uuid, {
+          endpoint: '/api/rooms/reserve',
+          headers: { 'X-CSRF-Token': token }
+        }));
       })
       .catch((e) => {
         console.log('Unable to save Reservation', e);

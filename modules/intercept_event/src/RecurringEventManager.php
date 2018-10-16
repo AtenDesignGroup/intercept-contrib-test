@@ -2,6 +2,7 @@
 
 namespace Drupal\intercept_event;
 
+use Drupal\Core\DependencyInjection\DependencySerializationTrait;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Messenger\MessengerInterface;
@@ -9,6 +10,8 @@ use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 
 class RecurringEventManager {
+
+  use DependencySerializationTrait;
 
   use StringTranslationTrait;
 
@@ -269,7 +272,7 @@ class RecurringEventManager {
       return;
     }
     // Use in submit and validate handlers but do not actually submit.
-    $node = $form_state->setTemporaryValue('recurring_event_manager', $this)->getFormObject()->getEntity();
+    $node = $form_state->set('recurring_event_manager', $this)->getFormObject()->getEntity();
 
     $form['recurring_event'] = [
       '#type' => 'fieldset',
@@ -301,7 +304,7 @@ class RecurringEventManager {
   public static function nodeFormSubmit(&$form, $form_state) {
     $recurring = $form_state->getValue('recurring_event');
 
-    $manager = $form_state->getTemporaryValue('recurring_event_manager');
+    $manager = $form_state->get('recurring_event_manager');
     $node = $form_state->getFormObject()->getEntity();
 
     // If the checkbox is disabled and this is a base event.

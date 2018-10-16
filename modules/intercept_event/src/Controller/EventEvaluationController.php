@@ -8,6 +8,7 @@ use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Entity\EntityFormBuilderInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Url;
+use Drupal\intercept_event\EventEvaluationManager;
 use Drupal\node\NodeInterface;
 use Drupal\user\UserInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -30,16 +31,19 @@ class EventEvaluationController extends ControllerBase {
    * @var EntityFormBuilderInterface
    */
   protected $entityFormBuilder;
+
+  /**
+   * @var EventEvaluationManager
+   */
+  protected $eventEvaluationManager;
+
   /**
    * EventsController constructor.
-   *
-   * @param EntityTypeManagerInterface $entity_type_manager
-   * @param EntityFormBuilderInterface $entity_form_builder
    */
-
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, EntityFormBuilderInterface $entity_form_builder) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, EntityFormBuilderInterface $entity_form_builder, EventEvaluationManager $event_evaluation_manager) {
     $this->entityTypeManager = $entity_type_manager;
     $this->entityFormBuilder = $entity_form_builder;
+    $this->eventEvaluationManager = $event_evaluation_manager;
   }
 
   /**
@@ -74,15 +78,13 @@ class EventEvaluationController extends ControllerBase {
       'uuid' => $events,
     ]);
 
-    $manager = \Drupal::service('intercept_event.evaluation_manager');
-
     foreach ($events as $event) {
       $result[$event->uuid()] = [
         'id' => $event->id(),
         'title' => $event->label(),
         'url' =>  $event->url(),
       ];
-      if ($analysis = $manager->uuid()->loadAnalysis($event)) {
+      if ($analysis = $this->eventEvaluationManager->uuid()->loadAnalysis($event)) {
         $result[$event->uuid()] += $analysis;
       }
     }
@@ -118,7 +120,7 @@ class EventEvaluationController extends ControllerBase {
   protected function getEvaluationFromPost(array $post) {
     $entity_id = $this->convertUuid($post['event'], 'node');
     $user_id = !empty($post['user']) ? $this->convertUuid($post['user'], 'user') : NULL;
-    $evaluation = \Drupal::service('intercept_event.evaluation_manager')->loadByProperties([
+    $evaluation = $this->eventEvaluationManager->loadByProperties([
       'entity_id' => $entity_id,
       'entity_type' => 'node',
       'user_id' => $user_id,

@@ -122,7 +122,9 @@ function intercept_event_entity_type_build(array &$entity_types) {
     ->setFormClass('template', 'Drupal\intercept_event\Form\EventTemplateForm')
     ->setLinkTemplate('template-form', '/node/{node}/template')
     ->setFormClass('recurrence', 'Drupal\intercept_event\Form\EventRecurrenceEventsForm')
-    ->setLinkTemplate('recurrence-form', '/node/{node}/recurrences');
+    ->setLinkTemplate('recurrence-form', '/node/{node}/recurrences')
+    ->setFormClass('attendance', 'Drupal\intercept_event\Form\EventAttendanceEventsForm')
+    ->setLinkTemplate('attendance-form', '/node/{node}/recurrences');
 }
 
 /**

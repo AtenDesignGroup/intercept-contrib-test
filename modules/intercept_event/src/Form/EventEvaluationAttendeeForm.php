@@ -11,27 +11,44 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class EventEvaluationAttendeeForm extends EventEvaluationFormBase {
 
+  /**
+   * {@inheritdoc}
+   */
   public function getFormId() {
     return 'event_evaluation_attendee_form_' . $this->entity->id();
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  protected function getVoteType() {
+    return \Drupal\intercept_event\EventEvaluationManager::VOTE_TYPE_ID;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    $node = $this->entity;
-    // TODO: Change this to just make the entity the evaluation itself.
-    $evaluation = $this->eventEvaluationManager->loadByEntity($node);
+    $form = parent::buildForm($form, $form_state);
+    $evaluation = $form_state->get('evaluation');
+    $evaluation_vote = $form_state->getValue('evaluation');
+    if (!isset($evaluation_vote)) {
+      $evaluation_vote = $evaluation->getVote();
+    }
+
+    $wrapper_id = 'evaluation-criteria-ajax-wrapper';
 
     $form['wrapper'] = [
       '#type' => 'html_tag',
       '#tag' => 'div',
       '#attributes' => [
         'class' => ['js-event-evaluation--attendee'],
-        'data-event' => [$node->uuid()],
+        'data-event' => [$this->entity->uuid()],
         'data-event-type-primary' => [
           $evaluation->getPrimaryEventType() ? $evaluation->getPrimaryEventType()->uuid() : '',
         ],
       ],
     ];
-    $wrapper_id = \Drupal\Component\Utility\Html::getUniqueId('evaluation-criteria-wrapper');
     $form['evaluation'] = [
       '#title' => $this->t('How\'d the Event Go?'),
       '#type' => 'radios',
@@ -39,15 +56,11 @@ class EventEvaluationAttendeeForm extends EventEvaluationFormBase {
         0 => $this->t('Dislike'),
         1 => $this->t('Like'),
       ],
-      '#default_value' => $evaluation->getVote(),
+      '#default_value' => $evaluation_vote,
     ];
 
     if ($evaluation->hasCriteria()) {
-      $evaluation_value = $form_state->getValue('evaluation');
-      if (!isset($evaluation_value)) {
-        $evaluation_value = $evaluation->getVote();
-      }
-      $options = $evaluation_value ? $evaluation->getPositiveCriteriaOptions() : $evaluation->getNegativeCriteriaOptions();
+      $options = $evaluation_vote ? $evaluation->getPositiveCriteriaOptions() : $evaluation->getNegativeCriteriaOptions();
       $form['evaluation']['#ajax'] = [
         'callback' => '::ajaxCallback',
         'wrapper' => $wrapper_id,
@@ -63,27 +76,21 @@ class EventEvaluationAttendeeForm extends EventEvaluationFormBase {
       ];
     }
 
-    $form['save'] = [
-      '#type' => 'submit',
-      '#value' => $this->t('Save'),
-      '#ajax' => [
-        'callback' => '::save',
-      ],
-    ];
-
-    $form_state->set('evaluation', $evaluation);
+    $form['actions'] = $this->buildActions();
 
     return $form;
   }
 
+  /**
+   * Form ajax handler for repopulating evaluation criteria select.
+   */
   public function ajaxCallback(&$form, FormStateInterface $form_state) {
     return $form['evaluation_criteria'];
   }
 
-  public function save(&$form, FormStateInterface $form_state) {
-    return $form;
-  }
-
+  /**
+   * {@inheritdoc}
+   */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $evaluation = $form_state->get('evaluation');
     $vote = $form_state->getValue('evaluation');

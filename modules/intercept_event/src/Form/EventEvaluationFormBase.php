@@ -16,6 +16,16 @@ abstract class EventEvaluationFormBase extends FormBase {
 
   protected $eventEvaluationManager;
 
+  /**
+   * Set votingapi entity bundle for new evaluations.
+   *
+   * @return string
+   */
+  abstract protected function getVoteType();
+
+  /**
+   * EventEvaluationFormBase constructor.
+   */
   public function __construct(EventEvaluationManager $event_evaluation_manager) {
     $this->eventEvaluationManager = $event_evaluation_manager;
   }
@@ -29,9 +39,59 @@ abstract class EventEvaluationFormBase extends FormBase {
     );
   }
 
+  /**
+   * Set the current event entity.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *
+   * @return $this
+   */
   public function setEntity(\Drupal\Core\Entity\EntityInterface $entity) {
     $this->entity = $entity;
     return $this;
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function buildForm(array $form, FormStateInterface $form_state) {
+    if (!$evaluation = $this->eventEvaluationManager->loadByEntity($this->entity, $this->getVoteType())) {
+      $evaluation = $this->eventEvaluationManager->create([
+        'entity_id' => $this->entity->id(),
+        'type' => $this->getVoteType(),
+        'entity_type' => $this->entity->getEntityTypeId(), 
+      ]);
+    }
+
+    $form_state->set('evaluation', $evaluation);
+    return $form;
+  }
+
+  /**
+   * Form ajax callback for submit button.
+   */
+  public function save(&$form, FormStateInterface $form_state) {
+    return $form;
+  }
+
+  /**
+   * Create form submit buttons.
+   *
+   * @return array
+   */
+  protected function buildActions() {
+    $actions = [];
+    $actions['save'] = [
+      '#type' => 'submit',
+      '#value' => $this->t('Save'),
+      '#ajax' => [
+        'callback' => '::save',
+        'progress' => [
+          'type' => 'throbber',
+          'message' => $this->t('Saving feedback...'),
+        ],
+      ],
+    ];
+    return $actions;
+  }
 }

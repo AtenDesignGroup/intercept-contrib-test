@@ -49,6 +49,17 @@ class EventEvaluation {
     $this->vote->save();
   }
 
+  public function getFeedback() {
+    $feedback = $this->vote->feedback;
+    return !empty($feedback) ? $feedback->getString() : '';
+  }
+
+  public function setFeedback($text) {
+    $this->vote->setValue(-1)
+      ->set('feedback', $text)
+      ->save();
+  }
+
   public function delete() {
     $this->vote->delete();
   }

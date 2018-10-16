@@ -5,10 +5,12 @@ namespace Drupal\intercept_event;
 use Drupal\Component\Serialization\Json;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Access\AccessResultAllowed;
+use Drupal\Core\DependencyInjection\DependencySerializationTrait;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Link;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\intercept_event\EventEvaluationManager;
 use Drupal\node\NodeInterface;
 use Drupal\votingapi\VoteStorageInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -16,9 +18,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 class EventEvaluation {
 
-  const FIELD_NAME_POSITIVE = 'field_evaluation_criteria_pos';
-
-  const FIELD_NAME_NEGATIVE = 'field_evaluation_criteria_neg';
+  use DependencySerializationTrait;
 
   use StringTranslationTrait;
 
@@ -32,111 +32,152 @@ class EventEvaluation {
    */
   protected $entityTypeManager;
 
-    /**
-     * @var VoteStorageInterface
-     */
-  protected $voteStorage;
+  /**
+   * @var EventEvaluationManager
+   */
+  protected $manager;
 
-  protected $eventTypePrimary;
-
+  /**
+   * EventEvaluation constructor.
+   */
   public function __construct($vote) {
     $this->vote = $vote;
   }
 
-  public function evaluate($value, $data = []) {
-    $this->vote->setValue($value);
-    $this->vote->set('vote_criteria', $data);
-    $this->vote->save();
+  /**
+   * Set the EventEvaluationManager service.
+   *
+   * @param EventEvaluationManager $manager
+   *
+   * @return $this
+   */
+  public function setManager($manager) {
+    $this->manager = $manager;
+    return $this;
   }
 
+  /**
+   * The main evaluation callback to cast a vote.
+   *
+   * @param $value
+   * @param array $data
+   *
+   * @return $this
+   */
+  public function evaluate($value, $data = []) {
+    $this->vote->setValue($value)
+      ->set('vote_criteria', $data)
+      ->save();
+      // TODO: Finish calculating results.
+      //$this->resultManager->recalculateResults($entity_type_id, $entity_id, $vote_type_id);
+    return $this;
+  }
+
+  /**
+   * Get voteapi staff feedback value.
+   *
+   * @return string
+   */
   public function getFeedback() {
     $feedback = $this->vote->feedback;
     return !empty($feedback) ? $feedback->getString() : '';
   }
 
+  /**
+   * Set voteapi staff feedback value.
+   *
+   * @return $this
+   */
   public function setFeedback($text) {
     $this->vote->setValue(-1)
       ->set('feedback', $text)
       ->save();
+    return $this;
   }
 
+  /**
+   * Delete this EventEvaluation and votingapi entity.
+   */
   public function delete() {
     $this->vote->delete();
   }
 
+  /**
+   * Get the votingapi vote value.
+   */
   public function getVote() {
     return $this->vote->get('value')->getString();
   }
 
-  public function hasCriteria() {
-    return $this->getPrimaryEventType() && !empty($this->getCriteria());
+  /**
+   * Get the event node being voted on.
+   *
+   * @return NodeInterface
+   */
+  public function getEvent() {
+    return $this->vote->get('entity_id')->entity;
   }
 
+  /**
+   * Get the criteria terms for this evaluation.
+   *
+   * @return array
+   */
   public function getVoteCriteria() {
     return $this->vote->get('vote_criteria')->taxonomy_term;
   }
 
+  /**
+   * Are there criteria set for this event type.
+   *
+   * @return bool
+   */
+  public function hasCriteria() {
+    $event = $this->getEvent();
+    return $this->manager->getPrimaryEventType($event)
+      && !empty($this->manager->getCriteria($event));
+  }
+
   public function getPrimaryEventType() {
-    if (!isset($this->eventTypePrimary)) {
-      $this->eventTypePrimary = FALSE;
-      if (!$event = $this->vote->get('entity_id')->entity) {
-        return $this->eventTypePrimary;
-      }
-      if (!$event_type = $event->get('field_event_type_primary')->entity) {
-        return $this->eventTypePrimary;
-      }
-      $this->eventTypePrimary = $event_type;
+    if (!$event = $this->getEvent()) {
+      return FALSE;
     }
-    return $this->eventTypePrimary;
+    return $this->manager->getPrimaryEventType($event);
   }
 
   public function getNegativeCriteria() {
-    $criteria = $this->getCriteria();
-    if (!empty($criteria[self::FIELD_NAME_NEGATIVE])) {
-      return $criteria[self::FIELD_NAME_NEGATIVE];
+    if (!$event = $this->getEvent()) {
+      return FALSE;
     }
-    return [];
+    return $this->manager->getNegativeCriteria($event);
   }
 
   public function getNegativeCriteriaOptions() {
-    $criteria = $this->getNegativeCriteria();
-    return array_map(function($term) {
-      return $term->label();
-    }, $criteria);
+    if (!$event = $this->getEvent()) {
+      return FALSE;
+    }
+    return $this->manager->getNegativeCriteriaOptions($event);
   }
 
   public function getPositiveCriteria() {
-    $criteria = $this->getCriteria();
-    $criteria = $this->getCriteria();
-    if (!empty($criteria[self::FIELD_NAME_POSITIVE])) {
-      return $criteria[self::FIELD_NAME_POSITIVE];
+    if (!$event = $this->getEvent()) {
+      return FALSE;
     }
-    return [];
+    return $this->manager->getPositiveCriteria($event);
   }
 
   public function getPositiveCriteriaOptions() {
-    $criteria = $this->getPositiveCriteria();
-    return array_map(function($term) {
-      return $term->label();
-    }, $criteria);
+    if (!$event = $this->getEvent()) {
+      return FALSE;
+    }
+    return $this->manager->getPositiveCriteriaOptions($event);
   }
 
   public function getCriteria() {
-    $criteria = [];
-    if (!$event_type = $this->getPrimaryEventType()) {
-      return $criteria;
+    if (!$event = $this->getEvent()) {
+      return FALSE;
     }
-    $fields = [self::FIELD_NAME_POSITIVE, self::FIELD_NAME_NEGATIVE];
-    foreach ($fields as $field_name) {
-      if ($event_type->get($field_name)->isEmpty()) {
-        continue;
-      }
-      $criteria[$field_name] = [];
-      foreach ($event_type->get($field_name)->getIterator() as $item) {
-        $criteria[$field_name][$item->entity->id()] = $item->entity;
-      }
-    }
-    return $criteria;
+    return $this->manager->getCriteria($event);
   }
 
   public function access(\Drupal\Core\Session\AccountInterface $account = NULL) {

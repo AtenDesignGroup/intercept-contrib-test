@@ -90,6 +90,10 @@ class EventEvaluationController extends ControllerBase {
     }
     return JsonResponse::create($result, 200);
   }
+
+  /**
+   * Evaluation api callback to evaluate an event node.
+   */
   public function evaluate(\Symfony\Component\HttpFoundation\Request $request) {
     $method = $request->getMethod();
     $post = Json::decode($request->getContent());
@@ -117,13 +121,17 @@ class EventEvaluationController extends ControllerBase {
     return JsonResponse::create($result, 200);
   }
 
-  protected function getEvaluationFromPost(array $post) {
+  /**
+   * Helper function to parse json request content body.
+   */
+  private function getEvaluationFromPost(array $post) {
     $entity_id = $this->convertUuid($post['event'], 'node');
     $user_id = !empty($post['user']) ? $this->convertUuid($post['user'], 'user') : NULL;
     $evaluation = $this->eventEvaluationManager->loadByProperties([
       'entity_id' => $entity_id,
       'entity_type' => 'node',
       'user_id' => $user_id,
+      'type' => EventEvaluationManager::VOTE_TYPE_ID,
     ]);
     return $evaluation;
   }

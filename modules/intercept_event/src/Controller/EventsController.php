@@ -94,20 +94,32 @@ class EventsController extends ControllerBase {
     return $build;
   }
 
+  private function title($text) {
+    return [
+      '#type' => 'html_tag',
+      '#tag' => 'h2',
+      '#value' => $this->t($text),
+    ];
+  }
+
+  /**
+   * Node analysis task callback.
+   */
   public function analysis(NodeInterface $node) {
     $event_uuid = $node->uuid();
     $event_nid = $node->id();
-
     return [
       '#theme' => 'node_event_analysis',
       '#content' => [
-        'event_attendance_form' => [
-          '#markup' => '',
+        'attendance' => [
+          'title' => $this->title('Number of Attendees'),
+          'form' => \Drupal::service('entity.form_builder')->getForm($node, 'attendance'),
         ],
-        'event_staff_commments' => [
-          '#markup' => '',
+        'staff_evaluation' => [
+          'title' => $this->title('Evaluate Your Event'),
+          'form' => \Drupal::service('intercept_event.evaluation_manager')->getStaffForm($node),
         ],
-        'event_attendance_list' => [
+        'attendance_list' => [
           '#markup' => '<div id="eventAttendanceListRoot" data-event-uuid="' . $event_uuid . '" data-event-nid="' . $event_nid . '"></div>',
           '#attached' => [
             'library' => ['intercept_event/eventAttendanceList']

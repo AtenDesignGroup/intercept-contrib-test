@@ -49,10 +49,45 @@ class EventEvaluationController extends ControllerBase {
     return new static(
       $container->get('entity_type.manager'),
       $container->get('entity.form_builder'),
-      $container->get('form_builder')
+      $container->get('form_builder'),
+      $container->get('intercept_event.evaluation_manager')
     );
   }
 
+  /**
+   * Analysis api callback to get event evaluation data.
+   */
+  public function analysis(\Symfony\Component\HttpFoundation\Request $request) {
+    $events = $request->query->get('events');
+    if (empty($events)) {
+      $content = Json::decode($request->getContent());
+      $events = !empty($content['events']) ? $content['events'] : FALSE;
+    }
+
+    if (!$events) {
+      return JsonResponse::create([], 200);
+    }
+    $result = [];
+
+    $events = $this->entityTypeManager->getStorage('node')->loadByProperties([
+      'type' => 'event',
+      'uuid' => $events,
+    ]);
+
+    $manager = \Drupal::service('intercept_event.evaluation_manager');
+
+    foreach ($events as $event) {
+      $result[$event->uuid()] = [
+        'id' => $event->id(),
+        'title' => $event->label(),
+        'url' =>  $event->url(),
+      ];
+      if ($analysis = $manager->uuid()->loadAnalysis($event)) {
+        $result[$event->uuid()] += $analysis;
+      }
+    }
+    return JsonResponse::create($result, 200);
+  }
   public function evaluate(\Symfony\Component\HttpFoundation\Request $request) {
     $method = $request->getMethod();
     $post = Json::decode($request->getContent());

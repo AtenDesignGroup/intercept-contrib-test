@@ -134,3 +134,11 @@ intercept_event.api.event.evaluate:
     _controller: '\Drupal\intercept_event\Controller\EventEvaluationController::evaluate'
   requirements:
     _permission: 'update own event evaluation, update any event evaluation'
+
+intercept_event.api.event.analysis:
+  path: '/api/event/analysis'
+  methods: [POST, GET]
+  defaults:
+    _controller: '\Drupal\intercept_event\Controller\EventEvaluationController::analysis'
+  requirements:
+    _permission: 'analyze events'

@@ -346,6 +346,8 @@ function intercept_event_entity_bundle_field_info(\Drupal\Core\Entity\EntityType
   if ($entity_type->id() == 'vote' && $bundle == 'evaluation') {
     $fields['vote_criteria'] = \Drupal\Core\Field\BaseFieldDefinition::create('map')
       ->setLabel(t('Vote criteria'));
+    $fields['feedback'] = \Drupal\Core\Field\BaseFieldDefinition::create('text_long')
+      ->setLabel(t('Feedback'));
     return $fields;
   }
   if ($entity_type->id() == 'node' && $bundle == 'event') {
@@ -378,6 +380,10 @@ function intercept_event_entity_base_field_info(\Drupal\Core\Entity\EntityTypeIn
     $definitions['vote_criteria'] = \Drupal\Core\Field\BaseFieldDefinition::create('map')
       ->setName('vote_criteria')
       ->setLabel(t('Vote criteria'))
+      ->setCardinality(1);
+    $definitions['feedback'] = \Drupal\Core\Field\BaseFieldDefinition::create('text_long')
+      ->setName('feedback')
+      ->setLabel(t('Feedback'))
       ->setCardinality(1);
     return $definitions;
   }

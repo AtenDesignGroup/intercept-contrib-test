@@ -116,11 +116,7 @@ class ReserveRoomStep3 extends React.Component {
   }
 
   componentDidMount() {
-    const {
-      fetchAvailability,
-      formValues,
-      room
-    } = this.props;
+    const { fetchAvailability, formValues, room } = this.props;
     const { start, end, date } = formValues;
     const shouldValidateConflicts = !!(room && start && end && date);
     this.mounted = true;
@@ -153,6 +149,11 @@ class ReserveRoomStep3 extends React.Component {
   // Get query params based on current rooms and filters.
   getRoomAvailabilityQuery = () => {
     const { formValues } = this.props;
+
+    if (!formValues.start || !formValues.start || !this.props.room) {
+      return {};
+    }
+
     const start = utils.getDateFromTime(formValues.start, formValues[c.DATE]);
     const end = utils.getDateFromTime(formValues.end, formValues[c.DATE]);
     const options = {
@@ -235,14 +236,7 @@ class ReserveRoomStep3 extends React.Component {
       handleFilterChange,
       handleFormChange,
     } = this;
-    const {
-      event,
-      room,
-      formValues,
-      onChange,
-      onChangeStep,
-      userStatus,
-    } = props;
+    const { event, room, formValues, onChange, onChangeStep, userStatus } = props;
     // const { date, start, end } = formValues;
     const dateValues = pick(formValues, ['date', 'start', 'end']);
     const values = pick(formValues, [
@@ -285,6 +279,7 @@ class ReserveRoomStep3 extends React.Component {
                 room={room}
                 event={event}
                 hasConflict={hasConflict}
+                availabilityQuery={this.getRoomAvailabilityQuery()}
               />
             </div>
           </div>
@@ -306,6 +301,4 @@ ReserveRoomStep3.propTypes = {
 
 ReserveRoomStep3.defaultProps = {};
 
-export default connect(
-  mapStateToProps,
-)(withAvailability(ReserveRoomStep3));
+export default connect(mapStateToProps)(withAvailability(ReserveRoomStep3));

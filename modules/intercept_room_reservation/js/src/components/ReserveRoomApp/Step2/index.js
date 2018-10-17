@@ -163,7 +163,16 @@ class ReserveRoomStep2 extends React.Component {
   };
 
   render() {
-    const { availability, onChange, isLoading, formValues, onChangeStep, hours, room } = this.props;
+    const {
+      availability,
+      onChange,
+      isLoading,
+      formValues,
+      onChangeStep,
+      hours,
+      room,
+      userStatus,
+    } = this.props;
     const isClosed = !hours;
     const limits = utils.userIsStaff()
       ? {
@@ -174,6 +183,12 @@ class ReserveRoomStep2 extends React.Component {
         min: '0000',
         max: '0000',
       };
+
+      // Hide this step if the reservation status has not been checked or
+    // the user has exceeded their limit.
+    if (!userStatus.initialized || userStatus.loading || userStatus.exceededLimit) {
+      return null;
+    }
 
     return (
       <div className="l--sidebar-before">

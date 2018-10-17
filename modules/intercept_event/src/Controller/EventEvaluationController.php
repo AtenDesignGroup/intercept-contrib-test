@@ -53,7 +53,6 @@ class EventEvaluationController extends ControllerBase {
     return new static(
       $container->get('entity_type.manager'),
       $container->get('entity.form_builder'),
-      $container->get('form_builder'),
       $container->get('intercept_event.evaluation_manager')
     );
   }

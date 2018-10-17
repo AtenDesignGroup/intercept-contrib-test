@@ -107,6 +107,13 @@ class EventManager implements EventManagerInterface {
   }
 
   /**
+   * Alter both node edit and node add forms for events.
+   */
+  public function nodeFormAlter(&$form, \Drupal\Core\Form\FormStateInterface $form_state) {
+    $form['#attached']['library'][] = 'intercept_event/event_form_helper';
+  }
+
+  /**
    * Alter a node edit form to add template functionality.
    */
   public function nodeEditFormAlter(&$form, \Drupal\Core\Form\FormStateInterface $form_state) {

@@ -13,6 +13,9 @@ class ReservationTeaser extends PureComponent {
   render() {
     const { id, reservation, image, actions } = this.props;
 
+    if (reservation === null) {
+      return null;
+    }
 
     const attendeeCount = get(reservation, 'attributes.field_attendee_count');
     const attendee = attendeeCount ? (
@@ -48,7 +51,7 @@ class ReservationTeaser extends PureComponent {
 
 ReservationTeaser.propTypes = {
   id: PropTypes.string.isRequired,
-  reservation: PropTypes.object.isRequired,
+  reservation: PropTypes.object,
   image: PropTypes.string,
   actions: PropTypes.array,
 };
@@ -56,14 +59,20 @@ ReservationTeaser.propTypes = {
 ReservationTeaser.defaultProps = {
   image: null,
   actions: null,
+  reservation: null,
 };
 
 const mapStateToProps = (state, ownProps) => {
   const identifier = select.getIdentifier(c.TYPE_ROOM_RESERVATION, ownProps.id);
   const reservation = select.bundle(identifier)(state);
   const room = get(reservation, 'relationships.field_room');
+
+  if (!room) {
+    return {};
+  }
+
   return {
-    reservation: reservation,
+    reservation,
     image: select.resourceImageStyle(room, '4to3_740x556')(state),
   };
 };

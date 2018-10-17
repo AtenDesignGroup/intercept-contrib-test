@@ -22,6 +22,30 @@ function intercept_event_views_data_alter(&$data) {
     ],
   ];
 
+  // TODO: Create this definition for all entity types and create a votingapi ticket.
+  $entity_type_manager = \Drupal::service('entity_type.manager');
+  $entity_type = $entity_type_manager
+    ->getDefinition('node');
+
+  if ($entity_type->hasHandlerClass('views_data')) {
+    $base_table = $entity_type_manager
+      ->getHandler($entity_type->id(), 'views_data')
+      ->getViewsTableForEntityType($entity_type);
+    $data[$base_table]['vote_relationship'] = [
+      'title' => t('Node vote'),
+      'help' => t('Limit results to only those entity flagged by a certain flag; Or display information about the flag set on a entity.'),
+      'relationship' => [
+        'group' => t('Vote'),
+        'label' => t('Votes'),
+        'base' => 'votingapi_vote',
+        'base field' => 'entity_id',
+        'relationship field' => 'nid',
+        'id' => 'vote_relationship',
+        'referenced_entity_type' => $entity_type->id(),
+      ],
+    ];
+  }
+
   $data['node_field_data']['event_registration_count'] = [
     'title' => t('Event registration count'),
     'help' => t('.'),

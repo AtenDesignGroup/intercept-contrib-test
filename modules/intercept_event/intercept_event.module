@@ -243,8 +243,11 @@ function intercept_event_form_node_form_alter(&$form, FormStateInterface $form_s
   if ($node->bundle() == 'event' && $node->hasField('event_recurrence')) {
     \Drupal::service('intercept_event.recurring_manager')->nodeFormAlter($form, $form_state);
   }
-  if ($node->bundle() == 'event' && !$node->isNew()) {
-    \Drupal::service('intercept_event.manager')->nodeEditFormAlter($form, $form_state);
+  if ($node->bundle() == 'event') {
+    \Drupal::service('intercept_event.manager')->nodeFormAlter($form, $form_state);
+    if (!$node->isNew()) {
+      \Drupal::service('intercept_event.manager')->nodeEditFormAlter($form, $form_state);
+    }
   }
   $request = \Drupal::service('request_stack')->getCurrentRequest();
   if ($node->bundle() == 'event' && $node->isNew() && $request->query->get('template')) {

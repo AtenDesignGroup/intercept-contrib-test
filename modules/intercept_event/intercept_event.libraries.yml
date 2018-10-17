@@ -1,3 +1,11 @@
+event_form_helper:
+  js:
+    js/event_form_helper.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
+    - core/drupalSettings
+
 event_recurring:
   version: VERSION
   js:

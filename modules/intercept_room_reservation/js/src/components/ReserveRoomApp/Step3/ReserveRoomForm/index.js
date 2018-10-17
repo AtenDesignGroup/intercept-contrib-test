@@ -267,6 +267,7 @@ class ReserveRoomForm extends PureComponent {
 
   render() {
     const {
+      availabilityQuery,
       combinedValues,
       event,
       hasConflict,
@@ -322,7 +323,10 @@ class ReserveRoomForm extends PureComponent {
                         roomCapacity.min
                       }`,
                     }}
-                    helperText={roomCapacity.max && `This room holds ${roomCapacity.min} to ${roomCapacity.max} people.`}
+                    helperText={
+                      roomCapacity.max &&
+                      `This room holds ${roomCapacity.min} to ${roomCapacity.max} people`
+                    }
                   />
                   <InputText
                     label="Group Name"
@@ -413,6 +417,7 @@ class ReserveRoomForm extends PureComponent {
             [c.TYPE_ROOM]: room,
             [c.TYPE_EVENT]: event,
           }}
+          availabilityQuery={availabilityQuery}
         />
 
         <Dialog
@@ -439,6 +444,7 @@ class ReserveRoomForm extends PureComponent {
 }
 
 ReserveRoomForm.propTypes = {
+  availabilityQuery: PropTypes.object.isRequired,
   values: PropTypes.shape({
     attendees: PropTypes.number,
     groupName: PropTypes.string,

@@ -78,26 +78,13 @@ class EventEvaluationManager {
     return $this->createEventEvaluationInstance($vote);
   }
 
-  /**
-   * Helper function for the EventEvaluation instantiation.
-   *
-   * @return EventEvaluation
-   */
-  protected function createEventEvaluationInstance(\Drupal\votingapi\VoteInterface $vote) {
-    $evaluation = new EventEvaluation($vote);
-    return $evaluation->setManager($this);
-  }
-
-  /**
-   * Configure manager to use uuids or entity ids.
-   *
-   * @param bool $use
-   *   Boolean to set the value with.
-   * @return $this
-   */
-  public function uuid($use = TRUE) {
-    $this->useUuid = $use;
-    return $this;
+  public function createFromEntity(EntityInterface $entity, $values = []) {
+    return $this->create([
+      'entity_type' => $entity->getEntityTypeId(),
+      'entity_id' => $entity->id(),
+      'user_id' => !empty($properties['user_id']) ? $properties['user_id'] : $this->currentUser->id(),
+      'type' => !empty($values['type']) ? $values['type'] : self::VOTE_TYPE_ID,
+    ]);
   }
 
   /**
@@ -153,6 +140,28 @@ class EventEvaluationManager {
     $votes = $vote_storage->loadMultiple($vote_ids);
     $vote = reset($votes);
     return $this->createEventEvaluationInstance($vote);
+  }
+
+  /**
+   * Helper function for the EventEvaluation instantiation.
+   *
+   * @return EventEvaluation
+   */
+  protected function createEventEvaluationInstance(\Drupal\votingapi\VoteInterface $vote) {
+    $evaluation = new EventEvaluation($vote);
+    return $evaluation->setManager($this);
+  }
+
+  /**
+   * Configure manager to use uuids or entity ids.
+   *
+   * @param bool $use
+   *   Boolean to set the value with.
+   * @return $this
+   */
+  public function uuid($use = TRUE) {
+    $this->useUuid = $use;
+    return $this;
   }
 
   /**
@@ -214,7 +223,9 @@ class EventEvaluationManager {
    * @return array
    */
   public function buildJsWidget(EntityInterface $entity) {
-    $evaluation = $this->loadByEntity($entity);
+    if (!$evaluation = $this->loadByEntity($entity, self::VOTE_TYPE_ID)) {
+      $evaluation = $this->createFromEntity($entity);
+    }
 
     $build['wrapper'] = [
       '#type' => 'html_tag',

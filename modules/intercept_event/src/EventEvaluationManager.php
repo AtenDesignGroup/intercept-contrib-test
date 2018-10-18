@@ -69,7 +69,7 @@ class EventEvaluationManager {
     $vote_storage = $this->entityTypeManager->getStorage('vote');
     /** @var \Drupal\votingapi\VoteInterface $vote */
     $vote_type = $this->entityTypeManager->getStorage('vote_type')->load($values['type']);
-    $user_id = !empty($properties['user_id']) ? $properties['user_id'] : $this->currentUser->id();
+    $user_id = !empty($values['user_id']) ? $values['user_id'] : $this->currentUser->id();
     $vote = $vote_storage->create(['type' => $values['type']]);
     $vote->setOwnerId($user_id);
     $vote->setVotedEntityId($values['entity_id']);

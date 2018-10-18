@@ -97,7 +97,7 @@ class EventEvaluationController extends ControllerBase {
     $method = $request->getMethod();
     $post = Json::decode($request->getContent());
     $current_user = $this->currentUser();
-    if (!$evaluation = $this->getEvaluationFromPost($post)) {
+    if (!is_array($post) || !($evaluation = $this->getEvaluationFromPost($post))) {
       return JsonResponse::create(['error' => 'Invalid data'], 200);
     } 
 
@@ -126,13 +126,21 @@ class EventEvaluationController extends ControllerBase {
   private function getEvaluationFromPost(array $post) {
     $entity_id = $this->convertUuid($post['event'], 'node');
     $user_id = !empty($post['user']) ? $this->convertUuid($post['user'], 'user') : NULL;
+    if (!empty($post['user']) && empty($user_id)) {
+      return FALSE;
+    }
     $evaluation = $this->eventEvaluationManager->loadByProperties([
       'entity_id' => $entity_id,
       'entity_type' => 'node',
       'user_id' => $user_id,
       'type' => EventEvaluationManager::VOTE_TYPE_ID,
     ]);
-    return $evaluation;
+    return $evaluation ? $evaluation : $this->eventEvaluationManager->create([
+      'entity_id' => $entity_id,
+      'entity_type' => 'node',
+      'user_id' => $user_id,
+      'type' => EventEvaluationManager::VOTE_TYPE_ID,
+    ]);
   }
 
 }

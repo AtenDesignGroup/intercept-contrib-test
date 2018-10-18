@@ -2,8 +2,10 @@ react:
   js:
     https://unpkg.com/react@16.3.2/umd/react.production.min.js:
       external: true
+      minified: true
     https://unpkg.com/react-dom@16.3.2/umd/react-dom.production.min.js:
       external: true
+      minified: true
 
 bigCalendar:
   version: 0.18.0
@@ -32,24 +34,32 @@ materialIcons:
 babelHelpers:
   js:
     js/dist/babelHelpers.js:
-      preprocess: false
+      preprocess: true
 
 interceptCommon:
   js:
     js/dist/interceptCommon.js:
-      preprocess: false
+      preprocess: true
+  dependencies:
+    - core/drupalSettings
+    - intercept_core/babelHelpers
+    - intercept_core/react
 
 interceptClient:
   js:
     js/dist/interceptClient.js:
-      preprocess: false
+      preprocess: true
   dependencies:
     - core/drupalSettings
+    - intercept_core/babelHelpers
+    - intercept_core/react
+    - intercept_core/interceptTheme
     - intercept_core/materialIcons
 
 interceptTheme:
   js:
     js/dist/interceptTheme.js:
-      preprocess: false
+      preprocess: true
   dependencies:
     - core/drupalSettings
+    - intercept_core/babelHelpers

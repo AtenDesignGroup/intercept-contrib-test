@@ -31,7 +31,13 @@ class InputCheckboxes extends React.Component {
   };
 
   render() {
-    const { label, options, helperText, value } = this.props;
+    const {
+      className,
+      label,
+      options,
+      helperText,
+      value,
+    } = this.props;
 
     const checkboxes = options.map(o => (<FormControlLabel
       key={o.key}
@@ -43,15 +49,13 @@ class InputCheckboxes extends React.Component {
 
 
     return (
-      <div className={''}>
-        <FormControl component="fieldset" className={''} name={name}>
-          {label && (<FormLabel component="legend">{label}</FormLabel>)}
-          <FormGroup>
-            {checkboxes}
-          </FormGroup>
-          {helperText && (<FormHelperText>{helperText}</FormHelperText>)}
-        </FormControl>
-      </div>
+      <FormControl component="fieldset" className={className} name={name}>
+        {label && (<FormLabel component="legend">{label}</FormLabel>)}
+        <FormGroup>
+          {checkboxes}
+        </FormGroup>
+        {helperText && (<FormHelperText>{helperText}</FormHelperText>)}
+      </FormControl>
     );
   }
 }

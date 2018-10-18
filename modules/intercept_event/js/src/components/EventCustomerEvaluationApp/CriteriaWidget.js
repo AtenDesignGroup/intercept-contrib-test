@@ -17,15 +17,14 @@ class CriteriaWidget extends React.PureComponent {
     }
 
     return (
-      <div className="evaluation__criteria-widget">
-        <InputCheckboxes
-          name={name}
-          onChange={onChange}
-          value={value}
-          options={options}
-          label={'Tell us Why'}
-        />
-      </div>
+      <InputCheckboxes
+        name={name}
+        onChange={onChange}
+        value={value}
+        options={options}
+        label={'Tell us Why'}
+        className="evaluation__criteria-widget"
+      />
     );
   }
 }

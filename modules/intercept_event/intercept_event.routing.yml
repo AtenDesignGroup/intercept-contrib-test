@@ -20,6 +20,7 @@ entity.user.events:
   path: '/user/{user}/events'
   defaults:
     _controller: '\Drupal\intercept_event\Controller\EventRegistrationController::manage'
+    _title: 'My Events'
   requirements:
     _entity_access: 'user.update'
     user: \d+

@@ -78,6 +78,8 @@ class EventEvaluationAttendeeForm extends EventEvaluationFormBase {
 
     $form['actions'] = $this->buildActions();
 
+    $form['#access'] = $evaluation->access()->isAllowed();
+
     return $form;
   }
 

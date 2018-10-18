@@ -192,7 +192,7 @@ class EventEvaluation {
     if ($account->hasPermission('evaluate any event')) {
       return AccessResult::allowed();
     }
-    if (!$account->hasPermission('evaluate own event')) {
+    if (!$account->hasPermission('evaluate own events')) {
       return AccessResult::neutral();
     }
     // TODO: Move this to the event manager.

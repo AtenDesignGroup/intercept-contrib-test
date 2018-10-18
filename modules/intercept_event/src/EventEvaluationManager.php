@@ -142,6 +142,15 @@ class EventEvaluationManager {
     return $this->createEventEvaluationInstance($vote);
   }
 
+  public function eventHasEnded(EntityInterface $entity) {
+    if (!$end_date = $entity->field_date_time->end_value) {
+      return FALSE;
+    }
+    $end_date = new \Drupal\Core\Datetime\DrupalDateTime($end_date, 'UTC');
+    $now = new \Drupal\Core\Datetime\DrupalDateTime('now', 'UTC');
+    return $now->diff($end_date)->invert;
+  }
+
   /**
    * Helper function for the EventEvaluation instantiation.
    *

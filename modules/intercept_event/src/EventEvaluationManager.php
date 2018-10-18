@@ -241,12 +241,15 @@ class EventEvaluationManager {
       '#tag' => 'div',
       '#attributes' => [
         'class' => ['js-event-evaluation--attendee'],
-        'data-event' => [$entity->uuid()],
-        'data-event-type-primary' => [
+        'data-event-uuid' => [$entity->uuid()],
+        'data-event-type-primary-uuid' => [
           $evaluation->getPrimaryEventType() ? $evaluation->getPrimaryEventType()->uuid() : '',
         ],
       ],
       '#evaluation' => $evaluation,
+      '#attached' => [
+        'library' => ['intercept_event/eventCustomerEvaluation'],
+      ],
     ];
 
     // Attach library here.

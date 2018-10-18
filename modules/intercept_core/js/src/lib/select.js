@@ -107,6 +107,7 @@ export const recordIsLoading = (type, id) =>
   createSelector(record(getIdentifier(type, id)), item => !!get(item, 'state.syncing'));
 
 export const recordsAreLoading = type => state => state[type].syncing;
+export const recordsUpdated = type => state => state[type].updated;
 
 export const recordLabel = identifier =>
   createSelector(

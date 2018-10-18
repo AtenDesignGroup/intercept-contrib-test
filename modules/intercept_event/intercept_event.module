@@ -75,6 +75,13 @@ function intercept_event_entity_operation(\Drupal\Core\Entity\EntityInterface $e
 function intercept_event_entity_extra_field_info() {
   $extra = [];
 
+  $extra['vote']['evaluation']['display']['evaluation'] = [
+    'label' => t('Event evaluation'),
+    'description' => t('A simple liked or disliked display.'),
+    'weight' => 0,
+    'visible' => FALSE,
+  ];
+
   $extra['node']['event']['display']['evaluation_attendee_default'] = [
     'label' => t('Evaluation default (attendee)'),
     'description' => t('View evaluation widget for attendees.'),
@@ -267,8 +274,12 @@ function intercept_event_node_view(array &$build, \Drupal\Core\Entity\EntityInte
       ->getDefaultForm($entity);
   }
   if ($entity->bundle() == 'event' && $display->getComponent('evaluation_attendee_js')) {
-    $build['evaluation'] = \Drupal::service('intercept_event.evaluation_manager')
-      ->buildJsWidget($entity);
+    $evaluation_manager = \Drupal::service('intercept_event.evaluation_manager');
+
+    if ($evaluation_manager->eventHasEnded($entity)) {
+      $evaluation = $evaluation_manager->loadByEntity($entity);
+      $build['evaluation'] = $evaluation ? $evaluation->view() : $evaluation_manager->buildJsWidget($entity);
+    }
   }
   if ($entity->bundle() === 'event' && $entity->field_must_register->value === '1') {
     $build['register_prompt'] = [
@@ -277,6 +288,31 @@ function intercept_event_node_view(array &$build, \Drupal\Core\Entity\EntityInte
         'library' => ['intercept_event/eventRegisterButton'],
         ]
       ];
+  }
+}
+
+/**
+ * Implements hook_vote_view().
+ */
+function intercept_event_vote_view(array &$build, \Drupal\Core\Entity\EntityInterface $entity, \Drupal\Core\Entity\Display\EntityViewDisplayInterface $display, $view_mode) {
+  if ($entity->bundle() == 'evaluation' && $display->getComponent('evaluation')) {
+    $build['evaluation'] = [
+      '#type' => 'container',
+    ];
+    $build['like'] = [
+      '#type' => 'html_tag',
+      '#tag' => 'div',
+      '#value' => t('Like'),
+      '#attributes' => ['class' => ['evaluation-option']],
+    ];
+    $build['dislike'] = [
+      '#type' => 'html_tag',
+      '#tag' => 'div',
+      '#value' => t('Dislike'),
+      '#attributes' => ['class' => ['evaluation-option']],
+    ];
+    $key = $entity->getValue() ? 'like' : 'dislike';
+    $build[$key]['#attributes']['class'][] = 'selected';
   }
 }
 
@@ -350,9 +386,14 @@ function intercept_event_entity_bundle_field_info(\Drupal\Core\Entity\EntityType
   $fields = [];
   if ($entity_type->id() == 'vote' && $bundle == 'evaluation') {
     $fields['vote_criteria'] = \Drupal\Core\Field\BaseFieldDefinition::create('map')
-      ->setLabel(t('Vote criteria'));
+      ->setLabel(t('Vote criteria'))
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
     $fields['feedback'] = \Drupal\Core\Field\BaseFieldDefinition::create('text_long')
-      ->setLabel(t('Feedback'));
+      ->setLabel(t('Feedback'))
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
+
     return $fields;
   }
   if ($entity_type->id() == 'node' && $bundle == 'event') {

@@ -73,6 +73,11 @@ class EventEvaluation {
     return $this;
   }
 
+  public function view($view_mode = 'default') {
+    $manager = \Drupal::service('entity_type.manager');
+    return $manager->getViewBuilder('vote')->view($this->vote, $view_mode);
+  }
+
   /**
    * Get voteapi staff feedback value.
    *

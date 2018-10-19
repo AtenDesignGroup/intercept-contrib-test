@@ -28,6 +28,7 @@ const IDLE = 'idle';
 const IN_PROGRESS = 'inProgress';
 const SAVING = 'saving';
 const SAVED = 'saved';
+const LOADING = 'loading';
 const COMPLETE = 'complete';
 const ERROR = 'error';
 
@@ -63,12 +64,10 @@ class EventCustomerEvaluationApp extends React.Component {
   }
 
   onSubmit() {
-    console.log('submit', this.state.value);
-    const { setState } = this;
+    this.setState({ state: LOADING });
     this.props.saveEvaluation(this.state.value, (res) => {
-      console.log(res);
-      setState({ state: SAVED });
-    })
+      this.setState({ state: SAVED });
+    });
   }
 
   getCriteriaOptions = () => {
@@ -109,15 +108,66 @@ class EventCustomerEvaluationApp extends React.Component {
     });
   };
 
+  updateEval = (value) => {
+    this.setState({
+      value: {
+        ...this.state.value,
+        evaluation: value,
+        evaluation_criteria: [],
+      },
+    });
+  };
+
+  likeIcon = color => (
+    <svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+      <title>Like</title>
+      <g fill="none" fillRule="evenodd">
+        <circle stroke={color} strokeWidth="5" cx="30" cy="30" r="27.5" />
+        <circle fill={color} cx="20.5" cy="24.5" r="3.5" />
+        <circle fill={color} cx="39.5" cy="24.5" r="3.5" />
+        <path
+          d="M19 39c7.7 6.4 14.4 6.4 22 0"
+          stroke={color}
+          strokeWidth="5"
+          strokeLinecap="round"
+        />
+      </g>
+    </svg>
+  );
+
+  dislikeIcon = color => (
+    <svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+      <title>Dislike</title>
+      <g fill="none" fillRule="evenodd">
+        <circle stroke={color} strokeWidth="5" cx="30" cy="30" r="27.5" />
+        <circle fill={color} cx="20.5" cy="24.5" r="3.5" />
+        <circle fill={color} cx="39.5" cy="24.5" r="3.5" />
+        <path d="M19 43.9c7.2-6 13.7-7 22 0" stroke={color} strokeWidth="5" strokeLinecap="round" />
+      </g>
+    </svg>
+  );
+
   render() {
     const { eventId } = this.props;
+    const { state, value } = this.state;
+
+    if (state === SAVED) {
+      return (
+        <div className="evaluation__eval-widget">
+          <h3 className="evaluation__widget-label">Your rating for this event:</h3>
+          {this[value.evaluation === '1' ? 'likeIcon' : 'dislikeIcon']('#00AFD0')}
+        </div>
+      );
+    }
 
     const evaluation = (
       <EvaluationWidget
         disabled={false}
-        onChange={this.updateValue('evaluation')}
+        onChange={this.updateEval}
         value={this.state.value.evaluation}
         name={eventId}
+        likeIcon={this.likeIcon}
+        dislikeIcon={this.dislikeIcon}
       />
     );
 
@@ -135,7 +185,7 @@ class EventCustomerEvaluationApp extends React.Component {
         variant={'raised'}
         size="small"
         color="primary"
-        className={'action-button__button'}
+        className={''}
         disabled={this.state.value.evaluation === NUETRAL}
         onClick={this.onSubmit}
       >
@@ -146,8 +196,10 @@ class EventCustomerEvaluationApp extends React.Component {
     return (
       <div className="evaluation__app">
         {evaluation}
-        {criteria}
-        {submit}
+        <div className="evaluation__criteria">
+          {criteria}
+          {submit}
+        </div>
       </div>
     );
   }
@@ -221,7 +273,7 @@ const mapDispatchToProps = dispatch => ({
         },
       }),
     );
-  }
+  },
 });
 
 export default connect(

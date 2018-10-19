@@ -17,32 +17,33 @@ class EvaluationWidget extends React.PureComponent {
   render() {
     const { value, label } = this.props;
 
-    const likeIcon = () => (
-      <svg width="60" height="60" xmlns="http://www.w3.org/2000/svg">
+    const likeIcon = color => (
+      <svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
         <title>Like</title>
         <g fill="none" fillRule="evenodd">
-          <circle stroke="#7A7D81" strokeWidth="5" cx="30" cy="30" r="27.5" />
-          <circle fill="#7A7D81" cx="20.5" cy="24.5" r="3.5" />
-          <circle fill="#7A7D81" cx="39.5" cy="24.5" r="3.5" />
+          <circle stroke={color} strokeWidth="5" cx="30" cy="30" r="27.5" />
+          <circle fill={color} cx="20.5" cy="24.5" r="3.5" />
+          <circle fill={color} cx="39.5" cy="24.5" r="3.5" />
           <path
             d="M19 39c7.7 6.4 14.4 6.4 22 0"
-            stroke="#7A7D81"
+            stroke={color}
             strokeWidth="5"
             strokeLinecap="round"
           />
         </g>
       </svg>
     );
-    const dislikeIcon = () => (
-      <svg width="60" height="60" xmlns="http://www.w3.org/2000/svg">
+
+    const dislikeIcon = color => (
+      <svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
         <title>Dislike</title>
         <g fill="none" fillRule="evenodd">
-          <circle stroke="#7A7D81" strokeWidth="5" cx="30" cy="30" r="27.5" />
-          <circle fill="#7A7D81" cx="20.5" cy="24.5" r="3.5" />
-          <circle fill="#7A7D81" cx="39.5" cy="24.5" r="3.5" />
+          <circle stroke={color} strokeWidth="5" cx="30" cy="30" r="27.5" />
+          <circle fill={color} cx="20.5" cy="24.5" r="3.5" />
+          <circle fill={color} cx="39.5" cy="24.5" r="3.5" />
           <path
             d="M19 43.9c7.2-6 13.7-7 22 0"
-            stroke="#7A7D81"
+            stroke={color}
             strokeWidth="5"
             strokeLinecap="round"
           />
@@ -57,7 +58,7 @@ class EvaluationWidget extends React.PureComponent {
             {label}
           </FormLabel>
         )}
-        <FormGroup>
+        <FormGroup className={'evaluation__widget-inputs'}>
           <Radio
             checked={value === '1'}
             onChange={this.handleChange}
@@ -65,8 +66,8 @@ class EvaluationWidget extends React.PureComponent {
             color="default"
             name={name}
             aria-label="Like"
-            icon={likeIcon()}
-            checkedIcon={likeIcon()}
+            icon={likeIcon('#7A7D81')}
+            checkedIcon={likeIcon('#ffffff')}
             className="evaluation__radio-icon"
           />
           <Radio
@@ -76,8 +77,8 @@ class EvaluationWidget extends React.PureComponent {
             color="default"
             name={name}
             aria-label="Dislike"
-            icon={dislikeIcon()}
-            checkedIcon={dislikeIcon()}
+            icon={dislikeIcon('#7A7D81')}
+            checkedIcon={dislikeIcon('#ffffff')}
             className="evaluation__radio-icon"
           />
         </FormGroup>

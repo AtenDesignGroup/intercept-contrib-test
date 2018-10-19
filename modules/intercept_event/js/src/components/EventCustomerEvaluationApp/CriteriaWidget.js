@@ -24,6 +24,9 @@ class CriteriaWidget extends React.PureComponent {
         options={options}
         label={'Tell us Why'}
         className="evaluation__criteria-widget"
+        labelProps={{
+          className: 'evaluation__widget-label',
+        }}
       />
     );
   }

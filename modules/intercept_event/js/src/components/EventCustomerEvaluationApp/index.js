@@ -154,7 +154,7 @@ class EventCustomerEvaluationApp extends React.Component {
     if (state === SAVED) {
       return (
         <div className="evaluation__eval-widget">
-          <h3 className="evaluation__widget-label">Your rating for this event:</h3>
+          <h3 className="evaluation__widget-label">Thank you for your feedback!</h3>
           {this[value.evaluation === '1' ? 'likeIcon' : 'dislikeIcon']('#00AFD0')}
         </div>
       );

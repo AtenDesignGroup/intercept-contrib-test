@@ -30,6 +30,13 @@ function intercept_event_theme() {
       'variables' => ['content' => NULL],
       'template' => 'node-event-registrations',
     ],
+    'evaluation_eval_widget' => [
+      'variables' => [
+        'label' => t('Your rating for this event:'),
+        'value' => NULL,
+      ],
+      'template' => 'evaluation-eval-widget',
+    ],
   ];
 }
 
@@ -297,22 +304,9 @@ function intercept_event_node_view(array &$build, \Drupal\Core\Entity\EntityInte
 function intercept_event_vote_view(array &$build, \Drupal\Core\Entity\EntityInterface $entity, \Drupal\Core\Entity\Display\EntityViewDisplayInterface $display, $view_mode) {
   if ($entity->bundle() == 'evaluation' && $display->getComponent('evaluation')) {
     $build['evaluation'] = [
-      '#type' => 'container',
+      '#theme' => 'evaluation_eval_widget',
+      '#value' => $entity->getValue() ? 'like' : 'dislike',
     ];
-    $build['like'] = [
-      '#type' => 'html_tag',
-      '#tag' => 'div',
-      '#value' => t('Like'),
-      '#attributes' => ['class' => ['evaluation-option']],
-    ];
-    $build['dislike'] = [
-      '#type' => 'html_tag',
-      '#tag' => 'div',
-      '#value' => t('Dislike'),
-      '#attributes' => ['class' => ['evaluation-option']],
-    ];
-    $key = $entity->getValue() ? 'like' : 'dislike';
-    $build[$key]['#attributes']['class'][] = 'selected';
   }
 }
 

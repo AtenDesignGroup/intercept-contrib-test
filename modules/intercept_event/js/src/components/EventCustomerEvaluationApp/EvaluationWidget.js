@@ -5,6 +5,12 @@ import FormLabel from '@material-ui/core/FormLabel';
 import FormControl from '@material-ui/core/FormControl';
 import FormGroup from '@material-ui/core/FormGroup';
 
+const radioClasses = {
+  root: "evaluation__radio-icon",
+  checked: "evaluation__radio-icon--checked",
+  disabled: "evaluation__radio-icon--disabled",
+};
+
 class EvaluationWidget extends React.PureComponent {
   // state = {
   //   selectedValue: 'a',
@@ -15,41 +21,7 @@ class EvaluationWidget extends React.PureComponent {
   };
 
   render() {
-    const { value, label } = this.props;
-
-    const likeIcon = color => (
-      <svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
-        <title>Like</title>
-        <g fill="none" fillRule="evenodd">
-          <circle stroke={color} strokeWidth="5" cx="30" cy="30" r="27.5" />
-          <circle fill={color} cx="20.5" cy="24.5" r="3.5" />
-          <circle fill={color} cx="39.5" cy="24.5" r="3.5" />
-          <path
-            d="M19 39c7.7 6.4 14.4 6.4 22 0"
-            stroke={color}
-            strokeWidth="5"
-            strokeLinecap="round"
-          />
-        </g>
-      </svg>
-    );
-
-    const dislikeIcon = color => (
-      <svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
-        <title>Dislike</title>
-        <g fill="none" fillRule="evenodd">
-          <circle stroke={color} strokeWidth="5" cx="30" cy="30" r="27.5" />
-          <circle fill={color} cx="20.5" cy="24.5" r="3.5" />
-          <circle fill={color} cx="39.5" cy="24.5" r="3.5" />
-          <path
-            d="M19 43.9c7.2-6 13.7-7 22 0"
-            stroke={color}
-            strokeWidth="5"
-            strokeLinecap="round"
-          />
-        </g>
-      </svg>
-    );
+    const { value, label, likeIcon, dislikeIcon } = this.props;
 
     return (
       <FormControl component="fieldset" className={'evaluation__eval-widget'} name={name}>
@@ -68,7 +40,7 @@ class EvaluationWidget extends React.PureComponent {
             aria-label="Like"
             icon={likeIcon('#7A7D81')}
             checkedIcon={likeIcon('#ffffff')}
-            className="evaluation__radio-icon"
+            classes={radioClasses}
           />
           <Radio
             checked={value === '0'}
@@ -79,7 +51,7 @@ class EvaluationWidget extends React.PureComponent {
             aria-label="Dislike"
             icon={dislikeIcon('#7A7D81')}
             checkedIcon={dislikeIcon('#ffffff')}
-            className="evaluation__radio-icon"
+            classes={radioClasses}
           />
         </FormGroup>
       </FormControl>

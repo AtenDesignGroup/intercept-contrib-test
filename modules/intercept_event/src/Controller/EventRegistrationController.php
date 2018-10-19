@@ -101,6 +101,9 @@ class EventRegistrationController extends ControllerBase {
       '#type' => 'view',
       '#name' => 'intercept_user_events',
       '#display_id' => 'embed',
+      '#attached' => [
+        'library' => ['intercept_event/eventCustomerEvaluation'],
+      ],
     ];
 
     return $build;

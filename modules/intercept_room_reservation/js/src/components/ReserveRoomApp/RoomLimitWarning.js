@@ -29,7 +29,7 @@ class RoomLimitWarning extends React.PureComponent {
       message = (
         <p className="value-summary__footer-text">
           You are only allowed to reserve a maximum of {userStatus.limit} room
-          {userStatus.limit !== 1 && 's'} at a time.{' '}
+          {parseInt(userStatus.limit, 10) === 1 ? '' : 's'} at a time.{' '}
           <a className="value-summary__footer-link" href="/account/room-reservations">
             View your current reservations.
           </a>

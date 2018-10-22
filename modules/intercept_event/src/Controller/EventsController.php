@@ -112,11 +112,11 @@ class EventsController extends ControllerBase {
       '#theme' => 'node_event_analysis',
       '#content' => [
         'attendance' => [
-          'title' => $this->title('Number of Attendees'),
+          'title' => $this->t('Number of Attendees'),
           'form' => \Drupal::service('entity.form_builder')->getForm($node, 'attendance'),
         ],
         'staff_evaluation' => [
-          'title' => $this->title('Evaluate Your Event'),
+          'title' => $this->t('Evaluate Your Event'),
           'form' => \Drupal::service('intercept_event.evaluation_manager')->getStaffForm($node),
         ],
         'attendance_list' => [

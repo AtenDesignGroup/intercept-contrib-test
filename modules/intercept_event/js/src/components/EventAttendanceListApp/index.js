@@ -129,11 +129,7 @@ class EventAttendanceListApp extends Component {
     };
 
     return (
-      <div className="l--main">
-        <div className="l--subsection">
-          <EventAttendanceTable {...tableProps} />
-        </div>
-      </div>
+      <EventAttendanceTable {...tableProps} />
     );
   }
 }

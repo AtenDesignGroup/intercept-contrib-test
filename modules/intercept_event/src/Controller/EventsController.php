@@ -125,6 +125,12 @@ class EventsController extends ControllerBase {
             'library' => ['intercept_event/eventAttendanceList']
           ],
         ],
+        'customer_evaluations' => [
+          '#markup' => '<div class="js-event-evaluations--attendee" data-event-uuid="' . $event_uuid . '" data-event-nid="' . $event_nid . '"></div>',
+          '#attached' => [
+            'library' => ['intercept_event/eventCustomerEvaluations']
+          ],
+        ],
       ],
     ];
   }

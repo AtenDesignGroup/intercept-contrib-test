@@ -6,6 +6,7 @@ const webpack = require('webpack');
 const entries = {
   intercept_event: [
     'eventCustomerEvaluation',
+    'eventCustomerEvaluations',
     'eventAttendanceList',
     'eventList',
     'eventRegister',

@@ -34,22 +34,15 @@ class EventEvaluationStaffForm extends EventEvaluationFormBase {
 
     $wrapper_id = \Drupal\Component\Utility\Html::getUniqueId('evaluation-criteria-wrapper');
 
-    $form['evaluation_label'] = [
-      '#type' => 'html_tag',
-      '#tag' => 'h4',
-      '#value' => $this->t('How\'d the Event Go?'),
-    ];
-
-    $form['evaluation_description'] = [
-      '#type' => 'html_tag',
-      '#tag' => 'div',
-      '#value' => $this->t('Ask yourself questions like: Did the event meet your expectations? How does it differ from other events you\'ve held? Did you receive any feedback from attendees?'),
-    ];
-
     $form['evaluation'] = [
-      '#title' => $this->t('Add thoughts about your event here to use in the future.'),
+      '#title' => $this->t('How\'d the Event Go?'),
+      '#attributes' => [
+        'placeholder' => $this->t('Add thoughts about your event here to use in the future.'),
+      ],
       '#type' => 'textarea',
       '#default_value' => $evaluation->getFeedback(),
+      '#description' => $this->t('Ask yourself questions like: Did the event meet your expectations? How does it differ from other events you\'ve held? Did you receive any feedback from attendees?'),
+      '#description_display' => 'before',
     ];
 
     $form['actions'] = $this->buildActions();

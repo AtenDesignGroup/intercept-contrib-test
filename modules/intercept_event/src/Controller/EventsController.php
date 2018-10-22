@@ -108,9 +108,12 @@ class EventsController extends ControllerBase {
   public function analysis(NodeInterface $node) {
     $event_uuid = $node->uuid();
     $event_nid = $node->id();
+    $view_builder = \Drupal::entityTypeManager()->getViewBuilder('node');
+
     return [
       '#theme' => 'node_event_analysis',
-      '#content' => [
+      '#content' => [    // Add Event Header
+        'header' => $build['header'] = $view_builder->view($node, 'header'),
         'attendance' => [
           'title' => $this->t('Number of Attendees'),
           'form' => \Drupal::service('entity.form_builder')->getForm($node, 'attendance'),

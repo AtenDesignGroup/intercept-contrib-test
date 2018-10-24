@@ -3,6 +3,7 @@
 namespace Drupal\intercept_event;
 
 use Drupal\Component\Serialization\Json;
+use Drupal\Core\DependencyInjection\DependencySerializationTrait;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Link;
 use Drupal\Core\Session\AccountProxyInterface;
@@ -12,6 +13,8 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 
 class EventManager implements EventManagerInterface {
+
+  use DependencySerializationTrait;
 
   use StringTranslationTrait;
 

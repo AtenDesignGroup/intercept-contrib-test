@@ -4,6 +4,7 @@ namespace Drupal\intercept_core;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Datetime\DrupalDateTime;
+use Drupal\Core\DependencyInjection\DependencySerializationTrait;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Mail\MailManagerInterface;
 use Drupal\Core\Session\AccountInterface;
@@ -18,6 +19,10 @@ use Drupal\intercept_room_reservation\Entity\RoomReservationInterface;
  * TODO: Move partially over to an EntityReservationManager/RoomReservationManager.
  */
 class ReservationManager implements ReservationManagerInterface {
+
+  use DependencySerializationTrait;
+
+  use StringTranslationTrait;
 
   const FORMAT = 'Y-m-d\TH:i:s';
 

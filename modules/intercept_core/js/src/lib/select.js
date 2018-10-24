@@ -89,12 +89,23 @@ export const keyValues = (selector, path) =>
     })),
   );
 
-// RICHAPP-638: Postponed until Drupal 8.6
-// https://atendesign.atlassian.net/browse/RICHAPP-638
-// export const getTermTree = (terms) => {
-//   const branches = groupBy(terms, 'data.relationships.parent.data.0.id');
-//   return branches;
-// };
+const sortTerms = items => sortBy(sortBy(items, 'data.attributes.name'), 'data.attributes.weight');
+
+const toTree = branches => item => ({
+  ...item,
+  children: branches[item.data.id] ? sortTerms(branches[item.data.id]).map(toTree(branches)) : [],
+});
+
+export const getTermTree = (terms) => {
+  const branches = groupBy(terms, 'data.relationships.parent.data.0.id');
+
+  if (!branches.virtual) {
+    return [];
+  }
+
+  const root = sortTerms(branches.virtual);
+  return root.map(toTree(branches));
+};
 
 export const record = identifier => state => state[identifier.type].items[identifier.id];
 
@@ -115,6 +126,12 @@ export const recordLabel = identifier =>
     item => get(item, 'data.attributes.title') || get(item, 'data.attributes.name'),
   );
 
+const toOptions = item => ({
+  key: item.data.id,
+  value: get(item, 'data.attributes.title') || get(item, 'data.attributes.name'),
+  children: item.children ? item.children.map(toOptions) : [],
+});
+
 export const recordOptions = type =>
   createSelector(records(type), (items) => {
     const isTerm = type.indexOf('taxonomy_term') >= 0;
@@ -122,19 +139,15 @@ export const recordOptions = type =>
 
     // If this is a taxonomy term, sort it by weight then alphabetically by name.
     if (isTerm) {
-      // RICHAPP-638: Postponed until Drupal 8.6
-      // getTermTree(items);
-      sorted = sortBy(sortBy(items, 'data.attributes.name'), 'data.attributes.weight');
+      sorted = getTermTree(items);
+      // sorted = sortBy(sortBy(items, 'data.attributes.name'), 'data.attributes.weight');
     }
     // Else sort alphabetically by title
     else {
       sorted = sortBy(items, 'data.attributes.title');
     }
 
-    return sorted.map(item => ({
-      key: item.data.id,
-      value: get(item, 'data.attributes.title') || get(item, 'data.attributes.name'),
-    }));
+    return sorted.map(toOptions);
   });
 
 // Converts the records object into an Array.

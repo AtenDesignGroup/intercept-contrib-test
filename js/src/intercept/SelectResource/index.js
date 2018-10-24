@@ -23,15 +23,19 @@ class SelectResource extends React.Component {
     if (chips) {
       renderValue = selected => (
         <div className="current-filter current-filter--embedded">
-          {selected.map(id => (<ResourceChip
-            key={id}
-            identifier={{ type, id }}
-            onDelete={item => handleChange({
-              target: {
-                value: value.filter(v => v !== item)
+          {selected.map(id => (
+            <ResourceChip
+              key={id}
+              identifier={{ type, id }}
+              onDelete={item =>
+                handleChange({
+                  target: {
+                    value: value.filter(v => v !== item),
+                  },
+                })
               }
-            })}
-          />))}
+            />
+          ))}
         </div>
       );
     }
@@ -52,9 +56,12 @@ class SelectResource extends React.Component {
   }
 }
 
-const mapStateToProps = (state, ownProps) => ({
-  options: select.recordOptions(ownProps.type)(state),
-});
+const mapStateToProps = (state, ownProps) => {
+  // console.log(select.getTermTree(ownProps.type)(state));
+  return {
+    options: select.recordOptions(ownProps.type)(state),
+  };
+};
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
   fetchAll: (options) => {

@@ -29,40 +29,57 @@ import EventCalendar from './../EventCalendar';
 
 const { constants, api, select, utils } = interceptClient;
 const c = constants;
-const eventIncludes = ['image_primary', 'image_primary.field_media_image', 'field_room'];
+const eventIncludes = (view = 'list') => {
+  return view === 'list'
+    ? ['image_primary', 'image_primary.field_media_image', 'field_room']
+    : null;
+};
 
 const viewOptions = [{ key: 'list', value: 'List' }, { key: 'calendar', value: 'Calendar' }];
 const userId = get(drupalSettings, 'intercept.user.uuid');
 
-const sparseFieldsets = {
-  [c.TYPE_EVENT]: [
-    'nid',
-    'uuid',
-    'status',
-    'title',
-    'path',
-    'field_date_time',
-    'field_must_register',
-    'field_text_teaser',
-    'registration',
-    'field_event_audience',
-    'field_event_register_period',
-    'field_event_type',
-    'field_event_tags',
-    'field_location',
-    'field_room',
-    'image_primary',
-  ],
-  [c.TYPE_EVENT_REGISTRATION]: ['uuid', 'field_event', 'field_user', 'status'],
-  [c.TYPE_ROOM]: ['nid', 'uuid', 'title', 'field_location'],
-  [c.TYPE_MEDIA_IMAGE]: [
-    'mid',
-    'uuid',
-    'field_media_caption',
-    'field_media_credit',
-    'field_media_image',
-  ],
-  [c.TYPE_FILE]: ['fid', 'uuid', 'uri', 'url'],
+const sparseFieldsets = (view = 'list') => {
+  return view === 'list'
+    ? {
+      [c.TYPE_EVENT]: [
+        'nid',
+        'uuid',
+        'status',
+        'title',
+        'path',
+        'field_date_time',
+        'field_must_register',
+        'field_text_teaser',
+        'registration',
+        'field_event_audience',
+        'field_event_register_period',
+        'field_event_type',
+        'field_event_tags',
+        'field_location',
+        'field_room',
+        'image_primary',
+      ],
+      [c.TYPE_EVENT_REGISTRATION]: ['uuid', 'field_event', 'field_user', 'status'],
+      [c.TYPE_ROOM]: ['nid', 'uuid', 'title', 'field_location'],
+      [c.TYPE_MEDIA_IMAGE]: [
+        'mid',
+        'uuid',
+        'field_media_caption',
+        'field_media_credit',
+        'field_media_image',
+      ],
+      [c.TYPE_FILE]: ['fid', 'uuid', 'uri', 'url'],
+    }
+    : {
+      [c.TYPE_EVENT]: [
+        'uuid',
+        'title',
+        'path',
+        'field_date_time',
+        'field_must_register',
+        'field_location',
+      ],
+    };
 };
 
 function getDate(value, view = 'day', boundary = 'start') {
@@ -256,7 +273,7 @@ class BrowseEvents extends Component {
     this.handleFilterChange = this.handleFilterChange.bind(this);
     this.handleViewChange = this.handleViewChange.bind(this);
     this.setFetchers = this.setFetchers.bind(this);
-    this.doFetch = debounce(this.doFetch, 500).bind(this);
+    this.doFetch = debounce(this.doFetch, 100).bind(this);
     this.doFetchMore = this.doFetchMore.bind(this);
     this.handleScroll = throttle(this.handleScroll, 30, { leading: true }).bind(this);
   }
@@ -278,9 +295,9 @@ class BrowseEvents extends Component {
   ) {
     const options = {
       filters: getFilters(values, view, calView, date),
-      include: eventIncludes,
+      include: eventIncludes(view),
       replace: true,
-      fields: pick(sparseFieldsets, [c.TYPE_EVENT, c.TYPE_MEDIA_IMAGE, c.TYPE_FILE, c.TYPE_ROOM]),
+      fields: pick(sparseFieldsets(view), [c.TYPE_EVENT, c.TYPE_MEDIA_IMAGE, c.TYPE_FILE, c.TYPE_ROOM]),
       sort: {
         date: {
           path: 'field_date_time.value',
@@ -291,7 +308,7 @@ class BrowseEvents extends Component {
       headers: {
         'X-Consumer-ID': interceptClient.consumer,
       },
-      limit: 10,
+      limit: view === 'list' ? 10 : 50,
     };
 
     const fetcher = {
@@ -300,7 +317,7 @@ class BrowseEvents extends Component {
         ...options,
         filters: getRegistrationFilters(options.filters),
         include: null,
-        fields: pick(sparseFieldsets, [c.TYPE_EVENT_REGISTRATION]),
+        fields: pick(sparseFieldsets(), [c.TYPE_EVENT_REGISTRATION]),
         sort: null,
       }),
     };
@@ -358,9 +375,12 @@ class BrowseEvents extends Component {
   }
 
   doFetch(fetcher) {
-    const { fetchEntities } = this.props;
+    const { fetchEntities, view } = this.props;
     fetchEntities(fetcher[c.TYPE_EVENT]);
-    fetchEntities(fetcher[c.TYPE_EVENT_REGISTRATION]);
+
+    if (view === 'list') {
+      fetchEntities(fetcher[c.TYPE_EVENT_REGISTRATION]);
+    }
   }
 
   doFetchMore(type) {

@@ -32,7 +32,7 @@ class EventSummaryActions extends React.Component {
         <Button size="small" color="secondary" onClick={() => onLearnMore(event)}>
           Learn More
         </Button>
-        <ButtonRegister {...this.props} event={event} />
+        <ButtonRegister {...this.props} event={event} eventId={id} />
       </CardActions>
     );
   }

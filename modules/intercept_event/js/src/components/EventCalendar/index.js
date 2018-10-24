@@ -1,5 +1,7 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
+
 import BigCalendar from 'intercept/BigCalendar';
 import Toolbar from 'react-big-calendar/lib/Toolbar';
 import ArrowBack from '@material-ui/icons/ArrowBack';
@@ -7,9 +9,11 @@ import ArrowForward from '@material-ui/icons/ArrowForward';
 import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import EventSummaryDialog from './EventSummaryDialog';
+import PrintableMonth from './PrintableMonth';
 import interceptClient from 'interceptClient';
 
-const { utils } = interceptClient;
+const { api, constants, utils, select } = interceptClient;
+const c = constants;
 
 const dateAccessor = prop => item =>
   utils.dateFromDrupal(item.data.attributes.field_date_time[prop]);
@@ -85,13 +89,39 @@ class EventCalendar extends React.Component {
     this.state = {
       showEvent: false,
       selectedEvent: null,
+      isPrint: false,
     };
+
+    this.mediaQueryList = window.matchMedia('print');
 
     this.onSelectEvent = this.onSelectEvent.bind(this);
     this.onHideEvent = this.onHideEvent.bind(this);
+    this.printTest = this.printTest.bind(this);
+    this.setPrintState = this.setPrintState.bind(this);
+  }
+
+  componentDidMount() {
+    this.mediaQueryList.addListener(this.printTest);
+    window.onbeforeprint = () => {
+      this.mediaQueryList.removeListener(this.printTest);
+      console.log('onBeforePrint', false);
+      this.setPrintState(true);
+    };
+    window.onafterprint = () => {
+      console.log('onAfterPrint', false);
+      this.setPrintState(false);
+    };
+  }
+
+  componentWillUnmount() {
+    this.mediaQueryList.removeListener(this.printTest);
+    window.onbeforeprint = null;
+    window.onafterprint = null;
   }
 
   onSelectEvent(event) {
+    this.props.fetchEvent(event.data.id);
+
     this.setState({
       showEvent: true,
       selectedEvent: event.data.id,
@@ -102,6 +132,15 @@ class EventCalendar extends React.Component {
     this.setState({
       showEvent: false,
     });
+  }
+
+  setPrintState(isPrint) {
+    this.setState({ isPrint });
+  }
+
+  printTest(mql) {
+    console.log('PRINT TEST', mql.matches);
+    this.setPrintState(mql.matches);
   }
 
   render() {
@@ -120,7 +159,11 @@ class EventCalendar extends React.Component {
           defaultView={this.props.defaultView}
           defaultDate={this.props.defaultDate}
           popup
-          views={['month', 'week', 'day']}
+          views={{
+            month: this.state.isPrint ? PrintableMonth : true,
+            week: true,
+            day: true,
+          }}
           elementProps={{
             style: {
               height: 'calc(100vh - 26rem)',
@@ -133,6 +176,7 @@ class EventCalendar extends React.Component {
           id={this.state.selectedEvent}
           open={this.state.showEvent}
           onClose={this.onHideEvent}
+          loading={this.props.isEventLoading}
         />
       </React.Fragment>
     );
@@ -154,4 +198,46 @@ EventCalendar.defaultProps = {
   defaultView: 'month',
 };
 
-export default EventCalendar;
+const mapStateToProps = state => ({
+  isEventLoading:
+    select.recordsAreLoading(c.TYPE_EVENT)(state) ||
+    select.recordsAreLoading(c.TYPE_EVENT_REGISTRATION)(state),
+});
+
+const mapDispatchToProps = dispatch => ({
+  fetchEvent: (id) => {
+    dispatch(
+      api[c.TYPE_EVENT].fetchAll({
+        filters: {
+          uuid: {
+            value: id,
+            path: 'uuid',
+          },
+        },
+        include: ['image_primary', 'image_primary.field_media_image', 'field_room'],
+        headers: {
+          'X-Consumer-ID': interceptClient.consumer,
+        },
+      }),
+    );
+    dispatch(
+      api[c.TYPE_EVENT_REGISTRATION].fetchAll({
+        filters: {
+          event: {
+            value: id,
+            path: 'field_event.uuid',
+          },
+          user: {
+            value: utils.getUserUuid(),
+            path: 'field_user.uuid',
+          },
+        },
+      }),
+    );
+  },
+});
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(EventCalendar);

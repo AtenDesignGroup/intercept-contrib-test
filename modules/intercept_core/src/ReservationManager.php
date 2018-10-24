@@ -9,7 +9,10 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Mail\MailManagerInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Session\AccountProxyInterface;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\Core\Url;
 use Drupal\Core\Utility\Token;
+use Drupal\node\NodeInterface;
 use Drupal\intercept_core\Utility\Dates;
 use Drupal\intercept_room_reservation\Entity\RoomReservation;
 use Drupal\intercept_room_reservation\Entity\RoomReservationInterface;
@@ -61,6 +64,295 @@ class ReservationManager implements ReservationManagerInterface {
     $this->dateUtility = $date_utility;
     $this->token = $token;
     $this->currentUser = $current_user;
+  }
+
+  /**
+   * Expose the date utility for functions that use this service.
+   *
+   * @return Dates
+   */
+  public function dateUtility() {
+    return $this->dateUtility;
+  }
+
+  /**
+   * Get a reservation entity for an event node.
+   *
+   * @param NodeInterface $event
+   * @return bool|RoomReservationInterface
+   */
+  public function getEventReservation(NodeInterface $event) {
+    if ($event->isNew()) {
+      return FALSE;
+    }
+    $reservations = $this->reservations('room', function($query) use ($event) {
+      $query->condition('field_event', $event->id(), '=');
+      $query->condition('field_status', ['canceled', 'denied'], 'NOT IN');
+    });
+    if (!empty($reservations)) {
+      $reservation = reset($reservations);
+      return $reservation;
+    }
+    return FALSE;
+  }
+
+  /**
+   * Create a new reservation entity based on an event node.
+   *
+   * @param NodeInterface $event
+   *   The event node.
+   * @param $params
+   *   Additional field info to pass to the create method.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   * @throws \Drupal\Core\Entity\EntityStorageException
+   */
+  public function createEventReservation($event, $params) {
+    $values = [
+      'field_event' => $event->id(),
+      'field_room' => $event->field_room->entity->id(),
+      'field_dates' => $event->field_date_time->first()->getValue(),
+      'field_user' => $this->currentUser->id(),
+    ] + $params;
+    $room_reservation = $this->entityTypeManager->getStorage('room_reservation')->create($values);
+    $room_reservation->save();
+  }
+
+  /**
+   * Update a reservation entity when a node is updated.
+   *
+   * @param RoomReservationInterface $reservation
+   *   The reservation entity to update.
+   * @param NodeInterface $event
+   *   The event node that also has been updated.
+   * @param array $params
+   *   Additional info to pass to the reservation entity. (not used)
+   */
+  public function updateEventReservation($reservation, $event, array $params = []) {
+    if (!$event->field_room->equals($reservation->field_room)) {
+      $reservation->field_room = $event->field_room;
+    }
+    if (!$event->field_date_time->equals($reservation->field_dates)) {
+      $reservation->field_dates = $event->field_date_time;
+    }
+    $reservation->save();
+  }
+
+
+  /**
+   * Adds reservation functionality to the node edit form.
+   */
+  public function nodeFormAlter(&$form, \Drupal\Core\Form\FormStateInterface $form_state) {
+    // Since all of this functionality centers around the reservation element
+    // we can avoid this alter if it's not displayed.
+    $form_display = $form_state->getFormObject()->getFormDisplay($form_state);
+    $node = $form_state->getFormObject()->getEntity();
+    $reservation = $this->getEventReservation($node);
+    $form['field_date_time']['widget'][0]['value']['#ajax'] = $this->updateStatusAjax() + [
+      'event' => 'change',
+      // Keep the refocus from re-activating the date select widget.
+      'disable-refocus' => TRUE,
+    ];
+
+    $form['field_date_time']['widget'][0]['end_value']['#ajax'] = $this->updateStatusAjax() + [
+      'event' => 'change',
+      // Keep the refocus from re-activating the date select widget.
+      'disable-refocus' => TRUE,
+    ];
+
+    $form['reservation'] = [
+      '#title' => $this->t('Reservation'),
+      '#type' => 'fieldset',
+      '#prefix' => '<div id="event-room-reservation-ajax-wrapper">',
+      '#suffix' => '</div>',
+      '#tree' => TRUE,
+    ];
+
+    $form['field_room']['widget']['#ajax'] = $this->updateStatusAjax();
+
+    $form['reservation']['create'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Create a room reservation'),
+      '#default_value' => 0,
+      '#states' => [
+        'enabled' => [':input[name="field_room"]' => ['!value' => '_none']],
+      ],
+      '#attributes' => ['class' => ['reservation-prepopulate-dates']],
+      '#access' => empty($reservation),
+      '#ajax' => $this->updateStatusAjax(),
+    ];
+
+    $start_date_object = $node->field_date_time->start_date ?: new \DateTime();
+    $end_date_object = $node->field_date_time->end_date ?: new \DateTime();
+    if (!empty($reservation)) {
+      $start_date_object = $this->dateUtility
+        ->convertTimezone($reservation->field_meeting_dates->start_date, 'default');
+      $end_date_object = $this->dateUtility
+        ->convertTimezone($reservation->field_meeting_dates->end_date, 'default');
+    }
+
+    $params = [
+      'start' => $start_date_object->format(self::FORMAT),
+      'end' => $end_date_object->format(self::FORMAT),
+    ];
+    if ($room = $node->field_room->entity) {
+      $params['rooms'] = [$room->id()];
+    }
+
+    $form['reservation']['#attached'] = [
+      'library' => ['intercept_core/reservation_form_helper'],
+    ];
+
+    $form['reservation']['dates'] = [
+      '#type' => 'container',
+      '#states' => [
+        'visible' => [
+          ':input[name="reservation[create]"]' => ['checked' => TRUE]
+        ],
+      ],
+    ];
+
+    $form['reservation']['dates']['start'] = [
+      '#title' => t('Meeting start time'),
+      '#type' => 'datetime',
+      '#default_value' => $start_date_object,
+    ];
+
+    $form['reservation']['dates']['end'] = [
+      '#title' => t('Meeting end time'),
+      '#type' => 'datetime',
+      '#default_value' => $end_date_object,
+    ];
+
+    $form['reservation']['dates']['status'] = [
+      '#type' => 'html_tag',
+      '#tag' => 'span',
+      '#prefix' => '<div id="event-room-reservation-status-ajax-wrapper">',
+      '#suffix' => '</div>',
+    ];
+
+    if ($form_state->getValue('field_room') && !empty($reservation) && $form_state->getValue(['reservation', 'dates'])) {
+      // If there is already a reservation just check if date or room was changed.
+      $this->updateFormStatusField($form, $form_state);
+    }
+    if ($form_state->getValue('field_room') && $form_state->getValue(['reservation', 'create'])) {
+      // Check that the create reservation checkbox has been checked.
+      $this->updateFormStatusField($form, $form_state);
+    }
+
+    if (!empty($reservation)) {
+      /** @var $view_builder \Drupal\Core\Entity\EntityViewBuilderInterface */
+      $view_builder = $this->entityTypeManager
+        ->getViewBuilder('room_reservation');
+      $form['reservation']['view'] = $view_builder->view($reservation, 'event');
+      $form_state->set('reservation', $reservation);
+    }
+
+    $form['actions']['submit']['#submit'][] = [static::class, 'nodeFormAlterSubmit'];
+    $form_state->set('reservation_manager', $this);
+
+  }
+
+  private function updateStatusAjax() {
+    return [
+      'callback' => [$this, 'ajaxCallback'],
+      'wrapper' => 'event-room-reservation-status-ajax-wrapper',
+    ];
+  }
+
+  private function updateFormStatusField(&$form, \Drupal\Core\Form\FormStateInterface $form_state) {
+    $event = $form_state->getFormObject()->getEntity();
+    $room = $form_state->getValue('field_room');
+    $status_element = &$form['reservation']['dates']['status'];
+    $reservation = $form_state->getValue('reservation');
+    $start_date = $this->dateUtility->convertTimezone($reservation['dates']['start'])->format(self::FORMAT);
+    $end_date = $this->dateUtility->convertTimezone($reservation['dates']['end'])->format(self::FORMAT);
+    $params = [
+      'debug' => TRUE,
+      'rooms' => [$room[0]['target_id']],
+      'start' => $start_date,
+      'end' => $end_date
+    ];
+    if (!$event->isNew()) {
+      $params['event'] = $event->id();
+    }
+    $availability = $this->availability($params);
+    $status = reset($availability);
+    if ($status['has_reservation_conflict']) {
+      $status_element['#value'] = $this->t('This room is not availabile.');
+      $status_element['#attributes']['class'][] = 'error-text-color';
+    }
+    if ($status['has_open_hours_conflict']) {
+      $status_element['#value'] = $this->t('Reservation times conflict with location open hours.');
+      $status_element['#attributes']['class'][] = 'error-text-color';
+    }
+    if (!$status['has_open_hours_conflict'] && !$status['has_reservation_conflict']) {
+      $status_element['#value'] = $this->t('This room is available.');
+      $status_element['#attributes']['class'][] = 'status-text-color';
+    }
+
+    if ($start_date > $end_date) {
+      $status_element['#value'] = $this->t('Invalid date selection.');
+      $status_element['#attributes']['class'][] = 'error-text-color';
+    }
+  }
+
+  /**
+   * Internal helper function to create a reservation for the node add form.
+   *
+   * @internal
+   */
+  public function createEventReservationSubmit(&$form, \Drupal\Core\Form\FormStateInterface $form_state) {
+    $node_event = $form_state->getFormObject()->getEntity();
+    $dates = $form_state->getValue(['reservation', 'dates']);
+    return $this->createEventReservation($node_event, [
+      'field_meeting_dates' => [
+        'value' => $this->dateUtility->convertTimezone($dates['start'])->format(self::FORMAT),
+        'end_value' => $this->dateUtility->convertTimezone($dates['end'])->format(self::FORMAT),
+      ],
+    ]);
+  }
+
+  /**
+   * Internal helper function to update an existing reservation for the node edit form.
+   *
+   * @internal
+   */
+  public function updateEventReservationSubmit(&$form, \Drupal\Core\Form\FormStateInterface $form_state) {
+    $node_event = $form_state->getFormObject()->getEntity();
+    $reservation = $form_state->get('reservation');
+    $dates = $form_state->getValue(['reservation', 'dates']);
+    $reservation->set('field_meeting_dates', [
+      'value' => $this->dateUtility->convertTimezone($dates['start'])->format(self::FORMAT),
+      'end_value' => $this->dateUtility->convertTimezone($dates['end'])->format(self::FORMAT),
+    ]);
+    return $this->updateEventReservation($reservation, $node_event);
+  }
+
+  /**
+   * Custom form submit handler to process a reservation for an event node.
+   *
+   * @see self::nodeFormAlter()
+   *
+   * @internal
+   */
+  public static function nodeFormAlterSubmit(&$form, \Drupal\Core\Form\FormStateInterface $form_state) {
+    if ($form_state->getValue(['reservation', 'create'])) {
+      $form_state->get('reservation_manager')->createEventReservationSubmit($form, $form_state);
+    }
+    if ($form_state->get('reservation')) {
+      $form_state->get('reservation_manager')->updateEventReservationSubmit($form, $form_state);
+    }
+  }
+
+  /**
+   * Custom ajax form submit handler to update reservation status.
+   *
+   * @internal
+   */
+  public function ajaxCallback(&$form, $form_state) {
+    return $form['reservation']['dates']['status'];
   }
 
   /**

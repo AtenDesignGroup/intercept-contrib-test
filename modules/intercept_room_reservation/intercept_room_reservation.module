@@ -221,6 +221,13 @@ function intercept_room_reservation_entity_extra_field_info() {
     'weight' => 15,
     'visible' => FALSE,
   ];
+
+  $extra['room_reservation']['room_reservation']['display']['action_button'] = [
+    'label' => t('Action button'),
+    'description' => t('Cancel deny and approve buttons.'),
+    'weight' => 15,
+    'visible' => FALSE,
+  ];
   return $extra;
 }
 
@@ -228,28 +235,35 @@ function intercept_room_reservation_entity_extra_field_info() {
  * Implements hook_ENTITY_TYPE_view().
  */
 function intercept_room_reservation_room_reservation_view(array &$build, RoomReservationInterface $room_reservation, EntityViewDisplayInterface $display, $view_mode) {
-  $build['location_full'] = [
-    '#type' => 'html_tag',
-    '#tag' => 'div',
-    '#attributes' => ['class' => 'field-location-full'],
-    '#value' => $room_reservation->location(),
-   ];
+  if ($display->getComponent('location_full')) {
+    $build['location_full'] = [
+      '#type' => 'html_tag',
+      '#tag' => 'div',
+      '#attributes' => ['class' => 'field-location-full'],
+      '#value' => $room_reservation->location(),
+    ];
+  }
 
-  $count = $room_reservation->field_attendee_count->getString();
-  $build['attendees_full'] = [
-    '#type' => 'html_tag',
-    '#tag' => 'div',
-    '#attributes' => ['class' => 'field-attendees-full'],
-    '#value' => !empty($count) ? t('@count Attendees', [
-      '@count' => $count,
-    ]) : '',
-   ];
-  $build['action_button'] = [
-    '#markup' => '<div class="js--room-reservation-action" data-reservation-uuid="' . $room_reservation->uuid() . '" data-status="' . $room_reservation->field_status->value . '" >' . $room_reservation->field_status->value . '</div>',
-    '#attached' => [
-      'library' => ['intercept_room_reservation/roomReservationActionButton'],
+  if ($display->getComponent('attendees_full')) {
+    $count = $room_reservation->field_attendee_count->getString();
+    $build['attendees_full'] = [
+      '#type' => 'html_tag',
+      '#tag' => 'div',
+      '#attributes' => ['class' => 'field-attendees-full'],
+      '#value' => !empty($count) ? t('@count Attendees', [
+        '@count' => $count,
+      ]) : '',
+    ];
+  }
+
+  if ($display->getComponent('action_button')) {
+    $build['action_button'] = [
+      '#markup' => '<div class="js--room-reservation-action" data-reservation-uuid="' . $room_reservation->uuid() . '" data-status="' . $room_reservation->field_status->value . '" >' . $room_reservation->field_status->value . '</div>',
+      '#attached' => [
+        'library' => ['intercept_room_reservation/roomReservationActionButton'],
       ]
     ];
+  }
 }
 
 /**

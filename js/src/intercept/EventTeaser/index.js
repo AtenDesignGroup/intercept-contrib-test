@@ -31,9 +31,11 @@ class EventTeaser extends PureComponent {
 
     const date = moment(utils.dateFromDrupal(event.attributes['field_date_time'].value));
 
-    const audienceValues = event.relationships['field_event_audience']
-      .map(termMap)
-      .filter(i => i.id);
+    const audienceValues = Array.isArray(event.relationships['field_event_audience'])
+      ? event.relationships['field_event_audience']
+        .map(termMap)
+        .filter(i => i.id)
+      : [];
 
     const audiences =
       audienceValues.length > 0 ? (

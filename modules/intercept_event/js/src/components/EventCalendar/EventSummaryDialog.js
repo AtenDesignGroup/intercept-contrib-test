@@ -3,10 +3,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Dialog from '@material-ui/core/Dialog';
-import EventSummary from 'intercept/EventSummary';
-import EventSummaryActions from './EventSummaryActions';
-
 import { withStyles } from '@material-ui/core/styles';
+
+import EventSummary from 'intercept/EventSummary';
+import LoadingIndicator from 'intercept/LoadingIndicator';
+
+import EventSummaryActions from './EventSummaryActions';
 
 const styles = theme => ({
   root: {
@@ -21,18 +23,36 @@ const styles = theme => ({
   },
 });
 
-class EventSummaryDialog extends React.Component {
+class EventSummaryDialog extends React.PureComponent {
   render() {
-    const { classes, close, onClose, open, id } = this.props;
+    const { classes, close, onClose, open, id, loading } = this.props;
+    if (!id) {
+      return null;
+    }
+
+    let content = null;
+
+    if (loading) {
+      content = (
+        <div style={{ padding: '2em' }}>
+          <LoadingIndicator loading />
+        </div>
+      );
+    }
+    else {
+      content = (
+        <React.Fragment>
+          <div className={classes.main}>{id ? <EventSummary id={id} /> : <div />}</div>
+          <div className={classes.footer}>
+            <EventSummaryActions id={id} />
+          </div>
+        </React.Fragment>
+      );
+    }
 
     return (
       <Dialog close={close} onClose={onClose} open={open} keepMounted>
-        <div className={classes.main}>
-          {id ? <EventSummary id={id} /> : <div />}
-        </div>
-        <div className={classes.footer}>
-        <EventSummaryActions id={id} />
-        </div>
+        {content}
       </Dialog>
     );
   }
@@ -41,6 +61,7 @@ class EventSummaryDialog extends React.Component {
 EventSummaryDialog.propTypes = {
   classes: PropTypes.object.isRequired,
   onClose: PropTypes.func,
+  loading: PropTypes.bool,
   open: PropTypes.bool,
   id: PropTypes.string,
 };
@@ -49,6 +70,7 @@ EventSummaryDialog.defaultProps = {
   open: false,
   onClose: null,
   id: null,
+  loading: false,
 };
 
 export default withStyles(styles)(EventSummaryDialog);

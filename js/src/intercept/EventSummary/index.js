@@ -30,6 +30,7 @@ function EventSummary(props) {
 
   const dateStart = utils.dateFromDrupal(event.attributes['field_date_time'].value);
   const dateEnd = utils.dateFromDrupal(event.attributes['field_date_time'].end_value);
+
   return (
     <div>
       <Summary
@@ -37,7 +38,7 @@ function EventSummary(props) {
         modifiers={[image ? 'with-image' : 'without-image', 'constrained', 'card']}
         image={image}
         subtitle={get(event, 'relationships.field_location.attributes.title')}
-        title={event.attributes.title}
+        title={get(event, 'attributes.title')}
         titleUrl={
           event.attributes.path ? event.attributes.path.alias : `/node/${event.attributes.nid}`
         }
@@ -45,10 +46,10 @@ function EventSummary(props) {
           date: utils.getDayDisplay(dateStart),
           time: `${utils.getTimeDisplay(dateStart)} - ${utils.getTimeDisplay(dateEnd)}`,
         }}
-        label={event.attributes.field_must_register ? 'Registration Required' : null}
-        body={event.attributes['field_text_teaser'].value}
+        label={get(event, 'attributes.field_must_register') ? 'Registration Required' : null}
+        body={get(event, 'attributes.field_text_teaser.value')}
       >
-        <RegistrationStatus event={event} />
+        <RegistrationStatus event={event} eventId={id} />
       </Summary>
     </div>
   );

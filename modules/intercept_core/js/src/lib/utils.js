@@ -2,7 +2,6 @@ import moment from 'moment';
 import drupalSettings from 'drupalSettings';
 import get from 'lodash/get';
 import intersection from 'lodash/intersection';
-import utils from '../../../../../node_modules/formsy-react/lib/utils';
 
 //
 // User getters

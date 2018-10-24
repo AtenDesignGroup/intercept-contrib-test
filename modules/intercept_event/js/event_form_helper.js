@@ -11,7 +11,7 @@
 Drupal.behaviors.eventFormHelper = {
   attach: function (context, settings) {
     var $root = this;
-    $('#edit-field-date-time-0-value-date').once().change(function() {
+    $('#edit-field-date-time-0-value-date', context).once().change(function() {
       var endDate = $('#edit-field-date-time-0-end-value-date');
       if ($(this).val() > endDate.val()) {
         endDate.val($(this).val());

@@ -202,7 +202,7 @@ function intercept_room_reservation_theme_suggestions_room_reservation(array $va
 function intercept_room_reservation_entity_extra_field_info() {
   $extra = [];
 
-  $extra['node']['event']['form']['reservations'] = [
+  $extra['node']['event']['form']['reservation'] = [
     'label' => t('Reservations'),
     'description' => t('Manage reservations for this event.'),
     'visible' => FALSE,

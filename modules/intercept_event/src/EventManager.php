@@ -113,7 +113,48 @@ class EventManager implements EventManagerInterface {
    * Alter both node edit and node add forms for events.
    */
   public function nodeFormAlter(&$form, \Drupal\Core\Form\FormStateInterface $form_state) {
+    $display = $form_state->getFormObject()->getFormDisplay($form_state);
+    if (!$display->getComponent('field_location') || !$display->getComponent('field_room')) {
+      return;
+    }
+    // Add in helper ajax functionality to change room field values depending on location.
     $form['#attached']['library'][] = 'intercept_event/event_form_helper';
+    $form['field_location']['widget']['#ajax'] = [
+      'callback' => [$this, 'fieldRoomAjaxCallback'],
+      'wrapper' => 'event-node-field-room-ajax-wrapper',
+    ];
+    if (!$location = $form_state->getValue('field_location')) {
+      $location = $form['field_location']['widget']['#default_value'];
+    }
+    $options = &$form['field_room']['widget']['#options'];
+
+    if (empty($location)) {
+      $form['field_room']['widget']['#options'] = ['_none' => $this->t('- Select a location -')];
+    }
+    else {
+      $rooms = $this->entityTypeManager->getStorage('node')->loadByProperties([
+        'type' => 'room',
+        'field_location' => $location[0],
+      ]);
+      foreach ($options as $id => $label) {
+        if ($id == '_none') {
+          continue;
+        }
+        if (!empty($rooms[$id])) {
+          continue;
+        }
+        unset($options[$id]);
+      }
+    }
+    $form['field_room']['#prefix'] = '<div id="event-node-field-room-ajax-wrapper">';
+    $form['field_room']['#suffix'] = '</div>';
+  }
+
+  /**
+   * Ajax form callback to re-populate the room field element.
+   */
+  public function fieldRoomAjaxCallback(&$form, $form_state) {
+    return $form['field_room'];
   }
 
   /**

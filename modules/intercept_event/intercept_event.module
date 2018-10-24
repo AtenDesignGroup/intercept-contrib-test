@@ -217,9 +217,12 @@ function intercept_event_node_delete(Drupal\node\NodeInterface $node) {
 }
 
 /**
- * Implemtent hook_theme_suggestions_HOOK_alter
+ * Implemtent hook_theme_suggestions_HOOK_alter().
  */
 function intercept_event_theme_suggestions_form_element_alter(&$suggestions, $variables) {
+  if (!isset($variables['element']['#form_id'])) {
+    return;
+  }
   $form_id = $variables['element']['#form_id'];
 
   // Add a suggestion for staff evaluations

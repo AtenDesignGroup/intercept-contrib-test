@@ -11,6 +11,8 @@ use Drupal\Core\Render\Element;
 use Drupal\intercept_room_reservation\Entity\RoomReservationInterface;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Url;
+use Drupal\views\ViewExecutable;
+use Drupal\views\Plugin\views\query\QueryPluginBase;
 
 /**
  * Implements hook_help().
@@ -248,4 +250,22 @@ function intercept_room_reservation_room_reservation_view(array &$build, RoomRes
       'library' => ['intercept_room_reservation/roomReservationActionButton'],
       ]
     ];
+}
+
+/**
+ * Implements hook_views_query_alter().
+ */
+function intercept_room_reservation_views_query_alter(ViewExecutable $view, QueryPluginBase $query) {
+  if ($view->id() == 'intercept_room_reservations' && $view->current_display == 'embed') {
+    foreach ($query->where as &$condition_group) {
+      // For each condition in condition group
+      foreach ($condition_group['conditions'] as &$condition) {
+        if (isset($condition['field']) && strstr($condition['field'], 'field_dates_value')) {
+          // Run the query from the beginning of the start date until the end of the end date.
+          $condition['field'] = preg_replace("/(?<=AND DATE_FORMAT\(\('\d{4}-\d{2}-\d{2}T)\d{2}:\d{2}:\d{2}' \+ INTERVAL [-+]?\d* SECOND\)/", "23:59:59')", $condition['field']);
+          $condition['field'] = preg_replace("/(?<=BETWEEN DATE_FORMAT\(\('\d{4}-\d{2}-\d{2}T)\d{2}:\d{2}:\d{2}' \+ INTERVAL [-+]?\d* SECOND\)/", "00:00:00')", $condition['field']);
+        }
+      }
+    }
+  }
 }

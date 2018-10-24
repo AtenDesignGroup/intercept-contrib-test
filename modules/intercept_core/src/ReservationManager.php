@@ -119,6 +119,11 @@ class ReservationManager implements ReservationManagerInterface {
       if (!empty($params['rooms'])) {
         $query->condition('field_room', $params['rooms'], 'IN');
       }
+      // If we're editing an event reservation, we need to make sure to not
+      // count the existing reservation towards unavailability.
+      if (!empty($params['event'])) {
+        $query->condition('field_event', $params['event'], '!=');
+      }
       $query->condition('field_status', ['canceled', 'denied'], 'NOT IN');
       $range = [$start_date->format(self::FORMAT), $end_date->format(self::FORMAT)];
       $query->condition($query->orConditionGroup()

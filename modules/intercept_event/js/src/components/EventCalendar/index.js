@@ -101,14 +101,20 @@ class EventCalendar extends React.Component {
   }
 
   componentDidMount() {
+    // Print handling.
+    // We add matchmedia support for Safari and older versions of Chrome.
     this.mediaQueryList.addListener(this.printTest);
+
+    // On beforeprint support for FF and IE and newer versions of Chrome.
     window.onbeforeprint = () => {
+      // Using both matchmedia and onbeforeprint will conflict on Chrome.
+      // If onbeforeprint is supported and fires, remove the matchMedia listener
+      // before it triggers.  This allows it to work for Safari but disables it in
+      // browsers that support onbeforeprint.
       this.mediaQueryList.removeListener(this.printTest);
-      console.log('onBeforePrint', false);
       this.setPrintState(true);
     };
     window.onafterprint = () => {
-      console.log('onAfterPrint', false);
       this.setPrintState(false);
     };
   }

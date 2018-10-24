@@ -29,17 +29,14 @@ import EventCalendar from './../EventCalendar';
 
 const { constants, api, select, utils } = interceptClient;
 const c = constants;
-const eventIncludes = (view = 'list') => {
-  return view === 'list'
-    ? ['image_primary', 'image_primary.field_media_image', 'field_room']
-    : null;
-};
+const eventIncludes = (view = 'list') =>
+  (view === 'list' ? ['image_primary', 'image_primary.field_media_image', 'field_room'] : null);
 
 const viewOptions = [{ key: 'list', value: 'List' }, { key: 'calendar', value: 'Calendar' }];
 const userId = get(drupalSettings, 'intercept.user.uuid');
 
-const sparseFieldsets = (view = 'list') => {
-  return view === 'list'
+const sparseFieldsets = (view = 'list') =>
+  (view === 'list'
     ? {
       [c.TYPE_EVENT]: [
         'nid',
@@ -79,8 +76,7 @@ const sparseFieldsets = (view = 'list') => {
         'field_must_register',
         'field_location',
       ],
-    };
-};
+    });
 
 function getDate(value, view = 'day', boundary = 'start') {
   const method = boundary === 'start' ? 'startOf' : 'endOf';
@@ -199,7 +195,20 @@ function getFilters(values, view = 'list', calView = 'day', date = new Date()) {
   const types = [
     { id: c.TYPE_EVENT_TYPE, path: 'field_event_type.uuid', conjunction: 'OR' },
     { id: c.TYPE_LOCATION, path: 'field_location.uuid', conjunction: 'OR' },
-    { id: c.TYPE_AUDIENCE, path: 'field_event_audience.uuid', conjunction: 'OR' },
+    {
+      id: c.TYPE_AUDIENCE,
+      path: 'field_event_audience.uuid',
+      conjunction: 'OR',
+      group: 'audience',
+    },
+    {
+      id: c.TYPE_AUDIENCE,
+      path: 'field_event_audience.parent.uuid',
+      conjunction: 'OR',
+      value: c.TYPE_AUDIENCE,
+      label: 'parent',
+      group: 'audience',
+    },
   ];
 
   types.forEach((type) => {
@@ -220,11 +229,19 @@ function getFilters(values, view = 'list', calView = 'day', date = new Date()) {
         });
       }
       else {
-        filter[type.id] = {
+        filter[type.label || type.id] = {
           path: type.path,
-          value: values[type.id],
+          value: values[type.value || type.id],
           operator: 'IN',
         };
+
+        if (type.group) {
+          filter[type.group] = {
+            type: 'group',
+            conjunction: type.conjunction,
+          };
+          filter[type.label || type.id].memberOf = type.group;
+        }
       }
     }
   });
@@ -297,7 +314,12 @@ class BrowseEvents extends Component {
       filters: getFilters(values, view, calView, date),
       include: eventIncludes(view),
       replace: true,
-      fields: pick(sparseFieldsets(view), [c.TYPE_EVENT, c.TYPE_MEDIA_IMAGE, c.TYPE_FILE, c.TYPE_ROOM]),
+      fields: pick(sparseFieldsets(view), [
+        c.TYPE_EVENT,
+        c.TYPE_MEDIA_IMAGE,
+        c.TYPE_FILE,
+        c.TYPE_ROOM,
+      ]),
       sort: {
         date: {
           path: 'field_date_time.value',

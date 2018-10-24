@@ -62,6 +62,23 @@ class SelectMultiple extends React.Component {
       <label className="select-filter__checkbox-label">{text}</label>
     );
 
+    const toOptionItems = (depth = 0) => (all, option) => {
+      return [].concat(
+        all,
+        (<MenuItem key={option.key} value={option.key} className="select-filter__menu-item" data-depth={depth}>
+          <Checkbox
+            checked={multiple ? value.indexOf(option.key) > -1 : value === option.key}
+            id={checkboxId(option.key)}
+            className="select-filter__checkbox"
+          />
+          <ListItemText
+            disableTypography
+            primary={checkboxLabel(option.value, checkboxId(option.key))}
+          />
+        </MenuItem>),
+        option.children && option.children.reduce(toOptionItems(depth + 1), []))
+    };
+
     return (
       <div className="select-filter input input--select">
         <FormControl className="select-filter__control">
@@ -84,21 +101,7 @@ class SelectMultiple extends React.Component {
             error={!this.props.isValid()}
             required={this.props.required}
           >
-            {options.map(option => (
-              <MenuItem key={option.key} value={option.key} className="select-filter__menu-item">
-                {multiple && (
-                  <Checkbox
-                    checked={multiple ? value.indexOf(option.key) > -1 : value === option.key}
-                    id={checkboxId(option.key)}
-                    className="select-filter__checkbox"
-                  />
-                )}
-                <ListItemText
-                  disableTypography
-                  primary={checkboxLabel(option.value, checkboxId(option.key))}
-                />
-              </MenuItem>
-            ))}
+            {options.reduce(toOptionItems(), [])}
           </Select>
         </FormControl>
       </div>

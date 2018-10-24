@@ -74,6 +74,21 @@ function intercept_room_reservation_room_reservation_presave(RoomReservationInte
 }
 
 /**
+ * Implements hook_ENTITY_TYPE_delete().
+ */
+function intercept_room_reservation_node_delete(\Drupal\node\NodeInterface $node) {
+  if (!$node->bundle() == 'event') {
+    return;
+  }
+  if (!\Drupal::hasService('intercept_core.reservation.manager')) {
+    return;
+  }
+  if ($reservation = \Drupal::service('intercept_core.reservation.manager')->getEventReservation($node)) {
+    $reservation->delete();
+  }
+}
+
+/**
  * Implements hook_entity_operation().
  */
 function intercept_room_reservation_entity_operation(\Drupal\Core\Entity\EntityInterface $entity) {
@@ -128,36 +143,14 @@ function intercept_room_reservation_mail($key, &$message, $params) {
 }
 
 function intercept_room_reservation_form_node_event_edit_form_alter(&$form, $form_state) {
-  $node = $form_state->getFormObject()->getEntity();
-  $manager = \Drupal::service('intercept_core.reservation.manager');
-  $reservations = $manager->reservations('room', function($query) use ($node) {
-    $query->condition('field_event', $node->id(), '=');
-    $query->condition('field_status', ['canceled', 'denied'], 'NOT IN');
-  });
-  $form['reservations'] = [
-    '#title' => t('Reservations'),
-    '#type' => 'fieldset',
-  ];
+  \Drupal::service('intercept_core.reservation.manager')->nodeFormAlter($form, $form_state);
+}
 
-  /** @var $view_builder \Drupal\Core\Entity\EntityViewBuilderInterface */
-  $view_builder = \Drupal::service('entity_type.manager')
-    ->getViewBuilder('room_reservation');
-
-  if (\Drupal::service('module_handler')->moduleExists('js_confirm_pop_up_js')) {
-    $form['#attributes']['class'][] = 'js-confirm-pop-up';
-    $form['#attached']['library'][] = 'js_confirm_pop_up/js_confirm_pop_up_js';
-  }
-  $form['reservations']['view'] = $view_builder->viewMultiple($reservations, 'teaser');
-  $form['reservations']['create'] = [
-    '#type' => 'link',
-    '#title' => 'Create a new reservation',
-    '#url' => Url::fromRoute('intercept_room_reservation.reserve_room'),
-    '#options' => ['query' => [
-      'event' => $node->uuid(),
-      'step' => 2,
-    ]],
-  ];
-    //'#url' => Url::fromRoute('/reserve-room?event=[event_uuid]&step=2
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function intercept_room_reservation_form_node_event_form_alter(&$form, $form_state) {
+  \Drupal::service('intercept_core.reservation.manager')->nodeFormAlter($form, $form_state);
 }
 
 /**

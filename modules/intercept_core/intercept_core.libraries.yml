@@ -7,6 +7,15 @@ react:
       external: true
       minified: true
 
+reservation_form_helper:
+  js:
+    js/reservation_form_helper.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
+    - core/drupalSettings
+    - intercept_event/event_form_helper
+
 bigCalendar:
   version: 0.18.0
   css:

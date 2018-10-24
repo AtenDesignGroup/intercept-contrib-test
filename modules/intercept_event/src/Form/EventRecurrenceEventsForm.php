@@ -99,9 +99,10 @@ class EventRecurrenceEventsForm extends ContentEntityForm {
       '#type' => 'container',
       '#title' => $this->t('Event list'),
     ];
+
     $form['event_list']['table'] = [
       '#type' => 'table',
-      '#header' => ['Event ID', 'Date', ''],
+      '#header' => ['Event ID', 'Date', '', ''],
       '#rows' => [],
     ];
 
@@ -111,6 +112,7 @@ class EventRecurrenceEventsForm extends ContentEntityForm {
         $date_item = $node->get('field_date_time')->first();
         $start_date = $this->dateUtility->convertTimezone($date_item->start_date, 'default');
         $end_date = $this->dateUtility->convertTimezone($date_item->end_date, 'default');
+        $reservation = \Drupal::service('intercept_core.reservation.manager')->getEventReservation($node);
         $column = [
           $node->link(),
           $this->formatDateRange([
@@ -118,7 +120,8 @@ class EventRecurrenceEventsForm extends ContentEntityForm {
             '@time_start' => $start_date->format($this->startTimeFormat),
             '@time_end' => $end_date->format($this->endTimeFormat),
           ]),
-          $node->link('edit', 'edit-form'),
+          $node->link('edit event', 'edit-form'),
+          $reservation ? $reservation->link('edit reservation', 'edit-form') : '',
         ];
         $form['event_list']['table']['#rows'][] = $column;
       }
@@ -133,6 +136,8 @@ class EventRecurrenceEventsForm extends ContentEntityForm {
             '@time_start' => $date['value']->format($this->startTimeFormat),
             '@time_end' => $date['end_value']->format($this->endTimeFormat),
           ]),
+          '',
+          '',
         ];
         $form['event_list']['table']['#rows'][] = $column;
       }
@@ -262,8 +267,17 @@ class EventRecurrenceEventsForm extends ContentEntityForm {
       ]);
       $event->set('event_recurrence', $this->eventRecurrence->id());
       $event->save();
+      $this->generateReservation($event, $base_event);
     }
     drupal_set_message($this->t('@count events created.', ['@count' => count($dates)]));
+  }
+
+  protected function generateReservation($new_event, $base_event) {
+    $manager = \Drupal::service('intercept_core.reservation.manager');
+    $base_reservation = $manager->getEventReservation($base_event);
+    $manager->createEventReservation($new_event, [
+      'field_meeting_dates' => $base_reservation->field_meeting_dates,
+    ]);
   }
 
   /**

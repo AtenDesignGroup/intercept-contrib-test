@@ -40,9 +40,9 @@ class PrintableMonth extends React.Component {
     ));
 
     const days = dates.map(day => (
-      <div key={day.key} className={'print-cal__cell'}>
+      <div key={day.key} className={`print-cal__cell print-cal__cell--${day.inScope ? 'in-scope' : 'not-in-scope'}`}>
         <h3 className={'print-cal__cell-day'}>{day.label}</h3>
-        {this.eventList(day.key, events)}
+        {day.inScope && this.eventList(day.key, events)}
       </div>
     ));
 
@@ -79,23 +79,25 @@ PrintableMonth.navigate = (date, action) => {
 
 PrintableMonth.datesInRange = (date) => {
   const dates = [];
-  const startDate = moment
-    .tz(date, utils.getUserTimezone())
-    .startOf('month')
-    .startOf('week');
-  const endDate = moment
-    .tz(date, utils.getUserTimezone())
-    .endOf('month')
+  const baseDate = moment.tz(date, utils.getUserTimezone());
+
+  const startOfMonth = baseDate.clone().startOf('month');
+  const endOfMonth = baseDate.clone().endOf('month');
+  const startDate = startOfMonth.clone().startOf('week');
+  const endDate = endOfMonth
+    .clone()
     .endOf('week')
     .toDate();
   const currentDate = startDate.clone();
 
   while (currentDate.toDate() <= endDate) {
+    const cd = currentDate.toDate();
     dates.push({
-      date: currentDate.toDate(),
+      date: cd,
       key: currentDate.format('MMDD'),
       label: currentDate.format('DD'),
       day: currentDate.format('ddd'),
+      inScope: cd >= startOfMonth.toDate() && cd <= endOfMonth.toDate(),
     });
     currentDate.add(1, 'days');
   }

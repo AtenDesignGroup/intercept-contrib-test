@@ -40,17 +40,6 @@ const babelLoader = {
     ],
     presets: [
       'react',
-      'stage-0',
-      'es2015',
-      [
-        'env',
-        {
-          modules: false,
-          targets: {
-            browsers: ['last 2 versions'],
-          },
-        },
-      ],
     ],
   },
 };

@@ -59,5 +59,12 @@
     "serve": "^6.4.9",
     "webpack": "^3.11.0",
     "webpack-dev-server": "^2.11.1"
-  }
+  },
+  "browserslist": [
+    "last 2 versions",
+    "ie 11",
+    "opera 12.1",
+    "ios 6",
+    "android 4"
+  ]
 }

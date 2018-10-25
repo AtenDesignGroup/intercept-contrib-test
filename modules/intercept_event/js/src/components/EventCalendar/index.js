@@ -2,15 +2,22 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
-import BigCalendar from 'intercept/BigCalendar';
 import Toolbar from 'react-big-calendar/lib/Toolbar';
+
+// Material UI
 import ArrowBack from '@material-ui/icons/ArrowBack';
 import ArrowForward from '@material-ui/icons/ArrowForward';
 import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
+
+// Intercept
+/* eslint-disable */
+import interceptClient from 'interceptClient';
+import BigCalendar from 'intercept/BigCalendar';
+/* eslint-enable */
+
 import EventSummaryDialog from './EventSummaryDialog';
 import PrintableMonth from './PrintableMonth';
-import interceptClient from 'interceptClient';
 
 const { api, constants, utils, select } = interceptClient;
 const c = constants;
@@ -32,6 +39,10 @@ const CalendarEvent = (props) => {
       <p className="calendar-event__title">{data.attributes.title}</p>
     </div>
   );
+};
+
+CalendarEvent.propTypes = {
+  event: PropTypes.object.isRequired,
 };
 
 class CustomToolbar extends Toolbar {
@@ -145,7 +156,6 @@ class EventCalendar extends React.Component {
   }
 
   printTest(mql) {
-    console.log('PRINT TEST', mql.matches);
     this.setPrintState(mql.matches);
   }
 
@@ -211,7 +221,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-  fetchEvent: (id) => {
+  fetchEvent: id => {
     dispatch(
       api[c.TYPE_EVENT].fetchAll({
         filters: {

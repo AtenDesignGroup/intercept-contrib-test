@@ -53,6 +53,7 @@ interceptCommon:
     - core/drupalSettings
     - intercept_core/babelHelpers
     - intercept_core/react
+    - intercept_core/moment
 
 interceptClient:
   js:

@@ -25,14 +25,14 @@ function ButtonRegister(props) {
   return mustRegister ? (
     <Button
       href={onClick ? null : registerUrl}
-      variant={text === 'Cancel' ? 'outlined' : 'raised'}
+      variant={text === 'Cancel' || registerUrl ? 'outlined' : 'raised'}
       size="small"
       color="primary"
       className={'action-button__button'}
       disabled={!registrationAllowed}
       onClick={onClick}
     >
-      {text}
+      {registerUrl ? 'View Reservation' : text}
     </Button>
   ) : null;
 }

@@ -53,17 +53,19 @@ class EventRegisterApp extends React.Component {
     let form = null;
 
     if (userHasNotRegistered) {
-      form = this.acceptingReservations()
-        ? <EventRegisterForm {...this.props} />
-        : <p>Registrations are not being accepted at this time.</p>;
+      form = this.acceptingReservations() ? (
+        <EventRegisterForm {...this.props} />
+      ) : (
+        <p>Registrations are not being accepted at this time.</p>
+      );
     }
 
     const table = registrations.length > 0 ? <EventRegistrationTable eventId={eventId} /> : null;
 
     return (
       <div className="l--offset">
-        {form}
-        {table}
+        <div className="l--section">{form}</div>
+        <div className="l--section">{table}</div>
       </div>
     );
   }

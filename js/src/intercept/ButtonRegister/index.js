@@ -32,7 +32,7 @@ function ButtonRegister(props) {
       disabled={!registrationAllowed}
       onClick={onClick}
     >
-      {registerUrl ? 'View Reservation' : text}
+      {text === 'Cancel' && registerUrl ? 'View Registration' : text}
     </Button>
   ) : null;
 }

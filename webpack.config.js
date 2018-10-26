@@ -5,9 +5,10 @@ const webpack = require('webpack');
 // Create an object map of entry file arrays keyed by submodule.
 const entries = {
   intercept_event: [
+    'eventAddToCalendar',
+    'eventAttendanceList',
     'eventCustomerEvaluation',
     'eventCustomerEvaluations',
-    'eventAttendanceList',
     'eventList',
     'eventRegister',
     'eventRegisterButton',

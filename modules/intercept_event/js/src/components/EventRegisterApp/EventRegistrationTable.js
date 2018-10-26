@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
 import { withStyles } from '@material-ui/core/styles';
+import withWidth, { isWidthUp } from '@material-ui/core/withWidth';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -45,46 +46,72 @@ const styles = theme => ({
   },
   canceled: {
     opacity: '.6',
-  }
+  },
 });
 
 const getData = registrations =>
-  registrations.map((registered) => {
-    return {
-      id: get(registered, 'data.id'),
-      status: get(registered, 'data.attributes.status'),
-    };
-  });
+  registrations.map(registered => ({
+    id: get(registered, 'data.id'),
+    status: get(registered, 'data.attributes.status'),
+  }));
 
 function EventRegistrationTable(props) {
-  const { classes, registrations } = props;
+  const { classes, registrations, width } = props;
   const data = getData(registrations);
 
   // const getEventAction = id => getAction(id, eventId);
 
-  return (
-    <Table className={classes.table}>
-      <TableHead>
-        <TableRow>
-          <TableCell>Registration</TableCell>
-          <TableCell>Status</TableCell>
-          <TableCell numeric />
-        </TableRow>
-      </TableHead>
-      <TableBody>
-        {data.map(n => (
-          <TableRow key={n.id} className={n.status === 'canceled' ? classes.canceled : ''}>
-            <TableCell>
-              <RegistrationTallySummary id={n.id} />
-            </TableCell>
-            <TableCell>{n.status}</TableCell>
-            <TableCell numeric className={classes.lastColumn}>
-              <EventRegistrationActions registrationId={n.id} />
-            </TableCell>
+  if (isWidthUp('md', width)) {
+    return (
+      <Table className={classes.table}>
+        <TableHead>
+          <TableRow>
+            <TableCell>Registration</TableCell>
+            <TableCell>Status</TableCell>
+            <TableCell numeric />
           </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+        </TableHead>
+        <TableBody>
+          {data.map(n => (
+            <TableRow key={n.id} className={n.status === 'canceled' ? classes.canceled : ''}>
+              <TableCell>
+                <RegistrationTallySummary id={n.id} />
+              </TableCell>
+              <TableCell>{n.status}</TableCell>
+              <TableCell numeric className={classes.lastColumn}>
+                <EventRegistrationActions registrationId={n.id} />
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    );
+  }
+
+  return (
+    <div className={'l--subsection'}>
+      <h4>Existing Registrations</h4>
+      {data.map(n => (
+        <div
+          key={n.id}
+          className={`metadata metadata--${n.status}`}
+        >
+          <div className="metadata__item metadata__item--block">
+            <h4 className="metadate__title">Attendees:</h4>
+            <div className="metadata__content">
+              <RegistrationTallySummary id={n.id} />
+            </div>
+          </div>
+          <div className="metadata__item metadata__item--inline">
+            <h4 className="metadate__title">Status:</h4>
+            <div className="metadata__content">{n.status}</div>
+          </div>
+          <div className="metadata__footer">
+            <EventRegistrationActions registrationId={n.id} />
+          </div>
+        </div>
+      ))}
+    </div>
   );
 }
 
@@ -108,4 +135,4 @@ const mapStateToProps = (state, ownProps) => ({
   registrationsLoading: select.recordsAreLoading(c.TYPE_EVENT_REGISTRATION)(state),
 });
 
-export default withStyles(styles)(connect(mapStateToProps)(EventRegistrationTable));
+export default withWidth()(withStyles(styles)(connect(mapStateToProps)(EventRegistrationTable)));

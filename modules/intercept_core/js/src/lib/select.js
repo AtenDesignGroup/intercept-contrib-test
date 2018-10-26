@@ -306,7 +306,7 @@ export const eventRegistrationDate = id =>
 export const registerUrl = id =>
   createSelector(
     record(getIdentifier(c.TYPE_EVENT, id)),
-    item => `/event/${get(item, 'data.attributes.nid')}/register`,
+    item => `/event/${get(item, 'data.attributes.nid')}/register#eventRegisterRoot`,
   );
 
 //

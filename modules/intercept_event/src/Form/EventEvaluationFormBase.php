@@ -55,14 +55,7 @@ abstract class EventEvaluationFormBase extends FormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    if (!$evaluation = $this->eventEvaluationManager->loadByEntity($this->entity, $this->getVoteType())) {
-      $evaluation = $this->eventEvaluationManager->create([
-        'entity_id' => $this->entity->id(),
-        'type' => $this->getVoteType(),
-        'entity_type' => $this->entity->getEntityTypeId(), 
-      ]);
-    }
-
+    $evaluation = $this->getEvaluation();
     $form_state->set('evaluation', $evaluation);
     return $form;
   }
@@ -72,6 +65,22 @@ abstract class EventEvaluationFormBase extends FormBase {
    */
   public function save(&$form, FormStateInterface $form_state) {
     return $form;
+  }
+
+  /**
+   * Create or load the evaluation for this entity and user.
+   *
+   * @return \Drupal\intercept_event\EventEvaluation
+   */
+  protected function getEvaluation(){
+    if (!$evaluation = $this->eventEvaluationManager->loadByEntity($this->entity, ['type' => $this->getVoteType()])) {
+      $evaluation = $this->eventEvaluationManager->create([
+        'entity_id' => $this->entity->id(),
+        'type' => $this->getVoteType(),
+        'entity_type' => $this->entity->getEntityTypeId(),
+      ]);
+    }
+    return $evaluation;
   }
 
   /**

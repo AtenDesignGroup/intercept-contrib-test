@@ -31,21 +31,53 @@ class EventEvaluationStaffForm extends EventEvaluationFormBase {
   public function buildForm(array $form, FormStateInterface $form_state) {
     $form = parent::buildForm($form, $form_state);
     $evaluation = $form_state->get('evaluation');
-
-    $wrapper_id = \Drupal\Component\Utility\Html::getUniqueId('evaluation-criteria-wrapper');
+    $user = $this->currentUser();
 
     $form['evaluation'] = [
-      '#title' => $this->t('How\'d the Event Go?'),
-      '#attributes' => [
-        'placeholder' => $this->t('Add thoughts about your event here to use in the future.'),
-      ],
-      '#type' => 'textarea',
-      '#default_value' => $evaluation->getFeedback(),
-      '#description' => $this->t('Ask yourself questions like: Did the event meet your expectations? How does it differ from other events you\'ve held? Did you receive any feedback from attendees?'),
       '#description_display' => 'before',
     ];
 
-    $form['actions'] = $this->buildActions();
+    $wrapper_id = \Drupal\Component\Utility\Html::getUniqueId('evaluation-criteria-wrapper');
+
+    $is_owner = $this->entity->getOwnerId() == $user->id();
+    $feedback = $evaluation->getFeedback();
+    if (($is_owner && $user->hasPermission('create own event feedback')) || $user->hasPermission('create any event feedback')) {
+      $form['evaluation_user'] = [
+        '#description' => $this->t('Choose which user to associate with this feedback.'),
+        '#description_display' => 'before',
+        '#type' => 'select',
+        '#options' => [
+          $user->id() => $user->getDisplayName(),
+          $this->entity->getOwnerId() => $this->entity->getOwner()->getDisplayName(),
+        ],
+        '#default_value' => $evaluation->getOwnerId(),
+        '#access' => $user->hasPermission('create any event feedback'),
+      ];
+      $form['evaluation'] += [
+        '#title' => $this->t('How\'d the Event Go?'),
+        '#type' => 'textarea',
+        '#attributes' => [
+          'placeholder' => $this->t('Add thoughts about your event here to use in the future.'),
+        ],
+        '#default_value' => $feedback,
+        '#description' => $this->t('Ask yourself questions like: Did the event meet your expectations? How does it differ from other events you\'ve held? Did you receive any feedback from attendees?'),
+      ];
+      $form['actions'] = $this->buildActions();
+    }
+    else {
+      $form['evaluation']['#type'] = 'item';
+      if (empty($feedback)) {
+        $form['evaluation'] += [
+          '#description' => $this->t('There is no feedback yet on the event.'),
+        ];
+      }
+      else {
+        $form['evaluation']['#title'] = $this->t('User: @display_name', [
+          '@display_name' => $evaluation->getOwner()->getDisplayName(),
+        ]);
+        $form['evaluation']['#description'] = $feedback;
+      }
+    }
 
     return $form;
   }
@@ -55,6 +87,12 @@ class EventEvaluationStaffForm extends EventEvaluationFormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $evaluation = $form_state->get('evaluation');
+    if (!empty($form_state->getValue('evaluation_user'))) {
+      $evaluation->setOwnerId($form_state->getValue('evaluation_user'));
+    }
+    else {
+      $evaluation->setOwnerId($this->currentUser()->id());
+    }
     $vote = $form_state->getValue('evaluation');
     $evaluation->setFeedback($vote);
   }

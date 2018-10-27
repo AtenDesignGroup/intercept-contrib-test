@@ -299,7 +299,9 @@ function intercept_event_node_view(array &$build, \Drupal\Core\Entity\EntityInte
     $evaluation_manager = \Drupal::service('intercept_event.evaluation_manager');
 
     if ($evaluation_manager->eventHasEnded($entity)) {
-      $evaluation = $evaluation_manager->loadByEntity($entity);
+      $evaluation = $evaluation_manager->loadByEntity($entity, [
+        'user_id' => '<current>',
+      ]);
       $build['evaluation'] = $evaluation ? $evaluation->view() : $evaluation_manager->buildJsWidget($entity);
     }
   }

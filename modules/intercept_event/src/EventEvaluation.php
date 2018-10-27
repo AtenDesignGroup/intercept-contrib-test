@@ -100,6 +100,24 @@ class EventEvaluation {
     return $this;
   }
 
+  public function setOwner(\Drupal\user\UserInterface $account) {
+    $this->vote->setOwner($account);
+    return $this;
+  }
+
+  public function setOwnerId($id) {
+    $this->vote->setOwnerId($id);
+    return $this;
+  }
+
+  public function getOwner() {
+    return $this->vote->getOwner();
+  }
+
+  public function getOwnerId() {
+    return $this->vote->getOwnerId();
+  }
+
   /**
    * Delete this EventEvaluation and votingapi entity.
    */

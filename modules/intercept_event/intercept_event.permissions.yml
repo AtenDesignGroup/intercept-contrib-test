@@ -42,3 +42,9 @@ evaluate own events:
 
 evaluate any event:
   title: 'Evaluate any event'
+
+create own event feedback:
+  title: 'Event feedback: Provide and edit feedback on own event'
+
+create any event feedback:
+  title: 'Event feedback: Provide and edit feedback on any event'

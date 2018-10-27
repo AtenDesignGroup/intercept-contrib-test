@@ -7,6 +7,7 @@ use Drupal\Core\Access\AccessResultForbidden;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Entity\EntityFormBuilderInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\Url;
 use Drupal\intercept_event\EventEvaluationManager;
 use Drupal\node\NodeInterface;
@@ -125,7 +126,10 @@ class EventEvaluationController extends ControllerBase {
    */
   private function getEvaluationFromPost(array $post) {
     $entity_id = $this->convertUuid($post['event'], 'node');
-    $user_id = !empty($post['user']) ? $this->convertUuid($post['user'], 'user') : NULL;
+    $user_id = !empty($post['user'])
+      ? $this->convertUuid($post['user'], 'user')
+      : '<current>';
+    // If they sent a user uuid but now the variable is blank, it's an invalid ID.
     if (!empty($post['user']) && empty($user_id)) {
       return FALSE;
     }

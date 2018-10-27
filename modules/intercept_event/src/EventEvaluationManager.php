@@ -69,22 +69,33 @@ class EventEvaluationManager {
     $vote_storage = $this->entityTypeManager->getStorage('vote');
     /** @var \Drupal\votingapi\VoteInterface $vote */
     $vote_type = $this->entityTypeManager->getStorage('vote_type')->load($values['type']);
-    $user_id = !empty($values['user_id']) ? $values['user_id'] : $this->currentUser->id();
     $vote = $vote_storage->create(['type' => $values['type']]);
-    $vote->setOwnerId($user_id);
+    $vote->setOwnerId($this->getUserFromParams($values));
     $vote->setVotedEntityId($values['entity_id']);
     $vote->setVotedEntityType($values['entity_type']);
     $vote->setValueType($vote_type->getValueType());
     return $this->createEventEvaluationInstance($vote);
   }
 
+  private function getUserFromParams($params) {
+    if (empty($params['user_id'])) {
+      return $this->currentUser->id();
+    }
+    if ($params['user_id'] == '<current>') {
+      return $this->currentUser->id();
+    }
+    return $params['user_id'];
+  }
+
   public function createFromEntity(EntityInterface $entity, $values = []) {
-    return $this->create([
+    $params = [
       'entity_type' => $entity->getEntityTypeId(),
       'entity_id' => $entity->id(),
-      'user_id' => !empty($properties['user_id']) ? $properties['user_id'] : $this->currentUser->id(),
       'type' => !empty($values['type']) ? $values['type'] : self::VOTE_TYPE_ID,
-    ]);
+      'user_id' => $this->getUserFromParams($values),
+    ];
+
+    return $this->create($params);
   }
 
   /**
@@ -95,15 +106,12 @@ class EventEvaluationManager {
    *
    * @return bool|EventEvaluation
    */
-  public function loadByEntity(EntityInterface $entity, $type = NULL) {
-    $properties = [
+  public function loadByEntity(EntityInterface $entity, array $values = []) {
+    $values += [
       'entity_type' => $entity->getEntityTypeId(),
       'entity_id' => $entity->id(),
     ];
-    if ($type) {
-      $properties['type'] = $type;
-    }
-    return $this->loadByProperties($properties);
+    return $this->loadByProperties($values);
   }
 
   /**
@@ -120,24 +128,25 @@ class EventEvaluationManager {
     if (empty($properties['entity_type']) || empty($properties['entity_id'])) {
       return FALSE;
     }
-    $type = !empty($properties['type']) ? $properties['type'] : self::VOTE_TYPE_ID;
-    if (!empty($properties['entity_type']) && !empty($properties['entity_id'])) {
-      $entity = $this->entityTypeManager->getStorage($properties['entity_type'])->load($properties['entity_id']);
-    }
-    $type = !empty($properties['type']) ? $properties['type'] : self::VOTE_TYPE_ID;
-    $user_id = !empty($properties['user_id']) ? $properties['user_id'] : $this->currentUser->id();
-    /** @var \Drupal\votingapi\VoteStorageInterface $vote_storage */
-    $vote_storage = $this->entityTypeManager->getStorage('vote');
-    $vote_ids = $vote_storage->getUserVotes(
-      $user_id,
-      $type,
-      $properties['entity_type'],
-      $properties['entity_id']
-    );
-    if (empty($vote_ids)) {
+    if (!$this->entityTypeManager->getStorage($properties['entity_type'])->load($properties['entity_id'])) {
+      // Invalid entity.
       return FALSE;
     }
-    $votes = $vote_storage->loadMultiple($vote_ids);
+    $params = [
+      'type' => !empty($properties['type']) ? $properties['type'] : self::VOTE_TYPE_ID,
+      'entity_type' => $properties['entity_type'],
+      'entity_id' => $properties['entity_id'],
+    ];
+    if (!empty($properties['user_id'])) {
+      $params['user_id'] = $this->getUserFromParams($properties);
+    }
+
+    /** @var \Drupal\votingapi\VoteStorageInterface $vote_storage */
+    $vote_storage = $this->entityTypeManager->getStorage('vote');
+    $votes = $vote_storage->loadByProperties($params);
+    if (empty($votes)) {
+      return FALSE;
+    }
     $vote = reset($votes);
     return $this->createEventEvaluationInstance($vote);
   }
@@ -232,7 +241,10 @@ class EventEvaluationManager {
    * @return array
    */
   public function buildJsWidget(EntityInterface $entity) {
-    if (!$evaluation = $this->loadByEntity($entity, self::VOTE_TYPE_ID)) {
+    if (!$evaluation = $this->loadByEntity($entity, [
+      'type' => self::VOTE_TYPE_ID,
+      'user_id' => '<current>',
+    ])) {
       $evaluation = $this->createFromEntity($entity);
     }
 

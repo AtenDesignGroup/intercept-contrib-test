@@ -3,6 +3,8 @@
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\TypedData\DataDefinition;
+use Drupal\views\ViewExecutable;
+use Drupal\views\Plugin\views\query\QueryPluginBase;
 
 /**
  * Implements hook_theme().
@@ -457,5 +459,33 @@ function intercept_event_entity_base_field_info(\Drupal\Core\Entity\EntityTypeIn
       ])
       ->setCardinality(1);
     return $definitions;
+  }
+}
+
+/**
+ * Implements hook_views_query_alter().
+ */
+function intercept_event_views_query_alter(ViewExecutable $view, QueryPluginBase $query) {
+  if ($view->id() == 'intercept_event_attendance' && $view->current_display == 'embed') {
+    foreach ($query->where as &$condition_group) {
+      // For each condition in condition group
+      foreach ($condition_group['conditions'] as &$condition) {
+        // Attendance dates
+        if (isset($condition['field']) && strstr($condition['field'], 'event_attendance.created')) {
+          // Run the query from the beginning of the start date until the end of the end date.
+          // First, find the end date chosen (timestamp).
+          preg_match('/(\d{10}) AND (\d{10})/', $condition['field'], $matches);
+          if (!empty($matches)) {
+            $end_timestamp = $matches[2] + 86399;
+            $condition['field'] = preg_replace("/(?<=\d{10} AND )\d{10}/", $end_timestamp, $condition['field']);
+          }
+        }
+        // Event dates
+        else if (isset($condition['field']) && strstr($condition['field'], 'field_date_time_value') && strstr($condition['field'], '<=')) {
+          // Run the query from the beginning of the start date until the end of the end date.
+          $condition['field'] = preg_replace("/(?<=\<\= DATE_FORMAT\(\('\d{4}-\d{2}-\d{2}T)\d{2}:\d{2}:\d{2}' \+ INTERVAL [-+]?\d* SECOND\)/", "23:59:59')", $condition['field']);
+        }
+      }
+    }
   }
 }

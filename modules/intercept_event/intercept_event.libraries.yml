@@ -92,6 +92,19 @@ eventCustomerEvaluation:
     - intercept_core/interceptCommon
     - intercept_core/interceptTheme
 
+eventAttendanceList:
+  js:
+    js/dist/eventAttendanceList.js:
+      preprocess: false
+  dependencies:
+    - core/drupal
+    - core/drupalSettings
+    - intercept_core/babelHelpers
+    - intercept_core/react
+    - intercept_core/interceptClient
+    - intercept_core/interceptCommon
+    - intercept_core/interceptTheme
+
 eventCustomerEvaluations:
   js:
     js/dist/eventCustomerEvaluations.js:

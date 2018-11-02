@@ -8,7 +8,7 @@ import withIntercept from 'intercept/withIntercept';
 
 import BrowseEventsApp from './components/BrowseEventsApp';
 
-Drupal.behaviors.myBehavior = {
+Drupal.behaviors.browseEventsApp = {
   attach: (context) => {
     const App = withIntercept(BrowseEventsApp);
     render(<App />, context.getElementById('eventListRoot'));

@@ -25,7 +25,7 @@ function ButtonRegister(props) {
   return mustRegister ? (
     <Button
       href={onClick ? null : registerUrl}
-      variant={text === 'Cancel' || registerUrl ? 'outlined' : 'raised'}
+      variant={text === 'register' ? 'raised' : 'outlined'}
       size="small"
       color="primary"
       className={'action-button__button'}

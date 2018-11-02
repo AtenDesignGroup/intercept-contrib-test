@@ -36,7 +36,7 @@ class ManagementController extends ManagementControllerBase {
 
   public function viewEventAttendanceExport(AccountInterface $user, Request $request) {
     return [
-      'title' => $this->title('Event attendance'),
+      'title' => $this->title('Event Attendance'),
       'download_link' => $this->getButton('Download CSV',
         'view.intercept_event_attendance.rest_export',
         ['_format' => 'csv'] + $request->query->all()

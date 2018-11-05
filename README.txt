@@ -14,7 +14,7 @@ interceptClient provides a shared Redux store, Reselect selectors and Drupal Jso
 ### Installation
 `npm install`
 
-### Develeopment Build
+### Development Build
 To run the development build which will bundle the apps with the development version of React and include source maps to aid in debugging, run the following.
 `npm run watch:js`
 

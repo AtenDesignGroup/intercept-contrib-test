@@ -334,6 +334,7 @@ class ReserveRoomForm extends PureComponent {
                     value={values.groupName}
                     name="groupName"
                     helperText={'Help others find you by name.'}
+                    required={!utils.userIsStaff()}
                   />
                   <SelectResource
                     type={c.TYPE_MEETING_PURPOSE}
@@ -365,7 +366,7 @@ class ReserveRoomForm extends PureComponent {
                 <div className="l--subsection">
                   <h4 className="section-title section-title--secondary">Refreshments</h4>
                   <InputCheckbox
-                    label="Serving light refreshments?"
+                    label="Serving light refreshments? (A $25 charge will be added to your library card.)"
                     checked={values.refreshments}
                     onChange={this.toggleValue}
                     value="refreshments"

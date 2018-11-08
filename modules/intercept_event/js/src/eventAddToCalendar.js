@@ -1,25 +1,41 @@
 import React from 'react';
 import { render } from 'react-dom';
 import AddToCalendar from 'react-add-to-calendar';
+import moment from 'moment';
 
 /* eslint-disable */
 import Drupal from 'Drupal';
+import interceptClient from 'interceptClient';
 /* eslint-enable */
+
+// This was an attempt to make .ics blobs work on iOS.
+// We may need revisit this in the future but for now we are just removing .ics options
+// from addToCalendar.
+// AddToCalendar.prototype.handleDropdownLinkClick = function (e) {
+//   const isIos = !!navigator.platform && /iPad|iPhone|iPod/.test(navigator.platform);
+//   if (isIos) {
+//     e.target.target = '_self';
+//     return true;
+//   }
+//   handleDropdownLinkClick.call(this, e);
+// };
+
+const { utils } = interceptClient;
 
 const getProp = (context, selector) => {
   const el = context.getElementsByClassName(selector);
   return el.length > 0 ? el[0].innerHTML : null;
 };
 
+const parseDate = date => moment.tz(date, utils.getUserTimezone());
+
 function renderApp(root) {
   const event = {
     title: getProp(root, 'atc_title'),
-    description: `${getProp(root, 'atc_description').trim()} \n\n <a href="${
-      window.location
-    }">View Event</a>`,
+    description: `${getProp(root, 'atc_description').trim()} <a href="${window.location}">View Event</a>`,
     location: getProp(root, 'atc_location'),
-    startTime: getProp(root, 'atc_date_start'),
-    endTime: getProp(root, 'atc_date_end'),
+    startTime: parseDate(getProp(root, 'atc_date_start')),
+    endTime: parseDate(getProp(root, 'atc_date_end')),
   };
 
   const services = root.getAttribute('data-calendars') || '';

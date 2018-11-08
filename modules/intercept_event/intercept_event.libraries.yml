@@ -33,6 +33,7 @@ eventAddToCalendar:
     - intercept_core/babelHelpers
     - intercept_core/react
     - intercept_core/interceptCommon
+    - intercept_core/interceptClient
 
 eventList:
   js:

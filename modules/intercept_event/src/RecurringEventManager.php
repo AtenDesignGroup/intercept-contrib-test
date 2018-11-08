@@ -145,14 +145,8 @@ class RecurringEventManager {
 
     $r['date']['start'] = [
       '#title' => t('Start date'),
-      '#type' => 'datetime',
-      '#default_value' => $start_date_object,
-    ];
-
-    $r['date']['end'] = [
-      '#title' => t('End date'),
-      '#type' => 'datetime',
-      '#default_value' => $end_date_object,
+      '#type' => 'date',
+      '#default_value' => $start_date_object->format('Y-m-d'),
     ];
 
     $r['raw_value'] = [
@@ -330,14 +324,23 @@ class RecurringEventManager {
         ]);
       }
 
+      $node = $form_state->getFormObject()->getEntity();
+
+      $submitted_start_date = new \DateTime($recurring['date']['start'], new \DateTimeZone('UTC'));
+      $recurring_start_datetime = clone $node->field_date_time->start_date;
+      $recurring_start_datetime->setDate(
+        $submitted_start_date->format('Y'),
+        $submitted_start_date->format('m'),
+        $submitted_start_date->format('d'));
+
       $recurring_event->field_event_rrule->setValue([
-        'value' => $recurring['date']['start']->format(DATETIME_DATETIME_STORAGE_FORMAT),
+        'value' => $recurring_start_datetime->format(DATETIME_DATETIME_STORAGE_FORMAT),
         'rrule' => $recurring['raw_value'],
-        'end_value' => $recurring['date']['end']->format(DATETIME_DATETIME_STORAGE_FORMAT),
+        'end_value' => $node->field_date_time->end_value,
         // TODO: This should be customizable.
         'infinit' => 0,
         // FIXME
-        'timezone' => 'America/New_York',
+        'timezone' => 'UTC',
       ]);
       $recurring_event->save();
     }

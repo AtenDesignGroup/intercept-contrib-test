@@ -20,13 +20,7 @@ Drupal.behaviors.eventRecurring = {
 
   initialize: function($container, context, settings) {
     var $eventStartDate = $($container.data('start-date-selector')).val();
-    var $eventEndDate = $($container.data('end-date-selector')).val();
-    var $eventStartTime = $($container.data('start-time-selector')).val();
-    var $eventEndTime = $($container.data('end-time-selector')).val();
-    $container.find('.form-item-recurring-event-date-start-date .picker__input', context).val($eventStartDate);
-    $container.find('.form-item-recurring-event-date-start-time .form-time', context).val($eventStartTime);
-    $container.find('.form-item-recurring-event-date-end-date .picker__input', context).val($eventEndDate);
-    $container.find('.form-item-recurring-event-date-end-time .form-time', context).val($eventEndTime);
+    $container.find('.form-item-recurring-event-date-start .picker__input', context).val($eventStartDate);
   },
 
   populate: function($container, context, settings) {

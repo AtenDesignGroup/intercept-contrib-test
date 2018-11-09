@@ -39,6 +39,13 @@ function intercept_event_theme() {
       ],
       'template' => 'evaluation-eval-widget',
     ],
+    'event_eval_feedback' => [
+      'variables' => [
+        'content' => NULL,
+        'user' => NULL,
+      ],
+      'template' => 'event-eval-feedback',
+    ],
   ];
 }
 

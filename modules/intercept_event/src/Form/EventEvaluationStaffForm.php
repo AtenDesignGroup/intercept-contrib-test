@@ -65,17 +65,18 @@ class EventEvaluationStaffForm extends EventEvaluationFormBase {
       $form['actions'] = $this->buildActions();
     }
     else {
-      $form['evaluation']['#type'] = 'item';
       if (empty($feedback)) {
+        $form['evaluation']['#type'] = 'item';
         $form['evaluation'] += [
           '#description' => $this->t('There is no feedback yet on the event.'),
         ];
       }
       else {
-        $form['evaluation']['#title'] = $this->t('User: @display_name', [
-          '@display_name' => $evaluation->getOwner()->getDisplayName(),
-        ]);
-        $form['evaluation']['#description'] = $feedback;
+        $form['evaluation'] = [
+          '#theme' => 'event_eval_feedback',
+          '#user' => $evaluation->getOwner()->getDisplayName(),
+          '#content' => $feedback,
+        ];
       }
     }
 

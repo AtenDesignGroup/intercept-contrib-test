@@ -261,18 +261,26 @@ class ReservationManager implements ReservationManagerInterface {
     ];
   }
 
+  /**
+   * Update the inline element from $form_state changes.
+   */
   private function updateFormStatusField(&$form, \Drupal\Core\Form\FormStateInterface $form_state) {
     $event = $form_state->getFormObject()->getEntity();
     $room = $form_state->getValue('field_room');
     $status_element = &$form['reservation']['dates']['status'];
     $reservation = $form_state->getValue('reservation');
-    $start_date = $this->dateUtility->convertTimezone($reservation['dates']['start'])->format(self::FORMAT);
-    $end_date = $this->dateUtility->convertTimezone($reservation['dates']['end'])->format(self::FORMAT);
+    // They clicked create reservation before the event date was set.
+    $dates = $form_state->getValue('field_date_time');
+    if (empty($dates) || empty($dates[0]['value']) || empty($dates[0]['end_value'])) {
+      return;
+    }
+    $start_date = $dates[0]['value'];
+    $end_date = $dates[0]['end_value'];
     $params = [
       'debug' => TRUE,
       'rooms' => [$room[0]['target_id']],
-      'start' => $start_date,
-      'end' => $end_date
+      'start' => $start_date->format(self::FORMAT),
+      'end' => $end_date->format(self::FORMAT),
     ];
     if (!$event->isNew()) {
       $params['event'] = $event->id();

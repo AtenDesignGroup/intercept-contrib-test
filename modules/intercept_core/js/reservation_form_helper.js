@@ -24,19 +24,25 @@ Drupal.behaviors.reservationFormHelper = {
     $('.reservation-prepopulate-dates', context).once().change(function() {
       var fields = [{
         'source': '#edit-field-date-time-0-value-date',
-        'target': '#edit-reservation-dates-start-date'
+        'target': '#edit-reservation-dates-start-date',
+        'targetName': 'reservation[dates][start][date]'
       },{
         'source': '#edit-field-date-time-0-value-time',
-        'target': '#edit-reservation-dates-start-time'
+        'target': '#edit-reservation-dates-start-time',
+        'targetName': 'reservation[dates][start][time]'
       },{
         'source': '#edit-field-date-time-0-end-value-date',
-        'target': '#edit-reservation-dates-end-date'
+        'target': '#edit-reservation-dates-end-date',
+        'targetName': 'reservation[dates][end][date]'
       },{
         'source': '#edit-field-date-time-0-end-value-time',
-        'target': '#edit-reservation-dates-end-time'
+        'target': '#edit-reservation-dates-end-time',
+        'targetName': 'reservation[dates][end][time]'
       }];
       for (var i = 0; i < fields.length; i++) {
-        $(fields[i].target).val($(fields[i].source).val());
+        var sv = $(fields[i].source).val();
+        $(fields[i].target).val(sv);
+        $('[name="' + fields[i].targetName + '"]').val(sv);
       }
     });
   },

@@ -18,6 +18,13 @@ class EventRegistrationField extends ComputedItemList implements CacheableDepend
    * {@inheritdoc}
    */
   protected function computeValue() {
+    if ($this->getEntity()->isNew()) {
+      return [
+        'total' => NULL,
+        'total_waitlist' => NULL,
+        'status' => NULL,
+      ];
+    }
     $this->getEntity()->addCacheableDependency($this->setValue([
       'total' => $this->getTotal(),
       'total_waitlist' => $this->getTotalWaitlist(),

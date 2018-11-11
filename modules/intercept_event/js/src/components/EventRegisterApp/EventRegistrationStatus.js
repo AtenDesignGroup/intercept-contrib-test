@@ -7,6 +7,11 @@ const c = interceptClient.constants;
 
 const messages = {
   default: 'The status of the registration is unknown',
+  dirty: {
+    waitlist: 'Submitting registration to the waitlist',
+    active: 'Submitting registration',
+    canceled: 'Cancelling registration',
+  },
   syncing: {
     waitlist: 'Submitting registration to the waitlist',
     active: 'Submitting registration',

@@ -9,7 +9,7 @@ import RoomReservationStatus from './RoomReservationStatus';
 import RoomReservationSummary from './RoomReservationSummary';
 import withAvailability from './../../withAvailability';
 
-const { actions, api, constants, select, utils, session } = interceptClient;
+const { api, constants, select, session } = interceptClient;
 const c = constants;
 
 // State constants
@@ -153,30 +153,6 @@ class ReserveRoomConfirmation extends React.Component {
       default:
         break;
     }
-
-    // let content =
-    //   uuid && saved ? (
-    //     <RoomReservationStatus uuid={uuid} />
-    //   ) : (
-    //     <RoomReservationSummary {...values} />
-    //   );
-
-    // if (conflict) {
-    //   content = null;
-
-    // }
-
-    // const dialogProps = uuid
-    //   ? {
-    //     confirmText: 'View Your Reservations',
-    //     cancelText: 'Close',
-    //     heading: '',
-    //     onConfirm: () => {
-    //       window.location.href = '/account/room-reservations';
-    //     },
-    //     onCancel,
-    //   }
-    //   : ;
 
     return (
       <DialogConfirm {...dialogProps} open={open}>

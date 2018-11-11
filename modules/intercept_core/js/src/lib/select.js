@@ -102,7 +102,7 @@ export const getTermTree = (terms) => {
   // If these terms don't have parent relationships, they will be grouped
   // by 'undefined'. Return that, as it should be the full list.
   if (branches.undefined) {
-    return branches.undefined;
+    return sortTerms(branches.undefined);
   }
 
   // 'virtual' is the parent of root terms. If there is no virtual property,

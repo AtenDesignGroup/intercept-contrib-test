@@ -24,9 +24,22 @@ class EventRegisterApp extends React.Component {
     this.props.fetchRegistrations(this.props.eventId);
   }
 
+  componentDidUpdate(prevProps) {
+    // Refetch events after any registrations have updated.
+    // We do this to keep registration data fresh, especially
+    // after a registration is canceled. Otherwise the registration
+    // count would be off.
+    const wasSyncing = prevProps.registrations.some(i => i.state.syncing);
+    if (wasSyncing && !this.props.registrations.some(i => i.state.syncing)) {
+      this.props.fetchEvent(this.props.eventId);
+    }
+  }
+
   onlyActiveOrWaitlist = () =>
     this.props.registrations.filter(
-      r => r.data.attributes.status === 'active' || r.data.attributes.status === 'waitlist',
+      r =>
+        (r.data.attributes.status === 'active' || r.data.attributes.status === 'waitlist') &&
+        r.state.saved,
     );
 
   acceptingReservations = () => {
@@ -54,7 +67,7 @@ class EventRegisterApp extends React.Component {
 
     if (userHasNotRegistered) {
       form = this.acceptingReservations() ? (
-        <EventRegisterForm {...this.props} />
+        <EventRegisterForm {...this.props} eventId={eventId} />
       ) : (
         <p>Registrations are not being accepted at this time.</p>
       );
@@ -99,7 +112,7 @@ const mapStateToProps = (state, ownProps) => ({
   registrationsLoading: select.recordsAreLoading(c.TYPE_EVENT_REGISTRATION)(state),
   event: select.record(select.getIdentifier(c.TYPE_EVENT, ownProps.eventId))(state),
   users: select.record(select.getIdentifier(c.TYPE_USER, ownProps.user.uuid))(state),
-  eventsLoading: select.recordsAreLoading(c.TYPE_EVENT)(state),
+  eventsLoading: select.recordIsLoading(c.TYPE_EVENT, ownProps.eventId)(state),
   segments: select.recordOptions(c.TYPE_POPULATION_SEGMENT)(state),
   segmentsLoading: select.recordsAreLoading(c.TYPE_POPULATION_SEGMENT)(state),
 });
@@ -107,12 +120,17 @@ const mapStateToProps = (state, ownProps) => ({
 const mapDispatchToProps = (dispatch, ownProps) => ({
   fetchEvent: (id) => {
     dispatch(
-      api[c.TYPE_EVENT].fetchAll({
-        filters: {
-          uuid: {
-            value: id,
-            path: 'uuid',
-          },
+      api[c.TYPE_EVENT].fetchResource(id, {
+        fields: {
+          [c.TYPE_EVENT]: [
+            'uuid',
+            'field_capacity_max',
+            'field_waitlist_max',
+            'field_event_register_period',
+            'field_has_waitlist',
+            'field_must_register',
+            'registration',
+          ],
         },
       }),
     );

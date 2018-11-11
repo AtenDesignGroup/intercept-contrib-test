@@ -40,6 +40,11 @@ class EntityStatus extends React.PureComponent {
       return message;
     }
 
+    if (state.dirty) {
+      message = messages.dirty[status];
+      return message;
+    }
+
     if (state.saved) {
       message = messages.saved[status];
       return message;

@@ -7,6 +7,12 @@ const c = interceptClient.constants;
 
 const messages = {
   default: 'The status of the reservation is unknown',
+  dirty: {
+    requested: 'Requesting reservation',
+    approved: 'Approving reservation',
+    denied: 'Denying reservation',
+    canceled: 'Cancelling reservation',
+  },
   syncing: {
     requested: 'Requesting reservation',
     approved: 'Approving reservation',

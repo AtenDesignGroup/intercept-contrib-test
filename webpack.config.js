@@ -40,7 +40,18 @@ const babelLoader = {
     ],
     presets: [
       'react',
-      'env',
+      'es2015',
+      [
+        'env', {
+          targets: {
+            browsers: [
+              'last 2 version',
+              '> .25%',
+              'ie 11',
+            ],
+          },
+        },
+      ],
     ],
   },
 };

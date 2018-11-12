@@ -66,7 +66,7 @@ export default class helpers {
         calendarUrl += "&enddt=" + this.formatTime(event.endTime);
         calendarUrl += "&subject=" + encodeURIComponent(event.title);
         calendarUrl += "&location=" + encodeURIComponent(event.location);
-        calendarUrl += "&body=" + encodeURIComponent(`event.description ${event.url ? 'View Event: ' + event.url : ''}`);
+        calendarUrl += "&body=" + encodeURIComponent(`${event.description} ${event.url ? 'View Event: ' + event.url : ''}`);
         calendarUrl += "&allday=false";
         calendarUrl += "&uid=" + this.getRandomKey();
         calendarUrl += "&path=/calendar/view/Month";

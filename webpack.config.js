@@ -41,6 +41,7 @@ const babelLoader = {
     ],
     presets: [
       'react',
+      'env',
     ],
   },
 };

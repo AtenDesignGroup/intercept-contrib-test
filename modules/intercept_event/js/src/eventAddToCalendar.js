@@ -1,8 +1,7 @@
 import React from 'react';
 import { render } from 'react-dom';
-import AddToCalendar from 'react-add-to-calendar';
+import AddToCalendar from 'intercept/AddToCalendar';
 import moment from 'moment';
-
 /* eslint-disable */
 import Drupal from 'Drupal';
 import interceptClient from 'interceptClient';
@@ -27,15 +26,17 @@ const getProp = (context, selector) => {
   return el.length > 0 ? el[0].innerHTML : null;
 };
 
-const parseDate = date => moment.tz(date, utils.getUserTimezone());
+const parseDate = date =>
+  moment.tz(date, 'YYYY-MM-DD HH:mm:ss', utils.getUserTimezone()).toISOString();
 
 function renderApp(root) {
   const event = {
     title: getProp(root, 'atc_title'),
-    description: `${getProp(root, 'atc_description').trim()} <a href="${window.location}">View Event</a>`,
+    description: getProp(root, 'atc_description').trim(),
     location: getProp(root, 'atc_location'),
     startTime: parseDate(getProp(root, 'atc_date_start')),
     endTime: parseDate(getProp(root, 'atc_date_end')),
+    url: window.location.href,
   };
 
   const services = root.getAttribute('data-calendars') || '';

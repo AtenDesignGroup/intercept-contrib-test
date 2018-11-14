@@ -78,6 +78,10 @@ class EventsController extends ControllerBase {
     $properties = $node->registration->getItemDefinition()->getSetting('properties');
     $field = $node->registration;
     foreach ($properties as $name => $property) {
+      // This property doesn't need to be seen by staff when viewing Registrations tab.
+      if ($name == 'status_user' || $name == 'status') {
+        continue;
+      }
       $content['details'][$name] = [
         '#type' => 'item',
         '#title' => $property->getLabel(),

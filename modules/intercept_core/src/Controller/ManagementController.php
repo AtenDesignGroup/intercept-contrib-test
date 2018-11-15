@@ -13,6 +13,10 @@ class ManagementController extends ManagementControllerBase {
   public function alter(array &$build, $page_name) {
     if ($page_name == 'default') {
       $build['links']['configuration'] = $this->getManagementButton('System Configuration', 'system_configuration');
+      $build['links']['account'] = $this->getButton('Edit My Account', 'entity.user.edit_form', [
+        'user' => \Drupal::currentUser()->id(),
+      ]);
+      $build['links']['account']['#weight'] = '11';
     }
   }
 

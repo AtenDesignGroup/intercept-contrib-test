@@ -34,12 +34,18 @@ class EventRegistrationListBuilder extends EntityListBuilder {
    */
   public function buildRow(EntityInterface $entity) {
     $row = [];
+    $authdata = [];
     $this->addEventRow($row, $entity);
-    // Use the $entity information to pull the customer's actual name instead of
-    // the name of the event registration.
-    $uid = $entity->get('field_user')->entity->id();
-    // Use the UID now to get the barcode and name of the customer.
-    $authdata = $this->getAuthdata($uid);
+    //kint($entity);
+    $user = $entity->get('field_user')->entity;
+    $guest_name = $entity->get('field_guest_name')->getValue();
+    if ($user) {
+      // Use the $entity information to pull the customer's actual name instead of
+      // the name of the event registration.
+      $uid = $entity->get('field_user')->entity->id();
+      // Use the UID now to get the barcode and name of the customer.
+      $authdata = $this->getAuthdata($uid);
+    }
     if ($authdata) {
       $email_link = Link::fromTextAndUrl($authdata->EmailAddress, Url::fromUri('mailto:' . $authdata->EmailAddress))->toString();
       $row['name'] = [
@@ -48,10 +54,23 @@ class EventRegistrationListBuilder extends EntityListBuilder {
         ],
       ];
     }
-    else {
+    else if (!empty($uid)) {
       // Backup info can come from $user if it's a non-customer.
       $user = \Drupal\user\Entity\User::load($uid);
       $row['name'] = $user->getUsername();
+    }
+    else if (!empty($guest_name)) {
+      $guest_email = $entity->get('field_guest_email')->getValue();
+      $guest_phone_number = $entity->get('field_guest_phone_number')->getValue();
+      $email_link = Link::fromTextAndUrl($guest_email[0]['value'], Url::fromUri('mailto:' . $guest_email[0]['value']))->toString();
+      $row['name'] = [
+        'data' => [
+          '#markup' => $guest_name[0]['value'] . '<br>' . $guest_phone_number[0]['value'] . ' ' . $email_link,
+        ],
+      ];
+    }
+    else {
+      $row['name'] = 'Unknown customer';
     }
 
     $row['count'] = $entity->total();

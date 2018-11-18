@@ -448,10 +448,10 @@ function intercept_event_entity_bundle_field_info(\Drupal\Core\Entity\EntityType
       ->setLabel(t('Registration details'))
       ->setComputed(TRUE)
       ->setSetting('properties', [
-        'total' => DataDefinition::create('integer')->setLabel(t('Total registrations')),
-        'total_waitlist' => DataDefinition::create('integer')->setLabel(t('Total waitlisted')),
-        'status' => DataDefinition::create('string')->setLabel(t('Status')),
-        'status_user' => DataDefinition::create('string')->setLabel(t('Status for current user')),
+        'total' => DataDefinition::create('integer')->setLabel(t('Total registrations:')),
+        'total_waitlist' => DataDefinition::create('integer')->setLabel(t('Total waitlisted:')),
+        'status' => DataDefinition::create('string')->setLabel(t('Registration Status:')),
+        'status_user' => DataDefinition::create('string')->setLabel(t('Status for current user:')),
       ])
       ->setClass(\Drupal\intercept_event\EventRegistrationField::class);
 

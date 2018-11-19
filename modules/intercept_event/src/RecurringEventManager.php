@@ -8,6 +8,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\intercept_core\Utility\Dates;
 
 class RecurringEventManager {
 
@@ -31,12 +32,18 @@ class RecurringEventManager {
   protected $messenger;
 
   /**
+   * @var Dates
+   */
+  protected $dateUtility;
+
+  /**
    * Constructs a new EventManager object.
    */
-  public function __construct(AccountProxyInterface $current_user, EntityTypeManagerInterface $entity_type_manager, MessengerInterface $messenger) {
+  public function __construct(AccountProxyInterface $current_user, EntityTypeManagerInterface $entity_type_manager, MessengerInterface $messenger, Dates $date_utility) {
     $this->currentUser = $current_user;
     $this->entityTypeManager = $entity_type_manager;
     $this->messenger = $messenger;
+    $this->dateUtility = $date_utility;
   }
 
   /**
@@ -44,6 +51,10 @@ class RecurringEventManager {
    */
   public function messenger() {
     return $this->messenger;
+  }
+
+  public function dateUtility() {
+    return $this->dateUtility;
   }
 
   /**
@@ -333,15 +344,28 @@ class RecurringEventManager {
         $submitted_start_date->format('m'),
         $submitted_start_date->format('d'));
 
+      $recurring_end_datetime = clone $node->field_date_time->end_date;
+      $recurring_end_datetime->setDate(
+        $submitted_start_date->format('Y'),
+        $submitted_start_date->format('m'),
+        $submitted_start_date->format('d'));
+
       $recurring_event->field_event_rrule->setValue([
-        'value' => $recurring_start_datetime->format(DATETIME_DATETIME_STORAGE_FORMAT),
+        //'value' => $recurring_start_datetime->format(DATETIME_DATETIME_STORAGE_FORMAT),
+        //'end_value' => $recurring_end_datetime->format(DATETIME_DATETIME_STORAGE_FORMAT),
+        'value' => $manager->dateUtility()
+          ->convertTimezone($recurring_start_datetime, 'default')
+          ->format(DATETIME_DATETIME_STORAGE_FORMAT),
+        'end_value' => $manager->dateUtility()
+          ->convertTimezone($recurring_end_datetime, 'default')
+          ->format(DATETIME_DATETIME_STORAGE_FORMAT),
         'rrule' => $recurring['raw_value'],
-        'end_value' => $node->field_date_time->end_value,
         // TODO: This should be customizable.
         'infinit' => 0,
         // FIXME
-        'timezone' => 'UTC',
+        'timezone' => $manager->dateUtility()->getDefaultTimezone()->getName(),
       ]);
+
       $recurring_event->save();
     }
   }

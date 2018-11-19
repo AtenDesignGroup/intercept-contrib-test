@@ -127,7 +127,7 @@ class EventRecurrenceEventsForm extends ContentEntityForm {
       }
     }
     else {
-      $dates = $this->getDates($recurring_rule_field);
+      $dates = $this->getDates($recurring_rule_field, 'default');
       // If the first computed recurrence date is the same as the base event
       // then label it as such. If not, then we add in the base event date
       // to make sure that is clear that that is an occurrence as well.
@@ -144,20 +144,14 @@ class EventRecurrenceEventsForm extends ContentEntityForm {
         $dates[0]['base_event'] = TRUE;
       }
       foreach ($dates as $date) {
+        //$start_date = $this->dateUtility->convertTimezone($date['value'], 'default');
+        //$end_date = $this->dateUtility->convertTimezone($date['end_value'], 'default');
         $column = [
           !empty($date['base_event']) ? $this->t('Base event') : $this->t('Date preview, not created yet'),
           $this->formatDateRange([
-            '@date' => $this->dateUtility
-              ->convertDate($date['value'], FALSE)
-              ->format($this->startDateFormat),
-
-            '@time_start' => $this->dateUtility
-            ->convertDate($date['value'], FALSE)
-            ->format($this->startTimeFormat),
-
-            '@time_end' => $this->dateUtility
-            ->convertDate($date['end_value'], FALSE)
-            ->format($this->endTimeFormat),
+            '@date' => $date['value']->format($this->startDateFormat),
+            '@time_start' => $date['value']->format($this->startTimeFormat),
+            '@time_end' => $date['end_value']->format($this->endTimeFormat),
           ]),
           '',
           '',
@@ -213,7 +207,14 @@ class EventRecurrenceEventsForm extends ContentEntityForm {
       ]];
     }
     else {
-      return $item->occurrences;
+      $occurrences = $item->occurrences;
+      foreach ($occurrences as &$occurrence) {
+        $occurrence['value'] = $this->dateUtility
+          ->convertTimezone($occurrence['value'], $timezone);
+        $occurrence['end_value'] = $this->dateUtility
+          ->convertTimezone($occurrence['end_value'], $timezone);
+      }
+      return $occurrences;
     }
   }
 
@@ -303,7 +304,7 @@ class EventRecurrenceEventsForm extends ContentEntityForm {
       return FALSE;
     }
     $manager->createEventReservation($new_event, [
-      'field_meeting_dates' => $base_reservation->field_meeting_dates,
+      'field_dates' => $base_reservation->field_dates,
     ]);
   }
 

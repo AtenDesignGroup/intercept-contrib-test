@@ -112,7 +112,7 @@ class ReservationManager implements ReservationManagerInterface {
     $values = [
       'field_event' => $event->id(),
       'field_room' => $event->field_room->entity->id(),
-      'field_dates' => $event->field_date_time->first()->getValue(),
+      'field_meeting_dates' => $event->field_date_time->first()->getValue(),
       'field_user' => $this->currentUser->id(),
     ] + $params;
     $room_reservation = $this->entityTypeManager->getStorage('room_reservation')->create($values);
@@ -133,8 +133,8 @@ class ReservationManager implements ReservationManagerInterface {
     if (!$event->field_room->equals($reservation->field_room)) {
       $reservation->field_room = $event->field_room;
     }
-    if (!$event->field_date_time->equals($reservation->field_dates)) {
-      $reservation->field_dates = $event->field_date_time;
+    if (!$event->field_date_time->equals($reservation->field_meeting_dates)) {
+      $reservation->field_meeting_dates = $event->field_date_time;
     }
     $reservation->save();
   }
@@ -187,9 +187,9 @@ class ReservationManager implements ReservationManagerInterface {
     $end_date_object = $node->field_date_time->end_date ?: new \DateTime();
     if (!empty($reservation)) {
       $start_date_object = $this->dateUtility
-        ->convertTimezone($reservation->field_meeting_dates->start_date, 'default');
+        ->convertTimezone($reservation->field_dates->start_date, 'default');
       $end_date_object = $this->dateUtility
-        ->convertTimezone($reservation->field_meeting_dates->end_date, 'default');
+        ->convertTimezone($reservation->field_dates->end_date, 'default');
     }
 
     $params = [
@@ -214,13 +214,13 @@ class ReservationManager implements ReservationManagerInterface {
     ];
 
     $form['reservation']['dates']['start'] = [
-      '#title' => t('Meeting start time'),
+      '#title' => t('Reservation start time'),
       '#type' => 'datetime',
       '#default_value' => $start_date_object,
     ];
 
     $form['reservation']['dates']['end'] = [
-      '#title' => t('Meeting end time'),
+      '#title' => t('Reservation end time'),
       '#type' => 'datetime',
       '#default_value' => $end_date_object,
     ];
@@ -315,7 +315,7 @@ class ReservationManager implements ReservationManagerInterface {
     $node_event = $form_state->getFormObject()->getEntity();
     $dates = $form_state->getValue(['reservation', 'dates']);
     return $this->createEventReservation($node_event, [
-      'field_meeting_dates' => [
+      'field_dates' => [
         'value' => $this->dateUtility->convertTimezone($dates['start'])->format(self::FORMAT),
         'end_value' => $this->dateUtility->convertTimezone($dates['end'])->format(self::FORMAT),
       ],
@@ -331,7 +331,7 @@ class ReservationManager implements ReservationManagerInterface {
     $node_event = $form_state->getFormObject()->getEntity();
     $reservation = $form_state->get('reservation');
     $dates = $form_state->getValue(['reservation', 'dates']);
-    $reservation->set('field_meeting_dates', [
+    $reservation->set('field_dates', [
       'value' => $this->dateUtility->convertTimezone($dates['start'])->format(self::FORMAT),
       'end_value' => $this->dateUtility->convertTimezone($dates['end'])->format(self::FORMAT),
     ]);

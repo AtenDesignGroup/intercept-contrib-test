@@ -45,6 +45,14 @@ babelHelpers:
     js/dist/babelHelpers.js:
       preprocess: true
 
+pickadate:
+  js:
+    libraries/pickadate/pickadate.js:
+      preprocess: true
+  dependencies:
+    - core/jquery
+    - core/drupal
+
 interceptCommon:
   js:
     js/dist/interceptCommon.js:

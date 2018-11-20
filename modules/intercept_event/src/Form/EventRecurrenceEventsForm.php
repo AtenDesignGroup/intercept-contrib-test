@@ -135,8 +135,8 @@ class EventRecurrenceEventsForm extends ContentEntityForm {
       if ($first_date['value'] != $this->entity->field_date_time->start_date) {
         $base_event_date = $this->entity->field_date_time;
         array_unshift($dates, [
-          'value' => $base_event_date->start_date,
-          'end_value' => $base_event_date->end_date,
+          'value' => $this->dateUtility->convertTimezone($base_event_date->start_date, 'default'),
+          'end_value' => $this->dateUtility->convertTimezone($base_event_date->end_date, 'default'),
           'base_event' => TRUE,
         ]);
       }
@@ -144,8 +144,6 @@ class EventRecurrenceEventsForm extends ContentEntityForm {
         $dates[0]['base_event'] = TRUE;
       }
       foreach ($dates as $date) {
-        //$start_date = $this->dateUtility->convertTimezone($date['value'], 'default');
-        //$end_date = $this->dateUtility->convertTimezone($date['end_value'], 'default');
         $column = [
           !empty($date['base_event']) ? $this->t('Base event') : $this->t('Date preview, not created yet'),
           $this->formatDateRange([

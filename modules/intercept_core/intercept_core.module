@@ -65,6 +65,14 @@ function intercept_core_menu_links_discovered_alter(&$links) {
 }
 
 /**
+ * Implements hook_preprocess_input__date
+ */
+function intercept_core_preprocess_input__date(&$variables) {
+  // Attach pickadate library to fix ajax submit issues.
+  $variables['#attached']['library'][] =  'intercept_core/pickadate';
+}
+
+/**
  * Perform alterations before an entity form is included in the IEF widget.
  *
  * @param $entity_form

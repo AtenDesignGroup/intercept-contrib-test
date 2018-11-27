@@ -281,6 +281,7 @@ class EventRegistrationField extends ComputedItemList implements CacheableDepend
    * {@inheritdoc}
    */
   public function getCacheTags() {
+    // TODO: Possibly add the current registration tags in here, but it depends.
     return [];
   }
 

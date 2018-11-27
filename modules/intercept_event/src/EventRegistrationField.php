@@ -122,11 +122,17 @@ class EventRegistrationField extends ComputedItemList implements CacheableDepend
   protected function waitlistFull() {
     $has_waitlist = $this->hasWaitlist();
     $waitlist_max = $this->getEntity()->get('field_waitlist_max')->getString();
+
+    // We treat an event with no waitlist as being full.
+    if (!$has_waitlist) {
+      return TRUE;
+    }
+
     // We are treating 0 and NULL the same as no waitlist maximum.
     if (empty($waitlist_max)) {
       return FALSE;
     }
-    return $has_waitlist && $waitlist_max <= $this->getTotalWaitlist();
+    return $waitlist_max <= $this->getTotalWaitlist();
   }
 
   /**

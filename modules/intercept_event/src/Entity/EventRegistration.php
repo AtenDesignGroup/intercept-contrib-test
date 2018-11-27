@@ -208,4 +208,32 @@ class EventRegistration extends ContentEntityBase implements EventRegistrationIn
     return $fields;
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public static function preDelete(EntityStorageInterface $storage, array $entities) {
+    // Make sure that the EventRegistrationField refreshes.
+    foreach ($entities as $entity) {
+      self::invalidateEventCacheTag($entity);
+    }
+  }
+
+  /**
+   * Invalidate the cache tag for an event associated with an event registration.
+   */
+  public static function invalidateEventCacheTag(EventRegistrationInterface $registration) {
+    if ($registration->hasField('field_event') && !$registration->field_event->isEmpty()) {
+      $event = $registration->field_event->entity;
+      \Drupal\Core\Cache\Cache::invalidateTags(['node:' . $event->id()]);
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function preSave(EntityStorageInterface $storage) {
+    // Make sure that the EventRegistrationField refreshes.
+    self::invalidateEventCacheTag($this);
+    parent::preSave($storage);
+  }
 }

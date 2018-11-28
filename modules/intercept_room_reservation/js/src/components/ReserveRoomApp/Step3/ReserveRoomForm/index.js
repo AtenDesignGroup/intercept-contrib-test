@@ -366,7 +366,7 @@ class ReserveRoomForm extends PureComponent {
                 <div className="l--subsection">
                   <h4 className="section-title section-title--secondary">Refreshments</h4>
                   <InputCheckbox
-                    label="Serving light refreshments? (A $25 charge will be added to your library card.)"
+                    label = "I would like to serve refreshments and agree to the $25 charge that will be added to my library card. (Note: Some spaces may not allow refreshments. We will contact you if we are unable to fulfill this request.)"
                     checked={values.refreshments}
                     onChange={this.toggleValue}
                     value="refreshments"

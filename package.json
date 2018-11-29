@@ -7,7 +7,7 @@
   "scripts": {
     "watch:js": "./node_modules/.bin/webpack --env.dev --watch",
     "lint:js": "./node_modules/.bin/eslint -c .eslintrc.json ./src",
-    "build:js": "npm run build:js-helpers && BABEL_ENV=production ./node_modules/.bin/webpack --env.production --progress --display-reasons --display-modules",
+    "build:js": "npm install && npm run build:js-helpers && BABEL_ENV=production ./node_modules/.bin/webpack --env.production --progress --display-reasons --display-modules",
     "build:js-helpers": "./node_modules/.bin/babel-external-helpers | ./node_modules/.bin/minify --mangle false > modules/intercept_core/js/dist/babelHelpers.js"
   },
   "dependencies": {

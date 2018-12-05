@@ -24,7 +24,7 @@ class EquipmentReservationController extends ControllerBase implements Container
     $build = [];
     $build['#attached']['library'][] = 'intercept_equipment/reserveEquipment';
     $build['#markup'] = '';
-    $build['intercept_equipment_reservation']['#markup'] = '<div id="reserveEquipmentRoot" />';
+    $build['intercept_equipment_reservation']['#markup'] = '<div id="reserveEquipmentRoot"></div>';
 
     return $build;
   }

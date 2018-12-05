@@ -1,6 +1,12 @@
 const path = require('path');
 const Minify = require('babel-minify-webpack-plugin');
 const webpack = require('webpack');
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+
+// Track webpack build pipeline performance.
+const SpeedMeasurePlugin = require('speed-measure-webpack-plugin');
+
+const smp = new SpeedMeasurePlugin();
 
 // Create an object map of entry file arrays keyed by submodule.
 const entries = {
@@ -14,17 +20,9 @@ const entries = {
     'eventRegisterButton',
     'eventRegistrationList',
   ],
-  intercept_location: [
-    'locationsList',
-  ],
-  intercept_room_reservation: [
-    'reserveRoom',
-    'roomReservationList',
-    'roomReservationActionButton',
-  ],
-  intercept_equipment: [
-    'reserveEquipment',
-  ],
+  intercept_location: ['locationsList'],
+  intercept_room_reservation: ['reserveRoom', 'roomReservationList', 'roomReservationActionButton'],
+  intercept_equipment: ['reserveEquipment'],
 };
 
 const babelLoader = {
@@ -32,27 +30,23 @@ const babelLoader = {
   loader: 'babel-loader',
   exclude: /node_modules/,
   query: {
-    plugins: [
-      'external-helpers',
-      'transform-class-properties',
-      'transform-decorators-legacy',
-      'transform-object-rest-spread',
-      'transform-es3-member-expression-literals',
-    ],
     presets: [
-      'react',
-      'es2015',
+      '@babel/preset-react',
       [
-        'env', {
+        '@babel/preset-env',
+        {
+          debug: true,
           targets: {
-            browsers: [
-              'last 2 version',
-              '> .25%',
-              'ie 11',
-            ],
+            browsers: ['last 2 version', '> .25%', 'ie 11', 'android 4', 'ios 9'],
           },
+          useBuiltIns: 'usage',
+          modules: false,
         },
       ],
+    ],
+    plugins: [
+      '@babel/plugin-proposal-class-properties',
+      '@babel/plugin-external-helpers',
     ],
   },
 };
@@ -97,7 +91,11 @@ module.exports = function config(env) {
       },
       resolve: {
         // Allow common modules in the root module to be referenced.
-        modules: [path.resolve(__dirname, 'js/src'), 'node_modules'],
+        modules: [
+          path.resolve(__dirname, 'js/src'),
+          path.resolve(__dirname, 'node_modules'),
+          'node_modules',
+        ],
       },
       devtool: (() => (isProduction ? 'none' : 'cheap-module-eval-source-map'))(),
       plugins: (() => {
@@ -107,6 +105,8 @@ module.exports = function config(env) {
           new webpack.optimize.CommonsChunkPlugin({
             name: 'modules/intercept_core/js/dist/interceptCommon',
             filename: '[name].js',
+            deepChildren: true,
+            minChunks: 4,
           }),
         ];
 
@@ -115,6 +115,7 @@ module.exports = function config(env) {
             new Minify({
               deadcode: false,
             }),
+            new BundleAnalyzerPlugin(),
           );
         }
 
@@ -164,7 +165,11 @@ module.exports = function config(env) {
       },
       resolve: {
         // Allow common modules in the root module to be referenced.
-        modules: [path.resolve(__dirname, 'js/src'), 'node_modules'],
+        modules: [
+          path.resolve(__dirname, 'js/src'),
+          path.resolve(__dirname, 'node_modules'),
+          'node_modules',
+        ],
       },
       plugins: (() => {
         const nodeEnv = isProduction ? 'production' : 'development';
@@ -245,5 +250,5 @@ module.exports = function config(env) {
         loaders: [babelLoader],
       },
     },
-  ];
+  ].map(smp.wrap);
 };

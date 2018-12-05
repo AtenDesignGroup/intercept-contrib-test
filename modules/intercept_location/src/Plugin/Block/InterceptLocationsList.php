@@ -21,7 +21,7 @@ class InterceptLocationsList extends BlockBase {
     $build = [];
     $build['#attached']['library'][] = 'intercept_location/locationsList';
     $build['#markup'] = '';
-    $build['intercept_locations_list']['#markup'] = '<div id="locationsListRoot" />';
+    $build['intercept_locations_list']['#markup'] = '<div id="locationsListRoot"></div>';
 
     return $build;
   }

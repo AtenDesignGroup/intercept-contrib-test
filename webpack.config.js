@@ -18,6 +18,7 @@ const entries = {
     'eventList',
     'eventRegister',
     'eventRegisterButton',
+    'eventRegistrationList',
   ],
   intercept_location: ['locationsList'],
   intercept_room_reservation: ['reserveRoom', 'roomReservationList', 'roomReservationActionButton'],

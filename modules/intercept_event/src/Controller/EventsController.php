@@ -25,7 +25,7 @@ class EventsController extends ControllerBase {
   public function list() {
     $build = [];
     $build['#attached']['library'][] = 'intercept_event/eventList';
-    $build['intercept_event_list']['#markup'] = '<div id="eventListRoot" />';
+    $build['intercept_event_list']['#markup'] = '<div id="eventListRoot" ></div>';
 
     return $build;
   }

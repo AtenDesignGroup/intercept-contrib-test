@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import map from 'lodash/map';
 import moment from 'moment';
@@ -12,7 +12,7 @@ import ContentList from 'intercept/ContentList';
 
 const { utils } = interceptClient;
 
-class EventList extends Component {
+class EventList extends React.Component {
   state = {};
 
   render() {

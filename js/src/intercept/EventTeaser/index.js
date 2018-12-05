@@ -1,8 +1,7 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import moment from 'moment-timezone';
-// import momentTimezone from 'moment-timezone';
+import moment from 'moment';
 import get from 'lodash/get';
 
 /* eslint-disable */

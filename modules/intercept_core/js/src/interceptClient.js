@@ -1,8 +1,8 @@
-import 'babel-polyfill';
+// import '@babel/polyfill';
 // Polyfill: Fetch API.
 import 'whatwg-fetch';
 import { createStore, applyMiddleware, combineReducers, compose } from 'redux';
-import intercept from 'intercept-client';
+import intercept from './lib/intercept-client';
 import drupalSettings from 'drupalSettings';
 import thunk from 'redux-thunk';
 import * as mui from './lib/mui';

@@ -72,7 +72,7 @@ class EventRegistrationController extends ControllerBase {
     // Add Registration Form
     $build['#attached']['library'][] = 'intercept_event/eventRegister';
     $build['#markup'] = '';
-    $build['intercept_event_register']['#markup'] = '<div id="eventRegisterRoot" data-uuid="' . $node->uuid() . '" />';
+    $build['intercept_event_register']['#markup'] = '<div id="eventRegisterRoot" data-uuid="' . $node->uuid() . '"></div>';
 
     return $build;
   }
@@ -85,7 +85,7 @@ class EventRegistrationController extends ControllerBase {
 
     $build['#attached']['library'][] = 'intercept_event/manageEventRegistrations';
     $build['#markup'] = '';
-    $build['intercept_event_registration']['#markup'] = '<div id="eventRegistrationRoot" />';
+    $build['intercept_event_registration']['#markup'] = '';
     $build['#attached']['drupalSettings']['intercept']['parameters']['user']['uuid'] = $user->uuid();
 
     return $build;

@@ -13,7 +13,7 @@ import padStart from 'lodash/padStart';
 import pickBy from 'lodash/pickBy';
 import sortBy from 'lodash/sortBy';
 import uniqBy from 'lodash/uniqBy';
-import intercept from 'intercept-client';
+import intercept from './intercept-client';
 import * as utils from './utils';
 
 const { constants } = intercept;

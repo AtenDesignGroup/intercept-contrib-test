@@ -1,31 +1,6 @@
 <?php
 
 /**
- * Implements hook_user_login().
- */
-function intercept_ils_user_login($account) {
-  $user = $account;
-  if ($patron = \Drupal::service('polaris.client')->patron->getByUser($user)) {
-    $externalauth = \Drupal::service('externalauth.externalauth');
-    $authmap = \Drupal::service('externalauth.authmap');
-    $authdata = $authmap->getAuthdata($user->id(), 'polaris');
-    $authdata_data = unserialize($authdata['data']);
-
-
-    // Update the authdata & user account based on the latest Polaris info.
-    if (!empty($authdata_data)) {
-      $authmap->save($user, 'polaris', $patron->barcode(), $patron->basicData());
-    }
-
-    // Updates email address if it doesn't match what's in Polaris.
-    if ($account->getEmail() != $authdata_data->EmailAddress) {
-      $account->setEmail($authdata_data->EmailAddress);
-      $account->save();
-    }
-  }
-}
-
-/**
  * Implements hook_entity_bundle_field_info().
  */
 function intercept_ils_entity_bundle_field_info(\Drupal\Core\Entity\EntityTypeInterface $entity_type, $bundle, array $base_field_definitions) {

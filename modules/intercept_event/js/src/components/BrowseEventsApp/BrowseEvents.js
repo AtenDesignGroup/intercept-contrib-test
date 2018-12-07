@@ -257,24 +257,6 @@ function getSortDirection(view, values) {
   return dir;
 }
 
-function getRegistrationFilters(eventFilters) {
-  return {
-    ...mapValues(eventFilters, filter => ({
-      ...filter,
-      path: `field_event.${filter.path}`,
-    })),
-    status: {
-      path: 'status',
-      value: ['active', 'waitlist'],
-      operator: 'IN',
-    },
-    user: {
-      path: 'field_user.uuid',
-      value: userId,
-    },
-  };
-}
-
 class BrowseEvents extends Component {
   constructor(props) {
     super(props);
@@ -297,6 +279,7 @@ class BrowseEvents extends Component {
 
   componentDidMount() {
     this.setFetchers(this.props.filters, this.props.view, this.props.calView, this.props.date);
+    this.props.fetchRegistrations();
     window.addEventListener('scroll', this.handleScroll);
   }
 
@@ -335,13 +318,6 @@ class BrowseEvents extends Component {
 
     const fetcher = {
       [c.TYPE_EVENT]: api[c.TYPE_EVENT].fetcher(options),
-      [c.TYPE_EVENT_REGISTRATION]: api[c.TYPE_EVENT_REGISTRATION].fetcher({
-        ...options,
-        filters: getRegistrationFilters(options.filters),
-        include: null,
-        fields: pick(sparseFieldsets(), [c.TYPE_EVENT_REGISTRATION]),
-        sort: null,
-      }),
     };
 
     this.setState({
@@ -392,17 +368,12 @@ class BrowseEvents extends Component {
 
     if (windowBottom >= docHeight - 1500) {
       this.doFetchMore(c.TYPE_EVENT);
-      this.doFetchMore(c.TYPE_EVENT_REGISTRATION);
     }
   }
 
   doFetch(fetcher) {
     const { fetchEntities, view } = this.props;
     fetchEntities(fetcher[c.TYPE_EVENT]);
-
-    if (view === 'list') {
-      fetchEntities(fetcher[c.TYPE_EVENT_REGISTRATION]);
-    }
   }
 
   doFetchMore(type) {
@@ -476,6 +447,31 @@ const mapDispatchToProps = dispatch => ({
   fetchEntities: (fetcher) => {
     dispatch(fetcher.next());
   },
+  fetchRegistrations: utils.isUserLoggedIn()
+    ? () => {
+      dispatch(
+        api[c.TYPE_EVENT_REGISTRATION].fetchAll({
+          filters: {
+            user: {
+              value: utils.getUserUuid(),
+              path: 'field_user.uuid',
+            },
+            status: {
+              path: 'status',
+              value: ['active', 'waitlist'],
+              operator: 'IN',
+            },
+          },
+          sort: {
+            date: {
+              path: 'created',
+              direction: 'DESC',
+            },
+          },
+        }),
+      );
+    }
+    : () => {}, // Don't fetch if the user is loggedOut
 });
 
 BrowseEvents.propTypes = {
@@ -483,6 +479,7 @@ BrowseEvents.propTypes = {
   events: PropTypes.arrayOf(Object).isRequired,
   loading: PropTypes.object.isRequired,
   fetchEntities: PropTypes.func.isRequired,
+  fetchRegistrations: PropTypes.func.isRequired,
   calView: PropTypes.string,
   date: PropTypes.instanceOf(Date),
   view: PropTypes.string,

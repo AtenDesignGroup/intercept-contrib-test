@@ -22,6 +22,8 @@ export const getUserTimeNow = () =>
     .tz(getUserTimezone())
     .toDate();
 
+export const isUserLoggedIn = () => getUserUid() !== 0;
+
 // Set default moment timezone.
 // moment.tz.setDefault(getUserTimezone());
 
@@ -67,9 +69,7 @@ export const getDayTimeStamp = date =>
     .format('YYYY-MM-DD');
 
 export const getDateFromDayTimeStamp = timestamp =>
-  moment
-    .tz(timestamp, 'YYYY-MM-DD', getUserTimezone())
-    .toDate();
+  moment.tz(timestamp, 'YYYY-MM-DD', getUserTimezone()).toDate();
 
 // Get a formatted date string.
 export const getDayDisplay = (date) => {

@@ -1,12 +1,6 @@
 <?php
 
 /**
- * Implements hook_user_login().
- */
-function intercept_ils_user_login($account) {
-}
-
-/**
  * Implements hook_entity_bundle_field_info().
  */
 function intercept_ils_entity_bundle_field_info(\Drupal\Core\Entity\EntityTypeInterface $entity_type, $bundle, array $base_field_definitions) {

@@ -146,7 +146,7 @@ class EventRegisterForm extends React.Component {
   }
 
   getCapacity() {
-    return get(this, 'props.event.data.attributes.field_capacity_max');
+    return get(this, 'props.event.data.attributes.field_capacity_max') || 0;
   }
 
   getRegistrationCount() {
@@ -158,7 +158,7 @@ class EventRegisterForm extends React.Component {
   }
 
   getWaitlistCapacity() {
-    return get(this, 'props.event.data.attributes.field_waitlist_max');
+    return get(this, 'props.event.data.attributes.field_waitlist_max') || 0;
   }
 
   getWaitlistRegistrationCount() {
@@ -172,7 +172,7 @@ class EventRegisterForm extends React.Component {
   getAvailableText() {
     // Assume there is unlimited capacity.
     if (this.getCapacity() === 0) {
-      return null;
+      return '';
     }
 
     const availableCapacity = this.getAvailableCapacity();
@@ -190,7 +190,7 @@ class EventRegisterForm extends React.Component {
   getWaitlistAvailableText() {
     // Assume there is unlimited capacity.
     if (this.getWaitlistCapacity() === 0) {
-      return null;
+      return '';
     }
 
     const availableCapacity = this.getAvailableWaitlistCapacity();
@@ -245,16 +245,21 @@ class EventRegisterForm extends React.Component {
   }
 
   isOverCapacity(total) {
-    return this.getAvailableCapacity() - total < 0;
+    return this.getCapacity() !== 0 && (this.getAvailableCapacity() - total) < 0;
   }
 
   isOverTotalCapacity(total) {
     const capacity = this.getCapacity();
+
+    if (capacity === 0) {
+      return false;
+    }
+
     return capacity > 0 && capacity - total < 0;
   }
 
   isOverWaitlistCapacity(total) {
-    return this.getAvailableWaitlistCapacity() - total < 0;
+    return this.getWaitlistCapacity() !== 0 && this.getAvailableWaitlistCapacity() - total < 0;
   }
 
   saveEntitytoStore = (values) => {

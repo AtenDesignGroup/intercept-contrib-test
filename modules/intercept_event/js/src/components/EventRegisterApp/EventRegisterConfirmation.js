@@ -24,7 +24,7 @@ const LOADING = 'loading';
 const VALIDATE = 'validate';
 
 function getCapacity(data) {
-  return get(data, 'data.attributes.field_capacity_max');
+  return get(data, 'data.attributes.field_capacity_max') || 0;
 }
 
 function getRegistrationCount(data) {
@@ -40,7 +40,7 @@ function getAvailableCapacity(data) {
 }
 
 function getWaitlistCapacity(data) {
-  return get(data, 'data.attributes.field_waitlist_max');
+  return get(data, 'data.attributes.field_waitlist_max') || 0;
 }
 
 function getWaitlistRegistrationCount(data) {
@@ -56,15 +56,24 @@ function isAcceptingRegistrations(data) {
 }
 
 function isOverCapacity(total, data) {
+  if (getCapacity(data) === 0) {
+    return false;
+  }
   return getAvailableCapacity(data) - total < 0;
 }
 
 function isOverTotalCapacity(total, data) {
   const capacity = getCapacity(data);
+  if (capacity === 0) {
+    return false;
+  }
   return capacity > 0 && capacity - total < 0;
 }
 
 function isOverWaitlistCapacity(total, data) {
+  if (getWaitlistCapacity(data) === 0) {
+    return false;
+  }
   return getAvailableWaitlistCapacity(data) - total < 0;
 }
 

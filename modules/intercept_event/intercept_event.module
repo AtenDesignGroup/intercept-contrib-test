@@ -500,7 +500,7 @@ function intercept_event_entity_base_field_info(\Drupal\Core\Entity\EntityTypeIn
  * Implements hook_views_query_alter().
  */
 function intercept_event_views_query_alter(ViewExecutable $view, QueryPluginBase $query) {
-  if ($view->id() == 'intercept_event_attendance' && $view->current_display == 'embed') {
+  if ($view->id() == 'intercept_event_attendance') {
     foreach ($query->where as &$condition_group) {
       // For each condition in condition group
       foreach ($condition_group['conditions'] as &$condition) {

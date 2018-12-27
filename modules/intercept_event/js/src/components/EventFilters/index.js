@@ -87,22 +87,6 @@ class EventFilters extends PureComponent {
           />
           <SelectResource
             multiple
-            type={c.TYPE_LOCATION}
-            name={c.TYPE_LOCATION}
-            handleChange={this.onInputChange(c.TYPE_LOCATION)}
-            value={filters[c.TYPE_LOCATION]}
-            label={labels[c.TYPE_LOCATION]}
-          />
-          <SelectResource
-            multiple
-            type={c.TYPE_EVENT_TYPE}
-            name={c.TYPE_EVENT_TYPE}
-            handleChange={this.onInputChange(c.TYPE_EVENT_TYPE)}
-            value={filters[c.TYPE_EVENT_TYPE]}
-            label={labels[c.TYPE_EVENT_TYPE]}
-          />
-          <SelectResource
-            multiple
             type={c.TYPE_AUDIENCE}
             name={c.TYPE_AUDIENCE}
             handleChange={this.onInputChange(c.TYPE_AUDIENCE)}

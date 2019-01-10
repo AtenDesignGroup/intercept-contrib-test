@@ -289,7 +289,7 @@ class ReservationManager implements ReservationManagerInterface {
     $status = reset($availability);
     if ($status['has_reservation_conflict']) {
       $message = t('This room is not available due to a conflict.');
-      $form_state->setError($form['title'], $message);
+      $form_state->setError($form['reservation'], $message);
     }
     // @TODO: Re-enable this when issue in CRL-149 is resolved.
     //else if ($status['has_open_hours_conflict']) {

@@ -249,9 +249,58 @@ class ReservationManager implements ReservationManagerInterface {
       $form_state->set('reservation', $reservation);
     }
 
+    $form['#validate'][] = [$this, 'nodeFormValidate'];
     $form['actions']['submit']['#submit'][] = [static::class, 'nodeFormAlterSubmit'];
     $form_state->set('reservation_manager', $this);
 
+  }
+
+  /**
+   * Custom form validate handler to process a reservation for an event node.
+   *
+   * @see self::nodeFormAlter()
+   *
+   * @internal
+   */
+  public function nodeFormValidate(&$form, \Drupal\Core\Form\FormStateInterface $form_state) {
+    
+    // Validate the requested room reservation.
+    $event = $form_state->getFormObject()->getEntity();
+    $room = $form_state->getValue('field_room');
+    $status_element = &$form['reservation']['dates']['status'];
+    $reservation = $form_state->getValue('reservation');
+    // They clicked create reservation before the event date was set.
+    $dates = $form_state->getValue('field_date_time');
+    if (empty($dates) || empty($dates[0]['value']) || empty($dates[0]['end_value'])) {
+      return;
+    }
+    $start_date = $dates[0]['value'];
+    $end_date = $dates[0]['end_value'];
+    $params = [
+      'debug' => TRUE,
+      'rooms' => [$room[0]['target_id']],
+      'start' => $start_date->format(self::FORMAT),
+      'end' => $end_date->format(self::FORMAT),
+    ];
+    if (!$event->isNew()) {
+      $params['event'] = $event->id();
+    }
+    $availability = $this->availability($params);
+    $status = reset($availability);
+    if ($status['has_reservation_conflict']) {
+      $message = t('This room is not available due to a conflict.');
+      $form_state->setError($form['title'], $message);
+    }
+    // @TODO: Re-enable this when issue in CRL-149 is resolved.
+    //else if ($status['has_open_hours_conflict']) {
+    //  $message = t('Reservation times conflict with location open hours.');
+    //  $form_state->setError($form['reservation'], $message);
+    //}
+    if ($start_date > $end_date) {
+      $message = t('The selected reservation times are invalid.');
+      $form_state->setError($form['reservation'], $message);
+    }
+    
   }
 
   private function updateStatusAjax() {
@@ -288,10 +337,10 @@ class ReservationManager implements ReservationManagerInterface {
     $availability = $this->availability($params);
     $status = reset($availability);
     if ($status['has_reservation_conflict']) {
-      $status_element['#value'] = $this->t('This room is not availabile.');
+      $status_element['#value'] = $this->t('This room is not available due to a conflict.');
       $status_element['#attributes']['class'][] = 'error-text-color';
     }
-    if ($status['has_open_hours_conflict']) {
+    else if ($status['has_open_hours_conflict']) {
       $status_element['#value'] = $this->t('Reservation times conflict with location open hours.');
       $status_element['#attributes']['class'][] = 'error-text-color';
     }
@@ -299,9 +348,8 @@ class ReservationManager implements ReservationManagerInterface {
       $status_element['#value'] = $this->t('This room is available.');
       $status_element['#attributes']['class'][] = 'status-text-color';
     }
-
     if ($start_date > $end_date) {
-      $status_element['#value'] = $this->t('Invalid date selection.');
+      $status_element['#value'] = $this->t('The selected reservation times are invalid.');
       $status_element['#attributes']['class'][] = 'error-text-color';
     }
   }

@@ -153,6 +153,57 @@ function intercept_room_reservation_form_node_event_form_alter(&$form, $form_sta
   \Drupal::service('intercept_core.reservation.manager')->nodeFormAlter($form, $form_state);
 }
 
+
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function intercept_room_reservation_form_views_exposed_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
+  $view = $form_state->get('view');
+  if ($view->id() == 'intercept_room_reservations' && $view->current_display == 'embed') {
+
+    // Change the locations field to be a dropdown.
+    // See: https://atendesigngroup.com/blog/drupal-8-views-entity-reference-exposed-filter-select-list
+    // Query nodes
+    $storage = Drupal::getContainer()->get('entity_type.manager')->getStorage('node');
+    $nids = $storage->getQuery();
+ 
+    // Gather published location nodes and sort by title
+    $nids = $nids->condition('type', 'location')
+      ->condition('status', 1)
+      ->sort('title')
+      ->execute();
+ 
+    // If there are no nodes, move on
+    if (!$nids) {
+      return FALSE;
+    }
+ 
+    // Start building out the options for our select list
+    $options = [];
+    $nodes = $storage->loadMultiple($nids);
+ 
+    // Push titles into select list
+    foreach ($nodes as $node) {
+      $title = $node->getTitle();
+      $options[$title] = $title;
+    }
+ 
+    // Start building out our new form element
+    $location_field = 'title';
+    $form[$location_field]['#type'] = 'select';
+    $form[$location_field]['#multiple'] = FALSE;
+ 
+    // Specify the empty option for our select list
+    $form[$location_field]['#empty_option'] = t('Any');
+ 
+    // Add the $options from above to our select list
+    $form[$location_field]['#options'] = $options;
+    unset($form[$location_field]['#size']);
+
+  }
+}
+
 /**
  * Prepares variables for Room reservation templates.
  *

@@ -388,7 +388,7 @@ class EventRegisterForm extends React.Component {
           eventId={eventId}
           heading={text[currentStatus].dialogHeading}
           total={total}
-          status={status}
+          status={currentStatus}
           onConfirm={() =>
             this.saveEntitytoStore({
               user: user.uuid,

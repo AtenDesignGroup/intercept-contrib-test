@@ -100,7 +100,7 @@ class ReserveRoomConfirmation extends React.Component {
           ...dialogProps,
           confirmText: 'Submit',
           cancelText: 'Cancel',
-          heading: 'Confirm Reservation Request?',
+          heading: 'Confirm reservation request?',
           onConfirm: this.handleConfirm,
         };
         break;
@@ -109,9 +109,10 @@ class ReserveRoomConfirmation extends React.Component {
         dialogProps = {
           ...dialogProps,
           // confirmText: 'Submit',
-          // cancelText: 'Cancel',
-          heading: 'Confirm Reservation Request?',
-          onConfirm: this.handleConfirm,
+          cancelText: 'Cancel',
+          heading: 'Sending reservation request',
+          onConfirm: null,
+          onCancel: null,
         };
         break;
       case CONFLICT:

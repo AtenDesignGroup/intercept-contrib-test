@@ -3,6 +3,7 @@
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\TypedData\DataDefinition;
+use Drupal\pathauto\AliasUniquifier;
 use Drupal\views\ViewExecutable;
 use Drupal\views\Plugin\views\query\QueryPluginBase;
 
@@ -187,6 +188,17 @@ function intercept_event_entity_field_access($operation, \Drupal\Core\Field\Fiel
  */
 function intercept_event_pathauto_alias_alter(&$alias, array &$context) {
   if ($context['module'] == 'node' && $context['bundle'] == 'event') {
+    // Utilize uniquify() function from Pathauto to prevent duplicate aliases
+    // which will lead to incorrect registrations for events.
+    $langcode = \Drupal::languageManager()->getCurrentLanguage()->getId();
+    $config_factory = \Drupal::service('config.factory');
+    $alias_storage_helper = \Drupal::service('pathauto.alias_storage_helper');
+    $module_handler = \Drupal::service('module_handler');
+    $route_provider = \Drupal::service('router.route_provider');
+    $alias_manager = \Drupal::service('path.alias_manager');
+    $alias_uniquifier = new AliasUniquifier($config_factory, $alias_storage_helper, $module_handler, $route_provider, $alias_manager);
+    $unique_alias = $alias_uniquifier->uniquify($alias, $context['source'], $langcode);
+    // Then ultimately make the alias for registration.
     \Drupal::service('intercept_event.manager')->addRegisterAlias($context['data']['node'], $alias);
   }
 }
